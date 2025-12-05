@@ -59,7 +59,7 @@ You must have the following installed:
 
 1. Clone the repository:
     ```shell
-     git clone https://github.com/flowset/flowset-control
+     git clone https://github.com/flowset/flowset-control-community
     ```
 2. Configure a PostgreSQL database.
    Flowset Control Community stores data such as connections to BPM engines in the database. 
