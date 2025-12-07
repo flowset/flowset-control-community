@@ -139,6 +139,11 @@ public class CallActivityOverlayClickHandler {
         filter.setLatestVersionOnly(false);
         filter.setKey(processKey);
 
+        if (binding == null) {
+            filter.setLatestVersionOnly(true);
+            return filter;
+        }
+
         switch (binding) {
             case "version" -> {
                 try {
