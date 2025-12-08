@@ -30,6 +30,8 @@ import java.util.stream.IntStream;
 public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBinder {
 
     private static final String MODE_URL_PARAM = "mode";
+    private static final String PRIMARY_THEME = "primary";
+    private static final String STATE_COLUMN_KEY = "state";
 
     private final InstanceContainer<ProcessInstanceFilter> filterDc;
     private final CollectionLoader<ProcessInstanceData> processInstanceDl;
@@ -43,7 +45,7 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
 
         this.filterDc = filterDc;
         this.processInstanceDl = processInstanceDl;
-        this.stateHeaderFilter = Optional.ofNullable(dataGrid.getColumnByKey("state"))
+        this.stateHeaderFilter = Optional.ofNullable(dataGrid.getColumnByKey(STATE_COLUMN_KEY))
                 .map(column -> (ProcessInstanceStateHeaderFilter) column.getHeaderComponent())
                 .orElse(null);
 
@@ -51,14 +53,13 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
                 .mapToObj(buttonIdx -> {
                     JmixButton modeBtn = (JmixButton) buttonsPanel.getComponentAt(buttonIdx);
                     modeBtn.addClickListener(clickEvent -> {
-                        boolean active = modeBtn.hasThemeName("primary");
+                        boolean active = modeBtn.hasThemeName(PRIMARY_THEME);
                         if (!active) {
                             activateModeButton(buttonIdx);
                         }
                     });
                     return modeBtn;
                 }).toList();
-
     }
 
 
@@ -72,7 +73,22 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
         List<String> modeStrings = queryParameters.getParameters().get(MODE_URL_PARAM);
         if (CollectionUtils.isNotEmpty(modeStrings)) {
             ProcessInstanceViewMode mode = ProcessInstanceViewMode.fromId(modeStrings.get(0));
-            loadInstances(mode);
+
+            if (mode != null) {
+                switch (mode) {
+                    case ALL:
+                        activateModeButton(0);
+                        break;
+                    case ACTIVE:
+                        activateModeButton(1);
+                        break;
+                    case COMPLETED:
+                        activateModeButton(2);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
