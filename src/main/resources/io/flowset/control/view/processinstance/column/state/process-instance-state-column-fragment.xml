@@ -12,6 +12,11 @@
             <icon id="incidentIcon" icon="WARNING" size="1em" classNames="text-error" visible="false">
                 <tooltip text="msg://processInstanceIncidentTooltip"/>
             </icon>
+            <button id="viewTerminateReasonBtn" width="1.25em" themeNames="tertiary-inline" classNames="text-body pl-m pr-m" visible="false">
+                <prefix>
+                    <svgIcon resource="icons/report.svg" size="1.25em"/>
+                </prefix>
+            </button>
         </hbox>
     </content>
 </fragment>
