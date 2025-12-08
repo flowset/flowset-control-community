@@ -37,8 +37,8 @@
                             <responsiveStep minWidth="0" columns="1"/>
                         </responsiveSteps>
                         <textField property="id" readOnly="true" width="auto"/>
-                        <dateTimePicker property="startTime" readOnly="true" width="auto"/>
-                        <dateTimePicker id="endTimeField" property="endTime" readOnly="true" width="auto"/>
+                        <dateTimePicker property="startTime" readOnly="true" width="auto" step="1ms"/>
+                        <dateTimePicker id="endTimeField" property="endTime" readOnly="true" width="auto" step="1ms"/>
                         <textField property="businessKey" readOnly="true" width="auto"/>
                         <textField id="processDefinitionField" label="msg://io.flowset.control.view.processinstance/processDefinition" readOnly="true" width="auto" >
                             <suffix>

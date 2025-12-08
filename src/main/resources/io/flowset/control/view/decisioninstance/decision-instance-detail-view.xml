@@ -34,7 +34,7 @@
                                     themeNames="tertiary-inline"/>
                         </suffix>
                     </textField>
-                    <dateTimePicker property="evaluationTime" readOnly="true" width="100%"/>
+                    <dateTimePicker property="evaluationTime" readOnly="true" width="100%" step="1ms"/>
                     <textField id="processDefinitionIdTextField" property="processDefinitionId" readOnly="true">
                         <suffix>
                             <button id="viewProcessDefinition" icon="SEARCH" themeNames="tertiary-inline"/>

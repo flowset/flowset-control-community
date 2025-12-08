@@ -36,7 +36,7 @@
                          classNames="grid grid-flow-row grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-s">
                         <dateTimePicker id="timestampField" width="auto" classNames="pt-xs"
                                         label="msg://io.flowset.control.entity.incident/IncidentData.timestamp"
-                                        property="timestamp" readOnly="true"/>
+                                        property="timestamp" readOnly="true" step="1ms"/>
                         <textField id="typeField" classNames="pt-xs"
                                    label="msg://io.flowset.control.entity.incident/IncidentData.type" width="100%"
                                    property="type"

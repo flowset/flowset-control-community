@@ -35,12 +35,12 @@
                     <button id="viewProcessDefinition" icon="SEARCH" themeNames="tertiary-inline"/>
                 </suffix>
             </textField>
-            <dateTimePicker id="startTimeField" property="startTime" readOnly="true"/>
-            <dateTimePicker id="endTimeField" property="endTime" readOnly="true"/>
-            <dateTimePicker id="createTimeField" property="createTime" readOnly="true"/>
-            <dateTimePicker id="lastUpdatedField" property="lastUpdateDate" readOnly="true"/>
-            <dateTimePicker id="dueField" property="dueDate" readOnly="true"/>
-            <dateTimePicker id="followUpField" property="followUpDate" readOnly="true"/>
+            <dateTimePicker id="startTimeField" property="startTime" readOnly="true" step="1ms"/>
+            <dateTimePicker id="endTimeField" property="endTime" readOnly="true" step="1ms"/>
+            <dateTimePicker id="createTimeField" property="createTime" readOnly="true" step="1ms"/>
+            <dateTimePicker id="lastUpdatedField" property="lastUpdateDate" readOnly="true" step="1ms"/>
+            <dateTimePicker id="dueField" property="dueDate" readOnly="true" step="1ms"/>
+            <dateTimePicker id="followUpField" property="followUpDate" readOnly="true" step="1ms"/>
             <textField id="delegationStateField" property="delegationState" readOnly="true"/>
             <textField id="formKeyField" property="formKey" readOnly="true"/>
             <textField id="taskIdField" property="taskId" readOnly="true"/>

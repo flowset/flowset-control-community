@@ -51,7 +51,7 @@
                                     </suffix>
                                 </textField>
                                 <dateTimePicker id="deploymentTimeField" readOnly="true" width="100%" classNames="pt-xs"
-                                                label="msg://deploymentTime"/>
+                                                label="msg://deploymentTime" step="1ms"/>
                                 <textField id="deploymentSourceField" readOnly="true" width="100%" classNames="pt-xs"
                                            label="msg://deploymentSource"/>
                             </vbox>

@@ -29,7 +29,7 @@
             <textField id="objectTypeInfoField" property="valueInfo.object.objectTypeName" visible="false" readOnly="true"/>
             <textField id="serializationDataFormatField" property="valueInfo.object.serializationDataFormat"
                        visible="false" readOnly="true"/>
-            <dateTimePicker id="createTimeField" property="createTime" readOnly="true"/>
+            <dateTimePicker id="createTimeField" property="createTime" readOnly="true" step="1ms"/>
             <textField id="idField" property="historicVariableInstanceId" readOnly="true"/>
             <textField id="taskIdField" property="taskId" readOnly="true"/>
             <textField id="activityInstanceIdField" property="activityInstanceId" readOnly="true"/>

@@ -25,8 +25,8 @@
             <textField id="activityIdField" property="activityId" readOnly="true"/>
             <textField id="activityNameField" property="activityName" readOnly="true"/>
             <textField id="activityTypeField" property="activityType" readOnly="true"/>
-            <dateTimePicker id="startTimeField" property="startTime" readOnly="true"/>
-            <dateTimePicker id="endTimeField" property="endTime" readOnly="true"/>
+            <dateTimePicker id="startTimeField" property="startTime" readOnly="true" step="1ms"/>
+            <dateTimePicker id="endTimeField" property="endTime" readOnly="true" step="1ms"/>
             <textField id="durationField" readOnly="true" label="msg://duration"/>
             <textField id="assigneeField" property="assignee" readOnly="true"/>
             <textField id="taskIdField" property="taskId" readOnly="true"/>

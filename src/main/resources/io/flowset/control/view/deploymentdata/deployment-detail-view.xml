@@ -39,7 +39,7 @@
                                     themeNames="tertiary-inline"/>
                         </suffix>
                     </textField>
-                    <dateTimePicker property="deploymentTime" readOnly="true" width="100%"/>
+                    <dateTimePicker property="deploymentTime" readOnly="true" width="100%" step="1ms"/>
                     <textField property="source" readOnly="true"/>
                     <textField property="tenantId" readOnly="true"/>
                 </formLayout>
