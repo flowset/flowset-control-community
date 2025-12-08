@@ -31,10 +31,10 @@
                          classNames="grid grid-flow-row grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-s">
                         <dateTimePicker id="createTimeField" width="auto" classNames="pt-xs"
                                         label="msg://io.flowset.control.entity.incident/HistoricIncidentData.createTime"
-                                        property="createTime" readOnly="true"/>
+                                        property="createTime" readOnly="true" step="1ms"/>
                         <dateTimePicker id="endTimeField" width="auto" classNames="pt-xs"
                                         label="msg://io.flowset.control.entity.incident/HistoricIncidentData.endTime"
-                                        property="endTime" readOnly="true"/>
+                                        property="endTime" readOnly="true" step="1ms"/>
                     </div>
 
                     <hbox width="100%" expand="typeField" alignItems="BASELINE">

@@ -18,8 +18,8 @@
                 <textField id="idField" property="jobId" label="msg://jobId" readOnly="true"/>
                 <textField id="activityField" property="jobDefinitionId" label="msg://activity"
                            readOnly="true"/>
-                <dateTimePicker id="createTimeField" property="createTime" width="AUTO" readOnly="true"/>
-                <dateTimePicker id="dueDateField" property="dueDate" width="AUTO" readOnly="true"/>
+                <dateTimePicker id="createTimeField" property="createTime" width="AUTO" readOnly="true" step="1ms"/>
+                <dateTimePicker id="dueDateField" property="dueDate" width="AUTO" readOnly="true" step="1ms"/>
                 <textField id="retriesField" property="retries" readOnly="true"/>
                 <textField id="priorityField" property="priority" readOnly="true"/>
                 <textField id="failedActivityIdField" property="failedActivityId" readOnly="true"/>

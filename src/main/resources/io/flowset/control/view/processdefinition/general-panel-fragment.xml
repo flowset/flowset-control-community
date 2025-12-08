@@ -62,7 +62,7 @@
                                 </textField>
 
                                 <dateTimePicker id="deploymentTimeField" readOnly="true" width="100%" classNames="pt-xs"
-                                                label="msg://io.flowset.control.view.processdefinition/deploymentTime"/>
+                                                label="msg://io.flowset.control.view.processdefinition/deploymentTime" step="1ms"/>
                                 <textField id="deploymentSourceField" readOnly="true" width="100%" classNames="pt-xs"
                                            label="msg://io.flowset.control.view.processdefinition/deploymentSource"/>
                             </vbox>

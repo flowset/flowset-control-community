@@ -27,7 +27,7 @@
                            property="retries" readOnly="true" classNames="pt-s" width="100%"/>
             </hbox>
             <dateTimePicker id="lockExpirationTimeField" property="lockExpirationTime" readOnly="true"
-                            classNames="pt-s"/>
+                            classNames="pt-s" step="1ms"/>
             <textField id="processDefinitionIdField" label="msg://process"
                        property="processDefinitionId" readOnly="true" classNames="pt-s"/>
             <textField id="processInstanceIdField" property="processInstanceId" readOnly="true" classNames="pt-s"/>
