@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://instanceTerminateReasonView.title">
+    <actions>
+        <action id="close" type="view_close" text="msg:///actions.Close"/>
+    </actions>
+    <data>
+        <instance id="processInstanceDc" class="io.flowset.control.entity.processinstance.ProcessInstanceData"/>
+        <collection id="incidentsDc"
+                    class="io.flowset.control.entity.incident.HistoricIncidentData">
+            <loader id="incidentsDl" readOnly="true"/>
+        </collection>
+    </data>
+    <layout>
+        <formLayout dataContainer="processInstanceDc" width="100%">
+            <textField property="instanceId" readOnly="true" classNames="pt-s">
+                <suffix>
+                    <button id="viewInstanceBtn" icon="SEARCH" themeNames="tertiary-inline" classNames="text-secondary"/>
+                </suffix>
+            </textField>
+            <textField property="businessKey" readOnly="true" classNames="pt-s"/>
+            <textArea property="deleteReason" readOnly="true" label="msg://reasonField.label"
+                      minHeight="9.5em" classNames="pt-s" colspan="2"
+            />
+        </formLayout>
+
+        <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
+            <h4 text="msg://incidentsHeader.text"/>
+            <hbox classNames="buttons-panel" padding="false">
+                <button action="incidentsGrid.view" themeNames="small primary"/>
+                <simplePagination id="incidentsPagination" dataLoader="incidentsDl"/>
+            </hbox>
+            <dataGrid id="incidentsGrid" width="100%" height="100%" themeNames="compact"
+                      dataContainer="incidentsDc">
+                <actions>
+                    <action id="view"
+                            text="msg:///actions.View"
+                            icon="EYE"
+                            type="list_itemTracking"/>
+                </actions>
+                <columns resizable="true">
+                    <column property="activityId" flexGrow="1" autoWidth="true"/>
+                    <column property="message" flexGrow="2"/>
+                    <column property="createTime"/>
+                    <column property="endTime"/>
+                    <column property="resolved" flexGrow="0"/>
+                    <column property="type"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+        <hbox padding="false" width="100%">
+            <button action="close"/>
+        </hbox>
+    </layout>
+</view>
