@@ -12,11 +12,7 @@
           title="msg://io.flowset.control/menu_config.bpm_ProcessDefinition.list.title" icon="SITEMAP"/>
     <item view="bpm_ProcessInstance.list"
           description="msg://io.flowset.control/menu_config.bpm_ProcessInstance.list.description"
-          title="msg://io.flowset.control/menu_config.bpm_ProcessInstance.list.title" icon="TASKS">
-        <urlQueryParameters>
-            <parameter name="mode" value="active"/>
-        </urlQueryParameters>
-    </item>
+          title="msg://io.flowset.control/menu_config.bpm_ProcessInstance.list.title" icon="TASKS"/>
     <item view="IncidentData.list" title="msg://io.flowset.control.view.incidentdata/incidentDataListView.title"
           icon="WARNING"/>
     <item view="bpm_AllTasksView" title="msg://io.flowset.control/allTasks" icon="USER_CARD"/>
