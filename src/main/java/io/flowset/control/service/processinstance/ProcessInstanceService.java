@@ -68,7 +68,8 @@ public interface ProcessInstanceService {
      * @param variableInstances   process variables with values
      * @return started process instance
      */
-    ProcessInstanceData startProcessByDefinitionId(String processDefinitionId, Collection<VariableInstanceData> variableInstances);
+    ProcessInstanceData startProcessByDefinitionId(String processDefinitionId, Collection<VariableInstanceData> variableInstances,
+                                                   @Nullable String businessKey);
 
     /**
      * Suspends the process instance with the specified identifier.

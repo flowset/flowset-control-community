@@ -22,6 +22,8 @@
                        colspan="2"
                        width="auto"
                        label="msg://processDefinitionIdLabel"/>
+            <textField id="businessKeyField" label="msg://businessKeyField.label"
+                       colspan="2" width="100%" classNames="pt-xs"/>
         </formLayout>
         <vbox id="variablesVBox" width="100%" padding="false" themeNames="spacing-s">
             <h4 text="msg://variableGrid.title"/>
@@ -44,8 +46,8 @@
             </dataGrid>
         </vbox>
 
-        <hbox id="lookupActions" classNames="buttons-panel" justifyContent="END" >
-            <button id="startProcessBtn" action="startProcessAction" />
+        <hbox id="lookupActions" classNames="buttons-panel" justifyContent="END">
+            <button id="startProcessBtn" action="startProcessAction"/>
             <button id="cancelBtn" action="cancelAction"/>
         </hbox>
     </layout>

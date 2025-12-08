@@ -18,6 +18,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.view.*;
@@ -28,7 +29,7 @@ import java.util.Objects;
 @ViewController("bpm_StartProcessWithVariableView")
 @ViewDescriptor("start-process-with-variable-view.xml")
 @EditedEntityContainer("processDefinitionDc")
-@DialogMode(width = "50em", height = "37.5em")
+@DialogMode(width = "50em", height = "41em")
 public class StartProcessWithVariableView extends StandardDetailView<ProcessDefinitionData> {
     @ViewComponent
     protected JmixFormLayout processDefinitionFormLayout;
@@ -42,6 +43,8 @@ public class StartProcessWithVariableView extends StandardDetailView<ProcessDefi
     protected DataGrid<VariableInstanceData> variableGrid;
     @Autowired
     protected Metadata metadata;
+    @ViewComponent
+    protected TypedTextField<String> businessKeyField;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -66,7 +69,8 @@ public class StartProcessWithVariableView extends StandardDetailView<ProcessDefi
 
     @Subscribe("startProcessAction")
     public void onStartProcessAction(final ActionPerformedEvent event) {
-        processInstanceService.startProcessByDefinitionId(getEditedEntity().getProcessDefinitionId(), variableDc.getItems());
+        processInstanceService.startProcessByDefinitionId(getEditedEntity().getProcessDefinitionId(), variableDc.getItems(),
+                 businessKeyField.getTypedValue());
         close(StandardOutcome.SAVE);
     }
 
