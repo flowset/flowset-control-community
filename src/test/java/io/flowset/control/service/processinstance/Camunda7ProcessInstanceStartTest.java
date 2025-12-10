@@ -67,7 +67,7 @@ public class Camunda7ProcessInstanceStartTest extends AbstractCamunda7Integratio
         Collection<VariableInstanceData> variables = new ArrayList<>();
 
         //when and then
-        assertThatThrownBy(() -> processInstanceService.startProcessByDefinitionId(processId, variables))
+        assertThatThrownBy(() -> processInstanceService.startProcessByDefinitionId(processId, variables, null))
                 .hasCauseInstanceOf(ConnectException.class);
     }
 
@@ -81,17 +81,44 @@ public class Camunda7ProcessInstanceStartTest extends AbstractCamunda7Integratio
         Collection<VariableInstanceData> variables = new ArrayList<>();
 
         //when
-        ProcessInstanceData startedInstance = processInstanceService.startProcessByDefinitionId(processId, variables);
+        ProcessInstanceData startedInstance = processInstanceService.startProcessByDefinitionId(processId, variables, null);
 
         //then
         assertThat(startedInstance).isNotNull();
         assertThat(startedInstance.getInstanceId()).isNotNull();
+        assertThat(startedInstance.getBusinessKey()).isNull();
 
         RuntimeProcessInstanceDto foundInstance = camundaRestTestHelper.findRuntimeInstance(camunda7, startedInstance.getInstanceId());
 
         assertThat(foundInstance).isNotNull();
         assertThat(foundInstance.getDefinitionId()).isEqualTo(processId);
         assertThat(foundInstance.getBusinessKey()).isNull();
+        assertThat(foundInstance.getCaseInstanceId()).isNull();
+    }
+
+    @Test
+    @DisplayName("Process instance with business key created")
+    void givenDeployedProcessAndBusinessKey_whenStartByProcessId_thenStartedInstanceWithBkDataReturned() {
+        //given
+        DeploymentResultDto deploymentResultDto = camundaRestTestHelper.createDeployment(camunda7, "test_support/vacationApproval.bpmn");
+        String processId = deploymentResultDto.getDeployedProcessDefinitions().keySet().iterator().next();
+        String businessKey = "Employee: test";
+
+        Collection<VariableInstanceData> variables = new ArrayList<>();
+
+        //when
+        ProcessInstanceData startedInstance = processInstanceService.startProcessByDefinitionId(processId, variables, businessKey);
+
+        //then
+        assertThat(startedInstance).isNotNull();
+        assertThat(startedInstance.getInstanceId()).isNotNull();
+        assertThat(startedInstance.getBusinessKey()).isEqualTo("Employee: test");
+
+        RuntimeProcessInstanceDto foundInstance = camundaRestTestHelper.findRuntimeInstance(camunda7, startedInstance.getInstanceId());
+
+        assertThat(foundInstance).isNotNull();
+        assertThat(foundInstance.getDefinitionId()).isEqualTo(processId);
+        assertThat(foundInstance.getBusinessKey()).isEqualTo("Employee: test");
         assertThat(foundInstance.getCaseInstanceId()).isNull();
     }
 
@@ -104,7 +131,7 @@ public class Camunda7ProcessInstanceStartTest extends AbstractCamunda7Integratio
         Collection<VariableInstanceData> variables = new ArrayList<>();
 
         //when and then
-        assertThatThrownBy(() -> processInstanceService.startProcessByDefinitionId(processId, variables))
+        assertThatThrownBy(() -> processInstanceService.startProcessByDefinitionId(processId, variables, null))
                 .isInstanceOf(RemoteProcessEngineException.class)
                 .hasMessageContaining("no deployed process definition found with id '%s'".formatted(processId));
 
@@ -124,7 +151,7 @@ public class Camunda7ProcessInstanceStartTest extends AbstractCamunda7Integratio
         List<VariableInstanceData> variables = List.of(variableInstance);
 
         //when
-        ProcessInstanceData startedInstance = processInstanceService.startProcessByDefinitionId(processId, variables);
+        ProcessInstanceData startedInstance = processInstanceService.startProcessByDefinitionId(processId, variables, null);
 
         //then: check instance and variables in engine
         assertThat(startedInstance).isNotNull();
