@@ -223,10 +223,16 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     }
 
     @Override
-    public ProcessInstanceData startProcessByDefinitionId(String processDefinitionId, Collection<VariableInstanceData> variableInstances) {
+    public ProcessInstanceData startProcessByDefinitionId(String processDefinitionId, Collection<VariableInstanceData> variableInstances,
+                                                          @Nullable String businessKey) {
         try {
             VariableMap variables = createVariableMap(variableInstances);
-            ProcessInstance processInstance = remoteRuntimeService.startProcessInstanceById(processDefinitionId, variables);
+            ProcessInstance processInstance;
+            if(businessKey != null) {
+                processInstance = remoteRuntimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
+            } else {
+                processInstance = remoteRuntimeService.startProcessInstanceById(processDefinitionId, variables);
+            }
 
             return mapFromModelWithDetails(processInstance);
         } catch (Exception e) {
