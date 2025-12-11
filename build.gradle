@@ -24,7 +24,7 @@ jmix {
 }
 
 group = 'io.flowset'
-version = '2026.0.999-SNAPSHOT'
+version = project.findProperty("appVersion") ?: '2026.0.999-SNAPSHOT'
 
 java {
     toolchain {
