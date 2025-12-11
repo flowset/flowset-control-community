@@ -21,7 +21,6 @@ import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.Notifications;
-import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.UiEventPublisher;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.accesscontext.UiEntityContext;
@@ -60,42 +59,35 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     protected ApplicationContext applicationContext;
     @Autowired
     protected Notifications notifications;
-    @ViewComponent
-    protected MessageBundle messageBundle;
     @Autowired
     protected Messages messages;
     @Autowired
     protected ViewNavigators viewNavigators;
-
-    @ViewComponent
-    protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
-    @ViewComponent
-    protected CollectionContainer<RuntimeProcessInstanceData> processInstanceDataDc;
-
     @Autowired
     protected ProcessInstanceService processInstanceService;
-
-    @ViewComponent
-    protected VerticalLayout processInstanceVBox;
-
-    @ViewComponent
-    protected DataGrid<RuntimeProcessInstanceData> processInstancesGrid;
-
-    @ViewComponent
-    protected SimplePagination processInstancesPagination;
     @Autowired
     protected Fragments fragments;
     @Autowired
     protected AccessManager accessManager;
     @Autowired
     protected Metadata metadata;
-
-    @Autowired
-    protected UiComponents uiComponents;
-    @ViewComponent
-    private Div selectedActivityContainer;
     @Autowired
     private UiEventPublisher uiEventPublisher;
+
+    @ViewComponent
+    protected MessageBundle messageBundle;
+    @ViewComponent
+    protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
+    @ViewComponent
+    protected CollectionContainer<RuntimeProcessInstanceData> processInstanceDataDc;
+    @ViewComponent
+    protected VerticalLayout processInstanceVBox;
+    @ViewComponent
+    protected DataGrid<RuntimeProcessInstanceData> processInstancesGrid;
+    @ViewComponent
+    protected SimplePagination processInstancesPagination;
+    @ViewComponent
+    private Div selectedActivityContainer;
     @ViewComponent
     private InstanceContainer<ProcessInstanceFilter> processInstanceFilterDc;
 

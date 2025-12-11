@@ -176,8 +176,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
 
     @Subscribe("suspendAction")
     public void onSuspendAction(final ActionPerformedEvent event) {
-        ProcessInstanceData processInstanceData = processInstanceDataDc.getItem();
-
         DialogWindow<SuspendProcessInstanceView> dialogWindow = dialogWindows.view(getCurrentView(), SuspendProcessInstanceView.class)
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
