@@ -8,7 +8,7 @@
 
 services:
   flowset-control-app: # Flowset Сontrol web application exposed on the configured port (by default 8081)
-    image: flowset/flowset-control:latest
+    image: flowset/flowset-control-community:latest
     container_name: flowset-control-app
     build: ..
     restart: "no"
