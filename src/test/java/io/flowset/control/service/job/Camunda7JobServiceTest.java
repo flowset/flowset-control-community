@@ -7,6 +7,7 @@ package io.flowset.control.service.job;
 
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.filter.JobFilter;
+import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
@@ -115,6 +116,28 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
     }
 
     @Test
+    @DisplayName("Find job by existing id")
+    void givenActiveJob_whenFindJob_thenJobReturned() {
+        //given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testTimerJob.bpmn")
+                .startByKey("testTimerJob");
+
+        JobDto sourceJobDto = camundaRestTestHelper.getJobsByProcessKey(camunda7, "testTimerJob").get(0);
+        String jobId = sourceJobDto.getId();
+
+        //when
+        JobData foundJob = jobService.findById(jobId);
+
+        //then
+        assertThat(foundJob).isNotNull();
+        assertThat(foundJob.getId()).isEqualTo(jobId);
+        assertThat(foundJob.getRetries()).isEqualTo(3);
+        assertThat(foundJob.getJobDefinitionId()).isEqualTo(sourceJobDto.getJobDefinitionId());
+
+    }
+
+    @Test
     @DisplayName("Get count of all jobs if filter is null")
     void givenActiveJobs_whenGetCount_thenAllJobsCountReturned() {
         //given
@@ -187,6 +210,45 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
 
         //then
         assertThat(errorDetails).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Suspend active existing job by id")
+    void givenExistingActiveJob_whenSuspendById_thenJobSuspended() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager.deploy("test_support/testTimerJob.bpmn")
+                .startByKey("testTimerJob");
+
+        String jobId = camundaRestTestHelper.getJobIdsByProcessKey(camunda7, "testTimerJob").get(0);
+
+        //when
+        jobService.suspendJob(jobId);
+
+        //then
+        JobDto updatedJob = camundaRestTestHelper.getJobById(camunda7, jobId);
+        assertThat(updatedJob).isNotNull();
+        assertThat(updatedJob.getSuspended()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Activate suspended existing job by id")
+    void givenExistingSuspendedJob_whenActivateById_thenJobActivated() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager.deploy("test_support/testTimerJob.bpmn")
+                .startByKey("testTimerJob");
+
+        String jobId = camundaRestTestHelper.getJobIdsByProcessKey(camunda7, "testTimerJob").get(0);
+        camundaRestTestHelper.suspendJobById(camunda7, jobId);
+
+        //when
+        jobService.activateJob(jobId);
+
+        //then
+        JobDto updatedJob = camundaRestTestHelper.getJobById(camunda7, jobId);
+        assertThat(updatedJob).isNotNull();
+        assertThat(updatedJob.getSuspended()).isFalse();
     }
 
     /*

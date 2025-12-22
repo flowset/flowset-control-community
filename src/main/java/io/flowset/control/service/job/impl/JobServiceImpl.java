@@ -7,14 +7,16 @@ package io.flowset.control.service.job.impl;
 
 import com.google.common.base.Strings;
 import feign.FeignException;
-import io.jmix.core.Sort;
+import feign.utils.ExceptionUtils;
 import io.flowset.control.entity.filter.JobFilter;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
+import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.JobMapper;
 import io.flowset.control.service.client.EngineRestClient;
 import io.flowset.control.service.job.JobLoadContext;
 import io.flowset.control.service.job.JobService;
+import io.jmix.core.Sort;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.camunda.community.rest.client.api.HistoryApiClient;
@@ -25,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,17 +59,30 @@ public class JobServiceImpl implements JobService {
         JobQueryDto jobQueryDto = createJobQueryDto(loadContext.getFilter());
         jobQueryDto.setSorting(createSortOptions(loadContext.getSort()));
 
-        ResponseEntity<List<JobDto>> jobsResponse = jobApiClient.queryJobs(loadContext.getFirstResult(), loadContext.getMaxResults(),
-                jobQueryDto);
-        if (jobsResponse.getStatusCode().is2xxSuccessful()) {
-            List<JobDto> jobDtoList = jobsResponse.getBody();
-            return CollectionUtils.emptyIfNull(jobDtoList)
-                    .stream()
-                    .map(jobMapper::fromJobDto)
-                    .toList();
+        try {
+            ResponseEntity<List<JobDto>> jobsResponse = jobApiClient.queryJobs(loadContext.getFirstResult(), loadContext.getMaxResults(),
+                    jobQueryDto);
+            if (jobsResponse.getStatusCode().is2xxSuccessful()) {
+                List<JobDto> jobDtoList = jobsResponse.getBody();
+                return CollectionUtils.emptyIfNull(jobDtoList)
+                        .stream()
+                        .map(jobMapper::fromJobDto)
+                        .toList();
+            }
+            log.error("Error on loading runtime jobs: query {}, status code {}", jobQueryDto, jobsResponse.getStatusCode());
+            return List.of();
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load runtime jobs because BPM engine not selected");
+                return List.of();
+            }
+            if (rootCause instanceof ConnectException) {
+                log.error("Unable to load runtime jobs because of connection error: ", e);
+                return List.of();
+            }
+            throw e;
         }
-        log.error("Error on loading runtime jobs: query {}, status code {}", jobQueryDto, jobsResponse.getStatusCode());
-        return List.of();
     }
 
     @Override
@@ -79,6 +95,29 @@ public class JobServiceImpl implements JobService {
         }
         log.error("Error on loading runtime jobs count: query {}, status code {}", jobQueryDto, jobsResponse.getStatusCode());
         return 0;
+    }
+
+    @Override
+    public JobData findById(String jobId) {
+        try {
+            ResponseEntity<JobDto> job = jobApiClient.getJob(jobId);
+            JobDto body = job.getBody();
+            if (body != null) {
+                return jobMapper.fromJobDto(body);
+            }
+            return null;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load runtime job by id {} because BPM engine not selected", jobId);
+                return null;
+            }
+            if (rootCause instanceof ConnectException) {
+                log.error("Unable to load runtime job by id {} because of connection error: ", jobId, e);
+                return null;
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -145,6 +184,20 @@ public class JobServiceImpl implements JobService {
             log.error("Error checking job log presence for jobId: {}, error: ", jobId, e);
             return false;
         }
+    }
+
+    @Override
+    public void activateJob(String jobId) {
+        SuspensionStateDto suspensionStateDto = new SuspensionStateDto()
+                .suspended(false);
+        jobApiClient.updateJobSuspensionState(jobId, suspensionStateDto);
+    }
+
+    @Override
+    public void suspendJob(String jobId) {
+        SuspensionStateDto suspensionStateDto = new SuspensionStateDto()
+                .suspended(true);
+        jobApiClient.updateJobSuspensionState(jobId, suspensionStateDto);
     }
 
     protected JobQueryDto createJobQueryDto(JobFilter filter) {

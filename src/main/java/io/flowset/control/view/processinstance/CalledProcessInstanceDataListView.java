@@ -13,6 +13,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataManager;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -57,6 +58,8 @@ public class CalledProcessInstanceDataListView extends StandardListView<ProcessI
     protected Messages messages;
     @Autowired
     protected ViewNavigators viewNavigators;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
     protected List<String> processInstanceIds;
 
@@ -83,8 +86,7 @@ public class CalledProcessInstanceDataListView extends StandardListView<ProcessI
     @Supply(to = "processInstancesDataGrid.processDefinitionId", subject = "renderer")
     protected Renderer<ProcessInstanceData> processInstancesDataGridProcessDefinitionIdRenderer() {
         return new TextRenderer<>(item -> item.getProcessDefinitionVersion() == null ? item.getProcessDefinitionId() :
-                messages.formatMessage("", "common.processDefinitionKeyAndVersion", item.getProcessDefinitionKey(),
-                        item.getProcessDefinitionVersion()));
+                componentHelper.getProcessLabel(item.getProcessDefinitionKey(), item.getProcessDefinitionVersion()));
     }
 
 

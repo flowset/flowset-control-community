@@ -24,7 +24,6 @@ public abstract class JobMapper {
     Metadata metadata;
 
     @Mapping(target = "jobId", source = "id")
-    @Mapping(target = "id", ignore = true)
     public abstract JobData fromJobDto(JobDto source);
 
     JobData targetClassFactory() {
@@ -32,7 +31,6 @@ public abstract class JobMapper {
     }
 
     @Mapping(target = "jobDefinitionId", source = "id")
-    @Mapping(target = "id", ignore = true)
     public abstract JobDefinitionData fromJobDefinitionDto(JobDefinitionDto source);
 
     JobDefinitionData jobDefinitionTargetClassFactory() {

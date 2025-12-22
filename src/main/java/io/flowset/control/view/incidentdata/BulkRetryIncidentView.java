@@ -4,6 +4,9 @@ package io.flowset.control.view.incidentdata;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.Notifications;
+import io.jmix.flowui.component.formlayout.JmixFormLayout;
+import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.component.validation.ValidationErrors;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.incident.IncidentData;
@@ -23,6 +26,12 @@ import java.util.Set;
 public class BulkRetryIncidentView extends StandardView {
 
     @Autowired
+    protected ViewValidation viewValidation;
+    @ViewComponent
+    protected JmixFormLayout form;
+    @ViewComponent
+    protected TypedTextField<Integer> retriesField;
+    @Autowired
     private ExternalTaskService externalTaskService;
     @Autowired
     private JobService jobService;
@@ -38,18 +47,32 @@ public class BulkRetryIncidentView extends StandardView {
         this.incidentDataSet = incidentDataSet;
     }
 
+    @Subscribe
+    public void onBeforeShow(final BeforeShowEvent event) {
+        retriesField.setTypedValue(1);
+    }
+
 
     @Subscribe("retryAction")
     public void onRetryAction(final ActionPerformedEvent event) {
+        ValidationErrors validationErrors = viewValidation.validateUiComponents(form);
+        if (!validationErrors.isEmpty()) {
+            viewValidation.showValidationErrors(validationErrors);
+            return;
+        }
+        Integer retries = retriesField.getTypedValue();
+        if (retries == null) {
+            return;
+        }
         List<String> externalTaskIds = getIncidentsByType(incidentDataSet, Incident.EXTERNAL_TASK_HANDLER_TYPE);
         if (CollectionUtils.isNotEmpty(externalTaskIds)) {
-            externalTaskService.setRetriesAsync(externalTaskIds, 1);
+            externalTaskService.setRetriesAsync(externalTaskIds, retries);
         }
 
 
         List<String> jobIds = getIncidentsByType(incidentDataSet, Incident.FAILED_JOB_HANDLER_TYPE);
         if (CollectionUtils.isNotEmpty(jobIds)) {
-            jobService.setJobRetriesAsync(jobIds, 1);
+            jobService.setJobRetriesAsync(jobIds, retries);
         }
 
         notifications.create(messageBundle.getMessage("retriesBulkUpdateStarted"))

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://suspendJobView.title">
+    <actions>
+        <action id="suspendAction"
+                text="msg:///actions.Suspend"
+                icon="PAUSE"
+                actionVariant="PRIMARY"/>
+        <action id="cancelAction"
+                text="msg:///actions.Cancel"
+                type="view_close"
+                icon="BAN"/>
+    </actions>
+
+    <layout>
+        <span text="msg://suspendJobConfirmation.text" width="100%"/>
+
+        <hbox justifyContent="END" width="100%">
+            <button id="suspendBtn" action="suspendAction"/>
+            <button id="cancelBtn" action="cancelAction"/>
+        </hbox>
+    </layout>
+</view>

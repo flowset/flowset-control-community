@@ -19,6 +19,8 @@
             <hbox classNames="buttons-panel" padding="false">
                 <button action="runtimeJobsGrid.edit" themeNames="small primary"/>
                 <button action="runtimeJobsGrid.retry" themeNames="small"/>
+                <button action="runtimeJobsGrid.activate" themeNames="small"/>
+                <button action="runtimeJobsGrid.suspend" themeNames="small"/>
                 <simplePagination id="jobsPagination" dataLoader="runtimeJobsDl"/>
             </hbox>
             <dataGrid id="runtimeJobsGrid" width="100%" height="100%" themeNames="compact"
@@ -27,17 +29,31 @@
                     <action id="edit"
                             text="msg:///actions.View"
                             icon="EYE"
-                            type="list_itemTracking"/>
+                            type="list_edit"/>
                     <action id="retry"
                             text="msg:///actions.Retry"
                             icon="ROTATE_LEFT"
                             type="list_itemTracking"/>
+                    <action id="activate"
+                            icon="PLAY" type="list_itemTracking"
+                            text="msg:///actions.Activate"/>
+                    <action id="suspend"
+                            icon="PAUSE" type="list_itemTracking"
+                            text="msg:///actions.Suspend"/>
                 </actions>
                 <columns resizable="true">
                     <column property="jobId"/>
+                    <column property="failedActivityId" sortable="false">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.processinstance.runtime.job.JobFailedActivityIdColumnFragment"/>
+                    </column>
                     <column property="createTime"/>
-                    <column property="retries"/>
-                    <column property="priority"/>
+                    <column property="retries" autoWidth="true"/>
+                    <column property="priority" autoWidth="true"/>
+                    <column property="state" autoWidth="true" sortable="false">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.job.column.state.JobStateColumnFragment"/>
+                    </column>
                 </columns>
             </dataGrid>
         </vbox>

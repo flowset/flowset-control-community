@@ -16,6 +16,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -66,6 +67,8 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
     protected ProcessInstanceService processInstanceService;
     @Autowired
     protected ProcessDefinitionService processDefinitionService;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
     @ViewComponent
     protected CollectionContainer<ProcessInstanceData> processInstancesDc;
@@ -252,8 +255,7 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
 
     protected String getProcessDisplayName(ProcessInstanceData item) {
         return item.getProcessDefinitionVersion() == null ? item.getProcessDefinitionId() :
-                messages.formatMessage("", "common.processDefinitionKeyAndVersion", item.getProcessDefinitionKey(),
-                        item.getProcessDefinitionVersion());
+                componentHelper.getProcessLabel(item.getProcessDefinitionKey(), item.getProcessDefinitionVersion());
     }
 
     @Subscribe(id = "processInstanceFilterDc", target = Target.DATA_CONTAINER)

@@ -38,10 +38,8 @@ import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
-import io.flowset.control.service.externaltask.ExternalTaskService;
 import io.flowset.control.service.incident.IncidentLoadContext;
 import io.flowset.control.service.incident.IncidentService;
-import io.flowset.control.service.job.JobService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.incidentdata.filter.*;
@@ -256,7 +254,7 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
             log.warn("Process definition with id '{}' not found", incidentData.getProcessDefinitionId());
             return null;
         }
-        return messages.formatMessage("", "common.processDefinitionKeyAndVersion", processDefinitionData.getKey(), processDefinitionData.getVersion());
+        return componentHelper.getProcessLabel(processDefinitionData);
     }
 
     protected void initDataGridHeaderRow() {
