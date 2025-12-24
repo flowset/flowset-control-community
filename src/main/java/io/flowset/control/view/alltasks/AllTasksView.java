@@ -22,6 +22,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -116,6 +117,8 @@ public class AllTasksView extends StandardListView<UserTaskData> {
     protected UiComponents uiComponents;
     @Autowired
     protected Messages messages;
+    @Autowired
+    protected ComponentHelper componentHelper;
     @ViewComponent
     protected JmixDetails assignmentFilters;
     @ViewComponent
@@ -440,7 +443,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
         ProcessDefinitionData processDefinitionData = processDefinitionsMap.computeIfAbsent(userTaskData.getProcessDefinitionId(),
                 processDefinitionId -> processDefinitionService.getById(processDefinitionId));
 
-        return messages.formatMessage("", "common.processDefinitionKeyAndVersion", processDefinitionData.getKey(), processDefinitionData.getVersion());
+        return componentHelper.getProcessLabel(processDefinitionData);
     }
 
     protected void setDefaultSort() {

@@ -7,33 +7,118 @@
 <view xmlns="http://jmix.io/schema/flowui/view"
       title="msg://jobData.detail.title">
     <data>
-        <instance id="jobDataDc" class="io.flowset.control.entity.job.JobData"/>
+        <instance id="jobDataDc" class="io.flowset.control.entity.job.JobData">
+            <loader id="jobDataDl"/>
+        </instance>
     </data>
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
     <actions>
-        <action id="closeAction" type="detail_discard"/>
+        <action id="closeAction" type="view_close"/>
+        <action id="copyIdAction" type="control_copyComponentValueToClipboard"/>
+        <action id="copyExceptionAction" type="control_copyComponentValueToClipboard"/>
+        <action id="copyErrorAction" type="control_copyComponentValueToClipboard"/>
+        <action id="retryAction" text="msg:///actions.Retry" icon="ROTATE_LEFT" visible="false"/>
+        <action id="activateAction" text="msg:///actions.Activate" icon="PLAY" visible="false"/>
+        <action id="suspendAction" text="msg:///actions.Suspend" icon="PAUSE" visible="false"/>
+        <action id="viewProcessAction" icon="SEARCH"/>
+        <action id="viewProcessInstanceAction" icon="SEARCH"/>
     </actions>
-    <layout>
-        <vbox width="100%" padding="false" spacing="false" height="100%">
-            <formLayout id="form" dataContainer="jobDataDc" width="100%">
-                <textField id="idField" property="jobId" label="msg://jobId" readOnly="true"/>
-                <textField id="activityField" property="jobDefinitionId" label="msg://activity"
-                           readOnly="true"/>
-                <dateTimePicker id="createTimeField" property="createTime" width="AUTO" readOnly="true" step="1ms"/>
-                <dateTimePicker id="dueDateField" property="dueDate" width="AUTO" readOnly="true" step="1ms"/>
-                <textField id="retriesField" property="retries" readOnly="true"/>
-                <textField id="priorityField" property="priority" readOnly="true"/>
-                <textField id="failedActivityIdField" property="failedActivityId" readOnly="true"/>
-                <textField id="jobTypeField" readOnly="true" label="msg://jobType"/>
-            </formLayout>
-            <textArea id="exceptionMessageField" dataContainer="jobDataDc" property="exceptionMessage" minHeight="3.5em"
-                      readOnly="true" width="100%"
-                      label="msg://exceptionMessage"/>
-            <codeEditor id="stackTraceField" label="msg://fullStacktrace" readOnly="true" width="100%" height="100%"
-                        showGutter="false"/>
-        </vbox>
+    <layout classNames="overflow-hidden">
+        <split themeNames="splitter-spacing" width="100%">
+            <div>
+                <formLayout dataContainer="jobDataDc" labelsPosition="TOP">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                    </responsiveSteps>
+                    <vbox width="100%" themeNames="spacing-s" padding="false">
+                        <textField id="idField" property="jobId" label="msg://jobId" readOnly="true" width="100%"
+                                   classNames="pt-xs">
+                            <suffix>
+                                <button id="copyIdBtn" icon="COPY_O" themeNames="tertiary-inline"
+                                        action="copyIdAction"/>
+                            </suffix>
+                        </textField>
+                        <hbox expand="jobTypeField" width="100%"
+                              padding="false" classNames="lg:flex-row 2xl:flex-row xl:flex-row md:flex-col sm:flex-col">
+                            <textField id="jobTypeField"
+                                       readOnly="true" width="100%" label="msg://jobType" classNames="pt-xs"/>
+                            <vbox padding="false" classNames="text-s text-secondary font-semibold"
+                                  themeNames="spacing-xs" width="auto">
+                                <span text="msg://io.flowset.control.entity.job/JobData.state"/>
+                                <fragment id="stateFragment"
+                                          class="io.flowset.control.view.job.column.state.JobStateColumnFragment"/>
+                            </vbox>
+                        </hbox>
+
+                        <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-3 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1"
+                             width="100%">
+                            <dateTimePicker id="createTimeField" property="createTime" width="100%" readOnly="true"
+                                            classNames="pt-xs col-span-2"
+                                            step="1ms" label="msg://io.flowset.control.entity.job/JobData.createTime"/>
+                            <textField id="priorityField" property="priority" width="100%" readOnly="true"
+                                       classNames="pt-xs" label="msg://io.flowset.control.entity.job/JobData.priority"/>
+                        </div>
+                        <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-3 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1"
+                             width="100%">
+                            <dateTimePicker id="dueDateField" property="dueDate" width="100%" readOnly="true" step="1ms"
+                                            classNames="pt-xs col-span-2"
+                                            label="msg://io.flowset.control.entity.job/JobData.dueDate"/>
+                            <textField id="retriesField" property="retries" width="100%" readOnly="true"
+                                       classNames="pt-xs"
+                                       label="msg://io.flowset.control.entity.job/JobData.retries"/>
+                        </div>
+                    </vbox>
+                    <vbox width="100%" themeNames="spacing-s" padding="false">
+                        <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1"
+                             width="100%">
+                            <textField id="activityField" label="msg://activity"
+                                       readOnly="true" width="100%" classNames="pt-xs"/>
+                            <textField id="failedActivityIdField" property="failedActivityId"
+                                       label="msg://io.flowset.control.entity.job/JobData.failedActivityId"
+                                       readOnly="true" width="100%" classNames="pt-xs"/>
+                        </div>
+
+                        <textField id="processDefinitionIdField"
+                                   label="msg://io.flowset.control.entity.job/JobData.processDefinitionId"
+                                   readOnly="true" width="100%" classNames="pt-xs">
+                            <suffix>
+                                <button id="viewProcessBtn" action="viewProcessAction" themeNames="tertiary-inline"/>
+                            </suffix>
+                        </textField>
+                        <textField id="processInstanceIdField" property="processInstanceId" readOnly="true"
+                                   label="msg://io.flowset.control.entity.job/JobData.processInstanceId"
+                                   width="100%" classNames="pt-xs">
+                            <suffix>
+                                <button id="viewProcessInstanceBtn" action="viewProcessInstanceAction" icon="SEARCH"
+                                        themeNames="tertiary-inline"/>
+                            </suffix>
+                        </textField>
+                    </vbox>
+                </formLayout>
+            </div>
+            <vbox padding="false" expand="stackTraceField" classNames="col-span-2">
+                <textArea id="exceptionMessageField" dataContainer="jobDataDc" property="exceptionMessage"
+                          minHeight="5em"
+                          readOnly="true" width="100%" classNames="pt-xs"
+                          label="msg://exceptionMessage">
+                    <suffix>
+                        <button id="copyErrorBtn" icon="COPY_O" themeNames="tertiary-inline" action="copyErrorAction"/>
+                    </suffix>
+                </textArea>
+                <codeEditor id="stackTraceField" readOnly="true" minHeight="8em" width="100%"/>
+            </vbox>
+        </split>
         <hbox id="editActions" width="100%">
-            <button id="retryBtn" text="msg:///actions.Retry" icon="ROTATE_LEFT" visible="false" themeNames="primary"/>
-            <button action="closeAction" classNames="ml-auto"/>
+            <button id="retryBtn" action="retryAction" themeNames="primary"/>
+            <button id="suspendBtn" action="suspendAction"/>
+            <button id="activateBtn" action="activateAction"/>
+            <hbox themeNames="spacing-s" classNames="ml-auto">
+                <button id="copyStacktrace" text="msg://copyStacktraceBtn.text" icon="COPY"
+                        action="copyExceptionAction"/>
+                <button action="closeAction"/>
+            </hbox>
         </hbox>
     </layout>
 </view>

@@ -83,6 +83,13 @@ public class CamundaRestTestHelper {
         restHelper.putVoid(camunda, "/process-instance/" + instanceId + "/suspended", suspendRequestDto);
     }
 
+    public void suspendJobById(Camunda7Container<?> camunda, String jobId) {
+        SuspendRequestDto suspendRequestDto = new SuspendRequestDto();
+        suspendRequestDto.setSuspended(true);
+
+        restHelper.putVoid(camunda, "/job/" + jobId + "/suspended", suspendRequestDto);
+    }
+
     public void suspendInstanceByProcessId(Camunda7Container<?> camunda, String processId) {
         SuspendInstancesRequestDto suspendRequestDto = new SuspendInstancesRequestDto();
         suspendRequestDto.setSuspended(true);

@@ -13,6 +13,7 @@ import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.UiComponents;
+import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import lombok.AllArgsConstructor;
 import org.springframework.lang.Nullable;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.TimeZone;
 
 @Component
@@ -74,5 +76,29 @@ public class ComponentHelper {
         }
 
         return span;
+    }
+
+    /**
+     * Retrieves a display name of the specified process in the <processKey> (ver. <processVersion>) format.
+     *
+     * @param process the process for showing in the column or in the text field.
+     * @return the process label to show as a value of the Process column or text field.
+     */
+    @Nullable
+    public String getProcessLabel(@Nullable ProcessDefinitionData process) {
+        return Optional.ofNullable(process)
+                .map(processDefinitionData -> getProcessLabel(process.getKey(), processDefinitionData.getVersion()))
+                .orElse(null);
+    }
+
+    /**
+     * Retrieves a display name of the process with the specified key and version in the <processKey> (ver. <processVersion>) format.
+     *
+     * @param processKey     the process key for showing in the column or in the text field.
+     * @param processVersion the process version for showing in the column or in the text field.
+     * @return the process label to show as a value of the Process column or text field.
+     */
+    public String getProcessLabel(String processKey, Integer processVersion) {
+        return messages.formatMessage("", "common.processDefinitionKeyAndVersion", processKey, processVersion);
     }
 }

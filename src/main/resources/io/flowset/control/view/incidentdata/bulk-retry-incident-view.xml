@@ -13,7 +13,15 @@
 
     <layout>
         <span text="msg://bulkRetry.text" width="100%"/>
-
+        <formLayout id="form" width="100%">
+            <textField id="retriesField" datatype="int" label="msg://retriesField.label" required="true"
+                       classNames="pt-xs"
+                       helperText="msg://retriesField.helperText">
+                <validators>
+                    <positive/>
+                </validators>
+            </textField>
+        </formLayout>
         <hbox justifyContent="END" width="100%">
             <button id="retryBtn" action="retryAction"/>
             <button id="cancelBtn" action="cancelAction"/>

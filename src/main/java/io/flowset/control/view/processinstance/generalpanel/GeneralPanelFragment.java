@@ -9,26 +9,24 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.ViewNavigators;
-import io.jmix.flowui.action.DialogAction;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
-import io.jmix.flowui.kit.action.ActionVariant;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
@@ -66,6 +64,8 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected DialogWindows dialogWindows;
     @Autowired
     protected Messages messages;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
     @Autowired
     protected ProcessInstanceService processInstanceService;
@@ -117,8 +117,7 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected void initProcessDefinitionField(ProcessInstanceData processInstanceData) {
         String value;
         if (processInstanceData.getProcessDefinitionVersion() != null) {
-            value = messages.formatMessage("", "common.processDefinitionKeyAndVersion",
-                    processInstanceData.getProcessDefinitionKey(), processInstanceData.getProcessDefinitionVersion());
+            value = componentHelper.getProcessLabel(processInstanceData.getProcessDefinitionKey(), processInstanceData.getProcessDefinitionVersion());
         } else {
             value = processInstanceData.getProcessDefinitionId();
         }

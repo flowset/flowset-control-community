@@ -10,6 +10,7 @@ import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -40,7 +41,7 @@ public class JobData {
 
     protected Date dueDate;
 
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     protected Date createTime;
 
     protected Boolean suspended;
@@ -169,4 +170,8 @@ public class JobData {
         this.tenantId = tenantId;
     }
 
+    @JmixProperty
+    public JobState getState() {
+        return BooleanUtils.isTrue(suspended) ? JobState.SUSPENDED : JobState.ACTIVE;
+    }
 }

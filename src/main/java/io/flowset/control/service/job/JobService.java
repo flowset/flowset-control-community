@@ -34,6 +34,15 @@ public interface JobService {
     long getCount(@Nullable JobFilter filter);
 
     /**
+     * Retrieves a job by its identifier from the engine.
+     *
+     * @param jobId the unique identifier of the job
+     * @return the {@code JobData} corresponding to the specified job identifier,
+     *         or {@code null} if no such job exists
+     */
+    JobData findById(String jobId);
+
+    /**
      * Loads a job definition with the specified identifier.
      *
      * @param jobDefinitionId a job definition identifier
@@ -82,4 +91,18 @@ public interface JobService {
      * @return boolean
      */
     boolean isHistoryJobLogPresent(String jobId);
+
+    /**
+     * Activates a job with the specified identifier.
+     *
+     * @param jobId the identifier of the job to be activated
+     */
+    void activateJob(String jobId);
+
+    /**
+     * Suspends a job with the specified identifier.
+     *
+     * @param jobId the identifier of the job to be suspended
+     */
+    void suspendJob(String jobId);
 }

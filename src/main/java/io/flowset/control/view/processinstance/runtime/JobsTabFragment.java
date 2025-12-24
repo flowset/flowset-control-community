@@ -8,10 +8,14 @@ package io.flowset.control.view.processinstance.runtime;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.event.SortEvent;
+import io.flowset.control.entity.job.JobState;
+import io.flowset.control.view.job.ActivateJobView;
+import io.flowset.control.view.job.SuspendJobView;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
+import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.UiEventPublisher;
@@ -34,6 +38,7 @@ import io.flowset.control.view.processinstance.event.JobCountUpdateEvent;
 import io.flowset.control.view.processinstance.event.JobRetriesUpdateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.List;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
@@ -56,6 +61,8 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
     protected MessageBundle messageBundle;
     @Autowired
     protected Messages messages;
+    @Autowired
+    protected DatatypeFormatter datatypeFormatter;
 
     @ViewComponent
     protected CollectionLoader<JobData> runtimeJobsDl;
@@ -162,5 +169,62 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
     protected void reloadJobs() {
         runtimeJobsDl.load();
         uiEventPublisher.publishEventForCurrentUI(new JobRetriesUpdateEvent(this));
+    }
+
+    @Install(to = "runtimeJobsGrid.failedActivityId", subject = "tooltipGenerator")
+    protected String runtimeJobsGridFailedActivityIdTooltipGenerator(final JobData jobData) {
+        return jobData.getFailedActivityId();
+    }
+
+    @Install(to = "runtimeJobsGrid.createTime", subject = "tooltipGenerator")
+    protected String runtimeJobsGridCreateTimeTooltipGenerator(final JobData jobData) {
+        Date createTime = jobData.getCreateTime();
+        return datatypeFormatter.formatDateTime(createTime);
+    }
+
+    @Subscribe("runtimeJobsGrid.activate")
+    public void onRuntimeJobsGridActivate(final ActionPerformedEvent event) {
+        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
+        if (selectedItem == null) {
+            return;
+        }
+
+        dialogWindows.view(getCurrentView(), ActivateJobView.class)
+                .withViewConfigurer(activateJobView -> activateJobView.setJobId(selectedItem.getJobId()))
+                .withAfterCloseListener(afterCloseEvent -> {
+                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
+                        reloadJobs();
+                    }
+                })
+                .open();
+    }
+
+    @Install(to = "runtimeJobsGrid.activate", subject = "enabledRule")
+    private boolean runtimeJobsGridActivateEnabledRule() {
+        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
+        return selectedItem != null && selectedItem.getState() == JobState.SUSPENDED;
+    }
+
+    @Subscribe("runtimeJobsGrid.suspend")
+    public void onRuntimeJobsGridSuspend(final ActionPerformedEvent event) {
+        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
+        if (selectedItem == null) {
+            return;
+        }
+
+        dialogWindows.view(getCurrentView(), SuspendJobView.class)
+                .withViewConfigurer(activateJobView -> activateJobView.setJobId(selectedItem.getJobId()))
+                .withAfterCloseListener(afterCloseEvent -> {
+                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
+                        reloadJobs();
+                    }
+                })
+                .open();
+    }
+
+    @Install(to = "runtimeJobsGrid.suspend", subject = "enabledRule")
+    private boolean runtimeJobsGridSuspendEnabledRule() {
+        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
+        return selectedItem != null && selectedItem.getState() == JobState.ACTIVE;
     }
 }

@@ -347,7 +347,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
         String processKey = getEditedEntity().getProcessDefinitionKey();
 
         String processBadgeText = processVersion == null ? processKey :
-                messages.formatMessage("", "common.processDefinitionKeyAndVersion", processKey, processVersion);
+                componentHelper.getProcessLabel(processKey, processVersion);
         processDefinitionBadge.setText(processBadgeText);
 
         return processDefinitionBadge;
