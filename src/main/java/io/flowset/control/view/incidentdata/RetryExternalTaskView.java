@@ -9,10 +9,9 @@ import io.jmix.flowui.component.validation.ValidationErrors;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
 import io.flowset.control.service.externaltask.ExternalTaskService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "retry-external-task-view", layout = MainView.class)
+@Route(value = "retry-external-task-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "RetryExternalTaskView")
 @ViewDescriptor(path = "retry-external-task-view.xml")
 public class RetryExternalTaskView extends StandardView {

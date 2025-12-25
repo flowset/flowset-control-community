@@ -16,11 +16,10 @@ import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.engine.BpmEngine;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-@Route(value = "bpm/engines", layout = MainView.class)
+@Route(value = "bpm/engines", layout = DefaultMainViewParent.class)
 @ViewController(id = "BpmEngine.list")
 @ViewDescriptor(path = "bpm-engine-list-view.xml")
 @LookupComponent("bpmEnginesDataGrid")

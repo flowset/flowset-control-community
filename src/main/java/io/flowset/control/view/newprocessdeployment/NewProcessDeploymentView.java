@@ -40,7 +40,6 @@ import io.flowset.control.service.deployment.DeploymentService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.AbstractResourceDeploymentView;
-import io.flowset.control.view.main.MainView;
 import io.flowset.uikit.component.bpmnviewer.event.XmlImportCompleteEvent;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,7 @@ import java.util.stream.Collectors;
 
 import static io.flowset.control.util.BpmParseUtil.parseProcessDefinitionsJson;
 
-@Route(value = "bpm/new-process-deployment", layout = MainView.class)
+@Route(value = "bpm/new-process-deployment", layout = DefaultMainViewParent.class)
 @ViewController("bpm_NewProcessDeploymentView")
 @ViewDescriptor("new-process-deployment-view.xml")
 @Slf4j

@@ -34,7 +34,6 @@ import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.event.TitleUpdateEvent;
 import io.flowset.control.view.externaltask.ExternalTaskErrorDetailsView;
 import io.flowset.control.view.job.JobErrorDetailsView;
-import io.flowset.control.view.main.MainView;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +44,7 @@ import java.util.Optional;
 
 import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 
-@Route(value = "bpm/incident/:id", layout = MainView.class)
+@Route(value = "bpm/incident/:id", layout = DefaultMainViewParent.class)
 @ViewController("IncidentData.detail")
 @ViewDescriptor("incident-data-detail-view.xml")
 @EditedEntityContainer("incidentDataDc")

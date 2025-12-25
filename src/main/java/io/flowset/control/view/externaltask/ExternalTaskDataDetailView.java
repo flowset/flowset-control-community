@@ -18,10 +18,9 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.ExternalTaskData;
 import io.flowset.control.service.externaltask.ExternalTaskService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "external-tasks/:id", layout = MainView.class)
+@Route(value = "external-tasks/:id", layout = DefaultMainViewParent.class)
 @ViewController("ExternalTaskData.detail")
 @ViewDescriptor("external-task-data-detail-view.xml")
 @EditedEntityContainer("externalTaskDataDc")

@@ -12,6 +12,7 @@ import io.flowset.control.entity.filter.UserTaskFilter;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.TaskMapper;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.usertask.UserTaskLoadContext;
 import io.flowset.control.service.usertask.UserTaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,15 +42,17 @@ public class UserTaskServiceImpl implements UserTaskService {
     protected final TaskMapper taskMapper;
     protected final HistoryApiClient historyApiClient;
     protected final TaskApiClient taskApiClient;
+    protected final EngineTenantProvider tenantProvider;
 
     public UserTaskServiceImpl(RemoteTaskService remoteTaskService,
                                TaskMapper taskMapper,
                                HistoryApiClient historyApiClient,
-                               TaskApiClient taskApiClient) {
+                               TaskApiClient taskApiClient, EngineTenantProvider tenantProvider) {
         this.remoteTaskService = remoteTaskService;
         this.taskMapper = taskMapper;
         this.historyApiClient = historyApiClient;
         this.taskApiClient = taskApiClient;
+        this.tenantProvider = tenantProvider;
     }
 
 
@@ -157,7 +160,7 @@ public class UserTaskServiceImpl implements UserTaskService {
 
 
     protected TaskQueryDto createTaskQueryDto(@Nullable UserTaskFilter filter) {
-        TaskQueryDto taskQueryDto = new TaskQueryDto();
+        TaskQueryDto taskQueryDto = createTaskQueryDto();
         if (filter != null) {
             addIfStringNotEmpty(filter.getProcessInstanceId(), taskQueryDto::setProcessInstanceId);
             addIfStringNotEmpty(filter.getActivityInstanceId(), value -> taskQueryDto.setActivityInstanceIdIn(List.of(value)));
@@ -177,6 +180,12 @@ public class UserTaskServiceImpl implements UserTaskService {
             taskQueryDto.setSuspended(filter.getSuspended());
         }
 
+        return taskQueryDto;
+    }
+
+    protected TaskQueryDto createTaskQueryDto() {
+        TaskQueryDto taskQueryDto = new TaskQueryDto();
+        addTenant(taskQueryDto, tenantProvider::getCurrentUserTenantId);
         return taskQueryDto;
     }
 

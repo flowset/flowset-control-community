@@ -16,7 +16,6 @@ import io.flowset.control.entity.variable.CamundaVariableType;
 import io.flowset.control.entity.variable.HistoricVariableInstanceData;
 import io.flowset.control.service.variable.VariableService;
 import io.flowset.control.service.variable.VariableUtils;
-import io.flowset.control.view.main.MainView;
 import io.jmix.core.LoadContext;
 import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.flowui.UiComponents;
@@ -29,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-@Route(value = "historicVariableInstanceDatas/:id", layout = MainView.class)
+@Route(value = "historicVariableInstanceDatas/:id", layout = DefaultMainViewParent.class)
 @ViewController("HistoricVariableInstanceData.detail")
 @ViewDescriptor("historic-variable-instance-data-detail-view.xml")
 @EditedEntityContainer("historicVariableInstanceDataDc")

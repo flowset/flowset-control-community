@@ -10,10 +10,9 @@ import io.jmix.flowui.component.codeeditor.CodeEditor;
 import io.jmix.flowui.view.*;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
 import io.flowset.control.service.job.JobService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "job-error-details", layout = MainView.class)
+@Route(value = "job-error-details", layout = DefaultMainViewParent.class)
 @ViewController("JobErrorDetailsView")
 @ViewDescriptor("job-error-details-view.xml")
 public class JobErrorDetailsView extends StandardView {

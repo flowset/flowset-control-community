@@ -14,6 +14,7 @@ import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.ProcessInstanceMapper;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import lombok.extern.slf4j.Slf4j;
@@ -53,17 +54,19 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     protected final ProcessInstanceApiClient processInstanceApiClient;
     protected final HistoryApiClient historyApiClient;
     protected final ProcessInstanceMapper processInstanceMapper;
+    protected final EngineTenantProvider engineTenantProvider;
 
     public ProcessInstanceServiceImpl(RemoteRuntimeService remoteRuntimeService,
                                       RemoteHistoryService historyService,
                                       ProcessInstanceApiClient processInstanceApiClient,
                                       HistoryApiClient historyApiClient,
-                                      ProcessInstanceMapper processInstanceMapper) {
+                                      ProcessInstanceMapper processInstanceMapper, EngineTenantProvider engineTenantProvider) {
         this.remoteRuntimeService = remoteRuntimeService;
         this.historyService = historyService;
         this.processInstanceApiClient = processInstanceApiClient;
         this.historyApiClient = historyApiClient;
         this.processInstanceMapper = processInstanceMapper;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
@@ -330,6 +333,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
     @Override
     public long getCountByProcessDefinitionId(String processDefinitionId) {
+        String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
         ResponseEntity<CountResultDto> processInstancesCount = processInstanceApiClient.getProcessInstancesCount(
                 null, null, null,
                 null, processDefinitionId, null,
@@ -337,7 +341,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 null, null, null,
                 null, null, null,
                 null, null, null,
-                null, null, null,
+                null, null, currentUserTenantId,
                 null, null, null,
                 null, null, null,
                 null, null
@@ -350,6 +354,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
     @Override
     public long getCountByDeploymentId(String deploymentId) {
+        String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
         ResponseEntity<CountResultDto> processInstancesCount = processInstanceApiClient.getProcessInstancesCount(
                 null, null, null,
                 null, null, null,
@@ -357,7 +362,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 null, null, null,
                 null, null, null,
                 null, null, null,
-                null, null, null,
+                null, null, currentUserTenantId,
                 null, null, null,
                 null, null, null,
                 null, null
@@ -371,6 +376,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
 
     @Override
     public long getCountByProcessDefinitionKey(String processDefinitionKey) {
+        String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
         ResponseEntity<CountResultDto> processInstancesCount = processInstanceApiClient.getProcessInstancesCount(
                 null, null, null,
                 null, null, processDefinitionKey,
@@ -378,7 +384,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 null, null, null,
                 null, null, null,
                 null, null, null,
-                null, null, null,
+                null, null, currentUserTenantId,
                 null, null, null,
                 null, null, null,
                 null, null
@@ -392,6 +398,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     protected HistoricProcessInstanceQueryDto createHistoryProcessInstanceQueryDto(@Nullable ProcessInstanceFilter filter, @Nullable Sort sort) {
         HistoricProcessInstanceQueryDto processInstanceQuery = new HistoricProcessInstanceQueryDto();
 
+        addTenant(processInstanceQuery, engineTenantProvider::getCurrentUserTenantId);
         addHistoryFilters(processInstanceQuery, filter);
         addHistorySort(processInstanceQuery, sort);
 

@@ -9,10 +9,9 @@ import io.jmix.flowui.component.validation.ValidationErrors;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
 import io.flowset.control.service.job.JobService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "retry-job-view", layout = MainView.class)
+@Route(value = "retry-job-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "RetryJobView")
 @ViewDescriptor(path = "retry-job-view.xml")
 public class RetryJobView extends StandardView {

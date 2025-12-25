@@ -19,11 +19,10 @@ import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.impl.JobServiceImpl;
 import io.flowset.control.view.externaltask.ExternalTaskErrorDetailsView;
 import io.flowset.control.view.job.JobErrorDetailsView;
-import io.flowset.control.view.main.MainView;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "historic-incidents/:id", layout = MainView.class)
+@Route(value = "historic-incidents/:id", layout = DefaultMainViewParent.class)
 @ViewController("HistoricIncidentData.detail")
 @ViewDescriptor("historic-incident-data-detail-view.xml")
 @EditedEntityContainer("historicIncidentDataDc")

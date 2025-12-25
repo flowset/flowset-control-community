@@ -34,16 +34,7 @@ import io.jmix.flowui.kit.component.codeeditor.CodeEditorMode;
 import io.jmix.flowui.kit.component.codeeditor.JmixCodeEditor;
 import io.jmix.flowui.kit.component.grid.JmixGrid;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.DialogMode;
-import io.jmix.flowui.view.EditedEntityContainer;
-import io.jmix.flowui.view.Install;
-import io.jmix.flowui.view.PrimaryDetailView;
-import io.jmix.flowui.view.StandardDetailView;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.Target;
-import io.jmix.flowui.view.ViewComponent;
-import io.jmix.flowui.view.ViewController;
-import io.jmix.flowui.view.ViewDescriptor;
+import io.jmix.flowui.view.*;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.entity.deployment.DeploymentProcessInstancesInfo;
@@ -55,7 +46,6 @@ import io.flowset.control.service.deployment.DeploymentService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.flowset.control.view.main.MainView;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
@@ -72,7 +62,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-@Route(value = "bpm/deployment/:id", layout = MainView.class)
+@Route(value = "bpm/deployment/:id", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_Deployment.detail")
 @ViewDescriptor(path = "deployment-detail-view.xml")
 @EditedEntityContainer("deploymentDataDc")

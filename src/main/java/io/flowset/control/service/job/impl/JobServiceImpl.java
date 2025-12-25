@@ -14,6 +14,7 @@ import io.flowset.control.entity.job.JobDefinitionData;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.JobMapper;
 import io.flowset.control.service.client.EngineRestClient;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.job.JobLoadContext;
 import io.flowset.control.service.job.JobService;
 import io.jmix.core.Sort;
@@ -41,17 +42,19 @@ public class JobServiceImpl implements JobService {
     protected final JobDefinitionApiClient jobDefinitionApiClient;
     protected final HistoryApiClient historyApiClient;
     protected final EngineRestClient engineRestClient;
+    protected final EngineTenantProvider engineTenantProvider;
 
     public JobServiceImpl(JobMapper jobMapper,
                           JobApiClient jobApiClient,
                           JobDefinitionApiClient jobDefinitionApiClient,
                           HistoryApiClient historyApiClient,
-                          EngineRestClient engineRestClient) {
+                          EngineRestClient engineRestClient, EngineTenantProvider engineTenantProvider) {
         this.jobMapper = jobMapper;
         this.jobApiClient = jobApiClient;
         this.jobDefinitionApiClient = jobDefinitionApiClient;
         this.historyApiClient = historyApiClient;
         this.engineRestClient = engineRestClient;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
@@ -202,6 +205,10 @@ public class JobServiceImpl implements JobService {
 
     protected JobQueryDto createJobQueryDto(JobFilter filter) {
         JobQueryDto jobQueryDto = new JobQueryDto();
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
+        if (tenantId != null) {
+            jobQueryDto.tenantIdIn(List.of(tenantId));
+        }
         if (filter != null) {
             jobQueryDto.processInstanceId(filter.getProcessInstanceId());
         }

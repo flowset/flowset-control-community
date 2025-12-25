@@ -7,12 +7,11 @@ import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 
-@Route(value = "process-instance-terminate-view", layout = MainView.class)
+@Route(value = "process-instance-terminate-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "ProcessInstanceTerminateView")
 @ViewDescriptor(path = "process-instance-terminate-view.xml")
 public class ProcessInstanceTerminateView extends StandardView {

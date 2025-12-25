@@ -6,12 +6,11 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route(value = "bulk-activate-process-instance-view", layout = MainView.class)
+@Route(value = "bulk-activate-process-instance-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "BulkActivateProcessInstanceView")
 @ViewDescriptor(path = "bulk-activate-process-instance-view.xml")
 public class BulkActivateProcessInstanceView extends StandardView {

@@ -6,6 +6,7 @@
 package io.flowset.control.service.engine.impl;
 
 import io.jmix.core.*;
+import io.jmix.core.impl.session.ThreadLocalSessionData;
 import io.jmix.core.querycondition.PropertyCondition;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.core.session.SessionData;
@@ -47,7 +48,7 @@ public class EngineServiceImpl implements EngineService {
 
     @Override
     public BpmEngine getSelectedEngine() {
-        String sessionAttribute = (String) sessionDataProvider.getObject().getAttribute(SELECTED_ENGINE_ATTRIBUTE);
+        String sessionAttribute = getSelectedEngineAttribute();
         if (sessionAttribute == null) {
             return findDefaultEngine();
         }
@@ -115,4 +116,11 @@ public class EngineServiceImpl implements EngineService {
         saveEngine(engine);
     }
 
+    protected String getSelectedEngineAttribute() {
+        if (ThreadLocalSessionData.isSet()) {
+            return (String) ThreadLocalSessionData.getAttribute(SELECTED_ENGINE_ATTRIBUTE);
+        } else {
+            return (String) sessionDataProvider.getObject().getAttribute(SELECTED_ENGINE_ATTRIBUTE);
+        }
+    }
 }

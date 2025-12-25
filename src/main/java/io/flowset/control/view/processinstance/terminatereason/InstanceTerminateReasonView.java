@@ -27,7 +27,6 @@ import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.incident.IncidentLoadContext;
 import io.flowset.control.service.incident.IncidentService;
-import io.flowset.control.view.main.MainView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.control.view.util.ComponentHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ import java.util.List;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
-@Route(value = "instance-terminate-reason-view", layout = MainView.class)
+@Route(value = "instance-terminate-reason-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "InstanceTerminateReasonView")
 @ViewDescriptor(path = "instance-terminate-reason-view.xml")
 @DialogMode(width = "60em")

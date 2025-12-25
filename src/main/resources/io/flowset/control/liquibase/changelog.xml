@@ -27,6 +27,7 @@
     <include file="/io/jmix/data/liquibase/changelog.xml"/>
     <include file="/io/jmix/flowuidata/liquibase/changelog.xml"/>
     <include file="/io/jmix/securitydata/liquibase/changelog.xml"/>
+    <include file="/io/jmix/multitenancy/liquibase/changelog.xml"/>
 
     <includeAll path="/io/flowset/control/liquibase/changelog"/>
 

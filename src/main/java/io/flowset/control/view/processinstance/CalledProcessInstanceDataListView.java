@@ -21,6 +21,7 @@ import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.view.DefaultMainViewParent;
 import io.jmix.flowui.view.DialogMode;
 import io.jmix.flowui.view.Install;
 import io.jmix.flowui.view.LookupComponent;
@@ -33,7 +34,6 @@ import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.flowset.control.view.main.MainView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,7 +41,7 @@ import java.util.List;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
-@Route(value = "called-process-instances", layout = MainView.class)
+@Route(value = "called-process-instances", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_CalledProcessInstanceData.list")
 @ViewDescriptor(path = "called-process-instance-data-list-view.xml")
 @LookupComponent("processInstancesDataGrid")

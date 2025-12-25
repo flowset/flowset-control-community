@@ -8,6 +8,7 @@ package io.flowset.control.view.externaltask;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.action.view.ViewCloseAction;
 import io.jmix.flowui.component.codeeditor.CodeEditor;
+import io.jmix.flowui.view.DefaultMainViewParent;
 import io.jmix.flowui.view.DialogMode;
 import io.jmix.flowui.view.StandardView;
 import io.jmix.flowui.view.Subscribe;
@@ -16,10 +17,9 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
 import io.flowset.control.service.externaltask.ExternalTaskService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "external-task-error-details", layout = MainView.class)
+@Route(value = "external-task-error-details", layout = DefaultMainViewParent.class)
 @ViewController("ExternalTaskErrorDetailsView")
 @ViewDescriptor("external-task-error-details-view.xml")
 @DialogMode(width = "52em")

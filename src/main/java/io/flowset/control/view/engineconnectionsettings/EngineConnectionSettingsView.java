@@ -35,7 +35,6 @@ import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.EngineUiService;
-import io.flowset.control.view.main.MainView;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 
 @Slf4j
-@Route(value = "engine-connection-settings", layout = MainView.class)
+@Route(value = "engine-connection-settings", layout = DefaultMainViewParent.class)
 @ViewController("EngineConnectionSettingsView")
 @ViewDescriptor("engine-connection-settings-view.xml")
 @DialogMode(minWidth = "30em", maxWidth = "40em")

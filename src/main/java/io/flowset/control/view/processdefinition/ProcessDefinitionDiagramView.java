@@ -9,16 +9,16 @@ package io.flowset.control.view.processdefinition;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.flowui.component.UiComponentUtils;
+import io.jmix.flowui.view.DefaultMainViewParent;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
-import io.flowset.control.view.main.MainView;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "process-definition-diagram", layout = MainView.class)
+@Route(value = "process-definition-diagram", layout = DefaultMainViewParent.class)
 @ViewController("ProcessDefinitionDiagramView")
 @ViewDescriptor("process-definition-diagram-view.xml")
 @DialogMode(width = "90%", height = "90%", minWidth = "40em", minHeight = "25em")

@@ -6,12 +6,11 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route(value = "bulk-suspend-process-instance-view", layout = MainView.class)
+@Route(value = "bulk-suspend-process-instance-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "BulkSuspendProcessInstanceView")
 @ViewDescriptor(path = "bulk-suspend-process-instance-view.xml")
 public class BulkSuspendProcessInstanceView extends StandardView {

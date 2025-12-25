@@ -23,7 +23,6 @@ import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.service.engine.EngineService;
-import io.flowset.control.view.main.MainView;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ import org.springframework.boot.info.BuildProperties;
 
 import java.util.Set;
 
-@Route(value = "bpm/engines/:id", layout = MainView.class)
+@Route(value = "bpm/engines/:id", layout = DefaultMainViewParent.class)
 @ViewController(id = "BpmEngine.detail")
 @ViewDescriptor(path = "bpm-engine-detail-view.xml")
 @EditedEntityContainer("bpmEngineDc")

@@ -17,6 +17,7 @@ import io.flowset.control.mapper.DeploymentResourceMapper;
 import io.flowset.control.service.deployment.DeploymentContext;
 import io.flowset.control.service.deployment.DeploymentLoadContext;
 import io.flowset.control.service.deployment.DeploymentService;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.bpm.engine.repository.DeploymentQuery;
@@ -35,8 +36,7 @@ import java.net.ConnectException;
 import java.util.List;
 import java.util.Optional;
 
-import static io.flowset.control.util.QueryUtils.addDeploymentFilters;
-import static io.flowset.control.util.QueryUtils.addDeploymentSort;
+import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_DeploymentService")
 @Slf4j
@@ -47,22 +47,26 @@ public class DeploymentServiceImpl implements DeploymentService {
     protected final DeploymentMapper deploymentMapper;
     protected final DeploymentResourceMapper deploymentResourceMapper;
     protected final DeploymentApiClient deploymentApiClient;
+    protected final EngineTenantProvider engineTenantProvider;
 
     public DeploymentServiceImpl(RemoteRepositoryService remoteRepositoryService,
                                  DeploymentMapper deploymentMapper,
                                  DeploymentResourceMapper deploymentResourceMapper,
-                                 DeploymentApiClient deploymentApiClient) {
+                                 DeploymentApiClient deploymentApiClient, EngineTenantProvider engineTenantProvider) {
         this.remoteRepositoryService = remoteRepositoryService;
         this.deploymentMapper = deploymentMapper;
         this.deploymentResourceMapper = deploymentResourceMapper;
         this.deploymentApiClient = deploymentApiClient;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
     public DeploymentWithDefinitions createDeployment(DeploymentContext context) {
         DelegatingDeploymentBuilder deployment = remoteRepositoryService.createDeployment();
 
+        String tenant = engineTenantProvider.getCurrentUserTenantId();
         return deployment
+                .tenantId(tenant)
                 .source(FLOWSET_CONTROL_SOURCE)
                 .addInputStream(context.getResourceName(), context.getResourceContent())
                 .deployWithResult();
@@ -175,6 +179,7 @@ public class DeploymentServiceImpl implements DeploymentService {
     protected DeploymentQuery createDeploymentQuery(@Nullable DeploymentFilter filter, @Nullable Sort sort) {
         DeploymentQuery deploymentQuery = remoteRepositoryService.createDeploymentQuery();
 
+        addIfNotNull(engineTenantProvider.getCurrentUserTenantId(), deploymentQuery::tenantIdIn);
         addDeploymentFilters(deploymentQuery, filter);
         addDeploymentSort(deploymentQuery, sort);
         return deploymentQuery;

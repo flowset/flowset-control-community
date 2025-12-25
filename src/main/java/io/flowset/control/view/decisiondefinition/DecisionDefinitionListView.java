@@ -29,12 +29,11 @@ import io.flowset.control.entity.filter.DecisionDefinitionFilter;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.view.decisiondeployment.DecisionDeploymentView;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route(value = "bpmn/decision-definitions", layout = MainView.class)
+@Route(value = "bpmn/decision-definitions", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_DecisionDefinition.list")
 @ViewDescriptor("decision-definition-list-view.xml")
 public class DecisionDefinitionListView extends StandardListView<DecisionDefinitionData> {

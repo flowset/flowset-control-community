@@ -12,6 +12,7 @@ import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.ProcessDefinitionMapper;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import jakarta.annotation.Nullable;
@@ -28,8 +29,7 @@ import org.springframework.stereotype.Service;
 import java.net.ConnectException;
 import java.util.List;
 
-import static io.flowset.control.util.QueryUtils.addDefinitionFilters;
-import static io.flowset.control.util.QueryUtils.addDefinitionSort;
+import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_ProcessDefinitionService")
 @Slf4j
@@ -37,19 +37,22 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
     protected final RemoteRepositoryService remoteRepositoryService;
     protected final ProcessDefinitionMapper processDefinitionMapper;
     protected final ProcessDefinitionApiClient processDefinitionApiClient;
+    protected final EngineTenantProvider engineTenantProvider;
 
     public ProcessDefinitionServiceImpl(RemoteRepositoryService remoteRepositoryService,
                                         ProcessDefinitionMapper processDefinitionMapper,
-                                        ProcessDefinitionApiClient processDefinitionApiClient) {
+                                        ProcessDefinitionApiClient processDefinitionApiClient,
+                                        EngineTenantProvider engineTenantProvider) {
         this.remoteRepositoryService = remoteRepositoryService;
         this.processDefinitionMapper = processDefinitionMapper;
         this.processDefinitionApiClient = processDefinitionApiClient;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
     public List<ProcessDefinitionData> findLatestVersions() {
         try {
-            return remoteRepositoryService.createProcessDefinitionQuery()
+            return createProcessDefinitionQuery()
                     .orderByProcessDefinitionVersion()
                     .asc()
                     .latestVersion()
@@ -75,7 +78,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
     @Override
     public List<ProcessDefinitionData> findAllByKey(String processDefinitionKey) {
         try {
-            return remoteRepositoryService.createProcessDefinitionQuery()
+            return createProcessDefinitionQuery()
                     .orderByProcessDefinitionVersion()
                     .asc()
                     .processDefinitionKey(processDefinitionKey)
@@ -149,7 +152,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
     @Override
     public ProcessDefinitionData getById(String processDefinitionId) {
         try {
-            ProcessDefinition processDefinition = remoteRepositoryService.createProcessDefinitionQuery()
+            ProcessDefinition processDefinition = createProcessDefinitionQuery()
                     .processDefinitionId(processDefinitionId)
                     .singleResult();
             return processDefinitionMapper.fromProcessDefinitionModel(processDefinition);
@@ -277,10 +280,17 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
     }
 
     protected ProcessDefinitionQuery createProcessDefinitionQuery(@Nullable ProcessDefinitionFilter filter, @Nullable Sort sort) {
-        ProcessDefinitionQuery processDefinitionQuery = remoteRepositoryService.createProcessDefinitionQuery();
+        ProcessDefinitionQuery processDefinitionQuery = createProcessDefinitionQuery();
 
         addDefinitionFilters(processDefinitionQuery, filter);
         addDefinitionSort(processDefinitionQuery, sort);
+        return processDefinitionQuery;
+    }
+
+    protected ProcessDefinitionQuery createProcessDefinitionQuery() {
+        ProcessDefinitionQuery processDefinitionQuery = remoteRepositoryService.createProcessDefinitionQuery();
+
+        addTenant(processDefinitionQuery, engineTenantProvider::getCurrentUserTenantId);
         return processDefinitionQuery;
     }
 }

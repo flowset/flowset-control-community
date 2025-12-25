@@ -21,7 +21,6 @@ import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
-import io.flowset.control.view.main.MainView;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Slf4j
-@Route(value = "about", layout = MainView.class)
+@Route(value = "about", layout = DefaultMainViewParent.class)
 @ViewController(id = "AboutProductView")
 @ViewDescriptor(path = "about-product-view.xml")
 public class AboutProductView extends StandardView {

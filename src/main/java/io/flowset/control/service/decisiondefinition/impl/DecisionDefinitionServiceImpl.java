@@ -9,6 +9,7 @@ import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.DecisionDefinitionMapper;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.repository.DecisionDefinition;
@@ -22,8 +23,7 @@ import org.springframework.stereotype.Service;
 import java.net.ConnectException;
 import java.util.List;
 
-import static io.flowset.control.util.QueryUtils.addDecisionDefinitionFilters;
-import static io.flowset.control.util.QueryUtils.addDecisionDefinitionSort;
+import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_DecisionDefinitionService")
 @Slf4j
@@ -33,12 +33,16 @@ public class DecisionDefinitionServiceImpl implements DecisionDefinitionService 
     protected final DecisionDefinitionMapper decisionDefinitionMapper;
     protected final DecisionDefinitionApiClient decisionDefinitionApiClient;
 
+    protected final EngineTenantProvider engineTenantProvider;
+
     public DecisionDefinitionServiceImpl(RemoteRepositoryService remoteRepositoryService,
                                          DecisionDefinitionMapper decisionDefinitionMapper,
-                                         DecisionDefinitionApiClient decisionDefinitionApiClient) {
+                                         DecisionDefinitionApiClient decisionDefinitionApiClient,
+                                         EngineTenantProvider engineTenantProvider) {
         this.remoteRepositoryService = remoteRepositoryService;
         this.decisionDefinitionMapper = decisionDefinitionMapper;
         this.decisionDefinitionApiClient = decisionDefinitionApiClient;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
@@ -167,6 +171,8 @@ public class DecisionDefinitionServiceImpl implements DecisionDefinitionService 
     protected DecisionDefinitionQuery createDecisionDefinitionQuery(@Nullable DecisionDefinitionFilter filter,
                                                                     @Nullable Sort sort) {
         DecisionDefinitionQuery decisionDefinitionQuery = new DecisionDefinitionQueryImpl(decisionDefinitionApiClient);
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
+        addIfNotNull(tenantId, decisionDefinitionQuery::tenantIdIn);
         addDecisionDefinitionFilters(decisionDefinitionQuery, filter);
         addDecisionDefinitionSort(decisionDefinitionQuery, sort);
         return decisionDefinitionQuery;

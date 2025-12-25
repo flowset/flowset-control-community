@@ -12,7 +12,6 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import io.flowset.control.service.job.JobService;
-import io.flowset.control.view.main.MainView;
 import org.apache.commons.collections4.CollectionUtils;
 import org.camunda.bpm.engine.runtime.Incident;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Set;
 
-@Route(value = "bulk-retry-incident-view", layout = MainView.class)
+@Route(value = "bulk-retry-incident-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "BulkRetryIncidentView")
 @ViewDescriptor(path = "bulk-retry-incident-view.xml")
 public class BulkRetryIncidentView extends StandardView {

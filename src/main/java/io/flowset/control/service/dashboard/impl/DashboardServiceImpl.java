@@ -20,9 +20,11 @@ import io.flowset.control.property.UiProperties;
 import io.flowset.control.restsupport.FeignClientCreationContext;
 import io.flowset.control.restsupport.FeignClientProvider;
 import io.flowset.control.service.dashboard.DashboardService;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.camunda.community.rest.client.api.HistoryApiClient;
 import org.camunda.community.rest.client.api.ProcessDefinitionApiClient;
 import org.camunda.community.rest.client.api.ProcessInstanceApiClient;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.QueryUtils.addTenant;
 
 @Service("control_DashboardService")
 @Slf4j
@@ -53,6 +56,7 @@ public class DashboardServiceImpl implements DashboardService {
     protected final FeignClientProvider feignClientProvider;
     protected final ProcessDefinitionMapper processDefinitionMapper;
     protected final UiProperties uiProperties;
+    protected final EngineTenantProvider engineTenantProvider;
 
     protected Map<UUID, TaskApiClient> taskClientByEngineId = new ConcurrentHashMap<>();
     protected Map<UUID, ProcessDefinitionApiClient> processDefinitionClientByEngineId = new ConcurrentHashMap<>();
@@ -61,11 +65,13 @@ public class DashboardServiceImpl implements DashboardService {
 
     public DashboardServiceImpl(Metadata metadata, FeignClientProvider feignClientProvider,
                                 ProcessDefinitionMapper processDefinitionMapper,
-                                UiProperties uiProperties) {
+                                UiProperties uiProperties,
+                                EngineTenantProvider engineTenantProvider) {
         this.metadata = metadata;
         this.feignClientProvider = feignClientProvider;
         this.processDefinitionMapper = processDefinitionMapper;
         this.uiProperties = uiProperties;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
@@ -87,7 +93,7 @@ public class DashboardServiceImpl implements DashboardService {
         TaskApiClient taskApiClient = taskClientByEngineId
                 .computeIfAbsent(bpmEngine.getId(), engineId -> createClient(bpmEngine, TaskApiClient.class));
         try {
-            ResponseEntity<CountResultDto> response = taskApiClient.queryTasksCount(new TaskQueryDto());
+            ResponseEntity<CountResultDto> response = taskApiClient.queryTasksCount(createTaskQueryDto());
             if (response.getStatusCode().is2xxSuccessful()) {
                 return getCountResult(response.getBody());
             }
@@ -104,12 +110,13 @@ public class DashboardServiceImpl implements DashboardService {
         ProcessDefinitionApiClient processDefinitionApiClient = processDefinitionClientByEngineId
                 .computeIfAbsent(bpmEngine.getId(), engineId -> createClient(bpmEngine, ProcessDefinitionApiClient.class));
         try {
+            String tenantId = engineTenantProvider.getCurrentUserTenantId();
             ResponseEntity<CountResultDto> response = processDefinitionApiClient.getProcessDefinitionsCount(null,
                     null, null, null, null,
                     null, null, null, null, null,
                     null, null, null, true,
                     null, null, null, null, null, null,
-                    null, null, null, null, null,
+                    null, null, null, tenantId, null,
                     null, null, null,
                     null, null, null, null);
 
@@ -129,7 +136,7 @@ public class DashboardServiceImpl implements DashboardService {
         ProcessInstanceApiClient processInstanceApiClient = processInstanceClientByEngineId
                 .computeIfAbsent(bpmEngine.getId(), engineId -> createClient(bpmEngine, ProcessInstanceApiClient.class));
         try {
-            ResponseEntity<CountResultDto> response = processInstanceApiClient.queryProcessInstancesCount(new ProcessInstanceQueryDto()
+            ResponseEntity<CountResultDto> response = processInstanceApiClient.queryProcessInstancesCount(createProcessInstanceQueryDto()
                     .active(true));
 
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -148,7 +155,7 @@ public class DashboardServiceImpl implements DashboardService {
         ProcessInstanceApiClient processInstanceApiClient = processInstanceClientByEngineId
                 .computeIfAbsent(bpmEngine.getId(), engineId -> createClient(bpmEngine, ProcessInstanceApiClient.class));
         try {
-            ResponseEntity<CountResultDto> response = processInstanceApiClient.queryProcessInstancesCount(new ProcessInstanceQueryDto()
+            ResponseEntity<CountResultDto> response = processInstanceApiClient.queryProcessInstancesCount(createProcessInstanceQueryDto()
                     .suspended(true));
 
             if (response.getStatusCode().is2xxSuccessful()) {
@@ -168,10 +175,21 @@ public class DashboardServiceImpl implements DashboardService {
                 .computeIfAbsent(bpmEngine.getId(), engineId -> createClient(bpmEngine, ProcessDefinitionApiClient.class));
         try {
             ResponseEntity<List<ProcessDefinitionStatisticsResultDto>> response = processDefinitionApiClient.getProcessDefinitionStatistics(true, null, null, true);
+            String tenantId = engineTenantProvider.getCurrentUserTenantId();
             if (response.getStatusCode().is2xxSuccessful()) {
                 List<ProcessDefinitionStatisticsResultDto> statisticsResultDtos = response.getBody();
                 return CollectionUtils.emptyIfNull(statisticsResultDtos)
                         .stream()
+                        .filter(processDefinitionStatisticsResultDto -> {
+                            if (tenantId == null) {
+                                return true;
+                            }
+                            ProcessDefinitionDto definition = processDefinitionStatisticsResultDto.getDefinition();
+                            if (definition == null) {
+                                return true;
+                            }
+                            return StringUtils.equals(definition.getTenantId(), tenantId);
+                        })
                         .map(processDefinitionMapper::fromStatisticsResultDto)
                         .toList();
             }
@@ -232,7 +250,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     protected List<HistoricProcessInstanceDto> loadStartedInstances(OffsetDateTime from, OffsetDateTime to, HistoryApiClient historyApiClient) {
-        HistoricProcessInstanceQueryDto queryByStartedDate = new HistoricProcessInstanceQueryDto()
+        HistoricProcessInstanceQueryDto queryByStartedDate = createHistoricProcessInstanceQueryDto()
                 .startedAfter(from)
                 .startedBefore(to);
         try {
@@ -249,7 +267,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     protected List<HistoricProcessInstanceDto> loadFinishedInstances(OffsetDateTime from, OffsetDateTime to, HistoryApiClient historyApiClient) {
-        HistoricProcessInstanceQueryDto queryByStartedDate = new HistoricProcessInstanceQueryDto()
+        HistoricProcessInstanceQueryDto queryByStartedDate = createHistoricProcessInstanceQueryDto()
                 .finishedAfter(from)
                 .finishedBefore(to);
         try {
@@ -274,5 +292,25 @@ public class DashboardServiceImpl implements DashboardService {
             historyApiClientByEngineId.remove((UUID) entityId.getValue());
             taskClientByEngineId.remove((UUID) entityId.getValue());
         }
+    }
+
+    protected HistoricProcessInstanceQueryDto createHistoricProcessInstanceQueryDto() {
+        HistoricProcessInstanceQueryDto historicProcessInstanceQueryDto = new HistoricProcessInstanceQueryDto();
+        addTenant(historicProcessInstanceQueryDto, engineTenantProvider::getCurrentUserTenantId);
+        return historicProcessInstanceQueryDto;
+    }
+
+    protected TaskQueryDto createTaskQueryDto() {
+        TaskQueryDto taskQueryDto = new TaskQueryDto();
+
+        addTenant(taskQueryDto, engineTenantProvider::getCurrentUserTenantId);
+        return taskQueryDto;
+    }
+
+
+    protected ProcessInstanceQueryDto createProcessInstanceQueryDto() {
+        ProcessInstanceQueryDto processInstanceQueryDto = new ProcessInstanceQueryDto();
+        addTenant(processInstanceQueryDto, engineTenantProvider::getCurrentUserTenantId);
+        return processInstanceQueryDto;
     }
 }

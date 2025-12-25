@@ -15,7 +15,6 @@ import io.flowset.control.entity.variable.ObjectTypeInfo;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.entity.variable.VariableValueInfo;
 import io.flowset.control.service.usertask.UserTaskService;
-import io.flowset.control.view.main.MainView;
 import io.flowset.control.view.processvariable.VariableInstanceDataDetail;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
@@ -29,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collection;
 import java.util.Objects;
 
-@Route(value = "bulk-task-complete", layout = MainView.class)
+@Route(value = "bulk-task-complete", layout = DefaultMainViewParent.class)
 @ViewController("BulkTaskCompleteView")
 @ViewDescriptor("bulk-task-complete-view.xml")
 @DialogMode(width = "50em")

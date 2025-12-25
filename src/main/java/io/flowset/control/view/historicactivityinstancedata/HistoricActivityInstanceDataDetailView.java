@@ -13,12 +13,11 @@ import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.activity.HistoricActivityInstanceData;
 import io.flowset.control.service.activity.ActivityService;
-import io.flowset.control.view.main.MainView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 
-@Route(value = "historicActivityInstanceDatas/:id", layout = MainView.class)
+@Route(value = "historicActivityInstanceDatas/:id", layout = DefaultMainViewParent.class)
 @ViewController("HistoricActivityInstanceData.detail")
 @ViewDescriptor("historic-activity-instance-data-detail-view.xml")
 @EditedEntityContainer("historicActivityInstanceDataDc")

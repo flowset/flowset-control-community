@@ -14,6 +14,7 @@ import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.mapper.VariableMapper;
 import io.flowset.control.service.client.EngineRestClient;
 import io.flowset.control.service.engine.EngineService;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.variable.VariableLoadContext;
 import io.flowset.control.service.variable.VariableService;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class VariableServiceImpl implements VariableService {
     protected final EntityStates entityStates;
     protected final EngineService engineService;
     protected final EngineRestClient engineRestClient;
+    protected final EngineTenantProvider engineTenantProvider;
 
     public VariableServiceImpl(HistoryApiClient historyApiClient,
                                VariableMapper variableMapper,
@@ -54,7 +56,7 @@ public class VariableServiceImpl implements VariableService {
                                ProcessInstanceApiClient processInstanceApiClient,
                                EntityStates entityStates,
                                EngineService engineService,
-                               EngineRestClient engineRestClient) {
+                               EngineRestClient engineRestClient, EngineTenantProvider engineTenantProvider) {
         this.historyApiClient = historyApiClient;
         this.variableMapper = variableMapper;
         this.remoteRuntimeService = remoteRuntimeService;
@@ -63,6 +65,7 @@ public class VariableServiceImpl implements VariableService {
         this.entityStates = entityStates;
         this.engineService = engineService;
         this.engineRestClient = engineRestClient;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
@@ -282,6 +285,10 @@ public class VariableServiceImpl implements VariableService {
 
     protected VariableInstanceQueryDto createVariableInstanceQuery(@Nullable VariableFilter filter) {
         VariableInstanceQueryDto variableInstanceQueryDto = new VariableInstanceQueryDto();
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
+        if (tenantId != null) {
+            variableInstanceQueryDto.tenantIdIn(List.of(tenantId));
+        }
 
         if (filter != null) {
             if (StringUtils.isNotBlank(filter.getActivityInstanceId())) {

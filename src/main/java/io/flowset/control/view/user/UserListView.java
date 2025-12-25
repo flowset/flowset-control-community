@@ -6,11 +6,10 @@
 package io.flowset.control.view.user;
 
 import io.flowset.control.entity.User;
-import io.flowset.control.view.main.MainView;
 import com.vaadin.flow.router.Route;
 import io.jmix.flowui.view.*;
 
-@Route(value = "users", layout = MainView.class)
+@Route(value = "users", layout = DefaultMainViewParent.class)
 @ViewController("User.list")
 @ViewDescriptor("user-list-view.xml")
 @LookupComponent("usersDataGrid")

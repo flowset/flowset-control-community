@@ -78,6 +78,8 @@ dependencies {
     implementation 'io.jmix.datatools:jmix-datatools-flowui-starter'
     implementation 'io.jmix.charts:jmix-charts-flowui-starter'
     implementation 'io.jmix.oidc:jmix-oidc-starter'
+    implementation 'io.jmix.multitenancy:jmix-multitenancy-starter'
+    implementation 'io.jmix.multitenancy:jmix-multitenancy-flowui-starter'
 
     // Jmix Translations
     implementation 'io.jmix.translations:jmix-translations-de'

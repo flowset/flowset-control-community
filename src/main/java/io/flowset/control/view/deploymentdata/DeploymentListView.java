@@ -18,15 +18,7 @@ import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.Install;
-import io.jmix.flowui.view.StandardListView;
-import io.jmix.flowui.view.StandardOutcome;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.Supply;
-import io.jmix.flowui.view.Target;
-import io.jmix.flowui.view.ViewComponent;
-import io.jmix.flowui.view.ViewController;
-import io.jmix.flowui.view.ViewDescriptor;
+import io.jmix.flowui.view.*;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
@@ -36,7 +28,6 @@ import io.flowset.control.restsupport.FeignClientProvider;
 import io.flowset.control.service.deployment.DeploymentLoadContext;
 import io.flowset.control.service.deployment.DeploymentService;
 import io.flowset.control.service.engine.EngineService;
-import io.flowset.control.view.main.MainView;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -44,7 +35,7 @@ import org.springframework.lang.Nullable;
 import java.util.List;
 import java.util.Set;
 
-@Route(value = "bpmn/deployments", layout = MainView.class)
+@Route(value = "bpmn/deployments", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_Deployment.list")
 @ViewDescriptor(path = "deployment-list-view.xml")
 public class DeploymentListView extends StandardListView<DeploymentData> {

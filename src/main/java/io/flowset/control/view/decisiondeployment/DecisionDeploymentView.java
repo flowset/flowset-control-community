@@ -28,6 +28,7 @@ import io.jmix.flowui.kit.action.ActionVariant;
 import io.jmix.flowui.kit.component.ComponentUtils;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.kit.component.upload.event.FileUploadSucceededEvent;
+import io.jmix.flowui.view.DefaultMainViewParent;
 import io.jmix.flowui.view.MessageBundle;
 import io.jmix.flowui.view.StandardOutcome;
 import io.jmix.flowui.view.Subscribe;
@@ -44,7 +45,6 @@ import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.service.deployment.DeploymentContext;
 import io.flowset.control.service.deployment.DeploymentService;
 import io.flowset.control.view.AbstractResourceDeploymentView;
-import io.flowset.control.view.main.MainView;
 import io.flowset.uikit.component.dmnviewer.event.DmnXmlImportCompleteEvent;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 
 import static io.flowset.control.util.BpmParseUtil.parseDecisionsDefinitionsJson;
 
-@Route(value = "bpm/decision-deployment", layout = MainView.class)
+@Route(value = "bpm/decision-deployment", layout = DefaultMainViewParent.class)
 @ViewController("bpm_DecisionDeploymentView")
 @ViewDescriptor("decision-deployment-view.xml")
 @Slf4j

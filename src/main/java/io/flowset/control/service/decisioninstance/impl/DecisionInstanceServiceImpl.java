@@ -1,6 +1,7 @@
 package io.flowset.control.service.decisioninstance.impl;
 
 import feign.utils.ExceptionUtils;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.jmix.core.Sort;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
@@ -18,8 +19,7 @@ import org.springframework.stereotype.Service;
 import java.net.ConnectException;
 import java.util.List;
 
-import static io.flowset.control.util.QueryUtils.addDecisionInstanceFilters;
-import static io.flowset.control.util.QueryUtils.addDecisionInstanceSort;
+import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_DecisionInstanceService")
 @Slf4j
@@ -27,11 +27,13 @@ public class DecisionInstanceServiceImpl implements DecisionInstanceService {
 
     protected final HistoryApiClient historyApiClient;
     protected final DecisionInstanceMapper decisionInstanceMapper;
+    protected final EngineTenantProvider tenantProvider;
 
     public DecisionInstanceServiceImpl(HistoryApiClient historyApiClient,
-                                       DecisionInstanceMapper decisionInstanceMapper) {
+                                       DecisionInstanceMapper decisionInstanceMapper, EngineTenantProvider tenantProvider) {
         this.historyApiClient = historyApiClient;
         this.decisionInstanceMapper = decisionInstanceMapper;
+        this.tenantProvider = tenantProvider;
     }
 
     @Override
@@ -114,6 +116,8 @@ public class DecisionInstanceServiceImpl implements DecisionInstanceService {
                                                                                 @Nullable Sort sort) {
         HistoricDecisionInstanceQuery historicDecisionInstanceQuery =
                 new HistoricDecisionInstanceQueryImpl(historyApiClient);
+        String tenantId = tenantProvider.getCurrentUserTenantId();
+        addIfNotNull(tenantId, historicDecisionInstanceQuery::tenantIdIn);
         addDecisionInstanceFilters(historicDecisionInstanceQuery, filter);
         addDecisionInstanceSort(historicDecisionInstanceQuery, sort);
         return historicDecisionInstanceQuery;

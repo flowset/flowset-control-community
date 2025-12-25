@@ -155,7 +155,7 @@ public class MainView extends StandardMainView {
         if (currentView == this) {
             refreshDashboard();
         } else {
-            viewNavigationSupport.navigate(MainView.class);
+            viewNavigationSupport.navigate(getClass());
         }
 
     }

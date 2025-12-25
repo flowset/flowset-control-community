@@ -6,7 +6,6 @@
 package io.flowset.control.view.user;
 
 import io.flowset.control.entity.User;
-import io.flowset.control.view.main.MainView;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.Route;
@@ -20,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
 
-@Route(value = "users/:id", layout = MainView.class)
+@Route(value = "users/:id", layout = DefaultMainViewParent.class)
 @ViewController("User.detail")
 @ViewDescriptor("user-detail-view.xml")
 @EditedEntityContainer("userDc")

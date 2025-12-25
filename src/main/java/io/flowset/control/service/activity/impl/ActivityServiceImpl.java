@@ -18,6 +18,7 @@ import io.flowset.control.mapper.ActivityMapper;
 import io.flowset.control.mapper.HistoryActivityMapper;
 import io.flowset.control.service.activity.ActivityLoadContext;
 import io.flowset.control.service.activity.ActivityService;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.camunda.community.rest.client.api.HistoryApiClient;
@@ -46,23 +47,27 @@ public class ActivityServiceImpl implements ActivityService {
     protected final HistoryApiClient historyApiClient;
     protected final ActivityMapper activityMapper;
     protected final ProcessInstanceApiClient processInstanceApi;
+    protected final EngineTenantProvider engineTenantProvider;
     protected final ProcessDefinitionApiClient processDefinitionApi;
+
 
     public ActivityServiceImpl(HistoryActivityMapper historyActivityMapper,
                                HistoryApiClient historyApiClient,
                                ActivityMapper activityMapper,
                                ProcessInstanceApiClient processInstanceApi,
+                               EngineTenantProvider engineTenantProvider,
                                ProcessDefinitionApiClient processDefinitionApi) {
         this.historyActivityMapper = historyActivityMapper;
         this.historyApiClient = historyApiClient;
         this.activityMapper = activityMapper;
         this.processInstanceApi = processInstanceApi;
         this.processDefinitionApi = processDefinitionApi;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
     public List<ActivityShortData> findRunningActivities(String processInstanceId) {
-        HistoricActivityInstanceQueryDto queryDto = new HistoricActivityInstanceQueryDto()
+        HistoricActivityInstanceQueryDto queryDto = createHistoricActivityInstanceQueryDto()
                 .processInstanceId(processInstanceId)
                 .unfinished(true);
 
@@ -101,7 +106,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<ActivityShortData> findFinishedActivities(String processInstanceId) {
-        HistoricActivityInstanceQueryDto queryDto = new HistoricActivityInstanceQueryDto()
+        HistoricActivityInstanceQueryDto queryDto = createHistoricActivityInstanceQueryDto()
                 .processInstanceId(processInstanceId)
                 .finished(true);
 
@@ -198,13 +203,22 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     protected HistoricActivityInstanceQueryDto createActivityQueryDto(@Nullable ActivityFilter filter) {
-        HistoricActivityInstanceQueryDto queryDto = new HistoricActivityInstanceQueryDto();
+        HistoricActivityInstanceQueryDto queryDto = createHistoricActivityInstanceQueryDto();
 
         if (filter != null) {
             queryDto.setProcessInstanceId(filter.getProcessInstanceId());
         }
 
         return queryDto;
+    }
+
+    protected HistoricActivityInstanceQueryDto createHistoricActivityInstanceQueryDto() {
+        HistoricActivityInstanceQueryDto historicActivityInstanceQueryDto = new HistoricActivityInstanceQueryDto();
+        String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
+        if (currentUserTenantId != null) {
+            historicActivityInstanceQueryDto.addTenantIdInItem(currentUserTenantId);
+        }
+        return historicActivityInstanceQueryDto;
     }
 
     protected void addSortOptions(Sort sort, HistoricActivityInstanceQueryDto queryDto) {

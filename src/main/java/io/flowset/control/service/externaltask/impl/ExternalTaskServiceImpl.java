@@ -10,6 +10,7 @@ import io.jmix.core.Sort;
 import io.flowset.control.entity.ExternalTaskData;
 import io.flowset.control.entity.filter.ExternalTaskFilter;
 import io.flowset.control.mapper.ExternalTaskMapper;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.externaltask.ExternalTaskLoadContext;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static io.flowset.control.util.QueryUtils.addIfStringNotEmpty;
-import static io.flowset.control.util.QueryUtils.addSortDirection;
+import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_ExternalTaskService")
 @Slf4j
@@ -35,19 +35,23 @@ public class ExternalTaskServiceImpl implements ExternalTaskService {
     protected final ExternalTaskApiClient externalTaskApiClient;
     protected final ExternalTaskMapper externalTaskMapper;
 
+    private final EngineTenantProvider engineTenantProvider;
+
     public ExternalTaskServiceImpl(RemoteExternalTaskService remoteExternalTaskService,
                                    HistoryApiClient historyApiClient,
                                    ExternalTaskApiClient externalTaskApiClient,
-                                   ExternalTaskMapper externalTaskMapper) {
+                                   ExternalTaskMapper externalTaskMapper,
+                                   EngineTenantProvider engineTenantProvider) {
         this.remoteExternalTaskService = remoteExternalTaskService;
         this.historyApiClient = historyApiClient;
         this.externalTaskApiClient = externalTaskApiClient;
         this.externalTaskMapper = externalTaskMapper;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
     public List<ExternalTaskData> findRunningTasks(ExternalTaskLoadContext loadContext) {
-        ExternalTaskQuery externalTaskQuery = remoteExternalTaskService.createExternalTaskQuery();
+        ExternalTaskQuery externalTaskQuery = createExternalTaskQuery();
         addSort(loadContext.getSort(), externalTaskQuery);
         addFilters(loadContext.getFilter(), externalTaskQuery);
 
@@ -65,7 +69,7 @@ public class ExternalTaskServiceImpl implements ExternalTaskService {
 
     @Override
     public long getRunningTasksCount(@Nullable ExternalTaskFilter filter) {
-        ExternalTaskQuery externalTaskQuery = remoteExternalTaskService.createExternalTaskQuery();
+        ExternalTaskQuery externalTaskQuery = createExternalTaskQuery();
         addFilters(filter, externalTaskQuery);
         return externalTaskQuery.count();
     }
@@ -98,6 +102,14 @@ public class ExternalTaskServiceImpl implements ExternalTaskService {
             return Strings.nullToEmpty(response.getBody());
         }
         return "";
+    }
+
+    protected ExternalTaskQuery createExternalTaskQuery() {
+        ExternalTaskQuery externalTaskQuery = remoteExternalTaskService.createExternalTaskQuery();
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
+
+        addIfNotNull(tenantId, externalTaskQuery::tenantIdIn);
+        return externalTaskQuery;
     }
 
     protected void addFilters(@Nullable ExternalTaskFilter filter, ExternalTaskQuery externalTaskQuery) {

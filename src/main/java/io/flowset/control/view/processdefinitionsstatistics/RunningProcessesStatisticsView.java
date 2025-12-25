@@ -10,7 +10,6 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
-import io.flowset.control.view.main.MainView;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -20,7 +19,7 @@ import io.jmix.flowui.view.*;
 import java.util.Collections;
 import java.util.List;
 
-@Route(value = "running-processes-statistics", layout = MainView.class)
+@Route(value = "running-processes-statistics", layout = DefaultMainViewParent.class)
 @ViewController("RunningProcessesStatisticsView")
 @ViewDescriptor("running-processes-statistics-view.xml")
 @DialogMode(width = "37em", maxHeight = "30em")

@@ -14,6 +14,7 @@ import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.IncidentMapper;
+import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.incident.IncidentLoadContext;
 import io.flowset.control.service.incident.IncidentService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,14 +43,16 @@ public class IncidentServiceImpl implements IncidentService {
     protected final HistoryApiClient historyApiClient;
     protected final IncidentMapper incidentMapper;
     protected final Messages messages;
+    protected final EngineTenantProvider engineTenantProvider;
 
     public IncidentServiceImpl(IncidentApiClient incidentApiClient,
                                HistoryApiClient historyApiClient,
-                               IncidentMapper incidentMapper, Messages messages) {
+                               IncidentMapper incidentMapper, Messages messages, EngineTenantProvider engineTenantProvider) {
         this.incidentApiClient = incidentApiClient;
         this.historyApiClient = historyApiClient;
         this.incidentMapper = incidentMapper;
         this.messages = messages;
+        this.engineTenantProvider = engineTenantProvider;
     }
 
     @Override
@@ -78,6 +81,7 @@ public class IncidentServiceImpl implements IncidentService {
     @Override
     public List<IncidentData> findRuntimeIncidents(IncidentLoadContext loadContext) {
         try {
+            String tenantId = engineTenantProvider.getCurrentUserTenantId();
             String sortBy = getRuntimeIncidentSortProperty(loadContext.getSort());
             String sortOrder = null;
             if (sortBy != null) {
@@ -89,7 +93,7 @@ public class IncidentServiceImpl implements IncidentService {
                     getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
                     getProcessDefinitionKey(filter), getProcessInstanceId(filter), null, getTimestampBefore(filter),
                     getTimestampAfter(filter), getActivityId(filter),
-                    null, null, null, null, null, null,
+                    null, null, null, null, tenantId, null,
                     sortBy, sortOrder, loadContext.getFirstResult(), loadContext.getMaxResults()
             );
 
@@ -145,11 +149,12 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public long getRuntimeIncidentCount(IncidentFilter filter) {
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
         ResponseEntity<CountResultDto> response = incidentApiClient.getIncidentsCount(
                 getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
                 getProcessDefinitionKey(filter), getProcessInstanceId(filter), null, getTimestampBefore(filter),
                 getTimestampAfter(filter), getActivityId(filter),
-                null, null, null, null, null, null
+                null, null, null, null, tenantId, null
         );
         if (response.getStatusCode().is2xxSuccessful()) {
             return getCountResult(response.getBody());
@@ -160,6 +165,7 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public List<HistoricIncidentData> findHistoricIncidents(IncidentLoadContext loadContext) {
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
         String sortBy = getHistoryIncidentSortProperty(loadContext.getSort());
         String sortOrder = null;
         if (sortBy != null) {
@@ -171,7 +177,7 @@ public class IncidentServiceImpl implements IncidentService {
                 getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
                 getProcessDefinitionKey(filter), null, getProcessInstanceId(filter), null, null,
                 null, null, null, getActivityId(filter),
-                null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, tenantId, null, null,
                 sortBy, sortOrder, loadContext.getFirstResult(), loadContext.getMaxResults()
         );
 
@@ -189,11 +195,12 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public long getHistoricIncidentCount(@Nullable IncidentFilter filter) {
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
         ResponseEntity<CountResultDto> response = historyApiClient.getHistoricIncidentsCount(
                 getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
                 getProcessDefinitionKey(filter), null, getProcessInstanceId(filter), null, null,
                 null, null, null, getActivityId(filter),
-                null, null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, tenantId, null, null
         );
 
         if (response.getStatusCode().is2xxSuccessful()) {
@@ -206,10 +213,11 @@ public class IncidentServiceImpl implements IncidentService {
     @Override
     @Nullable
     public HistoricIncidentData findHistoricIncidentById(String id) {
+        String tenantId = engineTenantProvider.getCurrentUserTenantId();
         ResponseEntity<List<HistoricIncidentDto>> response = historyApiClient.getHistoricIncidents(id, null, null, null, null,
                 null, null, null, null, null,
                 null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, tenantId, null, null,
                 null, null, 0, 1);
 
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {

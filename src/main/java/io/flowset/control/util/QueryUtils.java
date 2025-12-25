@@ -22,6 +22,8 @@ import org.camunda.bpm.engine.repository.ProcessDefinitionQuery;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.community.rest.client.model.HistoricProcessInstanceQueryDto;
 import org.camunda.community.rest.client.model.HistoricProcessInstanceQueryDtoSortingInner;
+import org.camunda.community.rest.client.model.ProcessInstanceQueryDto;
+import org.camunda.community.rest.client.model.TaskQueryDto;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -31,6 +33,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class QueryUtils {
 
@@ -313,4 +316,31 @@ public class QueryUtils {
             query.desc();
         }
     }
+
+    public static void addTenant(ProcessDefinitionQuery processDefinitionQuery, Supplier<String> tenantIdSupplier) {
+        String tenantId = tenantIdSupplier.get();
+        addIfNotNull(tenantId, processDefinitionQuery::tenantIdIn);
+    }
+
+    public static void addTenant(ProcessInstanceQueryDto processInstanceQuery, Supplier<String> tenantIdSupplier) {
+        String tenantId = tenantIdSupplier.get();
+        addSingleListValueIfNotEmpty(tenantId, processInstanceQuery::tenantIdIn);
+    }
+
+    public static void addTenant(TaskQueryDto taskQueryDto, Supplier<String> tenantIdSupplier) {
+        String tenantId = tenantIdSupplier.get();
+
+        addSingleListValueIfNotEmpty(tenantId, taskQueryDto::tenantIdIn);
+    }
+    public static void addTenant(HistoricProcessInstanceQueryDto historicTaskInstanceQueryDto, Supplier<String> tenantIdSupplier) {
+        String tenantId = tenantIdSupplier.get();
+        addSingleListValueIfNotEmpty(tenantId, historicTaskInstanceQueryDto::tenantIdIn);
+    }
+
+    public static void addSingleListValueIfNotEmpty(String filterValue, Consumer<List<String>> filterValueConsumer) {
+        if (StringUtils.hasText(filterValue)) {
+            filterValueConsumer.accept(List.of(filterValue));
+        }
+    }
+
 }

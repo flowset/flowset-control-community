@@ -13,7 +13,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.view.alltasks.AllTasksView;
-import io.flowset.control.view.main.MainView;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.jmix.core.LoadContext;
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-@Route(value = "bpm/user-task/:id", layout = MainView.class)
+@Route(value = "bpm/user-task/:id", layout = DefaultMainViewParent.class)
 @ViewController("bpm_UserTaskData.detail")
 @ViewDescriptor("user-task-data-detail-view.xml")
 @EditedEntityContainer("userTaskDataDc")

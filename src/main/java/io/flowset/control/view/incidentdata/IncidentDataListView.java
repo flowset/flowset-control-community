@@ -43,7 +43,6 @@ import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.incidentdata.filter.*;
-import io.flowset.control.view.main.MainView;
 import io.flowset.control.view.util.ComponentHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +56,7 @@ import java.util.function.Function;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @Slf4j
-@Route(value = "bpm/incidents", layout = MainView.class)
+@Route(value = "bpm/incidents", layout = DefaultMainViewParent.class)
 @ViewController("IncidentData.list")
 @ViewDescriptor("incident-data-list-view.xml")
 @LookupComponent("incidentsDataGrid")
