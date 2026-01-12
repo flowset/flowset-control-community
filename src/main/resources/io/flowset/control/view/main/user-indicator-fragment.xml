@@ -6,11 +6,7 @@
 
 <fragment xmlns="http://jmix.io/schema/flowui/fragment">
     <actions>
-        <action id="logout" type="logout">
-            <properties>
-                <property name="icon" value=""/>
-            </properties>
-        </action>
+        <action id="logout" type="logout"/>
     </actions>
     <content>
         <hbox id="root" expand="userIndicatorBox" padding="false" width="100%" themeNames="spacing-s" minWidth="0">

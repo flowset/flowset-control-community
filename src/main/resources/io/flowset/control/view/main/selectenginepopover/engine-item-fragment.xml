@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="bpmEngineDc" class="io.flowset.control.entity.engine.BpmEngine"/>
+    </data>
+    <content>
+        <hbox id="root" padding="false" classNames="gap-xs overflow-hidden overflow-ellipsis">
+            <vbox padding="false" classNames="gap-xs pl-s">
+                <span id="engineName" classNames="text-body font-semibold"/>
+                <hbox expand="urlField" padding="false" classNames="gap-xs overflow-hidden overflow-ellipsis" alignItems="BASELINE" width="100%">
+                    <fragment id="envField" class="io.flowset.control.view.bpmengine.EngineEnvironmentBadgeFragment"/>
+                    <span id="urlField" dataContainer="bpmEngineDc" property="baseUrl" minWidth="0"
+                          classNames="text-2xs text-secondary break-word"/>
+                </hbox>
+            </vbox>
+        </hbox>
+    </content>
+</fragment>

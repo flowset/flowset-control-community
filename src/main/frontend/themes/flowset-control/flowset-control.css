@@ -17,6 +17,18 @@ html {
     --user-avatar-bg-color: #7EB3C2;
     --menu-group-item-color: #69CE87;
     --side-menu-bg-color: rgb(16, 70, 86);
+
+    --engine-env-badge-prod-color: #9D174D;
+    --engine-env-badge-prod-bg-color: #FCE7F3;
+    --engine-env-badge-prod-border-color: #F472B6;
+
+    --engine-env-badge-qa-color: #0D9488;
+    --engine-env-badge-qa-bg-color:#F0FDFA;
+    --engine-env-badge-qa-border-color: #5EEAD4;
+
+    --engine-env-badge-dev-color: #4B5563;
+    --engine-env-badge-dev-bg-color:#F3F4F6;
+    --engine-env-badge-dev-border-color: #9CA3AF;
 }
 
 [part="toggle"] {
@@ -73,4 +85,8 @@ vaadin-button[theme~='badge'][theme~='has-icon'] {
 vaadin-button[theme~='badge'][theme~='has-icon'] vaadin-icon {
     margin-left: 0;
     margin-block: 0;
+}
+
+.break-word {
+    word-break: break-word;
 }

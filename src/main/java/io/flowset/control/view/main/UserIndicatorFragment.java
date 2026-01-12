@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.jmix.core.security.UserRepository;
 import io.jmix.core.usersubstitution.CurrentUserSubstitution;
 import io.jmix.core.usersubstitution.event.UiUserSubstitutionsChangedEvent;
+import io.jmix.flowui.action.security.LogoutAction;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.main.JmixUserIndicator;
 import io.jmix.flowui.fragment.Fragment;
@@ -48,9 +49,13 @@ public class UserIndicatorFragment extends Fragment<HorizontalLayout> {
     protected Span emailField;
     @ViewComponent
     protected JmixUserIndicator userIndicator;
+    @ViewComponent
+    protected LogoutAction logout;
 
     @Subscribe(target = Target.HOST_CONTROLLER)
     protected void onHostInit(final View.InitEvent event) {
+        logout.setIcon(null);
+
         updateUserInfo();
         updateUserIndicatorControl();
     }

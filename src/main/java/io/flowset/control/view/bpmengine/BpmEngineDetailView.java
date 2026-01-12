@@ -9,11 +9,13 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import io.flowset.control.entity.engine.EnvironmentType;
 import io.jmix.core.EntityStates;
 import io.jmix.core.SaveContext;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
+import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.radiobuttongroup.JmixRadioButtonGroup;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
@@ -61,11 +63,14 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     protected TestEngineConnectionAction testConnectionAction;
     @ViewComponent
     protected TypedTextField<String> baseUrlField;
+    @ViewComponent
+    protected JmixComboBox<EnvironmentType> environmentTypeField;
 
     @Subscribe
     public void onInitEntity(final InitEntityEvent<BpmEngine> event) {
         BpmEngine entity = event.getEntity();
         entity.setType(EngineType.CAMUNDA_7);
+        entity.setEnvironmentType(EnvironmentType.LOCAL);
 
         boolean engineExists = engineService.engineExists();
         if (!engineExists) {

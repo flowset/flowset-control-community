@@ -7,14 +7,19 @@
                   class="io.flowset.control.entity.engine.BpmEngine"/>
     </data>
     <content>
-        <flexLayout classNames="ml-auto pr-l gap-s" alignItems="CENTER">
-            <span id="engineStateBadge" themeNames="badge pill contrast">
-                <spinner id="statusSpinner" classNames="pr-xs" visible="false"/>
-                <icon id="successStatusIcon" icon="CHECK_CIRCLE" classNames="p-xs" visible="false"/>
-                <icon id="warningStatusIcon" icon="WARNING" classNames="p-xs" visible="false"/>
-                <div id="connectionStatusText" classNames="inline-flex gap-xs"/>
-            </span>
-            <button id="viewEngineConfigBtn" icon="lumo:edit" themeNames="contrast tertiary-inline"/>
-        </flexLayout>
+        <hbox padding="false" themeNames="spacing-s" classNames="ml-auto pr-xs mr-l" alignItems="BASELINE">
+            <flexLayout classNames="gap-s rounded-l border-contrast-30 border box-border pt-xs pb-xs" alignItems="CENTER" height="min-content">
+                <hbox padding="false" id="engineStateBadge" classNames="gap-xs items-baseline">
+                    <spinner id="statusSpinner" classNames="pr-xs" visible="false"/>
+                    <icon id="warningStatusIcon" icon="WARNING" classNames="p-xs" visible="false"/>
+                    <span id="successStatusBadge" themeNames="badge pill success small" visible="false"/>
+                    <span id="warningStatusBadge" themeNames="badge pill error small" visible="false"/>
+                    <div id="connectionStatusText" classNames="inline-flex gap-xs font-semibold text-body"/>
+                </hbox>
+                <fragment id="envBadge" class="io.flowset.control.view.bpmengine.EngineEnvironmentBadgeFragment"/>
+                <button id="viewEngineConfigBtn" icon="ANGLE_DOWN" themeNames="contrast tertiary-inline"/>
+            </flexLayout>
+        </hbox>
+
     </content>
 </fragment>

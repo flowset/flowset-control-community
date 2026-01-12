@@ -50,6 +50,8 @@
                     <button id="copyBaseUrlBtn" icon="COPY" themeNames="tertiary-inline"/>
                 </suffix>
             </textField>
+            <textField id="environmentTypeField" readOnly="true" dataContainer="engineDc" property="environmentType"
+                       label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType"/>
             <h4 text="msg://authentication"/>
             <textField id="authenticationTypeField" readOnly="true"
                        label="msg://authType"/>

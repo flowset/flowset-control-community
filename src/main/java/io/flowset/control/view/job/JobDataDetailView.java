@@ -39,6 +39,8 @@ import io.flowset.control.service.job.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 
+import java.util.Objects;
+
 @Route(value = "bpm/job/:id", layout = DefaultMainViewParent.class)
 @ViewController("JobData.detail")
 @ViewDescriptor("job-data-detail-view.xml")
@@ -174,7 +176,7 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
 
     @Install(to = "jobDataDl", target = Target.DATA_LOADER)
     protected JobData jobDataDlLoadDelegate(final LoadContext<JobData> loadContext) {
-        return jobService.findById(loadContext.getId().toString());
+        return jobService.findById(Objects.requireNonNull(loadContext.getId()).toString());
     }
 
     protected void openView(Class<? extends StandardView> viewClass, RouteParameters routeParameters) {
