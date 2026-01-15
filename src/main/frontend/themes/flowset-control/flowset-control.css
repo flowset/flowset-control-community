@@ -53,6 +53,11 @@ html {
     overflow: hidden;
 }
 
+.empty-grid-icon {
+    width: 2em;
+    height: 2em;
+}
+
 vaadin-grid::part(multiline-text-cell) {
     white-space: pre-wrap;
 }

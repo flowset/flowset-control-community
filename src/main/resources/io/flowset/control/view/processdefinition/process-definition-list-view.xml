@@ -91,6 +91,9 @@
                         flexGrow="1"/>
                 <column key="actions" sortable="false" editable="false" autoWidth="true" flexGrow="0"/>
             </columns>
+            <emptyStateComponent>
+                <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>
+            </emptyStateComponent>
         </dataGrid>
     </layout>
 </view>

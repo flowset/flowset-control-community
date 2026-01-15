@@ -16,7 +16,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.flowset.control.view.util.ComponentHelper;
+import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -50,7 +50,7 @@ import java.util.function.Function;
 @ViewDescriptor("process-instance-list-view.xml")
 @LookupComponent("processInstancesGrid")
 @DialogMode(width = "50em", height = "38.5em")
-public class ProcessInstanceListView extends StandardListView<ProcessInstanceData> {
+public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<ProcessInstanceData> {
 
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -67,8 +67,6 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
     protected ProcessInstanceService processInstanceService;
     @Autowired
     protected ProcessDefinitionService processDefinitionService;
-    @Autowired
-    protected ComponentHelper componentHelper;
 
     @ViewComponent
     protected CollectionContainer<ProcessInstanceData> processInstancesDc;
@@ -103,7 +101,7 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
         initDataGridHeaderRow();
         setDefaultSort();
         urlQueryParameters.registerBinder(new ProcessInstanceListParamBinder(modeButtonsGroup, processInstanceFilterDc,
-                processInstancesDl, processInstancesGrid));
+                this::startLoadData, processInstancesGrid));
     }
 
     protected void setDefaultSort() {
@@ -159,7 +157,7 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
                 .withViewConfigurer(view -> view.setProcessInstances(processInstancesGrid.getSelectedItems()))
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        processInstancesDl.load();
+                      startLoadData();
                     }
                 })
                 .build()
@@ -174,7 +172,7 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
         DialogWindow<BulkActivateProcessInstanceView> dialogWindow = dialogWindows.view(this, BulkActivateProcessInstanceView.class)
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        processInstancesDl.load();
+                        startLoadData();
                     }
                 })
                 .build();
@@ -192,7 +190,7 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
         DialogWindow<BulkSuspendProcessInstanceView> dialogWindow = dialogWindows.view(this, BulkSuspendProcessInstanceView.class)
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        processInstancesDl.load();
+                        startLoadData();
                     }
                 })
                 .build();
@@ -218,17 +216,17 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
                 .setLoadIncidents(true);
 
         if (query != null) {
-            context = context.setFirstResult(query.getFirstResult())
+            context.setFirstResult(query.getFirstResult())
                     .setMaxResults(query.getMaxResults())
                     .setSort(query.getSort());
         }
 
-        return processInstanceService.findAllHistoricInstances(context);
+        return loadItemsWithStateHandling(() -> processInstanceService.findAllHistoricInstances(context));
     }
 
     @Subscribe("processInstancesGrid")
     public void onProcessInstancesGridSort(final SortEvent<DataGrid<ProcessInstanceData>, GridSortOrder<DataGrid<ProcessInstanceData>>> event) {
-        processInstancesDl.load();
+        startLoadData();
     }
 
     @Subscribe("processInstancesGrid.view")
@@ -260,7 +258,7 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
 
     @Subscribe(id = "processInstanceFilterDc", target = Target.DATA_CONTAINER)
     public void onProcessInstanceFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<ProcessInstanceFilter> event) {
-        processInstancesDl.load();
+        startLoadData();
     }
 
     @Supply(to = "processInstancesGrid.actions", subject = "renderer")
@@ -288,6 +286,8 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
         processInstanceFilter.setUnfinished(true);
         processInstanceFilterDc.setItem(processInstanceFilter);
     }
+
+
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected BusinessKeyHeaderFilter createBusinessKeyColumnFilter(DataGridColumn<ProcessInstanceData> businessKeyColumn) {
@@ -325,5 +325,15 @@ public class ProcessInstanceListView extends StandardListView<ProcessInstanceDat
         BeanUtil.autowireContext(applicationContext, filterComponent);
         HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
         headerCell.setComponent(filterComponent);
+    }
+
+    @Override
+    protected void loadData() {
+        processInstancesDl.load();
+    }
+
+    @Subscribe("processInstancesGrid.refresh")
+    public void onProcessInstancesGridRefresh(final ActionPerformedEvent event) {
+        startLoadData();
     }
 }

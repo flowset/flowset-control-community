@@ -14,7 +14,6 @@ import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.facet.urlqueryparameters.AbstractUrlQueryParametersBinder;
 import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
@@ -34,17 +33,17 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
     private static final String STATE_COLUMN_KEY = "state";
 
     private final InstanceContainer<ProcessInstanceFilter> filterDc;
-    private final CollectionLoader<ProcessInstanceData> processInstanceDl;
+    private final Runnable loadDelegate;
     private final ProcessInstanceStateHeaderFilter stateHeaderFilter;
     private final List<JmixButton> modeButtons;
 
     public ProcessInstanceListParamBinder(HorizontalLayout buttonsPanel,
                                           InstanceContainer<ProcessInstanceFilter> filterDc,
-                                          CollectionLoader<ProcessInstanceData> processInstanceDl,
+                                          Runnable loadDelegate,
                                           DataGrid<ProcessInstanceData> dataGrid) {
 
         this.filterDc = filterDc;
-        this.processInstanceDl = processInstanceDl;
+        this.loadDelegate = loadDelegate;
         this.stateHeaderFilter = Optional.ofNullable(dataGrid.getColumnByKey(STATE_COLUMN_KEY))
                 .map(column -> (ProcessInstanceStateHeaderFilter) column.getHeaderComponent())
                 .orElse(null);
@@ -123,7 +122,7 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
         if (mode == null) {
             this.filterDc.getItem().setState(null);
             this.filterDc.getItem().setUnfinished(true);
-            this.processInstanceDl.load();
+            this.loadDelegate.run();
             return;
         }
 
@@ -131,17 +130,17 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
             case ALL -> {
                 this.filterDc.getItem().setState(null);
                 this.filterDc.getItem().setUnfinished(null);
-                this.processInstanceDl.load();
+                this.loadDelegate.run();
             }
             case COMPLETED -> {
                 this.filterDc.getItem().setState(ProcessInstanceState.COMPLETED);
                 this.filterDc.getItem().setUnfinished(null);
-                this.processInstanceDl.load();
+                this.loadDelegate.run();
             }
             default -> {
                 this.filterDc.getItem().setState(null);
                 this.filterDc.getItem().setUnfinished(true);
-                this.processInstanceDl.load();
+                this.loadDelegate.run();
             }
         }
     }

@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.processinstance;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.variable.VariableInstanceData;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.lang.Nullable;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -56,7 +56,7 @@ public class Camunda7ProcessInstanceStartTest extends AbstractCamunda7Integratio
     DataManager dataManager;
 
     @Test
-    @DisplayName("ConnectionException is thrown on process instance start if selected engine is not available")
+    @DisplayName("EngineConnectionFailedException is thrown on process instance start if selected engine is not available")
     void givenDeployedProcessAndNotAvailableEngine_whenStartByProcessId_thenStartedInstanceDataReturned() {
         //given
         DeploymentResultDto deploymentResultDto = camundaRestTestHelper.createDeployment(camunda7, "test_support/vacationApproval.bpmn");
@@ -68,7 +68,7 @@ public class Camunda7ProcessInstanceStartTest extends AbstractCamunda7Integratio
 
         //when and then
         assertThatThrownBy(() -> processInstanceService.startProcessByDefinitionId(processId, variables, null))
-                .hasCauseInstanceOf(ConnectException.class);
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test

@@ -14,7 +14,9 @@
         <instance id="userTaskFilterDc" class="io.flowset.control.entity.filter.UserTaskFilter"/>
     </data>
     <facets>
-        <dataLoadCoordinator auto="true"/>
+        <urlQueryParameters>
+            <pagination component="tasksPagination"/>
+        </urlQueryParameters>
     </facets>
     <actions>
         <action id="applyFilter" icon="SEARCH" text="msg:///actions.Apply"
@@ -110,6 +112,9 @@
                         <column property="assignee" autoWidth="true"/>
                         <column key="actions" autoWidth="true" sortable="false" flexGrow="0"/>
                     </columns>
+                    <emptyStateComponent>
+                        <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>
+                    </emptyStateComponent>
                 </dataGrid>
             </vbox>
         </hbox>

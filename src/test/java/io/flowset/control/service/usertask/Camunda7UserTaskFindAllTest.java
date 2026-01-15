@@ -6,6 +6,7 @@
 package io.flowset.control.service.usertask;
 
 import io.flowset.control.entity.UserTaskData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -27,8 +28,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -47,8 +47,8 @@ public class Camunda7UserTaskFindAllTest extends AbstractCamunda7IntegrationTest
     CamundaRestTestHelper camundaRestTestHelper;
 
     @Test
-    @DisplayName("Empty list with tasks is returned if selected engine is not available")
-    void givenEmptyLoadContextAndNotAvailableEngine_whenFindRuntimeTasks_thenNoUserTasksReturned() {
+    @DisplayName("EngineConnectionFailedException thrown when load runtime user tasks if selected engine is not available")
+    void givenEmptyLoadContextAndNotAvailableEngine_whenFindRuntimeTasks_thenExceptionThrown() {
         //given
         CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
         camundaSampleDataManager.deploy("test_support/testUserTaskWithoutAssignee.bpmn")
@@ -60,11 +60,9 @@ public class Camunda7UserTaskFindAllTest extends AbstractCamunda7IntegrationTest
 
         UserTaskLoadContext userTaskLoadContext = new UserTaskLoadContext();
 
-        //when
-        List<UserTaskData> foundUserTasks = userTaskService.findRuntimeTasks(userTaskLoadContext);
-
-        //then
-        assertThat(foundUserTasks).isEmpty();
+        //when and then
+        assertThatThrownBy(() -> userTaskService.findRuntimeTasks(userTaskLoadContext))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test

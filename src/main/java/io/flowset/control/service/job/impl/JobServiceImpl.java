@@ -11,6 +11,7 @@ import feign.utils.ExceptionUtils;
 import io.flowset.control.entity.filter.JobFilter;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.JobMapper;
 import io.flowset.control.service.client.EngineRestClient;
@@ -28,11 +29,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 
 @Service("control_JobService")
 @Slf4j
@@ -80,9 +81,9 @@ public class JobServiceImpl implements JobService {
                 log.warn("Unable to load runtime jobs because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load runtime jobs because of connection error: ", e);
-                return List.of();
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -90,14 +91,24 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public long getCount(@Nullable JobFilter jobFilter) {
-        JobQueryDto jobQueryDto = createJobQueryDto(jobFilter);
+        try {
+            JobQueryDto jobQueryDto = createJobQueryDto(jobFilter);
 
-        ResponseEntity<CountResultDto> jobsResponse = jobApiClient.queryJobsCount(jobQueryDto);
-        if (jobsResponse.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(jobsResponse.getBody());
+            ResponseEntity<CountResultDto> jobsResponse = jobApiClient.queryJobsCount(jobQueryDto);
+            if (jobsResponse.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(jobsResponse.getBody());
+            }
+            log.error("Error on loading runtime jobs count: query {}, status code {}", jobQueryDto, jobsResponse.getStatusCode());
+            return 0;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable get job count because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+
+            throw e;
         }
-        log.error("Error on loading runtime jobs count: query {}, status code {}", jobQueryDto, jobsResponse.getStatusCode());
-        return 0;
     }
 
     @Override
@@ -115,9 +126,9 @@ public class JobServiceImpl implements JobService {
                 log.warn("Unable to load runtime job by id {} because BPM engine not selected", jobId);
                 return null;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load runtime job by id {} because of connection error: ", jobId, e);
-                return null;
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -137,36 +148,63 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void setJobRetries(String jobId, int retries) {
-        ResponseEntity<Void> response = jobApiClient.setJobRetries(jobId, new JobRetriesDto().retries(retries));
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("Error on loading update retries to {} for job with id {}, status code {}", retries,
-                    jobId, response.getStatusCode());
-        } else {
-            log.debug("Update retries count for job {}. New value: {}", jobId, retries);
+        try {
+            ResponseEntity<Void> response = jobApiClient.setJobRetries(jobId, new JobRetriesDto().retries(retries));
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("Error on loading update retries to {} for job with id {}, status code {}", retries,
+                        jobId, response.getStatusCode());
+            } else {
+                log.debug("Update retries count for job {}. New value: {}", jobId, retries);
+            }
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable update retries for job '{}' because of connection error: ",  jobId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
     }
 
     @Override
     public void setJobRetriesAsync(List<String> jobIds, int retries) {
-        ResponseEntity<BatchDto> response = jobApiClient.setJobRetriesAsyncOperation(new SetJobRetriesDto()
-                .jobIds(jobIds)
-                .retries(retries));
+        try {
+            ResponseEntity<BatchDto> response = jobApiClient.setJobRetriesAsyncOperation(new SetJobRetriesDto()
+                    .jobIds(jobIds)
+                    .retries(retries));
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            log.error("Error on loading update retries to {} for job with ids {}, status code {}", retries,
-                    jobIds, response.getStatusCode());
-        } else {
-            log.debug("Async update retries count for jobs {}. New value: {}", jobIds, retries);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("Error on loading update retries to {} for job with ids {}, status code {}", retries,
+                        jobIds, response.getStatusCode());
+            } else {
+                log.debug("Async update retries count for jobs {}. New value: {}", jobIds, retries);
+            }
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable update job retries because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
     }
 
     @Override
     public String getErrorDetails(String jobId) {
-        ResponseEntity<String> response = engineRestClient.getStacktrace(jobId);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return Strings.nullToEmpty(response.getBody());
+        try {
+            ResponseEntity<String> response = engineRestClient.getStacktrace(jobId);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return Strings.nullToEmpty(response.getBody());
+            }
+            return "";
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable update get job retries details of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-        return "";
     }
 
     @Override
@@ -191,16 +229,34 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void activateJob(String jobId) {
-        SuspensionStateDto suspensionStateDto = new SuspensionStateDto()
-                .suspended(false);
-        jobApiClient.updateJobSuspensionState(jobId, suspensionStateDto);
+        try {
+            SuspensionStateDto suspensionStateDto = new SuspensionStateDto()
+                    .suspended(false);
+            jobApiClient.updateJobSuspensionState(jobId, suspensionStateDto);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable activate job by id {} because of connection error: ", jobId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
     public void suspendJob(String jobId) {
-        SuspensionStateDto suspensionStateDto = new SuspensionStateDto()
-                .suspended(true);
-        jobApiClient.updateJobSuspensionState(jobId, suspensionStateDto);
+        try {
+            SuspensionStateDto suspensionStateDto = new SuspensionStateDto()
+                    .suspended(true);
+            jobApiClient.updateJobSuspensionState(jobId, suspensionStateDto);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable suspend job by id {} because of connection error: ", jobId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     protected JobQueryDto createJobQueryDto(JobFilter filter) {

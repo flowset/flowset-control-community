@@ -34,11 +34,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 
 @Service("control_ActivityService")
 @Slf4j
@@ -186,7 +186,7 @@ public class ActivityServiceImpl implements ActivityService {
                 return null;
             }
 
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable load process definition activity statistics by id '{}' because of connection error: ", processDefinitionId, e);
                 return null;
             }

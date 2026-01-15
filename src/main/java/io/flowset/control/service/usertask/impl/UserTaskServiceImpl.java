@@ -10,6 +10,7 @@ import io.jmix.core.Sort;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.entity.filter.UserTaskFilter;
 import io.flowset.control.entity.variable.VariableInstanceData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.TaskMapper;
 import io.flowset.control.service.engine.EngineTenantProvider;
@@ -26,13 +27,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import static io.flowset.control.service.variable.VariableUtils.createVariableMap;
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_UserTaskService")
@@ -77,9 +78,9 @@ public class UserTaskServiceImpl implements UserTaskService {
                 log.warn("Unable to load user tasks because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load user tasks because of connection error: ", e);
-                return List.of();
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -87,38 +88,65 @@ public class UserTaskServiceImpl implements UserTaskService {
 
     @Override
     public long getRuntimeTasksCount(@Nullable UserTaskFilter filter) {
-        TaskQueryDto taskQueryDto = createTaskQueryDto(filter);
-        ResponseEntity<CountResultDto> tasksResponse = taskApiClient.queryTasksCount(taskQueryDto);
-        if (tasksResponse.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(tasksResponse.getBody());
+        try {
+            TaskQueryDto taskQueryDto = createTaskQueryDto(filter);
+            ResponseEntity<CountResultDto> tasksResponse = taskApiClient.queryTasksCount(taskQueryDto);
+            if (tasksResponse.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(tasksResponse.getBody());
+            }
+            log.error("Error on user task count loading, query: {}, status code: {}", taskQueryDto, tasksResponse.getStatusCode());
+            return 0;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load runtime user tasks count because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-        log.error("Error on user task count loading, query: {}, status code: {}", taskQueryDto, tasksResponse.getStatusCode());
-        return 0;
     }
 
     @Override
     public void completeTaskById(String taskId, Collection<VariableInstanceData> variableInstances) {
         VariableMap variables = createVariableMap(variableInstances);
-        remoteTaskService.complete(taskId, variables);
+        try {
+            remoteTaskService.complete(taskId, variables);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable complete user task by id '{}' because of connection error: ", taskId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
     @Nullable
     public UserTaskData findTaskById(String taskId) {
-        ResponseEntity<List<HistoricTaskInstanceDto>> taskResponse = historyApiClient.queryHistoricTaskInstances(0, 1, new HistoricTaskInstanceQueryDto()
-                .taskId(taskId));
-        if (taskResponse.getStatusCode().is2xxSuccessful()) {
-            List<HistoricTaskInstanceDto> taskInstanceDtoList = taskResponse.getBody();
+        try {
+            ResponseEntity<List<HistoricTaskInstanceDto>> taskResponse = historyApiClient.queryHistoricTaskInstances(0, 1, new HistoricTaskInstanceQueryDto()
+                    .taskId(taskId));
+            if (taskResponse.getStatusCode().is2xxSuccessful()) {
+                List<HistoricTaskInstanceDto> taskInstanceDtoList = taskResponse.getBody();
 
-            if (CollectionUtils.isNotEmpty(taskInstanceDtoList)) {
-                HistoricTaskInstanceDto task = taskInstanceDtoList.get(0);
-                return taskMapper.fromTaskDto(task);
+                if (CollectionUtils.isNotEmpty(taskInstanceDtoList)) {
+                    HistoricTaskInstanceDto task = taskInstanceDtoList.get(0);
+                    return taskMapper.fromTaskDto(task);
+                }
+
+                return null;
             }
-
+            log.error("Error on user task loading, task id: {}, status code: {}", taskId, taskResponse.getStatusCode());
             return null;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load historic user task by id '{}' because of connection error: ", taskId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-        log.error("Error on user task loading, task id: {}, status code: {}", taskId, taskResponse.getStatusCode());
-        return null;
     }
 
     @Override
@@ -143,19 +171,37 @@ public class UserTaskServiceImpl implements UserTaskService {
 
     @Override
     public long getHistoryTasksCount(@Nullable UserTaskFilter filter) {
-        HistoricTaskInstanceQueryDto queryDto = createHistoryTaskQueryDto(filter);
-        ResponseEntity<CountResultDto> response = historyApiClient.queryHistoricTaskInstancesCount(queryDto);
+        try {
+            HistoricTaskInstanceQueryDto queryDto = createHistoryTaskQueryDto(filter);
+            ResponseEntity<CountResultDto> response = historyApiClient.queryHistoricTaskInstancesCount(queryDto);
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(response.getBody());
+            }
+            log.error("Error on historic user task count loading, query: {}, status code: {}", queryDto, response.getStatusCode());
+            return 0;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load historic user tasks count because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-        log.error("Error on historic user task count loading, query: {}, status code: {}", queryDto, response.getStatusCode());
-        return 0;
     }
 
     @Override
     public void setAssignee(String taskId, String newAssignee) {
-        remoteTaskService.setAssignee(taskId, newAssignee);
+        try {
+            remoteTaskService.setAssignee(taskId, newAssignee);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable reassign user task by id '{}' because of connection error: ", taskId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
 

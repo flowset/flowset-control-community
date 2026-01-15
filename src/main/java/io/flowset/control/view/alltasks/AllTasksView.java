@@ -22,7 +22,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.flowset.control.view.util.ComponentHelper;
+import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -71,7 +71,7 @@ import static io.flowset.control.view.util.JsUtils.SET_DEFAULT_TIME_SCRIPT;
 @ViewController("bpm_AllTasksView")
 @ViewDescriptor("all-tasks-view.xml")
 @LookupComponent("tasksDataGrid")
-public class AllTasksView extends StandardListView<UserTaskData> {
+public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> {
 
     protected static final String ASSIGNED_OPTION = "assigned";
     protected static final String UNASSIGNED_OPTION = "unassigned";
@@ -117,8 +117,6 @@ public class AllTasksView extends StandardListView<UserTaskData> {
     protected UiComponents uiComponents;
     @Autowired
     protected Messages messages;
-    @Autowired
-    protected ComponentHelper componentHelper;
     @ViewComponent
     protected JmixDetails assignmentFilters;
     @ViewComponent
@@ -189,7 +187,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
         ProcessDefinitionData value = event.getValue();
         String key = value != null ? value.getKey() : null;
         userTaskFilterDc.getItem().setProcessDefinitionKey(key);
-        tasksDl.load();
+        startLoadData();
     }
 
     @Subscribe(id = "userTaskFilterDc", target = Target.DATA_CONTAINER)
@@ -199,7 +197,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
         boolean notAssignmentFilter = !property.equals("assigned") && !property.equals("unassigned");
         boolean notStateFilter = !property.equals("active") && !property.equals("suspended");
         if (notAssignmentFilter && notStateFilter) { //not to load because the data loading is implemented in the component listeners
-            tasksDl.load();
+            startLoadData();
         }
     }
 
@@ -222,7 +220,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
         dialogWindows.view(this, TaskReassignView.class)
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        tasksDl.load();
+                        startLoadData();
                     }
                 })
                 .withViewConfigurer(taskReassignView -> taskReassignView.setTaskDataList(tasksDataGrid.getSelectedItems()))
@@ -236,7 +234,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
                 .withViewConfigurer(bulkTaskCompleteView -> bulkTaskCompleteView.setUserTasks(tasksDataGrid.getSelectedItems()))
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        tasksDl.load();
+                        startLoadData();
                     }
                 })
                 .build()
@@ -246,7 +244,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
 
     @Subscribe("applyFilter")
     protected void onApplyFilterActionPerformed(ActionPerformedEvent event) {
-        tasksDl.load();
+        startLoadData();
     }
 
     @Subscribe(id = "tasksDl", target = Target.DATA_LOADER)
@@ -264,9 +262,11 @@ public class AllTasksView extends StandardListView<UserTaskData> {
                     .setSort(query.getSort());
         }
 
-        List<UserTaskData> runtimeTasks = userTaskService.findRuntimeTasks(context);
-        loadProcessDefinitions(runtimeTasks);
-        return runtimeTasks;
+        return loadItemsWithStateHandling(() -> {
+            List<UserTaskData> runtimeTasks = userTaskService.findRuntimeTasks(context);
+            loadProcessDefinitions(runtimeTasks);
+            return runtimeTasks;
+        });
     }
 
     @Install(to = "tasksPagination", subject = "totalCountDelegate")
@@ -295,7 +295,12 @@ public class AllTasksView extends StandardListView<UserTaskData> {
         UserTaskFilter userTaskFilter = metadata.create(UserTaskFilter.class);
         userTaskFilterDc.setItem(userTaskFilter);
 
-        tasksDl.load();
+        startLoadData();
+    }
+
+    @Subscribe("tasksDataGrid.refresh")
+    public void onTasksDataGridRefresh(final ActionPerformedEvent event) {
+        startLoadData();
     }
 
     @Install(to = "tasksDataGrid.name", subject = "tooltipGenerator")
@@ -325,7 +330,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
             userTaskFilterDc.getItem().setAssigneeLike(null);
             assigneeField.setEnabled(false);
         }
-        tasksDl.load();
+        startLoadData();
     }
 
     @Subscribe("stateTypeGroup")
@@ -339,7 +344,7 @@ public class AllTasksView extends StandardListView<UserTaskData> {
                 case SUSPENDED -> setSuspendedTasksFilter();
             }
 
-            tasksDl.load();
+            startLoadData();
         }
     }
 
@@ -367,6 +372,11 @@ public class AllTasksView extends StandardListView<UserTaskData> {
                     .open());
             return viewButton;
         });
+    }
+
+    @Override
+    protected void loadData() {
+        tasksDl.load();
     }
 
     protected void setSuspendedTasksFilter() {

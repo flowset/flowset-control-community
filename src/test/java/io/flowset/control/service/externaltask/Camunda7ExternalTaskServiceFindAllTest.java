@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.externaltask;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.ExternalTaskData;
 import io.flowset.control.entity.filter.ExternalTaskFilter;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -126,6 +128,24 @@ public class Camunda7ExternalTaskServiceFindAllTest extends AbstractCamunda7Inte
                     assertThat(externalTaskData.getProcessInstanceId()).isEqualTo(instanceId);
                     assertThat(externalTaskData.getProcessDefinitionKey()).isEqualTo("testExternalTasksListLoad");
                 });
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when find all external tasks if engine is not available")
+    void givenExistingExternalTasksAndNotAvailableEngine_whenFindRunningTasks_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testExternalTasksListLoad.bpmn")
+                .startByKey("testExternalTasksListLoad", 3);
+
+        ExternalTaskLoadContext loadContext = new ExternalTaskLoadContext();
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.findRunningTasks(loadContext))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     static Stream<Arguments> provideValidPaginationData() {

@@ -16,6 +16,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
@@ -48,7 +49,7 @@ import java.util.Set;
 @ViewController("bpm_ProcessDefinition.list")
 @ViewDescriptor("process-definition-list-view.xml")
 @Slf4j
-public class ProcessDefinitionListView extends StandardView {
+public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<ProcessDefinitionData> {
 
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -88,7 +89,6 @@ public class ProcessDefinitionListView extends StandardView {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         initFilter();
-        processDefinitionsDl.load();
     }
 
     @Install(to = "processDefinitionsDl", target = Target.DATA_LOADER)
@@ -98,12 +98,12 @@ public class ProcessDefinitionListView extends StandardView {
 
         ProcessDefinitionLoadContext context = new ProcessDefinitionLoadContext().setFilter(filter);
         if (query != null) {
-            context = context.setFirstResult(query.getFirstResult())
+            context.setFirstResult(query.getFirstResult())
                     .setMaxResults(query.getMaxResults())
                     .setSort(query.getSort());
         }
 
-        return processDefinitionService.findAll(context);
+        return loadItemsWithStateHandling(() -> processDefinitionService.findAll(context));
     }
 
     @Install(to = "processDefinitionsGrid.bulkActivate", subject = "enabledRule")
@@ -120,7 +120,7 @@ public class ProcessDefinitionListView extends StandardView {
         dialogWindows.view(this, BulkActivateProcessDefinitionView.class)
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        processDefinitionsDl.load();
+                        startLoadData();
                     }
                 })
                 .withViewConfigurer(view -> view.setProcessDefinitions(selectedItems))
@@ -135,7 +135,7 @@ public class ProcessDefinitionListView extends StandardView {
 
     @Subscribe(id = "processDefinitionFilterDc", target = Target.DATA_CONTAINER)
     public void onProcessDefinitionFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<ProcessDefinitionFilter> event) {
-        processDefinitionsDl.load();
+        startLoadData();
     }
 
 
@@ -191,7 +191,7 @@ public class ProcessDefinitionListView extends StandardView {
 
     @Subscribe("applyFilter")
     public void onApplyFilter(ActionPerformedEvent event) {
-        processDefinitionsDl.load();
+        startLoadData();
     }
 
     @Supply(to = "processDefinitionsGrid.status", subject = "renderer")
@@ -292,5 +292,15 @@ public class ProcessDefinitionListView extends StandardView {
                 .build()
                 .open());
         return previewBtn;
+    }
+
+    @Override
+    protected void loadData() {
+        processDefinitionsDl.load();
+    }
+
+    @Subscribe("processDefinitionsGrid.refresh")
+    public void onProcessDefinitionsGridRefresh(final ActionPerformedEvent event) {
+        startLoadData();
     }
 }

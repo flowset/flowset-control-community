@@ -16,9 +16,9 @@ import org.camunda.community.rest.client.api.HistoryApiClient;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.List;
 
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_DecisionInstanceService")
@@ -56,11 +56,11 @@ public class DecisionInstanceServiceImpl implements DecisionInstanceService {
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
-                log.warn("Unable to load deployments because BPM engine not selected");
+                log.warn("Unable to load historic DMN instances because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
-                log.error("Unable to load deployments because of connection error: ", e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load  historic DMN instances because of connection error: ", e);
                 return List.of();
             }
             throw e;
@@ -90,7 +90,7 @@ public class DecisionInstanceServiceImpl implements DecisionInstanceService {
                 log.warn("Unable to load deployments because BPM engine not selected");
                 return null;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load deployments because of connection error: ", e);
                 return null;
             }

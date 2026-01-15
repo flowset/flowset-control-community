@@ -13,6 +13,8 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
@@ -236,7 +238,11 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     @Install(to = "processDefinitionDataDl", target = Target.DATA_LOADER)
     protected ProcessDefinitionData loadProcessDefinition(LoadContext<ProcessDefinitionData> loadContext) {
         String id = Objects.requireNonNull(loadContext.getId()).toString();
-        return processDefinitionService.getById(id);
+        try {
+            return processDefinitionService.getById(id);
+        } catch (EngineConnectionFailedException e) {
+            throw new ViewEngineConnectionFailedException(e, this);
+        }
     }
 
     @Subscribe(id = "processInstanceFilterDc", target = Target.DATA_CONTAINER)

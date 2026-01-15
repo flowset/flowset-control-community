@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.usertask;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -99,5 +101,22 @@ public class Camunda7UserTaskSetAssigneeTest extends AbstractCamunda7Integration
         assertThat(foundTask.getId()).isEqualTo(sourceUserTask.getId());
         assertThat(foundTask.getAssignee()).isEqualTo(sourceUserTask.getAssignee());
         assertThat(foundTask.getAssignee()).isEqualTo("admin");
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when set task assignee if engine is not available")
+    void givenActiveTaskAndNotAvailableEngine_whenSetAsignee_thenExceptionThrown() {
+        //given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUserTaskWithAssignee.bpmn")
+                .startByKey("userTaskWithAssignee");
+
+        RuntimeUserTaskDto sourceUserTask = camundaRestTestHelper.findRuntimeUserTasksByProcessKey(camunda7, "userTaskWithAssignee").get(0);
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> userTaskService.setAssignee(sourceUserTask.getId(), "admin"))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 }

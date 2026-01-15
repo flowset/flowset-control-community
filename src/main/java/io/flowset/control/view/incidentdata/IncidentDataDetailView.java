@@ -19,6 +19,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.flowui.*;
@@ -174,7 +176,11 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     protected IncidentData incidentDataDlLoadDelegate(final LoadContext<IncidentData> loadContext) {
         Object id = loadContext.getId();
         if (id != null) {
-            return incidentService.findRuntimeIncidentById(id.toString());
+            try {
+                return incidentService.findRuntimeIncidentById(id.toString());
+            } catch (EngineConnectionFailedException e) {
+                throw new ViewEngineConnectionFailedException(e, this);
+            }
         }
         return null;
     }

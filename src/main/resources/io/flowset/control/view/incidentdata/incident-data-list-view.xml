@@ -47,6 +47,9 @@
                 <column property="type" autoWidth="true" flexGrow="0"/>
                 <column key="actions" sortable="false" autoWidth="true" flexGrow="0"/>
             </columns>
+            <emptyStateComponent>
+                <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>
+            </emptyStateComponent>
         </dataGrid>
         <hbox id="lookupActions" visible="false">
             <button id="selectBtn" action="selectAction"/>

@@ -7,6 +7,7 @@ package io.flowset.control.service.processdefinition.impl;
 
 import feign.FeignException;
 import feign.utils.ExceptionUtils;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.Sort;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
@@ -26,9 +27,9 @@ import org.camunda.community.rest.impl.RemoteRepositoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.List;
 
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_ProcessDefinitionService")
@@ -66,7 +67,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
                 log.warn("Unable to load latest versions of process definitions because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load latest versions of process definitions because of connection error: ", e);
                 return List.of();
             }
@@ -92,7 +93,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
                 log.warn("Unable to load process definition versions by key because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load process definition versions by key because of connection error: ", e);
                 return List.of();
             }
@@ -122,9 +123,9 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
                 log.warn("Unable to load process definitions because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load process definitions because of connection error: ", e);
-                return List.of();
+                throw new EngineConnectionFailedException(rootCause.getMessage(), -1, rootCause.getMessage());
             }
             throw e;
         }
@@ -141,9 +142,9 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
                 log.warn("Unable to load get count of process definitions because BPM engine not selected");
                 return 0;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load get count of process definitions because of connection error: ", e);
-                return 0;
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -162,9 +163,9 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
                 log.warn("Unable to load process definition by id '{}' because BPM engine not selected", processDefinitionId);
                 return null;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable load process definition by id '{}' because of connection error: ", processDefinitionId, e);
-                return null;
+                throw new EngineConnectionFailedException(rootCause.getMessage(), -1, rootCause.getMessage());
             }
             throw e;
         }
@@ -186,7 +187,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
                 return null;
             }
 
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable load process definition XML by id '{}' because of connection error: ", processDefinitionId, e);
                 return null;
             }
@@ -202,31 +203,76 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
 
     @Override
     public void activateById(String processDefinitionId, boolean activateBelongsInstances) {
-        suspendOrActivateProcessDefinitionById(processDefinitionId, activateBelongsInstances, false);
+        try {
+            suspendOrActivateProcessDefinitionById(processDefinitionId, activateBelongsInstances, false);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to activate process definition by id '{}' because of connection error: ", processDefinitionId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
     public void activateAllVersionsByKey(String processDefinitionKey, boolean activateBelongsInstances) {
-        suspendOrActivateProcessDefinitionsByKey(processDefinitionKey, activateBelongsInstances, false);
+        try {
+            suspendOrActivateProcessDefinitionsByKey(processDefinitionKey, activateBelongsInstances, false);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to activate process definition by key '{}' because of connection error: ", processDefinitionKey, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
     public void suspendById(String processDefinitionId, boolean suspendBelongsInstances) {
-        suspendOrActivateProcessDefinitionById(processDefinitionId, suspendBelongsInstances, true);
+        try {
+            suspendOrActivateProcessDefinitionById(processDefinitionId, suspendBelongsInstances, true);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to suspend process definition by id '{}' because of connection error: ", processDefinitionId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
     public void suspendAllVersionsByKey(String processDefinitionKey, boolean suspendBelongsInstances) {
-        suspendOrActivateProcessDefinitionsByKey(processDefinitionKey, suspendBelongsInstances, true);
+        try {
+            suspendOrActivateProcessDefinitionsByKey(processDefinitionKey, suspendBelongsInstances, true);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to suspend process definition by key '{}' because of connection error: ", processDefinitionKey, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
     public void deleteAllVersionsByKey(String processDefinitionKey, boolean deleteAllRelatedInstances) {
-        boolean hasNextVersion = deleteProcessVersionByKey(processDefinitionKey, deleteAllRelatedInstances);
-        if (hasNextVersion) {
-            do {
-                hasNextVersion = deleteProcessVersionByKey(processDefinitionKey, deleteAllRelatedInstances);
-            } while (hasNextVersion);
+        try {
+            boolean hasNextVersion = deleteProcessVersionByKey(processDefinitionKey, deleteAllRelatedInstances);
+            if (hasNextVersion) {
+                do {
+                    hasNextVersion = deleteProcessVersionByKey(processDefinitionKey, deleteAllRelatedInstances);
+                } while (hasNextVersion);
+            }
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to delete process definition by key '{}' because of connection error: ", processDefinitionKey, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
     }
 
@@ -251,7 +297,16 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
 
     @Override
     public void deleteById(String processDefinitionId, boolean deleteAllRelatedInstances) {
-        remoteRepositoryService.deleteProcessDefinition(processDefinitionId, deleteAllRelatedInstances);
+        try {
+            remoteRepositoryService.deleteProcessDefinition(processDefinitionId, deleteAllRelatedInstances);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to delete process definition by id '{}' because of connection error: ", processDefinitionId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @SuppressWarnings("ConstantValue")

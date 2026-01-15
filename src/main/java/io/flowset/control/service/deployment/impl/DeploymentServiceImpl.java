@@ -11,6 +11,7 @@ import io.jmix.core.Sort;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.entity.deployment.DeploymentResource;
 import io.flowset.control.entity.filter.DeploymentFilter;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.DeploymentMapper;
 import io.flowset.control.mapper.DeploymentResourceMapper;
@@ -32,10 +33,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.List;
 import java.util.Optional;
 
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_DeploymentService")
@@ -65,11 +66,20 @@ public class DeploymentServiceImpl implements DeploymentService {
         DelegatingDeploymentBuilder deployment = remoteRepositoryService.createDeployment();
 
         String tenant = engineTenantProvider.getCurrentUserTenantId();
-        return deployment
-                .tenantId(tenant)
-                .source(FLOWSET_CONTROL_SOURCE)
-                .addInputStream(context.getResourceName(), context.getResourceContent())
-                .deployWithResult();
+        try {
+            return deployment
+                    .tenantId(tenant)
+                    .source(FLOWSET_CONTROL_SOURCE)
+                    .addInputStream(context.getResourceName(), context.getResourceContent())
+                    .deployWithResult();
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to deployment '{}' because of connection error: ",  context.getResourceName(), e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -81,6 +91,11 @@ public class DeploymentServiceImpl implements DeploymentService {
                 return deploymentMapper.fromDto(response.getBody());
             }
         } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load deployment by id '{}' because of connection error: ", deploymentId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
             if (e instanceof FeignException feignException && feignException.status() == 404) {
                 log.error("Unable to find deployment by id {}", deploymentId, e);
                 return null;
@@ -113,9 +128,9 @@ public class DeploymentServiceImpl implements DeploymentService {
                 log.warn("Unable to load deployments because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load deployments because of connection error: ", e);
-                return List.of();
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -172,8 +187,17 @@ public class DeploymentServiceImpl implements DeploymentService {
     @Override
     public void deleteById(String deploymentId, boolean deleteAllRelatedInstances, boolean skipCustomListeners,
                            boolean skipIoMappings) {
-        remoteRepositoryService.deleteDeployment(deploymentId, deleteAllRelatedInstances, skipCustomListeners,
-                skipIoMappings);
+        try {
+            remoteRepositoryService.deleteDeployment(deploymentId, deleteAllRelatedInstances, skipCustomListeners,
+                    skipIoMappings);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to delete deployment by id '{}' because of connection error: ", deploymentId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     protected DeploymentQuery createDeploymentQuery(@Nullable DeploymentFilter filter, @Nullable Sort sort) {

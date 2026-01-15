@@ -12,6 +12,7 @@ import io.flowset.control.dto.ActivityIncidentData;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.incident.IncidentData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.IncidentMapper;
 import io.flowset.control.service.engine.EngineTenantProvider;
@@ -28,13 +29,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 
 @Service("control_IncidentService")
 @Slf4j
@@ -114,9 +115,9 @@ public class IncidentServiceImpl implements IncidentService {
                 log.warn("Unable to load runtime incidents because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load runtime incidents because of connection error: ", e);
-                return List.of();
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -139,9 +140,9 @@ public class IncidentServiceImpl implements IncidentService {
                 log.warn("Unable to load runtime incident by id {} because BPM engine not selected", incidentId);
                 return null;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load runtime incident by id '{}' because of connection error: ", incidentId, e);
-                return null;
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -149,18 +150,31 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public long getRuntimeIncidentCount(IncidentFilter filter) {
-        String tenantId = engineTenantProvider.getCurrentUserTenantId();
-        ResponseEntity<CountResultDto> response = incidentApiClient.getIncidentsCount(
-                getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
-                getProcessDefinitionKey(filter), getProcessInstanceId(filter), null, getTimestampBefore(filter),
-                getTimestampAfter(filter), getActivityId(filter),
-                null, null, null, null, tenantId, null
-        );
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(response.getBody());
+        try {
+            String tenantId = engineTenantProvider.getCurrentUserTenantId();
+            ResponseEntity<CountResultDto> response = incidentApiClient.getIncidentsCount(
+                    getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
+                    getProcessDefinitionKey(filter), getProcessInstanceId(filter), null, getTimestampBefore(filter),
+                    getTimestampAfter(filter), getActivityId(filter),
+                    null, null, null, null, tenantId, null
+            );
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(response.getBody());
+            }
+            log.error("Error on incident count loading, status code {}", response.getStatusCode());
+            return 0;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load runtime incident count because BPM engine not selected");
+                return 0;
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load runtime incident count because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-        log.error("Error on incident count loading, status code {}", response.getStatusCode());
-        return 0;
     }
 
     @Override
@@ -195,44 +209,70 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public long getHistoricIncidentCount(@Nullable IncidentFilter filter) {
-        String tenantId = engineTenantProvider.getCurrentUserTenantId();
-        ResponseEntity<CountResultDto> response = historyApiClient.getHistoricIncidentsCount(
-                getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
-                getProcessDefinitionKey(filter), null, getProcessInstanceId(filter), null, null,
-                null, null, null, getActivityId(filter),
-                null, null, null, null, null, null, null, null, tenantId, null, null
-        );
+        try {
+            String tenantId = engineTenantProvider.getCurrentUserTenantId();
+            ResponseEntity<CountResultDto> response = historyApiClient.getHistoricIncidentsCount(
+                    getIncidentId(filter), getIncidentType(filter), null, getIncidentMessageLike(filter), getProcessDefinitionId(filter),
+                    getProcessDefinitionKey(filter), null, getProcessInstanceId(filter), null, null,
+                    null, null, null, getActivityId(filter),
+                    null, null, null, null, null, null, null, null, tenantId, null, null
+            );
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(response.getBody());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(response.getBody());
+            }
+            log.error("Error on historic incident count loading, status code {}", response.getStatusCode());
+            return 0;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load historic incident count because BPM engine not selected");
+                return 0;
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load historic incident count because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-        log.error("Error on historic incident count loading, status code {}", response.getStatusCode());
-        return 0;
     }
 
     @Override
     @Nullable
     public HistoricIncidentData findHistoricIncidentById(String id) {
-        String tenantId = engineTenantProvider.getCurrentUserTenantId();
-        ResponseEntity<List<HistoricIncidentDto>> response = historyApiClient.getHistoricIncidents(id, null, null, null, null,
-                null, null, null, null, null,
-                null, null, null, null,
-                null, null, null, null, null, null, null, null, tenantId, null, null,
-                null, null, 0, 1);
+        try {
+            String tenantId = engineTenantProvider.getCurrentUserTenantId();
+            ResponseEntity<List<HistoricIncidentDto>> response = historyApiClient.getHistoricIncidents(id, null, null, null, null,
+                    null, null, null, null, null,
+                    null, null, null, null,
+                    null, null, null, null, null, null, null, null, tenantId, null, null,
+                    null, null, 0, 1);
 
-        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            List<HistoricIncidentDto> historicIncidentDtos = response.getBody();
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                List<HistoricIncidentDto> historicIncidentDtos = response.getBody();
 
-            if (CollectionUtils.isNotEmpty(historicIncidentDtos)) {
-                HistoricIncidentDto incidentDto = historicIncidentDtos.get(0);
-                return incidentMapper.fromHistoricIncidentModel(incidentDto);
-            } else {
+                if (CollectionUtils.isNotEmpty(historicIncidentDtos)) {
+                    HistoricIncidentDto incidentDto = historicIncidentDtos.get(0);
+                    return incidentMapper.fromHistoricIncidentModel(incidentDto);
+                } else {
+                    return null;
+                }
+            }
+
+            log.error("Error on loading historic incident by id {}, status code {}", id, response.getStatusCode());
+            return null;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load historic incident by id '{}' because BPM engine not selected", id);
                 return null;
             }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load historic incident  by id '{}' because of connection error: ", id, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-
-        log.error("Error on loading historic incident by id {}, status code {}", id, response.getStatusCode());
-        return null;
     }
 
     protected String getRuntimeIncidentSortProperty(@Nullable Sort sort) {

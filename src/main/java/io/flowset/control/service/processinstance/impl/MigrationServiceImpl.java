@@ -5,6 +5,8 @@
 
 package io.flowset.control.service.processinstance.impl;
 
+import feign.utils.ExceptionUtils;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.service.processinstance.MigrationService;
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 
 @Service("control_MigrationService")
 @Slf4j
@@ -32,8 +36,17 @@ public class MigrationServiceImpl implements MigrationService {
 
     @Override
     public List<String> validateMigrationOfSingleProcessInstance(String processInstanceId, String targetProcessDefinitionId) {
-        ProcessInstance processInstance = getProcessInstanceById(processInstanceId);
-        return validateMigrationOfProcessInstances(processInstance.getProcessDefinitionId(), targetProcessDefinitionId);
+        try {
+            ProcessInstance processInstance = getProcessInstanceById(processInstanceId);
+            return validateMigrationOfProcessInstances(processInstance.getProcessDefinitionId(), targetProcessDefinitionId);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable create process instance migration plan because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -50,19 +63,28 @@ public class MigrationServiceImpl implements MigrationService {
 
     @Override
     public List<String> validateMigrationOfProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId) {
-        MigrationPlanDto migrationPlanDto = createMigrationPlan(srcProcessDefinitionId, targetProcessDefinitionId);
-        ResponseEntity<MigrationPlanReportDto> response = migrationApiClient.validateMigrationPlan(migrationPlanDto);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            List<MigrationInstructionValidationReportDto> instructionReports = Optional.ofNullable(response.getBody())
-                    .map(MigrationPlanReportDto::getInstructionReports)
-                    .orElse(List.of());
-            return instructionReports
-                    .stream()
-                    .flatMap(validationInstruction -> validationInstruction.getFailures().stream())
-                    .toList();
+        try {
+            MigrationPlanDto migrationPlanDto = createMigrationPlan(srcProcessDefinitionId, targetProcessDefinitionId);
+            ResponseEntity<MigrationPlanReportDto> response = migrationApiClient.validateMigrationPlan(migrationPlanDto);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                List<MigrationInstructionValidationReportDto> instructionReports = Optional.ofNullable(response.getBody())
+                        .map(MigrationPlanReportDto::getInstructionReports)
+                        .orElse(List.of());
+                return instructionReports
+                        .stream()
+                        .flatMap(validationInstruction -> validationInstruction.getFailures().stream())
+                        .toList();
+            }
+            log.error("Error on process instances migration: source process definition {}, target process definition {}", srcProcessDefinitionId, targetProcessDefinitionId);
+            return List.of();
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable create process definition migration plan because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
         }
-        log.error("Error on process instances migration: source process definition {}, target process definition {}", srcProcessDefinitionId, targetProcessDefinitionId);
-        return List.of();
     }
 
     @Override

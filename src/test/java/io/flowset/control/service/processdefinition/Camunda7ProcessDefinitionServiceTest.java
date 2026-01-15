@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.processdefinition;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
@@ -25,8 +26,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -204,19 +204,17 @@ public class Camunda7ProcessDefinitionServiceTest extends AbstractCamunda7Integr
     }
 
     @Test
-    @DisplayName("Process version not found if engine is not available")
-    void givenDeployedProcessIdAndStoppedEngine_whenGetById_thenNullReturned() {
+    @DisplayName("EngineConnectionFailedException when find process version by id if engine is not available")
+    void givenDeployedProcessIdAndStoppedEngine_whenGetById_thenExceptionThrown() {
         //given
         DeploymentResultDto deploymentResultDto = camundaRestTestHelper.createDeployment(camunda7, "test_support/testVisitPlanningV1.bpmn");
         String processId = deploymentResultDto.getDeployedProcessDefinitions().keySet().iterator().next();
 
         camunda7.stop();
 
-        //when
-        ProcessDefinitionData foundProcess = processDefinitionService.getById(processId);
-
-        //then
-        assertThat(foundProcess).isNull();
+        //when and then
+        assertThatThrownBy(() -> processDefinitionService.getById(processId))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
 
@@ -324,18 +322,16 @@ public class Camunda7ProcessDefinitionServiceTest extends AbstractCamunda7Integr
     }
 
     @Test
-    @DisplayName("Zero is returned as process versions count if engine is not available")
-    void givenDeployedProcessAndNotAvailableEngine_whenGetCount_thenZeroReturned() {
+    @DisplayName("EngineConnectionFailedException thrown when get process versions count if engine is not available")
+    void givenDeployedProcessAndNotAvailableEngine_whenGetCount_thenExceptionThrown() {
         //given
         camundaRestTestHelper.createDeployment(camunda7, "test_support/testVisitPlanningV1.bpmn");
 
         camunda7.stop();
 
-        //when
-        long processCount = processDefinitionService.getCount(null);
-
-        //then
-        assertThat(processCount).isZero();
+        //when and then
+        assertThatThrownBy(() -> processDefinitionService.getCount(null))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test
