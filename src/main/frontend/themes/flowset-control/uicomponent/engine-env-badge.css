@@ -1,0 +1,24 @@
+[theme~='badge'][theme~='engine-env-prod'],
+[theme~='badge'][theme~='engine-env-pre_prod'] {
+    color: var(--engine-env-badge-prod-color);
+    background-color: var(--engine-env-badge-prod-bg-color);
+    border: 1px solid var(--engine-env-badge-prod-border-color);
+}
+
+[theme~='badge'][theme~='engine-env-stage'],
+[theme~='badge'][theme~='engine-env-qa'] {
+    color: var(--engine-env-badge-qa-color);
+    background-color: var(--engine-env-badge-qa-bg-color);
+    border: 1px solid var(--engine-env-badge-qa-border-color);
+}
+
+[theme~='badge'][theme~='engine-env-dev'],
+[theme~='badge'][theme~='engine-env-local'] {
+    color: var(--engine-env-badge-dev-color);
+    background-color: var(--engine-env-badge-dev-bg-color);
+    border: 1px solid var(--engine-env-badge-dev-border-color);
+}
+
+[theme~='badge'][theme~='engine-env-prod'] {
+    gap: var(--lumo-space-xs);
+}

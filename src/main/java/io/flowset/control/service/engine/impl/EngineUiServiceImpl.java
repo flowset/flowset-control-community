@@ -98,7 +98,7 @@ public class EngineUiServiceImpl implements EngineUiService {
                 result.setSuccess(false);
             }
         } catch (FeignException e) {
-            log.error("Error while engine version loading ", e);
+            log.error("Error while engine version loading: {} ", e.getMessage());
             result.setSuccess(false);
         }
 

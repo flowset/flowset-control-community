@@ -3,7 +3,6 @@
   ~ Copyright (c) Haulmont 2024. All Rights Reserved.
   ~ Use is subject to license terms.
   -->
-
 <view xmlns="http://jmix.io/schema/flowui/view"
       title="msg://bpmEngineDetailView.title"
       focusComponent="form">
@@ -54,6 +53,10 @@
                            label="msg://io.flowset.control.entity.engine/BpmEngine.baseUrl" valueChangeMode="ON_BLUR"
                            property="baseUrl"
                            classNames="pt-s"/>
+                <hbox padding="false">
+                    <comboBox id="environmentTypeField" label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType" required="false"
+                              property="environmentType" width="AUTO" clearButtonVisible="true"/>
+                </hbox>
             </formLayout>
             <vbox id="details" padding="false"
                   width="100%" themeNames="spacing-xs">
@@ -72,14 +75,12 @@
                 </vbox>
             </vbox>
         </vbox>
-
         <hbox id="detailActions" justifyContent="START" alignItems="BASELINE" width="100%"
               classNames="sticky-buttons-bottom-panel">
             <hbox>
                 <button id="saveAndCloseButton" action="saveAction"/>
                 <button id="closeButton" action="closeAction"/>
             </hbox>
-
             <button id="testConnectionBtn" action="testConnectionAction" themeNames="tertiary-inline"
                     classNames="pl-l"/>
         </hbox>

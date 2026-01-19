@@ -47,10 +47,10 @@
                 <action id="edit" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">
-                <column property="name">
+                <column property="name" autoWidth="true" flexGrow="1">
                     <fragmentRenderer class="io.flowset.control.view.bpmengine.BpmEngineNameColumnFragment"/>
                 </column>
-                <column property="baseUrl" autoWidth="true"/>
+                <column property="baseUrl" flexGrow="2" autoWidth="true"/>
                 <column property="type" autoWidth="true"/>
                <column key="actions" sortable="false" autoWidth="true" flexGrow="0"/>
             </columns>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <collection id="enginesDc" class="io.flowset.control.entity.engine.BpmEngine">
+            <loader id="enginesDl"/>
+        </collection>
+        <instance id="selectedEngineDc" class="io.flowset.control.entity.engine.BpmEngine"/>
+    </data>
+    <content>
+        <vbox expand="rootBox" id="root" alignItems="START" spacing="false" padding="false"
+              classNames="pt-xs engine-popover-content">
+            <button id="closeBtn" icon="CLOSE_SMALL" themeNames="tertiary-inline icon small"
+                    classNames="ml-auto text-s"/>
+            <vbox id="rootBox" classNames="p-xs" spacing="false" padding="false">
+                <vbox classNames="p-xs pb-0" spacing="false" themeNames="spacing-s">
+                    <hbox padding="false" width="100%">
+                        <span text="msg://selectBpmEngineLabel.text" classNames="font-semibold text-xs text-secondary"/>
+                    </hbox>
+                    <textField id="searchField" themeNames="small" placeholder="msg://searchEnginePlaceholder"
+                               width="100%"
+                               valueChangeMode="LAZY" valueChangeTimeout="500" clearButtonVisible="true"
+                               datatype="string">
+                        <prefix>
+                            <icon icon="SEARCH"/>
+                        </prefix>
+                    </textField>
+                    <listBox id="engineListBox" itemsContainer="enginesDc" width="100%" height="100%"
+                             classNames="engine-list-box">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.main.selectenginepopover.EngineItemFragment"/>
+                    </listBox>
+                    <vbox id="emptyEnginesBox" padding="false" width="100%" minHeight="4em" expand="noEngineFoundText"
+                          themeNames="spacing-xs">
+                        <span id="noEngineFoundText" text="msg://noEngineFoundText"
+                              classNames="flex items-center text-s text-secondary mx-auto my-auto"/>
+                        <hr/>
+                    </vbox>
+                </vbox>
+                <vbox spacing="false" padding="false" classNames="p-xs pt-s">
+                    <button id="createBpmEnginBtn" themeNames="tertiary-inline small" icon="PLUS"
+                            classNames="mt-0 text-s"
+                            text="msg://createBpmEnginBtn.text"/>
+                    <hr/>
+                </vbox>
+                <button id="advancedModeBtn" text="msg://advancedModeBtn.text" classNames="ml-auto mb-xs mr-s text-s"
+                        themeNames="tertiary-inline"/>
+            </vbox>
+        </vbox>
+    </content>
+</fragment>

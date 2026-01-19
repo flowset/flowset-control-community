@@ -3,9 +3,10 @@
         <instance id="bpmEngineDc" class="io.flowset.control.entity.engine.BpmEngine"/>
     </data>
     <content>
-        <hbox padding="false" themeNames="spacing-s" alignItems="BASELINE">
+        <hbox padding="false" themeNames="spacing-s" alignItems="BASELINE" width="100%">
            <span dataContainer="bpmEngineDc" property="name" classNames="overflow-hidden overflow-ellipsis"/>
            <span id="defaultEngineBadge" text="msg://defaultEngineTag" themeNames="badge pill" visible="false"/>
+           <fragment id="envBadge" class="io.flowset.control.view.bpmengine.EngineEnvironmentBadgeFragment"/>
         </hbox>
     </content>
 </fragment>

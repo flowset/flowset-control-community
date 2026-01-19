@@ -18,6 +18,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.engine.EnvironmentType;
 import io.jmix.core.Messages;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
@@ -89,6 +90,8 @@ public class EngineConnectionSettingsView extends StandardView {
     protected EngineUiService engineUiService;
     @ViewComponent
     protected InstanceContainer<BpmEngine> engineDc;
+    @ViewComponent
+    protected TypedTextField<EnvironmentType> environmentTypeField;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -105,6 +108,7 @@ public class EngineConnectionSettingsView extends StandardView {
         testConnectionAction.refreshState();
 
         if (bpmEngine != null) {
+            environmentTypeField.setTypedValue(bpmEngine.getEnvironmentType());
             if (BooleanUtils.isTrue(bpmEngine.getAuthEnabled())) {
                 authenticationTypeField.setTypedValue(messages.getMessage(bpmEngine.getAuthType()));
 
@@ -124,6 +128,7 @@ public class EngineConnectionSettingsView extends StandardView {
             basicAuthSettingsHBox.setVisible(false);
             customHttpHeaderSettingsVBox.setVisible(false);
             authenticationTypeField.setTypedValue(null);
+            environmentTypeField.setTypedValue(null);
         }
     }
 

@@ -163,3 +163,70 @@ vaadin-app-layout::part(drawer) {
     background-color: #fff;
     color: var(--lumo-primary-text-color);
 }
+
+.select-engine-popover::part(overlay) {
+    border: 1px solid var(--lumo-shade-30pct);
+    box-shadow: var(--lumo-box-shadow-l);
+    border-radius: var(--lumo-border-radius-l);
+}
+
+.engine-list-box hr {
+    margin: calc(var(--lumo-space-xs) / 2);
+}
+
+.engine-list-box vaadin-item {
+    overflow: hidden;
+}
+
+.engine-list-box vaadin-item::part(content) {
+    width: 100%;
+}
+
+.engine-list-box vaadin-item::part(checkmark)::before {
+    border: 1px solid var(--lumo-primary-color);
+    border-radius: 50%;
+    color: var(--lumo-primary-color);
+    font-size: 1em;
+}
+
+@media (min-width: 360px) and (orientation: portrait) {
+    .engine-popover-content {
+        min-width: 85vw;
+        max-width: 85vw;
+    }
+}
+
+@media (min-width: 640px) and (orientation: portrait) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 640px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 1280px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 1440px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 1920px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}

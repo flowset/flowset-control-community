@@ -49,6 +49,9 @@ public class BpmEngine {
     @NotNull
     private String name;
 
+    @Column(name = "ENVIRONMENT_TYPE")
+    private String environmentType;
+
     @Column(name = "IS_DEFAULT")
     private Boolean isDefault = false;
 
@@ -94,6 +97,14 @@ public class BpmEngine {
     @DeletedDate
     @Column(name = "DELETED_DATE")
     private OffsetDateTime deletedDate;
+
+    public EnvironmentType getEnvironmentType() {
+        return environmentType == null ? null : EnvironmentType.fromId(environmentType);
+    }
+
+    public void setEnvironmentType(EnvironmentType environmentType) {
+        this.environmentType = environmentType == null ? null : environmentType.getId();
+    }
 
     public Boolean getIsDefault() {
         return isDefault;
