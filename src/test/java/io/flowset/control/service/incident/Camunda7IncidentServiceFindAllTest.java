@@ -7,6 +7,7 @@ package io.flowset.control.service.incident;
 
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.incident.IncidentData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -26,8 +27,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -63,8 +63,8 @@ public class Camunda7IncidentServiceFindAllTest extends AbstractCamunda7Integrat
     }
 
     @Test
-    @DisplayName("Empty list with runtime incidents is returned if selected engine is not available")
-    void givenEmptyLoadContextAndNotAvailableEngine_whenFindRuntimeIncidents_thenEmptyListReturned() {
+    @DisplayName("EngineConnectionFailedException is thrown when loading runtime incidents if selected engine is not available")
+    void givenEmptyLoadContextAndNotAvailableEngine_whenFindRuntimeIncidents_thenExceptionThrown() {
         //given
         CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
         camundaSampleDataManager.deploy("test_support/testFailedJobIncident.bpmn")
@@ -75,11 +75,9 @@ public class Camunda7IncidentServiceFindAllTest extends AbstractCamunda7Integrat
 
         IncidentLoadContext loadContext = new IncidentLoadContext();
 
-        //when
-        List<IncidentData> runtimeIncidents = incidentService.findRuntimeIncidents(loadContext);
-
-        //then
-        assertThat(runtimeIncidents).isEmpty();
+        //when and then
+        assertThatThrownBy(() -> incidentService.findRuntimeIncidents(loadContext))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test

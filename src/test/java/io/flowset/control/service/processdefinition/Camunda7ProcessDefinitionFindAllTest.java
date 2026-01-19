@@ -6,6 +6,7 @@
 package io.flowset.control.service.processdefinition;
 
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @SpringBootTest
@@ -65,8 +67,8 @@ public class Camunda7ProcessDefinitionFindAllTest extends AbstractCamunda7Integr
     }
 
     @Test
-    @DisplayName("Empty list returned if engine is not available")
-    void givenDeployedProcessesAndNotAvailableEngine_whenFindAll_thenEmptyListReturned() {
+    @DisplayName("EngineConnectionFailedException thrown when get process definitions list if engine is not available")
+    void givenDeployedProcessesAndNotAvailableEngine_whenFindAll_thenExceptionThrown() {
         //given
         applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
                 .deploy("test_support/vacationApproval.bpmn");
@@ -75,11 +77,9 @@ public class Camunda7ProcessDefinitionFindAllTest extends AbstractCamunda7Integr
 
         ProcessDefinitionLoadContext loadContext = new ProcessDefinitionLoadContext();
 
-        //when
-        List<ProcessDefinitionData> foundProcesses = processDefinitionService.findAll(loadContext);
-
-        //then
-        assertThat(foundProcesses).isEmpty();
+        //when and then
+        assertThatThrownBy(() -> processDefinitionService.findAll(loadContext))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test

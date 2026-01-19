@@ -6,6 +6,7 @@
 package io.flowset.control.service.usertask;
 
 import io.flowset.control.entity.UserTaskData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -23,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -79,6 +81,28 @@ public class Camunda7UserTaskServiceTest extends AbstractCamunda7IntegrationTest
     }
 
     @Test
+    @DisplayName("EngineConnectionFailedException thrown when get historic tasks count if engine is not available")
+    void givenCompletedTasksAndNotAvailableEngine_whenGetHistoryTasksCount_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        camundaSampleDataManager.deploy("test_support/testUserTaskWithoutAssignee.bpmn")
+                .deploy("test_support/testUserTaskWithAssignee.bpmn")
+                .startByKey("userTaskWithoutAssignee")
+                .startByKey("userTaskWithAssignee");
+
+        RuntimeUserTaskDto task = camundaRestTestHelper.getRuntimeUserTasks(camunda7).get(0);
+
+        camundaRestTestHelper.completeTaskById(camunda7, task.getId());
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> userTaskService.getHistoryTasksCount(null))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
     @DisplayName("Count of runtime tasks only is returned")
     void givenCompletedTaskAndNullFilter_whenGetRuntimeTasksCount_thenOnlyRuntimeTasksCountReturned() {
         //given
@@ -96,6 +120,23 @@ public class Camunda7UserTaskServiceTest extends AbstractCamunda7IntegrationTest
 
         //then
         assertThat(runtimeTasksCount).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when get runtime tasks count if engine is not available")
+    void givenActiveTasksAndNotAvailableEngine_whenGetRuntimeTasksCount_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        camundaSampleDataManager.deploy("test_support/testUserTaskWithoutAssignee.bpmn")
+                .deploy("test_support/testUserTaskWithAssignee.bpmn")
+                .startByKey("userTaskWithoutAssignee");
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> userTaskService.getRuntimeTasksCount(null))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test
@@ -185,6 +226,24 @@ public class Camunda7UserTaskServiceTest extends AbstractCamunda7IntegrationTest
         assertThat(foundTask.getName()).isEqualTo("Task with assignee");
         assertThat(foundTask.getProcessDefinitionKey()).isEqualTo("userTaskWithAssignee");
         assertThat(foundTask.getSuspended()).isNull();
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when find task by id if engine is not available")
+    void givenExistingTaskAndNotAvailableEngine_whenFindById_thenExceptionThrown() {
+        //given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUserTaskWithAssignee.bpmn")
+                .startByKey("userTaskWithAssignee");
+
+        RuntimeUserTaskDto sourceUserTask = camundaRestTestHelper.findRuntimeUserTasksByProcessKey(camunda7, "userTaskWithAssignee").get(0);
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> userTaskService.findTaskById(sourceUserTask.getId()))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
 }

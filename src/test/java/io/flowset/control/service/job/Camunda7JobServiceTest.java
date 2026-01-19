@@ -5,6 +5,8 @@
 
 package io.flowset.control.service.job;
 
+import feign.FeignException;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.filter.JobFilter;
 import io.flowset.control.entity.job.JobData;
@@ -27,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -138,6 +141,41 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
     }
 
     @Test
+    @DisplayName("Find job by non-existing id")
+    void givenNonExistingJobId_whenFindJob_thenExceptionThrown() {
+        //given
+        String jobId = "non-existing-job-id";
+
+        //when and then
+        assertThatThrownBy(() -> jobService.findById(jobId))
+                .isInstanceOf(FeignException.class)
+                .satisfies(throwable -> {
+                    FeignException feignException = (FeignException) throwable;
+                    assertThat(feignException.status()).isEqualTo(404);
+                });
+
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when find existing job by id if engine is not available")
+    void givenActiveJobAndNotAvailableEngine_whenFindJobById_thenExceptionThrown() {
+        //given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testTimerJob.bpmn")
+                .startByKey("testTimerJob");
+
+        JobDto sourceJobDto = camundaRestTestHelper.getJobsByProcessKey(camunda7, "testTimerJob").get(0);
+        String jobId = sourceJobDto.getId();
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> jobService.findById(jobId))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
     @DisplayName("Get count of all jobs if filter is null")
     void givenActiveJobs_whenGetCount_thenAllJobsCountReturned() {
         //given
@@ -150,6 +188,21 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
 
         //then
         assertThat(jobsCount).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when get job count if engine is not available")
+    void givenActiveJobsAndNotAvailableEngine_whenGetCount_thenExceptionThrown() {
+        //given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testTimerJob.bpmn")
+                .startByKey("testTimerJob", 2);
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> jobService.getCount(null))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test
@@ -232,6 +285,24 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
     }
 
     @Test
+    @DisplayName("EngineConnectionFailedException thrown when suspend job if engine is not available")
+    void givenActiveJobAndNotAvailableEngine_whenSuspendById_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager.deploy("test_support/testTimerJob.bpmn")
+                .startByKey("testTimerJob");
+
+        String jobId = camundaRestTestHelper.getJobIdsByProcessKey(camunda7, "testTimerJob").get(0);
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> jobService.suspendJob(jobId))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
     @DisplayName("Activate suspended existing job by id")
     void givenExistingSuspendedJob_whenActivateById_thenJobActivated() {
         //given
@@ -251,6 +322,23 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
         assertThat(updatedJob.getSuspended()).isFalse();
     }
 
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when activate job if engine is not available")
+    void givenSuspendedJobAndNotAvailableEngine_whenActivateById_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager.deploy("test_support/testTimerJob.bpmn")
+                .startByKey("testTimerJob");
+
+        String jobId = camundaRestTestHelper.getJobIdsByProcessKey(camunda7, "testTimerJob").get(0);
+        camundaRestTestHelper.suspendJobById(camunda7, jobId);
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> jobService.activateJob(jobId))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
     /*
     TODO: fix
     @Test

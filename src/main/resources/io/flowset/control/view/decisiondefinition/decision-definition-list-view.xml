@@ -35,7 +35,7 @@
                         <checkbox property="latestVersionOnly" id="lastVersionOnlyCb"
                                   label="msg://decisionDefinitionList.lastVersionOnly"/>
 
-                        <icon icon="QUESTION_CIRCLE" id="allVersionsContextHelp" size="1em" alignSelf="CENTER">
+                        <icon icon="QUESTION_CIRCLE" id="allVersionsContextHelp" size="0.85em" alignSelf="CENTER" classNames="text-secondary">
                             <tooltip text="msg://keyAndLatestVersionOnly.tooltip"/>
                         </icon>
                     </hbox>
@@ -70,8 +70,13 @@
                 <column property="name" autoWidth="true" flexGrow="1"/>
                 <column property="key" autoWidth="true" flexGrow="1"/>
                 <column property="version"/>
-                <column key="actions" sortable="false" autoWidth="true" flexGrow="0"/>
+                <column key="actions" sortable="false" autoWidth="true" flexGrow="0">
+                    <fragmentRenderer class="io.flowset.control.view.decisiondefinition.DecisionDefinitionListItemActionsFragment"/>
+                </column>
             </columns>
+            <emptyStateComponent>
+                <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>
+            </emptyStateComponent>
         </dataGrid>
     </layout>
 </view>

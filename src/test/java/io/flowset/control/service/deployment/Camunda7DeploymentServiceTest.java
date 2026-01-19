@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.deployment;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.Resources;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.exception.RemoteEngineParseException;
@@ -109,6 +110,21 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
     }
 
     @Test
+    @DisplayName("EngineConnectionFailedException thrown when deploy a valid BPMN 2.0 if engine is not available")
+    void givenResourceNameAndValidaBpmnXmlNotAvailableEngine_whenDeployWithContent_thenExceptionThrown() {
+        //given
+        String resourceName = "contractApproval.bpmn";
+        String bpmnXml = getResource("test_support/contractApproval.bpmn");
+        DeploymentContext deploymentContext = new DeploymentContext(resourceName, new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> deploymentService.createDeployment(deploymentContext))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
     @DisplayName("Find deployment by existing id")
     void givenExistingDeployment_whenFindById_thenDeploymentReturned() {
         //given
@@ -123,6 +139,19 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
         assertThat(foundDeployment.getName()).isEqualTo("supportRequest.bpmn");
         assertThat(foundDeployment.getSource()).isNull();
         assertThat(foundDeployment.getDeploymentTime()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when find existing deployment by id if engine is not available")
+    void givenExistingDeploymentNotAvailableEngine_whenFindById_thenExceptionThrown() {
+        //given
+        DeploymentResultDto deployment = camundaRestTestHelper.createDeployment(camunda7, "test_support/supportRequest.bpmn");
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> deploymentService.findById(deployment.getId()))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     private String getResource(String name) {

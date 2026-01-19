@@ -37,6 +37,8 @@ import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortD
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.decisioninstance.DecisionInstanceLoadContext;
 import io.flowset.control.service.decisioninstance.DecisionInstanceService;
@@ -205,7 +207,11 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
 
     @Install(to = "processInstanceDataDl", target = Target.DATA_LOADER)
     protected ProcessInstanceData processInstanceDataDlLoadDelegate(final LoadContext<ProcessInstanceData> loadContext) {
-        return processInstanceService.getProcessInstanceById(Objects.requireNonNull(loadContext.getId()).toString());
+        try {
+            return processInstanceService.getProcessInstanceById(Objects.requireNonNull(loadContext.getId()).toString());
+        } catch (EngineConnectionFailedException e) {
+            throw new ViewEngineConnectionFailedException(e, this);
+        }
     }
 
     @Install(to = "runtimeActivityInstancesDl", target = Target.DATA_LOADER)

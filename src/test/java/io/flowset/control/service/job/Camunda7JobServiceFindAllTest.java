@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.job;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.filter.JobFilter;
 import io.flowset.control.entity.job.JobData;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @SpringBootTest
@@ -118,6 +120,24 @@ public class Camunda7JobServiceFindAllTest extends AbstractCamunda7IntegrationTe
 
         //then
         assertThat(jobs).hasSize(expectedCount);
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when find all jobs if engine is not available")
+    void givenExistingJobsAndNotAvailableEngine_whenFinAll_thenExceptionThrown() {
+        //given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testJobsListLoad.bpmn")
+                .startByKey("testJobsListLoad");
+
+        JobLoadContext loadContext = new JobLoadContext();
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> jobService.findAll(loadContext))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     static Stream<Arguments> provideValidPaginationData() {

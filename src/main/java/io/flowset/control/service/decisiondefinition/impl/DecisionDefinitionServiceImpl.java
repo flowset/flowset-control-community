@@ -2,6 +2,7 @@ package io.flowset.control.service.decisiondefinition.impl;
 
 import feign.FeignException;
 import feign.utils.ExceptionUtils;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.Sort;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.filter.DecisionDefinitionFilter;
@@ -20,9 +21,9 @@ import org.camunda.community.rest.impl.RemoteRepositoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.List;
 
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
 
 @Service("control_DecisionDefinitionService")
@@ -100,9 +101,9 @@ public class DecisionDefinitionServiceImpl implements DecisionDefinitionService 
                 log.warn("Unable to load decision definitions because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load decision definitions because of connection error: ", e);
-                return List.of();
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -128,10 +129,10 @@ public class DecisionDefinitionServiceImpl implements DecisionDefinitionService 
                         decisionDefinitionId);
                 return null;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable load decision definition by id '{}' because of connection error: ",
                         decisionDefinitionId, e);
-                return null;
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -154,7 +155,7 @@ public class DecisionDefinitionServiceImpl implements DecisionDefinitionService 
                         decisionDefinitionId);
                 return null;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable load decision definition XML by id '{}' because of connection error: ",
                         decisionDefinitionId, e);
                 return null;

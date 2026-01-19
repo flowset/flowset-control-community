@@ -5,6 +5,8 @@
 
 package io.flowset.control.service.variable.impl;
 
+import feign.utils.ExceptionUtils;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.EntityStates;
 import io.jmix.core.Sort;
 import io.flowset.control.entity.filter.VariableFilter;
@@ -34,6 +36,7 @@ import java.io.File;
 import java.util.*;
 
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 
 @Service("control_VariableService")
 @Slf4j
@@ -99,13 +102,23 @@ public class VariableServiceImpl implements VariableService {
 
     @Override
     public VariableInstanceData findRuntimeVariableById(String variableInstanceId) {
-        ResponseEntity<VariableInstanceDto> response = variableInstanceApiClient.getVariableInstance(variableInstanceId, false);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            VariableInstanceDto variableInstanceDto = response.getBody();
-            return variableInstanceDto != null ? variableMapper.fromVariableDto(variableInstanceDto) : null;
+        try {
+            ResponseEntity<VariableInstanceDto> response = variableInstanceApiClient.getVariableInstance(variableInstanceId, false);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                VariableInstanceDto variableInstanceDto = response.getBody();
+                return variableInstanceDto != null ? variableMapper.fromVariableDto(variableInstanceDto) : null;
+            }
+            log.error("Error on loading runtime variables, variable id {}, status code {}", variableInstanceId, response.getStatusCode());
+            return null;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable get runtime variables by id '{}' because of connection error: ", variableInstanceId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+
+            throw e;
         }
-        log.error("Error on loading runtime variables, variable id {}, status code {}", variableInstanceId, response.getStatusCode());
-        return null;
     }
 
     @Override
@@ -142,45 +155,75 @@ public class VariableServiceImpl implements VariableService {
 
     @Override
     public long getRuntimeVariablesCount(@Nullable VariableFilter filter) {
-        VariableInstanceQueryDto queryDto = createVariableInstanceQuery(filter);
-        ResponseEntity<CountResultDto> response = variableInstanceApiClient.queryVariableInstancesCount(queryDto);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(response.getBody());
-        }
+        try {
+            VariableInstanceQueryDto queryDto = createVariableInstanceQuery(filter);
+            ResponseEntity<CountResultDto> response = variableInstanceApiClient.queryVariableInstancesCount(queryDto);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(response.getBody());
+            }
 
-        log.error("Error on loading runtime variables count, query {}, status code {}", queryDto, response.getStatusCode());
-        return 0;
+            log.error("Error on loading runtime variables count, query {}, status code {}", queryDto, response.getStatusCode());
+            return 0;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable get runtime variables count because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+
+            throw e;
+        }
     }
 
     @Override
     public long getHistoricVariablesCount(@Nullable VariableFilter filter) {
-        HistoricVariableInstanceQueryDto queryDto = createHistoricVariableQuery(filter);
-        ResponseEntity<CountResultDto> response = historyApiClient.queryHistoricVariableInstancesCount(queryDto);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(response.getBody());
+        try {
+            HistoricVariableInstanceQueryDto queryDto = createHistoricVariableQuery(filter);
+            ResponseEntity<CountResultDto> response = historyApiClient.queryHistoricVariableInstancesCount(queryDto);
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(response.getBody());
+            }
+            log.error("Error on loading historic variables count, query {}, status code {}", queryDto, response.getStatusCode());
+            return 0;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable get historic variables count because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+
+            throw e;
         }
-        log.error("Error on loading historic variables count, query {}, status code {}", queryDto, response.getStatusCode());
-        return 0;
     }
 
     @Override
     public void updateVariableLocal(VariableInstanceData variableInstanceData) {
         Objects.requireNonNull(variableInstanceData.getExecutionId(), "executionId can not be null");
 
-        VariableValueDto variableValueDto = new VariableValueDto();
-        variableValueDto.type(variableInstanceData.getType());
+        try {
+            VariableValueDto variableValueDto = new VariableValueDto();
+            variableValueDto.type(variableInstanceData.getType());
 
-        if (variableInstanceData.getValueInfo() != null && variableInstanceData.getValueInfo().getObject() != null) {
-            ObjectTypeInfo objectTypeInfo = variableInstanceData.getValueInfo().getObject();
-            Map<String, Object> valueInfoMap = new HashMap<>();
-            valueInfoMap.put("objectTypeName", objectTypeInfo.getObjectTypeName());
-            valueInfoMap.put("serializationDataFormat", objectTypeInfo.getSerializationDataFormat());
+            if (variableInstanceData.getValueInfo() != null && variableInstanceData.getValueInfo().getObject() != null) {
+                ObjectTypeInfo objectTypeInfo = variableInstanceData.getValueInfo().getObject();
+                Map<String, Object> valueInfoMap = new HashMap<>();
+                valueInfoMap.put("objectTypeName", objectTypeInfo.getObjectTypeName());
+                valueInfoMap.put("serializationDataFormat", objectTypeInfo.getSerializationDataFormat());
 
-            variableValueDto.valueInfo(valueInfoMap);
+                variableValueDto.valueInfo(valueInfoMap);
+            }
+            variableValueDto.value(variableInstanceData.getValue());
+
+            processInstanceApiClient.setProcessInstanceVariable(variableInstanceData.getExecutionId(), variableInstanceData.getName(), variableValueDto);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable update local variable {} because of connection error: ", variableInstanceData.getName(), e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+
+            throw e;
         }
-        variableValueDto.value(variableInstanceData.getValue());
-
-        processInstanceApiClient.setProcessInstanceVariable(variableInstanceData.getExecutionId(), variableInstanceData.getName(), variableValueDto);
     }
 
     @Override
@@ -204,11 +247,21 @@ public class VariableServiceImpl implements VariableService {
     public void removeVariablesLocal(String executionId, Set<VariableInstanceData> variableItems) {
         Objects.requireNonNull(executionId, "executionId can not be null");
 
-        List<String> nameList = variableItems.stream()
-                .map(VariableInstanceData::getName)
-                .toList();
+        try {
+            List<String> nameList = variableItems.stream()
+                    .map(VariableInstanceData::getName)
+                    .toList();
 
-        remoteRuntimeService.removeVariablesLocal(executionId, nameList);
+            remoteRuntimeService.removeVariablesLocal(executionId, nameList);
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable remove local variables for execution {} because of connection error: ", executionId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+
+            throw e;
+        }
     }
 
     @Override

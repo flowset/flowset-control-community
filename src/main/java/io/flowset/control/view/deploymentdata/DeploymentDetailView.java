@@ -19,6 +19,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
@@ -201,7 +203,11 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
         DeploymentData item = deploymentDataDc.getItemOrNull();
         String id = item == null ? Objects.requireNonNull(loadContext.getId()).toString() : item.getId();
 
-        return deploymentService.findById(id);
+        try {
+            return deploymentService.findById(id);
+        } catch (EngineConnectionFailedException e) {
+            throw new ViewEngineConnectionFailedException(e, this);
+        }
     }
 
     private void initResourcesDataGrid() {

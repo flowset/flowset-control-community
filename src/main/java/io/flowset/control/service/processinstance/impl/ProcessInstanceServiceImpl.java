@@ -12,6 +12,7 @@ import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.entity.variable.VariableInstanceData;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.flowset.control.mapper.ProcessInstanceMapper;
 import io.flowset.control.service.engine.EngineTenantProvider;
@@ -35,7 +36,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static io.flowset.control.service.variable.VariableUtils.createVariableMap;
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
 
 @Slf4j
@@ -98,9 +99,9 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 log.warn("Unable to load historic process instances because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load historic process instances because of connection error: ", e);
-                return List.of();
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -139,7 +140,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 log.warn("Unable to load runtime process instances because BPM engine not selected");
                 return List.of();
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load runtime process instances because of connection error: ", e);
                 return List.of();
             }
@@ -165,9 +166,9 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 log.warn("Unable to load historic process instances count because BPM engine not selected");
                 return 0;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load historic process instances count because of connection error: ", e);
-                return 0;
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -187,9 +188,9 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 log.warn("Unable to load runtime process instances count because BPM engine not selected");
                 return 0;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load runtime process instances count because of connection error: ", e);
-                return 0;
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -213,9 +214,9 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 log.warn("Unable to load process instance by id '{}' because BPM engine not selected", processInstanceId);
                 return null;
             }
-            if (rootCause instanceof ConnectException) {
+            if (isConnectionError(rootCause)) {
                 log.error("Unable to load process instance by id '{}' because of connection error: ", processInstanceId, e);
-                return null;
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             if (rootCause instanceof FeignException feignException && feignException.status() == 404) {
                 log.warn("Process instance by id '{}' not found: ", processInstanceId, e);
@@ -231,7 +232,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
         try {
             VariableMap variables = createVariableMap(variableInstances);
             ProcessInstance processInstance;
-            if(businessKey != null) {
+            if (businessKey != null) {
                 processInstance = remoteRuntimeService.startProcessInstanceById(processDefinitionId, businessKey, variables);
             } else {
                 processInstance = remoteRuntimeService.startProcessInstanceById(processDefinitionId, variables);
@@ -243,6 +244,10 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load start process by definitionId by id '{}' because BPM engine not selected", processDefinitionId);
                 return null;
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to start process by definitionId by id '{}' because of connection error: ", processDefinitionId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -257,6 +262,10 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load suspend instance by id '{}' because BPM engine not selected", processInstanceId);
             }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to suspend process instance by id '{}' because of connection error: ", processInstanceId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
             throw e;
         }
     }
@@ -269,6 +278,10 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load activate instance by id '{}' because BPM engine not selected", processInstanceId);
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to activate process instance by id '{}' because of connection error: ", processInstanceId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -283,6 +296,10 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load terminate instance by id '{}' because BPM engine not selected", processInstanceId);
             }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to terminate process instance by id '{}' because of connection error: ", processInstanceId, e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
             throw e;
         }
     }
@@ -295,6 +312,10 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load terminate instances by ids '{}' because BPM engine not selected", processInstanceIds);
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to terminate process instances because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -310,6 +331,10 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load activate instances by ids '{}' because BPM engine not selected", processInstancesIds);
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to terminate process instances because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;
         }
@@ -327,51 +352,81 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load suspend instances by ids '{}' because BPM engine not selected", processInstancesIds);
             }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to suspend process instances because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
             throw e;
         }
     }
 
     @Override
     public long getCountByProcessDefinitionId(String processDefinitionId) {
-        String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
-        ResponseEntity<CountResultDto> processInstancesCount = processInstanceApiClient.getProcessInstancesCount(
-                null, null, null,
-                null, processDefinitionId, null,
-                null, null, null,
-                null, null, null,
-                null, null, null,
-                null, null, null,
-                null, null, currentUserTenantId,
-                null, null, null,
-                null, null, null,
-                null, null
-        );
-        if (processInstancesCount.getStatusCode().is2xxSuccessful()) {
-            return getCountResult(processInstancesCount.getBody());
+        try {
+            String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
+            ResponseEntity<CountResultDto> processInstancesCount = processInstanceApiClient.getProcessInstancesCount(
+                    null, null, null,
+                    null, processDefinitionId, null,
+                    null, null, null,
+                    null, null, null,
+                    null, null, null,
+                    null, null, null,
+                    null, null, currentUserTenantId,
+                    null, null, null,
+                    null, null, null,
+                    null, null
+            );
+            if (processInstancesCount.getStatusCode().is2xxSuccessful()) {
+                return getCountResult(processInstancesCount.getBody());
+            }
+            return -1;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to get process instance count by process definition id '{}' because BPM engine not selected", processDefinitionId);
+                return -1;
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to get process instance count by process definition id '{}' because of connection error: ", processDefinitionId, e);
+                return -1;
+            }
+            throw e;
         }
-        return -1;
     }
 
     @Override
     public long getCountByDeploymentId(String deploymentId) {
-        String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
-        ResponseEntity<CountResultDto> processInstancesCount = processInstanceApiClient.getProcessInstancesCount(
-                null, null, null,
-                null, null, null,
-                null, null, deploymentId,
-                null, null, null,
-                null, null, null,
-                null, null, null,
-                null, null, currentUserTenantId,
-                null, null, null,
-                null, null, null,
-                null, null
-        );
-        CountResultDto countResultDto = processInstancesCount.getBody();
-        if (processInstancesCount.getStatusCode().is2xxSuccessful() && countResultDto != null) {
-            return countResultDto.getCount();
+        try {
+            String currentUserTenantId = engineTenantProvider.getCurrentUserTenantId();
+            ResponseEntity<CountResultDto> processInstancesCount = processInstanceApiClient.getProcessInstancesCount(
+                    null, null, null,
+                    null, null, null,
+                    null, null, deploymentId,
+                    null, null, null,
+                    null, null, null,
+                    null, null, null,
+                    null, null, currentUserTenantId,
+                    null, null, null,
+                    null, null, null,
+                    null, null
+            );
+            CountResultDto countResultDto = processInstancesCount.getBody();
+            if (processInstancesCount.getStatusCode().is2xxSuccessful() && countResultDto != null) {
+                return countResultDto.getCount();
+            }
+            return -1;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to get process instance count by deployment id '{}' because BPM engine not selected", deploymentId);
+                return -1;
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to get process instance count by deployment id '{}' because of connection error: ", deploymentId, e);
+                return -1;
+            }
+            throw e;
         }
-        return -1;
     }
 
     @Override

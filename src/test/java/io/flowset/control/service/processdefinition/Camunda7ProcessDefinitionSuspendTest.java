@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.processdefinition;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -24,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -122,6 +124,22 @@ public class Camunda7ProcessDefinitionSuspendTest extends AbstractCamunda7Integr
     }
 
     @Test
+    @DisplayName("EngineConnectionFailedException thrown when suspend process version by id if engine is not available")
+    void givenActiveProcessVersionAndNotAvailableEngine_whenSuspendById_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/vacationApproval.bpmn");
+
+        String processVersionId = sampleDataManager.getDeployedProcessVersions("vacation_approval").get(0);
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> processDefinitionService.suspendById(processVersionId, false))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
     @DisplayName("Suspend all active process versions but not related instances by key")
     void givenAllActiveProcessVersionsWithInstances_whenSuspendAllVersionsByKeyWithoutInstances_thenProcessSuspendedAndInstancesNotSuspended() {
         //given
@@ -212,5 +230,20 @@ public class Camunda7ProcessDefinitionSuspendTest extends AbstractCamunda7Integr
                 .hasSize(2)
                 .containsAll(suspendedInstances);
 
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when suspend process versions by key if engine is not available")
+    void givenActiveProcessVersionsAndNotAvailableEngine_whenSuspendAllVersionsByKey_thenExceptionThrown() {
+        //given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testVisitPlanningV1.bpmn")
+                .deploy("test_support/testVisitPlanningV2.bpmn");
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> processDefinitionService.suspendAllVersionsByKey("visitPlanning", true))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 }

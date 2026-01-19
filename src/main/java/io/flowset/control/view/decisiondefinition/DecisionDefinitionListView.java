@@ -3,18 +3,14 @@ package io.flowset.control.view.decisiondefinition;
 import com.google.common.base.Strings;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Fragments;
-import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
@@ -36,7 +32,7 @@ import java.util.List;
 @Route(value = "bpmn/decision-definitions", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_DecisionDefinition.list")
 @ViewDescriptor("decision-definition-list-view.xml")
-public class DecisionDefinitionListView extends StandardListView<DecisionDefinitionData> {
+public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<DecisionDefinitionData> {
 
     @Autowired
     private Metadata metadata;
@@ -69,7 +65,6 @@ public class DecisionDefinitionListView extends StandardListView<DecisionDefinit
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         initFilter();
-        decisionDefinitionsDl.load();
     }
 
     @Subscribe(id = "clearBtn", subject = "clickListener")
@@ -86,7 +81,7 @@ public class DecisionDefinitionListView extends StandardListView<DecisionDefinit
         if (lastVersionOnlyCb.getValue() && !Strings.isNullOrEmpty(nameField.getValue())) {
             return;
         }
-        decisionDefinitionsDl.load();
+        startLoadData();
     }
 
     @Subscribe("nameField")
@@ -131,19 +126,20 @@ public class DecisionDefinitionListView extends StandardListView<DecisionDefinit
         DecisionDefinitionFilter filter = decisionDefinitionFilterDc.getItemOrNull();
         DecisionDefinitionLoadContext context = new DecisionDefinitionLoadContext().setFilter(filter);
         if (query != null) {
-            context = context.setFirstResult(query.getFirstResult())
+            context.setFirstResult(query.getFirstResult())
                     .setMaxResults(query.getMaxResults())
                     .setSort(query.getSort());
         }
-        return decisionDefinitionService.findAll(context);
+        return loadItemsWithStateHandling(() -> decisionDefinitionService.findAll(context));
     }
 
-    @Supply(to = "decisionDefinitionsGrid.actions", subject = "renderer")
-    private Renderer<DecisionDefinitionData> decisionDefinitionsGridActionsRenderer() {
-        return new ComponentRenderer<>(decisiondefinitiondata -> {
-            DecisionDefinitionListItemActionsFragment fragment = fragments.create(this, DecisionDefinitionListItemActionsFragment.class);
-            fragment.setDecisionDefinition(decisiondefinitiondata);
-            return fragment;
-        });
+    @Override
+    protected void loadData() {
+        decisionDefinitionsDl.load();
+    }
+
+    @Subscribe("decisionDefinitionsGrid.refresh")
+    public void onDecisionDefinitionsGridRefresh(final ActionPerformedEvent event) {
+        startLoadData();
     }
 }

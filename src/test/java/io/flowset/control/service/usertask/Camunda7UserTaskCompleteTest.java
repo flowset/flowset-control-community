@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.usertask;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.exception.RemoteProcessEngineException;
@@ -256,6 +257,25 @@ public class Camunda7UserTaskCompleteTest extends AbstractCamunda7IntegrationTes
         assertThatThrownBy(() -> userTaskService.completeTaskById(suspendedTaskId, List.of()))
                 .isInstanceOf(RemoteProcessEngineException.class)
                 .hasMessageContaining("task with id '%s' is suspended", suspendedTaskId);
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException is thrown when complete task by id and engine is not available")
+    void givenActiveTaskIdAndNotAvailableEngine_whenCompleteById_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        camundaSampleDataManager.deploy("test_support/testUserTaskWithoutAssignee.bpmn")
+                .startByKey("userTaskWithoutAssignee");
+
+        RuntimeUserTaskDto userTask = camundaRestTestHelper.findRuntimeUserTasksByProcessKey(camunda7, "userTaskWithoutAssignee").get(0);
+
+        String taskId = userTask.getId();
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() ->  userTaskService.completeTaskById(taskId, List.of()))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     private static Stream<Arguments> provideNonNullPrimitiveVariables() {

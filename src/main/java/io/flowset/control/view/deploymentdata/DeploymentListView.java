@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import feign.RequestInterceptor;
 import feign.auth.BasicAuthRequestInterceptor;
+import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
@@ -38,7 +39,7 @@ import java.util.Set;
 @Route(value = "bpmn/deployments", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_Deployment.list")
 @ViewDescriptor(path = "deployment-list-view.xml")
-public class DeploymentListView extends StandardListView<DeploymentData> {
+public class DeploymentListView extends AbstractListViewWithDelayedLoad<DeploymentData> {
 
     @Autowired
     private DeploymentService deploymentService;
@@ -75,18 +76,17 @@ public class DeploymentListView extends StandardListView<DeploymentData> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         initFilter();
-        deploymentDatasDl.load();
     }
 
     @Subscribe("applyFilter")
     public void onApplyFilter(ActionPerformedEvent event) {
-        deploymentDatasDl.load();
+        startLoadData();
     }
 
     @Subscribe(id = "deploymentFilterDc", target = Target.DATA_CONTAINER)
     public void onDeploymentFilterDcItemPropertyChange(
             final InstanceContainer.ItemPropertyChangeEvent<DeploymentFilter> event) {
-        deploymentDatasDl.load();
+        startLoadData();
     }
 
     @Subscribe(id = "clearBtn", subject = "clickListener")
@@ -132,12 +132,12 @@ public class DeploymentListView extends StandardListView<DeploymentData> {
 
         DeploymentLoadContext context = new DeploymentLoadContext().setFilter(filter);
         if (query != null) {
-            context = context.setFirstResult(query.getFirstResult())
+            context.setFirstResult(query.getFirstResult())
                     .setMaxResults(query.getMaxResults())
                     .setSort(query.getSort());
         }
 
-        return deploymentService.findAll(context);
+        return loadItemsWithStateHandling(() -> deploymentService.findAll(context));
     }
 
     @Supply(to = "deploymentsDataGrid.actions", subject = "renderer")
@@ -161,7 +161,7 @@ public class DeploymentListView extends StandardListView<DeploymentData> {
             dialogWindows.view(this, DeleteDeploymentView.class)
                     .withAfterCloseListener(closeEvent -> {
                         if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                            deploymentDatasDl.load();
+                            startLoadData();
                         }
                     })
                     .withViewConfigurer(view -> view.setDeploymentId(
@@ -174,11 +174,21 @@ public class DeploymentListView extends StandardListView<DeploymentData> {
         dialogWindows.view(this, BulkDeleteDeploymentView.class)
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        deploymentDatasDl.load();
+                        startLoadData();
                     }
                 })
                 .withViewConfigurer(view -> view.setDeployments(selectedItems))
                 .build()
                 .open();
+    }
+
+    @Override
+    protected void loadData() {
+        deploymentDatasDl.load();
+    }
+
+    @Subscribe("deploymentsDataGrid.refresh")
+    public void onDeploymentsDataGridRefresh(final ActionPerformedEvent event) {
+        startLoadData();
     }
 }

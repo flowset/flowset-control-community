@@ -21,6 +21,7 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -43,7 +44,6 @@ import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.incidentdata.filter.*;
-import io.flowset.control.view.util.ComponentHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,12 +61,10 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 @ViewDescriptor("incident-data-list-view.xml")
 @LookupComponent("incidentsDataGrid")
 @DialogMode(width = "50em")
-public class IncidentDataListView extends StandardListView<IncidentData> {
+public class IncidentDataListView extends AbstractListViewWithDelayedLoad<IncidentData> {
 
     @Autowired
     protected Metadata metadata;
-    @Autowired
-    protected ComponentHelper componentHelper;
     @Autowired
     protected ViewNavigators viewNavigators;
     @Autowired
@@ -118,9 +116,11 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
                     .setSort(query.getSort());
         }
 
-        List<IncidentData> incidents = incidentService.findRuntimeIncidents(context);
-        loadProcessDefinitions(incidents);
-        return incidents;
+        return loadItemsWithStateHandling(() -> {
+            List<IncidentData> incidents = incidentService.findRuntimeIncidents(context);
+            loadProcessDefinitions(incidents);
+            return incidents;
+        });
     }
 
     @Install(to = "pagination", subject = "totalCountDelegate")
@@ -135,7 +135,7 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
 
     @Subscribe("incidentsDataGrid")
     public void onIncidentsDataGridSort(final SortEvent<DataGrid<IncidentData>, GridSortOrder<DataGrid<IncidentData>>> event) {
-        incidentsDl.load();
+        startLoadData();
     }
 
     @Supply(to = "incidentsDataGrid.actions", subject = "renderer")
@@ -169,7 +169,7 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
 
     @Subscribe(id = "filterDc", target = Target.DATA_CONTAINER)
     public void onFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<IncidentFilter> event) {
-        incidentsDl.load();
+        startLoadData();
     }
 
     @Subscribe("incidentsDataGrid.bulkRetry")
@@ -179,17 +179,14 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
             return;
         }
 
-        DialogWindow<BulkRetryIncidentView> dialogWindow = dialogWindows.view(this, BulkRetryIncidentView.class)
+        dialogWindows.view(this, BulkRetryIncidentView.class)
+                .withViewConfigurer(bulkRetryIncidentView -> bulkRetryIncidentView.setIncidentDataSet(selectedItems))
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        incidentsDl.load();
+                        startLoadData();
                     }
                 })
-                .build();
-
-        BulkRetryIncidentView bulkRetryIncidentView = dialogWindow.getView();
-        bulkRetryIncidentView.setIncidentDataSet(selectedItems);
-        dialogWindow.open();
+                .open();
     }
 
     @Install(to = "incidentsDataGrid.message", subject = "tooltipGenerator")
@@ -211,9 +208,19 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
         });
     }
 
+    @Subscribe("incidentsDataGrid.refresh")
+    public void onIncidentsDataGridRefresh(final ActionPerformedEvent event) {
+        startLoadData();
+    }
+
     protected void initFilter() {
         IncidentFilter incidentFilter = metadata.create(IncidentFilter.class);
         filterDc.setItem(incidentFilter);
+    }
+
+    @Override
+    protected void loadData() {
+        incidentsDl.load();
     }
 
     protected JmixButton createViewButton(IncidentData incidentData) {
@@ -319,7 +326,7 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
             DialogWindow<RetryJobView> dialogWindow = dialogWindows.view(getCurrentView(), RetryJobView.class)
                     .withAfterCloseListener(afterClose -> {
                         if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                            incidentsDl.load();
+                            startLoadData();
                         }
                     })
                     .build();
@@ -341,7 +348,7 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
             DialogWindow<RetryExternalTaskView> dialogWindow = dialogWindows.view(this, RetryExternalTaskView.class)
                     .withAfterCloseListener(closeEvent -> {
                         if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                            incidentsDl.load();
+                            startLoadData();
                         }
                     })
                     .build();
@@ -358,4 +365,5 @@ public class IncidentDataListView extends StandardListView<IncidentData> {
                 SortDirection.DESCENDING));
         incidentsDataGrid.sort(gridSortOrders);
     }
+
 }

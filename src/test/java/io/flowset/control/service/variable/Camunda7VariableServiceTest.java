@@ -5,6 +5,8 @@
 
 package io.flowset.control.service.variable;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.test_support.camunda7.dto.response.ProcessVariablesMapDto;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
@@ -19,6 +21,7 @@ import io.flowset.control.test_support.camunda7.dto.request.VariableValueDto;
 import io.flowset.control.test_support.camunda7.dto.response.HistoricDetailDto;
 import io.flowset.control.test_support.camunda7.dto.response.VariableInstanceDto;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,9 +31,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @SpringBootTest
@@ -124,6 +129,84 @@ public class Camunda7VariableServiceTest extends AbstractCamunda7IntegrationTest
                 .hasSize(1)
                 .extracting(HistoricDetailDto::getExecutionId, HistoricDetailDto::getVariableName, HistoricDetailDto::getValue)
                 .contains(tuple(processInstanceId, "myNewVariable", newValue));
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when update local variable if engine is not available")
+    void givenNewVariableAndNotAvailableEngine_whenUpdateVariableLocal_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUpdateVariable.bpmn")
+                .startByKey("testUpdateVariable");
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testUpdateVariable").get(0);
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myNewVariable");
+        variableInstanceData.setType("String");
+        variableInstanceData.setValue("newValue");
+        variableInstanceData.setExecutionId(processInstanceId);
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> variableService.updateVariableLocal(variableInstanceData))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
+    @DisplayName("Remove existing process variable")
+    void givenExistingVariable_whenRemoveVariableLocal_thenVariableRemoved() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("myVariable", new VariableValueDto("String", "oldValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUpdateVariable.bpmn")
+                .startByKey("testUpdateVariable", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testUpdateVariable").get(0);
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myVariable");
+        variableInstanceData.setType("String");
+        variableInstanceData.setValue("oldValue");
+        variableInstanceData.setExecutionId(processInstanceId);
+
+        //when
+        variableService.removeVariablesLocal(processInstanceId, Set.of(variableInstanceData));
+
+        //then
+        ProcessVariablesMapDto myVariablesMap = camundaRestTestHelper.getVariablesByProcess(camunda7, processInstanceId);
+        assertThat(myVariablesMap).isEmpty();
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when remove variable if engine is not available")
+    void givenExistingVariableAndNotAvailableEngine_whenRemoveVariableLocal_thenExceptionThrown() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("myVariable", new VariableValueDto("String", "oldValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUpdateVariable.bpmn")
+                .startByKey("testUpdateVariable", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testUpdateVariable").get(0);
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myVariable");
+        variableInstanceData.setType("String");
+        variableInstanceData.setValue("oldValue");
+        variableInstanceData.setExecutionId(processInstanceId);
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> variableService.removeVariablesLocal(processInstanceId, Set.of(variableInstanceData)))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     static Stream<Arguments> provideNonNullPrimitiveExistingVariables() {

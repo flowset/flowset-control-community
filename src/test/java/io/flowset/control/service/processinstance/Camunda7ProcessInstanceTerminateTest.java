@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.processinstance;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -27,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -133,6 +135,25 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
         assertThat(foundHistoryInstance.getEndTime()).isNotNull();
     }
 
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when terminate instance by id if engine is not available")
+    void givenActiveInstanceAndNotAvailableEngine_whenTerminateById_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testVisitPlanningV1.bpmn")
+                .startByKey("visitPlanning");
+
+        String processId = sampleDataManager.getDeployedProcessVersions("visitPlanning").get(0);
+        String instanceId = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId).get(0).getId();
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() ->  processInstanceService.terminateById(instanceId))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"Remove for testing purpose"})
     @NullSource
@@ -165,6 +186,24 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                     assertThat(foundHistoricInstance.getEndTime()).isNotNull();
                     assertThat(foundHistoricInstance.getDeleteReason()).isEqualTo(reason);
                 });
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when terminate instances async if engine is not available")
+    void givenActiveInstancesAndNotAvailableEngine_whenTerminateByIdsAsync_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testVisitPlanningV1.bpmn")
+                .startByKey("visitPlanning", 2);
+
+        String processId = sampleDataManager.getDeployedProcessVersions("visitPlanning").get(0);
+        List<String> activeInstanceIds = camundaRestTestHelper.getActiveInstancesByProcessId(camunda7, processId);
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> processInstanceService.terminateByIdsAsync(activeInstanceIds, null))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     private void waitForBatchExecution() {

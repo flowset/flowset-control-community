@@ -10,6 +10,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.UiEventPublisher;
@@ -138,7 +140,11 @@ public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDef
             final LoadContext<DecisionDefinitionData> loadContext) {
         DecisionDefinitionData item = decisionDefinitionDc.getItemOrNull();
         String id = item == null ? Objects.requireNonNull(loadContext.getId()).toString() : item.getId();
-        return decisionDefinitionService.getById(id);
+        try {
+            return decisionDefinitionService.getById(id);
+        } catch (EngineConnectionFailedException e) {
+            throw new ViewEngineConnectionFailedException(e, this);
+        }
     }
 
     @Subscribe("versionComboBox")

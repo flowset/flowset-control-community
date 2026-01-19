@@ -7,6 +7,7 @@ package io.flowset.control.service.processinstance;
 
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -24,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -60,8 +62,8 @@ public class Camunda7ProcessInstanceServiceTest extends AbstractCamunda7Integrat
     }
 
     @Test
-    @DisplayName("Zero is returned as process instances count if engine is not available")
-    void givenRunningInstanceAndNotAvailableEngine_whenGetHistoricInstancesCount_thenZeroReturned() {
+    @DisplayName("EngineConnectionFailedException thrown when get process instances count if engine is not available")
+    void givenRunningInstanceAndNotAvailableEngine_whenGetHistoricInstancesCount_thenExceptionThrown() {
         //given
         applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
                 .deploy("test_support/testVisitPlanningV1.bpmn")
@@ -69,11 +71,9 @@ public class Camunda7ProcessInstanceServiceTest extends AbstractCamunda7Integrat
 
         camunda7.stop();
 
-        //when
-        long instancesCount = processInstanceService.getHistoricInstancesCount(null);
-
-        //then
-        assertThat(instancesCount).isZero();
+        //when and then
+        assertThatThrownBy(() -> processInstanceService.getHistoricInstancesCount(null))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class Camunda7ProcessInstanceServiceTest extends AbstractCamunda7Integrat
     }
 
     @Test
-    @DisplayName("Null returned for existing instance if selected engine is not available")
+    @DisplayName("EngineConnectionFailedException thrown when get existing instance if selected engine is not available")
     void givenRunningInstanceAndNotAvailableEngine_whenGetProcessInstanceById_thenNullReturned() {
         //given
         applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
@@ -122,11 +122,9 @@ public class Camunda7ProcessInstanceServiceTest extends AbstractCamunda7Integrat
 
         camunda7.stop();
 
-        //when
-        ProcessInstanceData foundInstance = processInstanceService.getProcessInstanceById(instanceId);
-
-        //then
-        assertThat(foundInstance).isNull();
+        //when and then
+        assertThatThrownBy(() -> processInstanceService.getProcessInstanceById(instanceId))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test

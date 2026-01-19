@@ -5,6 +5,8 @@
 
 package io.flowset.control.service.externaltask;
 
+import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.exception.RemoteProcessEngineException;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.filter.ExternalTaskFilter;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
@@ -25,8 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -73,6 +77,28 @@ public class Camunda7ExternalTaskServiceTest extends AbstractCamunda7Integration
     }
 
     @Test
+    @DisplayName("EngineConnectionFailedException thrown when set external task retries if engine is not available")
+    void givenExistingTaskAndNotAvailableEngine_whenSetRetries_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testExternalTaskRetriesUpdate.bpmn")
+                .startByKey("testExternalTaskRetriesUpdate");
+
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testExternalTaskRetriesUpdate");
+
+        ExternalTaskDto sourceTaskDto = camundaRestTestHelper.getExternalTasks(camunda7, instanceIds).get(0);
+        String externalTaskId = sourceTaskDto.getId();
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.setRetries(externalTaskId, 5))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
     @DisplayName("Set non-zero retries async for active external task")
     void givenActiveExternalTasksWithZeroRetries_whenSetRetriesAsync_thenRetriesUpdated() {
         //given
@@ -97,6 +123,26 @@ public class Camunda7ExternalTaskServiceTest extends AbstractCamunda7Integration
                     assertThat(externalTaskDto.getRetries()).isEqualTo(5);
                     assertThat(externalTaskDto.getId()).isIn(taskIds);
                 });
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when set external task retries async if engine is not available")
+    void givenExistingExternalTaskAndNotAvailableEngine_whenSetRetriesAsync_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testExternalTaskRetriesUpdate.bpmn")
+                .startByKey("testExternalTaskRetriesUpdate", 2);
+
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testJobRetriesUpdate");
+
+        List<String> taskIds = camundaRestTestHelper.getExternalTaskIds(camunda7, instanceIds);
+
+        camunda7.stop();
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.setRetriesAsync(taskIds, 5))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test
@@ -136,6 +182,28 @@ public class Camunda7ExternalTaskServiceTest extends AbstractCamunda7Integration
     }
 
     @Test
+    @DisplayName("EngineConnectionFailedException thrown when get runtime tasks count if engine is not available")
+    void givenExistingTasksAndNotAvailableEngine_whenGetRunningTasksCount_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testExternalTasksListLoad.bpmn")
+                .startByKey("testExternalTasksListLoad", 2);
+
+        String instanceId = sampleDataManager.getStartedInstances("testExternalTasksListLoad").get(0);
+
+        ExternalTaskFilter filter = dataManager.create(ExternalTaskFilter.class);
+        filter.setProcessInstanceId(instanceId);
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.getRunningTasksCount(filter))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
     @DisplayName("Get error details of active external task by existing task id")
     void givenExistingExternalTaskWithError_whenGetErrorDetails_thenErrorIsReturned() {
         //given
@@ -159,6 +227,44 @@ public class Camunda7ExternalTaskServiceTest extends AbstractCamunda7Integration
 
         //then
         assertThat(errorDetails).isEqualTo("I/O exception occurred during service connection");
+    }
+
+    @Test
+    @DisplayName("Get error details of active external task by non-existing task id")
+    void givenNonExistingExternalTaskId_whenGetErrorDetails_thenExceptionThrown() {
+        //given
+        String nonExistingTaskId = UUID.randomUUID().toString();
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.getErrorDetails(nonExistingTaskId))
+                .isInstanceOf(RemoteProcessEngineException.class);
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when get error details if engine is not available")
+    void givenExternalTaskWithErrorAndNotAvailableEngine_whenGetErrorDetails_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testFailedExternalTask.bpmn")
+                .startByKey("testFailedExternalTask");
+
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testFailedExternalTask");
+        String taskId = camundaRestTestHelper.getExternalTaskIds(camunda7, instanceIds).get(0);
+
+        camundaRestTestHelper.failExternalTask(camunda7, taskId, HandleFailureDto.builder()
+                .errorMessage("Service not available")
+                .errorDetails("I/O exception occurred during service connection")
+                .retries(0)
+                .workerId("testWorker")
+                .build());
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.getErrorDetails(taskId))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
     @Test
