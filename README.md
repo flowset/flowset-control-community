@@ -8,7 +8,7 @@
 - **User Task Management:** View user tasks with the ability to reassign them.
 
 > [!NOTE]
-> Currently, only Camunda 7 is supported. 
+> Currently, Camunda 7, Operaton, and other BPM engines compatible with the Camunda Rest API are supported.
 
 Flowset Control Community is built using the open-source [Jmix](https://www.jmix.io) framework.
 
