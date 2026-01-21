@@ -10,23 +10,29 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.ComponentUtils;
 import io.jmix.flowui.model.InstanceContainer;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.IncidentData;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.flowset.control.view.incidentdata.IncidentHeaderFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.runtime.Incident;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class IncidentTypeHeaderFilter extends IncidentHeaderFilter {
+import static io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder.TYPE_FILTER_PARAM;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getStringParam;
+
+public class IncidentTypeHeaderFilter extends IncidentHeaderFilter implements HasFilterUrlParamHeaderFilter {
     private static final String CUSTOM_TYPE = "custom";
 
-    protected TextField customTypeField;
+    protected TypedTextField<String> customTypeField;
     protected RadioButtonGroup<String> incidentTypeGroup;
 
     public IncidentTypeHeaderFilter(Grid<IncidentData> dataGrid,
@@ -59,6 +65,34 @@ public class IncidentTypeHeaderFilter extends IncidentHeaderFilter {
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, value != null);
     }
 
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        String typeParam = getStringParam(queryParameters, TYPE_FILTER_PARAM);
+        if (typeParam == null) {
+            incidentTypeGroup.clear();
+            customTypeField.clear();
+        } else if (StringUtils.equalsAny(typeParam, Incident.FAILED_JOB_HANDLER_TYPE, Incident.EXTERNAL_TASK_HANDLER_TYPE)) {
+            incidentTypeGroup.setValue(typeParam);
+            customTypeField.clear();
+        } else {
+            incidentTypeGroup.setValue(CUSTOM_TYPE);
+            customTypeField.setTypedValue(typeParam);
+        }
+        apply();
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+        String value = incidentTypeGroup.getValue();
+        if (StringUtils.equals(value, CUSTOM_TYPE)) {
+            paramValues.put(TYPE_FILTER_PARAM, customTypeField.getTypedValue());
+        } else {
+            paramValues.put(TYPE_FILTER_PARAM, value);
+        }
+        return paramValues;
+    }
+
     protected VerticalLayout createIncidentTypeFilter() {
         incidentTypeGroup = uiComponents.create(RadioButtonGroup.class);
         incidentTypeGroup.setLabel(messages.getMessage(IncidentFilter.class, "IncidentFilter.incidentType"));
@@ -80,7 +114,7 @@ public class IncidentTypeHeaderFilter extends IncidentHeaderFilter {
         );
         ComponentUtils.setItemsMap(incidentTypeGroup, incidentTypesMap);
 
-        customTypeField = uiComponents.create(TextField.class);
+        customTypeField = uiComponents.create(TypedTextField.class);
         customTypeField.setVisible(false);
         customTypeField.setWidthFull();
         customTypeField.setMinWidth("10em");

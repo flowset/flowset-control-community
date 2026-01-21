@@ -7,15 +7,24 @@ package io.flowset.control.view.processinstance.filter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.QueryParameters;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.model.InstanceContainer;
 
-public class BusinessKeyHeaderFilter extends ProcessInstanceDataGridHeaderFilter {
+import java.util.HashMap;
+import java.util.Map;
 
-    protected TextField businessKey;
+import static io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder.BUSINESS_KEY_FILTER_PARAM;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getStringParam;
+
+public class BusinessKeyHeaderFilter extends ProcessInstanceDataGridHeaderFilter implements HasFilterUrlParamHeaderFilter {
+
+    protected TypedTextField<String> businessKey;
 
     public BusinessKeyHeaderFilter(DataGrid<ProcessInstanceData> dataGrid,
                                    DataGridColumn<ProcessInstanceData> column, InstanceContainer<ProcessInstanceFilter> filterDc) {
@@ -35,15 +44,30 @@ public class BusinessKeyHeaderFilter extends ProcessInstanceDataGridHeaderFilter
 
     @Override
     public void apply() {
-        String value = businessKey.getValue();
+        String value = businessKey.getTypedValue();
         filterDc.getItem().setBusinessKeyLike(value);
 
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, value != null);
     }
 
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        String paramValue = getStringParam(queryParameters, BUSINESS_KEY_FILTER_PARAM);
+
+        businessKey.setTypedValue(paramValue);
+        apply();
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+        paramValues.put(BUSINESS_KEY_FILTER_PARAM, businessKey.getTypedValue());
+
+        return paramValues;
+    }
 
     protected TextField createBusinessKeyFilter() {
-        businessKey = uiComponents.create(TextField.class);
+        businessKey = uiComponents.create(TypedTextField.class);
         businessKey.setWidthFull();
         businessKey.setMinWidth("30em");
         businessKey.setClearButtonVisible(true);

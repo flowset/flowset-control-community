@@ -7,17 +7,25 @@ package io.flowset.control.view.incidentdata.filter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.QueryParameters;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.model.InstanceContainer;
 import io.micrometer.common.util.StringUtils;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.view.incidentdata.IncidentHeaderFilter;
 
-public class ProcessInstanceIdHeaderFilter extends IncidentHeaderFilter {
+import java.util.HashMap;
+import java.util.Map;
 
-    protected TextField processInstanceIdField;
+import static io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder.*;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getStringParam;
+
+public class ProcessInstanceIdHeaderFilter extends IncidentHeaderFilter implements HasFilterUrlParamHeaderFilter {
+
+    protected TypedTextField<String> processInstanceIdField;
 
     public ProcessInstanceIdHeaderFilter(Grid<IncidentData> dataGrid,
                                          DataGridColumn<IncidentData> column,
@@ -38,7 +46,7 @@ public class ProcessInstanceIdHeaderFilter extends IncidentHeaderFilter {
 
     @Override
     public void apply() {
-        String value = processInstanceIdField.getValue();
+        String value = processInstanceIdField.getTypedValue();
         boolean notEmptyValue = StringUtils.isNotEmpty(value);
         if (notEmptyValue) {
             filterDc.getItem().setProcessInstanceId(value);
@@ -50,8 +58,24 @@ public class ProcessInstanceIdHeaderFilter extends IncidentHeaderFilter {
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, notEmptyValue);
     }
 
-    protected TextField createProcessInstanceIdFilter() {
-        processInstanceIdField = uiComponents.create(TextField.class);
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        String paramValue = getStringParam(queryParameters, PROCESS_INSTANCE_ID_FILTER_PARAM);
+
+        processInstanceIdField.setTypedValue(paramValue);
+        apply();
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+        paramValues.put(PROCESS_INSTANCE_ID_FILTER_PARAM, processInstanceIdField.getTypedValue());
+
+        return paramValues;
+    }
+
+    protected TypedTextField<String> createProcessInstanceIdFilter() {
+        processInstanceIdField = uiComponents.create(TypedTextField.class);
         processInstanceIdField.setWidthFull();
         processInstanceIdField.setMinWidth("30em");
         processInstanceIdField.setClearButtonVisible(true);

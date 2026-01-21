@@ -14,7 +14,7 @@
         <instance id="userTaskFilterDc" class="io.flowset.control.entity.filter.UserTaskFilter"/>
     </data>
     <facets>
-        <urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters">
             <pagination component="tasksPagination"/>
         </urlQueryParameters>
     </facets>
@@ -56,7 +56,7 @@
                     </details>
                     <details id="assignmentFilters" width="100%" themeNames="reverse small" opened="true">
                         <div width="100%">
-                            <radioButtonGroup id="assignmentTypeGroup" classNames="pt-xs"/>
+                            <radioButtonGroup id="assignmentTypeGroup" classNames="pt-xs" itemsEnum="io.flowset.control.view.alltasks.AssignmentFilterOption"/>
                             <textField id="assigneeField" property="assigneeLike" width="100%" classNames="pt-xs"
                                        label="msg://io.flowset.control.entity.filter/UserTaskFilter.assigneeLike"
                                        clearButtonVisible="true"/>

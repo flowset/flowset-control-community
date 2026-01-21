@@ -21,6 +21,8 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder;
+import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -29,6 +31,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
@@ -77,6 +80,8 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected Dialogs dialogs;
     @Autowired
     protected Notifications notifications;
+    @ViewComponent
+    protected UrlQueryParametersFacet urlQueryParameters;
     @Autowired
     private DialogWindows dialogWindows;
     @Autowired
@@ -99,6 +104,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     public void onInit(final InitEvent event) {
         initFilter();
         initDataGridHeaderRow();
+        urlQueryParameters.registerBinder(new IncidentListQueryParamBinder(incidentsDataGrid, this::startLoadData));
     }
 
     @Subscribe
@@ -165,11 +171,6 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     @Install(to = "incidentsDataGrid.processInstanceId", subject = "tooltipGenerator")
     protected String incidentsDataGridProcessInstanceIdTooltipGenerator(final IncidentData incidentData) {
         return incidentData.getProcessInstanceId();
-    }
-
-    @Subscribe(id = "filterDc", target = Target.DATA_CONTAINER)
-    public void onFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<IncidentFilter> event) {
-        startLoadData();
     }
 
     @Subscribe("incidentsDataGrid.bulkRetry")
@@ -274,7 +275,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
         addColumnFilter(headerRow, "type", this::createTypeColumnFilter);
     }
 
-    protected <T extends IncidentHeaderFilter> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<IncidentData>, T> filterProvider) {
+    protected <T extends ContainerDataGridHeaderFilter<IncidentFilter, IncidentData>> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<IncidentData>, T> filterProvider) {
         DataGridColumn<IncidentData> column = incidentsDataGrid.getColumnByKey(columnName);
         T filterComponent = filterProvider.apply(column);
         BeanUtil.autowireContext(applicationContext, filterComponent);
@@ -301,7 +302,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
         return new ProcessInstanceIdHeaderFilter(incidentsDataGrid, column, filterDc);
     }
 
-    protected IncidentHeaderFilter createProcessColumnFilter(DataGridColumn<IncidentData> column) {
+    protected ProcessHeaderFilter createProcessColumnFilter(DataGridColumn<IncidentData> column) {
         return new ProcessHeaderFilter(incidentsDataGrid, column, filterDc);
     }
 

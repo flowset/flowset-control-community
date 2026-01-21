@@ -6,7 +6,6 @@
 package io.flowset.control.view.alltasks;
 
 
-import com.google.common.collect.ImmutableMap;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,16 +21,19 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.facet.urlqueryparameters.AllUserTaskListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
+import io.jmix.core.Sort;
 import io.jmix.core.entity.EntityValues;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.details.JmixDetails;
@@ -39,8 +41,8 @@ import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.radiobuttongroup.JmixRadioButtonGroup;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
-import io.jmix.flowui.kit.component.ComponentUtils;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
@@ -72,9 +74,6 @@ import static io.flowset.control.view.util.JsUtils.SET_DEFAULT_TIME_SCRIPT;
 @ViewDescriptor("all-tasks-view.xml")
 @LookupComponent("tasksDataGrid")
 public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> {
-
-    protected static final String ASSIGNED_OPTION = "assigned";
-    protected static final String UNASSIGNED_OPTION = "unassigned";
 
     @Autowired
     protected Metadata metadata;
@@ -124,18 +123,20 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     @ViewComponent
     protected JmixDetails generalFilters;
     @ViewComponent
-    protected JmixRadioButtonGroup<Object> assignmentTypeGroup;
+    protected JmixRadioButtonGroup<AssignmentFilterOption> assignmentTypeGroup;
     @ViewComponent
     protected TypedDateTimePicker<OffsetDateTime> createdBeforeField;
     @ViewComponent
     protected TypedDateTimePicker<OffsetDateTime> createdAfterField;
     @ViewComponent
     protected TypedTextField<String> assigneeField;
-
-    protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
-
     @ViewComponent
     protected JmixRadioButtonGroup<UserTaskStateFilterOption> stateTypeGroup;
+    @ViewComponent
+    protected UrlQueryParametersFacet urlQueryParameters;
+
+    protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
+    protected AllUserTaskListQueryParamBinder queryParamBinder;
 
     @Subscribe
     protected void onInit(InitEvent initEvent) {
@@ -151,18 +152,13 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         addDetailsSummary(generalFilters, "generalFilterGroup");
         addDetailsSummary(assignmentFilters, "assignmentFilterGroup");
         addDetailsSummary(creationDateFilters, "createDateFilterGroup");
-    }
-
-    @Subscribe
-    public void onBeforeShow(final BeforeShowEvent event) {
-        Map<Object, String> assignmentTypesMap = ImmutableMap.of(
-                ASSIGNED_OPTION, messages.getMessage(UserTaskFilter.class, "UserTaskFilter.assigned"),
-                UNASSIGNED_OPTION, messages.getMessage(UserTaskFilter.class, "UserTaskFilter.unassigned")
-        );
-        ComponentUtils.setItemsMap(assignmentTypeGroup, assignmentTypesMap);
 
         stateTypeGroup.setItems(UserTaskStateFilterOption.class);
         stateTypeGroup.setValue(UserTaskStateFilterOption.ALL);
+
+        queryParamBinder = new AllUserTaskListQueryParamBinder(userTaskFilterDc, this::startLoadData,
+                processDefinitionService, filterFormLayout);
+        urlQueryParameters.registerBinder(queryParamBinder);
     }
 
     @Install(to = "processDefinitionLookup", subject = "itemsFetchCallback")
@@ -171,6 +167,7 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         filter.setKeyLike(query.getFilter().orElse(null));
         filter.setLatestVersionOnly(true);
         ProcessDefinitionLoadContext context = new ProcessDefinitionLoadContext().setFilter(filter)
+                .setSort(Sort.by(Sort.Direction.ASC, "key"))
                 .setMaxResults(query.getLimit())
                 .setFirstResult(query.getOffset());
 
@@ -184,19 +181,10 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
 
     @Subscribe("processDefinitionLookup")
     public void onProcessDefinitionLookupComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixComboBox<ProcessDefinitionData>, ProcessDefinitionData> event) {
-        ProcessDefinitionData value = event.getValue();
-        String key = value != null ? value.getKey() : null;
-        userTaskFilterDc.getItem().setProcessDefinitionKey(key);
-        startLoadData();
-    }
-
-    @Subscribe(id = "userTaskFilterDc", target = Target.DATA_CONTAINER)
-    public void onUserTaskFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<UserTaskFilter> event) {
-        String property = event.getProperty();
-
-        boolean notAssignmentFilter = !property.equals("assigned") && !property.equals("unassigned");
-        boolean notStateFilter = !property.equals("active") && !property.equals("suspended");
-        if (notAssignmentFilter && notStateFilter) { //not to load because the data loading is implemented in the component listeners
+        if (event.isFromClient()) {
+            ProcessDefinitionData value = event.getValue();
+            String key = value != null ? value.getKey() : null;
+            userTaskFilterDc.getItem().setProcessDefinitionKey(key);
             startLoadData();
         }
     }
@@ -295,6 +283,7 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         UserTaskFilter userTaskFilter = metadata.create(UserTaskFilter.class);
         userTaskFilterDc.setItem(userTaskFilter);
 
+        queryParamBinder.resetParameters();
         startLoadData();
     }
 
@@ -314,17 +303,17 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     }
 
     @Subscribe("assignmentTypeGroup")
-    public void onAssignmentTypeGroupComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixRadioButtonGroup<String>, String> event) {
-        String value = event.getValue();
+    public void onAssignmentTypeGroupComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixRadioButtonGroup<AssignmentFilterOption>, AssignmentFilterOption> event) {
+        AssignmentFilterOption value = event.getValue();
         if (value == null) {
             assigneeField.setEnabled(true);
             userTaskFilterDc.getItem().setUnassigned(null);
             userTaskFilterDc.getItem().setAssigned(null);
-        } else if (ASSIGNED_OPTION.equals(value)) {
+        } else if (value == AssignmentFilterOption.ASSIGNED) {
             assigneeField.setEnabled(true);
             userTaskFilterDc.getItem().setUnassigned(null);
             userTaskFilterDc.getItem().setAssigned(true);
-        } else if (UNASSIGNED_OPTION.equals(value)) {
+        } else if (value == AssignmentFilterOption.UNASSIGNED) {
             userTaskFilterDc.getItem().setUnassigned(true);
             userTaskFilterDc.getItem().setAssigned(null);
             userTaskFilterDc.getItem().setAssigneeLike(null);
@@ -344,6 +333,41 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
                 case SUSPENDED -> setSuspendedTasksFilter();
             }
 
+            startLoadData();
+        }
+    }
+
+    @Subscribe("taskKeyLikeField")
+    public void onTaskKeyLikeFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<?>, ?> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("taskNameLikeField")
+    public void onTaskNameLikeFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<?>, ?> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("assigneeField")
+    public void onAssigneeFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<?>, ?> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("createdAfterField")
+    public void onCreatedAfterFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedDateTimePicker<Comparable>, Comparable<?>> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("createdBeforeField")
+    public void onCreatedBeforeFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedDateTimePicker<Comparable>, Comparable<?>> event) {
+        if (event.isFromClient()) {
             startLoadData();
         }
     }
