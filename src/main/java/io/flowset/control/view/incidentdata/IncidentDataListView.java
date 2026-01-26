@@ -145,12 +145,9 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
             layout.setWidth("min-content");
 
             if (StringUtils.equals(incidentData.getIncidentId(), incidentData.getCauseIncidentId())) {
-                if (incidentData.isJobFailed()) {
-                    JmixButton retryJobBtn = createRetryJobButton(incidentData);
-                    layout.add(retryJobBtn);
-                } else if (incidentData.isExternalTaskFailed()) {
-                    JmixButton retryExternalTaskBtn = createRetryExternalTaskButton(incidentData);
-                    layout.add(retryExternalTaskBtn);
+                JmixButton retryBtn = createRetryIncidentButton(incidentData);
+                if (retryBtn != null) {
+                    layout.add(retryBtn);
                 }
             }
 
@@ -301,47 +298,48 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
         return new IncidentTimestampHeaderFilter(incidentsDataGrid, column, filterDc);
     }
 
-    protected JmixButton createRetryJobButton(IncidentData incidentData) {
-        JmixButton retryJobBtn = uiComponents.create(JmixButton.class);
-        retryJobBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        retryJobBtn.setText(messages.getMessage("actions.Retry"));
-        retryJobBtn.setIcon(VaadinIcon.ROTATE_LEFT.create());
-        retryJobBtn.addClickListener(buttonClickEvent -> {
-            DialogWindow<RetryJobView> dialogWindow = dialogWindows.view(getCurrentView(), RetryJobView.class)
-                    .withAfterCloseListener(afterClose -> {
-                        if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                            startLoadData();
-                        }
-                    })
-                    .build();
+    @Nullable
+    protected JmixButton createRetryIncidentButton(IncidentData incident) {
+        if (!incident.isExternalTaskFailed() && !incident.isJobFailed()) {
+            return null;
+        }
 
-            RetryJobView retryJobView = dialogWindow.getView();
-            retryJobView.setJobId(incidentData.getConfiguration());
-
-            dialogWindow.open();
+        JmixButton retryBtn = uiComponents.create(JmixButton.class);
+        retryBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        retryBtn.addClassNames("data-grid-column-action");
+        retryBtn.setTitle(messages.getMessage("actions.Retry"));
+        retryBtn.setIcon(VaadinIcon.ROTATE_LEFT.create());
+        retryBtn.addClickListener(event -> {
+            if (incident.isJobFailed()) {
+                openRetryJobView(incident);
+            } else if (incident.isExternalTaskFailed()) {
+                openRetryExternalTaskView(incident);
+            }
         });
-        return retryJobBtn;
+
+        return retryBtn;
     }
 
-    protected JmixButton createRetryExternalTaskButton(IncidentData incidentData) {
-        JmixButton retryExternalTaskBtn = uiComponents.create(JmixButton.class);
-        retryExternalTaskBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        retryExternalTaskBtn.setText(messages.getMessage("actions.Retry"));
-        retryExternalTaskBtn.setIcon(VaadinIcon.ROTATE_LEFT.create());
-        retryExternalTaskBtn.addClickListener(buttonClickEvent -> {
-            DialogWindow<RetryExternalTaskView> dialogWindow = dialogWindows.view(this, RetryExternalTaskView.class)
-                    .withAfterCloseListener(closeEvent -> {
-                        if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                            startLoadData();
-                        }
-                    })
-                    .build();
+    protected void openRetryJobView(IncidentData incidentData) {
+        dialogWindows.view(getCurrentView(), RetryJobView.class)
+                .withViewConfigurer(view -> view.setJobId(incidentData.getConfiguration()))
+                .withAfterCloseListener(afterClose -> {
+                    if (afterClose.closedWith(StandardOutcome.SAVE)) {
+                        startLoadData();
+                    }
+                })
+                .open();
+    }
 
-            RetryExternalTaskView retryExternalTaskView = dialogWindow.getView();
-            retryExternalTaskView.setExternalTaskId(incidentData.getConfiguration());
-            dialogWindow.open();
-        });
-        return retryExternalTaskBtn;
+    protected void openRetryExternalTaskView(IncidentData incidentData) {
+        dialogWindows.view(this, RetryExternalTaskView.class)
+                .withViewConfigurer(view -> view.setExternalTaskId(incidentData.getConfiguration()))
+                .withAfterCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
+                        startLoadData();
+                    }
+                })
+                .open();
     }
 
     protected void setDefaultSort() {

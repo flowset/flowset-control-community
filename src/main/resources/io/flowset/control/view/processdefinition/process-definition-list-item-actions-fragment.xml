@@ -9,13 +9,13 @@
     </data>
 
     <content>
-        <hbox minWidth="20em" themeNames="spacing-xs" justifyContent="END">
-            <button id="startProcessBtn" minWidth="10em" themeNames="tertiary-inline small" icon="PLAY_CIRCLE"
-                    text="msg://processDefinitionList.start" visible="false"/>
-            <button id="activateBtn" minWidth="10em" themeNames="tertiary-inline small" icon="PLAY"
-                    text="msg://processDefinitionList.activate" visible="false"/>
-            <dropdownButton id="activeProcessActions" visible="false" dropdownIndicatorVisible="false"
-                            themeNames="tertiary-inline small" icon="ELLIPSIS_DOTS_H" openOnHover="true">
+        <hbox minWidth="min-content" themeNames="spacing-xs" justifyContent="END" alignItems="BASELINE">
+            <button id="startProcessBtn" themeNames="tertiary-inline" icon="PLAY_CIRCLE" classNames="data-grid-column-action"
+                    title="msg://processDefinitionList.start" visible="false"/>
+            <button id="activateBtn" themeNames="tertiary-inline" icon="PLAY" classNames="data-grid-column-action"
+                    title="msg://processDefinitionList.activate" visible="false"/>
+            <dropdownButton id="activeProcessActions" visible="false" dropdownIndicatorVisible="false" classNames="data-grid-column-action"
+                            themeNames="tertiary-inline" icon="ELLIPSIS_DOTS_V">
                 <items>
                     <componentItem id="delete">
                         <hbox alignItems="CENTER" justifyContent="START" classNames="text-error">
@@ -37,8 +37,8 @@
                     </componentItem>
                 </items>
             </dropdownButton>
-            <dropdownButton id="suspendedProcessActions" visible="false" dropdownIndicatorVisible="false"
-                            themeNames="tertiary-inline" icon="ELLIPSIS_DOTS_H" openOnHover="true">
+            <dropdownButton id="suspendedProcessActions" visible="false" dropdownIndicatorVisible="false" classNames="data-grid-column-action"
+                            themeNames="tertiary-inline" icon="ELLIPSIS_DOTS_V">
                 <items>
                     <componentItem id="delete" >
                         <hbox alignItems="CENTER" justifyContent="START" classNames="text-error">

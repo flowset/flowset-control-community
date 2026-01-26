@@ -95,3 +95,11 @@ vaadin-button[theme~='badge'][theme~='has-icon'] vaadin-icon {
 .break-word {
     word-break: break-word;
 }
+
+.data-grid-column-action {
+    min-width: 2.5em;
+}
+
+vaadin-button.data-grid-column-action > vaadin-icon {
+    padding: 0.175em;
+}
