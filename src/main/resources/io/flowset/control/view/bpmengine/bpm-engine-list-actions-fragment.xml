@@ -7,7 +7,7 @@
     </data>
     <content>
         <hbox padding="false" themeNames="spacing-s" width="min-content" classNames="pt-s pb-s">
-            <button id="markAsDefaultBtn" icon="BOOKMARK" text="msg:///actions.MarkAsDefault" themeNames="tertiary-inline" visible="false"/>
+            <button id="markAsDefaultBtn" title="msg:///actions.MarkAsDefault" themeNames="tertiary-inline" visible="false"/>
         </hbox>
     </content>
 </fragment>

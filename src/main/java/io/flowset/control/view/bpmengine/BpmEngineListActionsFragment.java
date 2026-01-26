@@ -1,7 +1,9 @@
 package io.flowset.control.view.bpmengine;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.action.DialogAction;
@@ -38,6 +40,11 @@ public class BpmEngineListActionsFragment extends FragmentRenderer<HorizontalLay
 
     public void setSourceDataGrid(DataGrid<BpmEngine> sourceDataGrid) {
         this.sourceDataGrid = sourceDataGrid;
+    }
+
+    @Subscribe
+    public void onAttachEvent(final AttachEvent event) {
+        markAsDefaultBtn.setIcon(new SvgIcon("icons/bookmark_check.svg"));
     }
 
     @Override
