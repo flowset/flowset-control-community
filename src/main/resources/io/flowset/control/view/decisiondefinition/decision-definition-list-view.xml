@@ -67,12 +67,15 @@
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">
-                <column property="name" autoWidth="true" flexGrow="1"/>
-                <column property="key" autoWidth="true" flexGrow="1"/>
-                <column property="version"/>
-                <column key="actions" sortable="false" autoWidth="true" flexGrow="0">
-                    <fragmentRenderer class="io.flowset.control.view.decisiondefinition.DecisionDefinitionListItemActionsFragment"/>
+                <column property="name" autoWidth="true" flexGrow="1">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.decisiondefinition.column.DecisionNameColumnFragment"/>
                 </column>
+                <column property="key" autoWidth="true" flexGrow="1">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.decisiondefinition.column.DecisionKeyColumnFragment"/>
+                </column>
+                <column property="version"/>
             </columns>
             <emptyStateComponent>
                 <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>

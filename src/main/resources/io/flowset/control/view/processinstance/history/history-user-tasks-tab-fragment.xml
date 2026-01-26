@@ -16,7 +16,6 @@
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
             <hbox classNames="buttons-panel" padding="false">
-                <button action="historyTasksGrid.view" themeNames="small primary"/>
                 <simplePagination id="userTasksPagination" dataLoader="historyTasksDl"/>
             </hbox>
             <dataGrid id="historyTasksGrid" width="100%" height="100%" themeNames="compact"
@@ -28,7 +27,10 @@
                             type="list_itemTracking"/>
                 </actions>
                 <columns resizable="true">
-                    <column property="taskId"/>
+                    <column property="taskId">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment"/>
+                    </column>
                     <column property="name"/>
                     <column property="taskDefinitionKey" sortable="false"/>
                     <column property="assignee"/>

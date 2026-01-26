@@ -102,6 +102,10 @@
                         </action>
                     </actions>
                     <columns resizable="true">
+                        <column property="taskId" frozen="true">
+                            <fragmentRenderer
+                                    class="io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment"/>
+                        </column>
                         <column property="taskDefinitionKey" autoWidth="true" sortable="false">
                             <fragmentRenderer
                                     class="io.flowset.control.view.alltasks.TaskKeyColumnFragment"/>
@@ -110,7 +114,6 @@
                         <column property="processDefinitionId" header="msg://processColumnLabel"/>
                         <column property="createTime" autoWidth="true"/>
                         <column property="assignee" autoWidth="true"/>
-                        <column key="actions" autoWidth="true" sortable="false" flexGrow="0"/>
                     </columns>
                     <emptyStateComponent>
                         <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>

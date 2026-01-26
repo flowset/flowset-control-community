@@ -68,11 +68,9 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     @Autowired
     protected Fragments fragments;
     @Autowired
-    protected AccessManager accessManager;
-    @Autowired
     protected Metadata metadata;
     @Autowired
-    private UiEventPublisher uiEventPublisher;
+    protected UiEventPublisher uiEventPublisher;
 
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -87,9 +85,9 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     @ViewComponent
     protected SimplePagination processInstancesPagination;
     @ViewComponent
-    private Div selectedActivityContainer;
+    protected Div selectedActivityContainer;
     @ViewComponent
-    private InstanceContainer<ProcessInstanceFilter> processInstanceFilterDc;
+    protected InstanceContainer<ProcessInstanceFilter> processInstanceFilterDc;
 
     @Subscribe
     public void onReady(ReadyEvent event) {
@@ -118,26 +116,6 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     protected String processInstancesGridIdTooltipGenerator(final RuntimeProcessInstanceData processInstanceData) {
         return processInstanceData.getId();
     }
-
-    @Supply(to = "processInstancesGrid.actions", subject = "renderer")
-    protected Renderer<RuntimeProcessInstanceData> processInstancesGridActionsRenderer() {
-        return new ComponentRenderer<>(processInstance -> {
-            UiEntityContext context = new UiEntityContext(metadata.getClass(processInstance));
-            accessManager.applyRegisteredConstraints(context);
-
-            if (!context.isViewPermitted()) {
-                return null;
-            }
-
-            JmixButton viewButton = uiComponents.create(JmixButton.class);
-            viewButton.setIcon(VaadinIcon.EYE.create());
-            viewButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-            viewButton.setText(messages.getMessage("actions.View"));
-            viewButton.addClickListener(event -> openProcessInstanceDetailView(processInstance));
-            return viewButton;
-        });
-    }
-
 
     protected void openProcessInstanceDetailView(RuntimeProcessInstanceData selectedInstance) {
         viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)

@@ -29,7 +29,6 @@ public abstract class VariableMapper {
     @Autowired
     Metadata metadata;
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "historicVariableInstanceId", source = "id")
     @Mapping(target = "valueInfo", expression = "java(createValueInfo(source.getValueInfo()))")
     public abstract HistoricVariableInstanceData fromHistoricVariableInstanceDto(HistoricVariableInstanceDto source);

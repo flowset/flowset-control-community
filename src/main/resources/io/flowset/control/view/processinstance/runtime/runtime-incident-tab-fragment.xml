@@ -16,7 +16,6 @@
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
             <hbox classNames="buttons-panel" padding="false">
-                <button action="runtimeIncidentsGrid.view" themeNames="small primary"/>
                 <button action="runtimeIncidentsGrid.retry" themeNames="small"/>
                 <simplePagination id="incidentsPagination" dataLoader="runtimeIncidentsDl"/>
             </hbox>
@@ -33,6 +32,14 @@
                             type="list_itemTracking"/>
                 </actions>
                 <columns resizable="true">
+                    <column property="incidentId" frozen="true">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.incidentdata.column.IncidentIdColumnFragment">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </fragmentRenderer>
+                    </column>
                     <column property="activityId" flexGrow="1"/>
                     <column property="message" flexGrow="2"/>
                     <column property="timestamp" flexGrow="1"/>

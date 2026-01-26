@@ -36,7 +36,6 @@
         </genericFilter>
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <button id="createBtn" action="usersDataGrid.create"/>
-            <button id="editBtn" action="usersDataGrid.edit"/>
             <button id="removeBtn" action="usersDataGrid.remove"/>
             <button id="showRoleAssignmentsBtn" action="usersDataGrid.showRoleAssignments"/>
             <dropdownButton id="additionalBtn" text="msg://additionalMenu" icon="COG">
@@ -63,7 +62,10 @@
                 <action id="showUserSubstitutions" type="sec_showUserSubstitutions"/>
             </actions>
             <columns resizable="true">
-                <column property="username"/>
+                <column property="username">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.user.column.UsernameColumnFragment"/>
+                </column>
                 <column property="firstName"/>
                 <column property="lastName"/>
                 <column property="email"/>

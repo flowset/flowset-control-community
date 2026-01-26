@@ -10,7 +10,6 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
@@ -56,10 +55,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     protected MessageBundle messageBundle;
     @Autowired
     protected ViewNavigators viewNavigators;
-    @Autowired
-    protected Fragments fragments;
-    @Autowired
-    protected UiComponents uiComponents;
     @Autowired
     protected Messages messages;
 
@@ -259,16 +254,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     @Subscribe(id = "processInstanceFilterDc", target = Target.DATA_CONTAINER)
     public void onProcessInstanceFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<ProcessInstanceFilter> event) {
         startLoadData();
-    }
-
-    @Supply(to = "processInstancesGrid.actions", subject = "renderer")
-    protected Renderer<ProcessInstanceData> processInstancesGridActionsRenderer() {
-        return new ComponentRenderer<>(processInstance -> {
-            ProcessInstanceListItemActionsFragment fragment = fragments.create(this, ProcessInstanceListItemActionsFragment.class);
-            fragment.setProcessInstance(processInstance);
-
-            return fragment;
-        });
     }
 
     @Install(to = "processInstancesGrid.startTime", subject = "partNameGenerator")

@@ -17,7 +17,6 @@
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
             <hbox classNames="buttons-panel" padding="false">
-                <button action="runtimeJobsGrid.edit" themeNames="small primary"/>
                 <button action="runtimeJobsGrid.retry" themeNames="small"/>
                 <button action="runtimeJobsGrid.activate" themeNames="small"/>
                 <button action="runtimeJobsGrid.suspend" themeNames="small"/>
@@ -42,7 +41,14 @@
                             text="msg:///actions.Suspend"/>
                 </actions>
                 <columns resizable="true">
-                    <column property="jobId"/>
+                    <column property="jobId">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.job.column.JobIdColumnFragment">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </fragmentRenderer>
+                    </column>
                     <column property="failedActivityId" sortable="false">
                         <fragmentRenderer
                                 class="io.flowset.control.view.processinstance.runtime.job.JobFailedActivityIdColumnFragment"/>

@@ -15,7 +15,6 @@
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
             <hbox classNames="buttons-panel" padding="false">
-                <button action="runtimeExternalTasksGrid.edit" themeNames="small primary"/>
                 <button action="runtimeExternalTasksGrid.retry" themeNames="small"/>
                 <simplePagination id="pagination" dataLoader="runtimeExternalTasksDl"/>
             </hbox>
@@ -32,9 +31,13 @@
                             type="list_itemTracking"/>
                 </actions>
                 <columns resizable="true" sortable="false">
+                    <column property="externalTaskId" frozen="true">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.externaltask.column.ExternalTaskIdColumnFragment"/>
+                    </column>
                     <column property="activityId"/>
-                    <column property="topicName"/>
-                    <column property="retries"/>
+                    <column property="topicName" autoWidth="true"/>
+                    <column property="retries" autoWidth="true"/>
                     <column property="lockExpirationTime"/>
                 </columns>
             </dataGrid>

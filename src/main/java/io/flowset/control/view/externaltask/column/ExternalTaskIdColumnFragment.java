@@ -1,0 +1,30 @@
+package io.flowset.control.view.externaltask.column;
+
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import io.flowset.control.entity.ExternalTaskData;
+import io.flowset.control.view.entitydetaillink.EntityDetailLinkFragment;
+import io.jmix.flowui.fragment.FragmentDescriptor;
+import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
+import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.view.Subscribe;
+import io.jmix.flowui.view.ViewComponent;
+
+@FragmentDescriptor("external-task-id-column-fragment.xml")
+@RendererItemContainer("externalTaskDc")
+public class ExternalTaskIdColumnFragment extends EntityDetailLinkFragment<HorizontalLayout, ExternalTaskData> {
+    @ViewComponent
+    protected JmixButton idBtn;
+
+    @Override
+    public void setItem(ExternalTaskData item) {
+        super.setItem(item);
+
+        idBtn.setText(item.getExternalTaskId());
+    }
+
+    @Subscribe(id = "idBtn", subject = "clickListener")
+    public void onIdBtnClick(final ClickEvent<JmixButton> event) {
+        openDetailView(ExternalTaskData.class);
+    }
+}

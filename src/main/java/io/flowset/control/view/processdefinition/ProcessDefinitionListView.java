@@ -6,15 +6,11 @@
 package io.flowset.control.view.processdefinition;
 
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
@@ -199,6 +195,11 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         return new ComponentRenderer<>(this::createStateBadge);
     }
 
+    @Subscribe(id = "processDefinitionsDl", target = Target.DATA_LOADER)
+    public void onProcessDefinitionsDlPostLoad(final CollectionLoader.PostLoadEvent<ProcessDefinitionData> event) {
+        processDefinitionsGrid.recalculateColumnWidths();
+    }
+
     @Supply(to = "processDefinitionsGrid.actions", subject = "renderer")
     protected Renderer<ProcessDefinitionData> processDefinitionsGridActionsRenderer() {
         return new ComponentRenderer<>((processDefinitionData) -> {
@@ -255,43 +256,6 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         String messageKey = suspended ? "processDefinitionList.status.suspended" : "processDefinitionList.status.active";
         badge.setText(messageBundle.getMessage(messageKey));
         return badge;
-    }
-
-    @Supply(to = "processDefinitionsGrid.key", subject = "renderer")
-    protected Renderer<ProcessDefinitionData> processDefinitionsGridKeyRenderer() {
-        StreamResource iconResource = new StreamResource("preview.svg",
-                () -> getClass().getResourceAsStream("/META-INF/resources/icons/preview.svg"));
-
-        return new ComponentRenderer<>(processDefinitionData -> {
-            HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
-            layout.setAlignItems(FlexComponent.Alignment.BASELINE);
-
-            Span key = uiComponents.create(Span.class);
-            key.setText(processDefinitionData.getKey());
-            key.setWidthFull();
-            key.addClassNames(LumoUtility.Overflow.HIDDEN, LumoUtility.TextOverflow.ELLIPSIS);
-
-            JmixButton previewBtn = createDiagramPreviewButton(processDefinitionData, iconResource);
-
-            layout.addAndExpand(key);
-            layout.add(previewBtn);
-
-            return layout;
-        });
-    }
-
-    protected JmixButton createDiagramPreviewButton(ProcessDefinitionData processDefinitionData, StreamResource iconResource) {
-        SvgIcon previewIcon = uiComponents.create(SvgIcon.class);
-        previewIcon.setSrc(iconResource);
-
-        JmixButton previewBtn = uiComponents.create(JmixButton.class);
-        previewBtn.setIcon(previewIcon);
-        previewBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        previewBtn.addClickListener(clickEvent -> dialogWindows.view(this, ProcessDefinitionDiagramView.class)
-                .withViewConfigurer(view -> view.setProcessDefinition(processDefinitionData))
-                .build()
-                .open());
-        return previewBtn;
     }
 
     @Override

@@ -2,8 +2,6 @@ package io.flowset.control.view.deploymentdata;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import feign.RequestInterceptor;
@@ -138,16 +136,6 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         }
 
         return loadItemsWithStateHandling(() -> deploymentService.findAll(context));
-    }
-
-    @Supply(to = "deploymentsDataGrid.actions", subject = "renderer")
-    protected Renderer<DeploymentData> deploymentsDataGridActionsRenderer() {
-        return new ComponentRenderer<>((deploymentData) -> {
-            DeploymentListItemActionsFragment actionsFragment =
-                    fragments.create(this, DeploymentListItemActionsFragment.class);
-            actionsFragment.setDeploymentData(deploymentData);
-            return actionsFragment;
-        });
     }
 
     @Subscribe("deploymentsDataGrid.bulkRemove")

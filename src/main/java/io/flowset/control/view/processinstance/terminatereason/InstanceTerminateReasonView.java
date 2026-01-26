@@ -38,7 +38,7 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 @Route(value = "instance-terminate-reason-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "InstanceTerminateReasonView")
 @ViewDescriptor(path = "instance-terminate-reason-view.xml")
-@DialogMode(width = "60em")
+@DialogMode(width = "65em")
 public class InstanceTerminateReasonView extends StandardView {
     @Autowired
     protected IncidentService incidentService;

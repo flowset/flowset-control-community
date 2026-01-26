@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="externalTaskDc" class="io.flowset.control.entity.ExternalTaskData"/>
+    </data>
+    <content>
+        <hbox id="root" padding="false" spacing="false" classNames="overflow-hidden">
+            <startSlot>
+                <button id="idBtn" themeNames="tertiary-inline link" whiteSpace="NOWRAP"
+                        width="auto"
+                        classNames="overflow-hidden text-ellipsis flex-shrink"/>
+            </startSlot>
+        </hbox>
+    </content>
+</fragment>

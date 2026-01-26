@@ -17,7 +17,6 @@
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
             <hbox classNames="buttons-panel" padding="false">
-                <button action="historicActivityInstancesGrid.view" themeNames="small primary"/>
                 <simplePagination id="historicActivityInstancesPagination" dataLoader="historicActivityInstancesDl"/>
             </hbox>
             <dataGrid id="historicActivityInstancesGrid" width="100%" height="100%" themeNames="compact"
@@ -29,8 +28,15 @@
                             type="list_itemTracking"/>
                 </actions>
                 <columns resizable="true">
+                    <column property="activityInstanceId">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.historicactivityinstancedata.column.ActivityInstanceIdColumnFragment">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </fragmentRenderer>
+                    </column>
                     <column property="activityId"/>
-                    <column property="activityType"/>
                     <column property="activityName"/>
                     <column property="startTime"/>
                     <column property="endTime"/>

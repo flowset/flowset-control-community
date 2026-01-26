@@ -34,7 +34,6 @@
                 <hbox id="processInstancesButtons" classNames="buttons-panel" alignItems="BASELINE">
                     <button id="refreshDecisionInstanceBtn" action="decisionInstancesGrid.refresh"
                             themeNames="small success primary"/>
-                    <button id="editProcessInstanceBtn" action="decisionInstancesGrid.edit" themeNames="small"/>
                     <simplePagination id="decisionInstancesPagination" />
                 </hbox>
             </vbox>
@@ -45,9 +44,19 @@
                     <action id="refresh" type="list_refresh"/>
                 </actions>
                 <columns resizable="true">
+                    <column property="decisionInstanceId">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.decisioninstance.column.DecisionInstanceIdColumnFragment"/>
+                    </column>
                     <column property="evaluationTime"/>
-                    <column property="processDefinitionKey"/>
-                    <column property="processInstanceId"/>
+                    <column property="processDefinitionKey">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.decisioninstance.column.DecisionInstanceProcessColumnFragment"/>
+                    </column>
+                    <column property="processInstanceId">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.decisioninstance.column.DecisionInstanceProcessInstanceColumnFragment"/>
+                    </column>
                     <column property="activityId"/>
                 </columns>
             </dataGrid>

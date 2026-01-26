@@ -171,7 +171,7 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         this.title = messageBundle.formatMessage("processDefinitionDetail.processName", getEditedEntity().getKey());
 
         FlexLayout flexLayout = uiComponents.create(FlexLayout.class);
-        flexLayout.addClassNames(LumoUtility.Margin.Left.XSMALL, LumoUtility.Gap.SMALL);
+        flexLayout.addClassNames(LumoUtility.Margin.Left.XSMALL, LumoUtility.Gap.SMALL, LumoUtility.AlignItems.CENTER);
 
         Span version = uiComponents.create(Span.class);
         version.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontWeight.BOLD);

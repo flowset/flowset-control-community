@@ -29,12 +29,11 @@
                     <column property="id" autoWidth="true" flexGrow="1">
                         <fragmentRenderer class="io.flowset.control.view.processinstance.column.instanceid.InstanceIdColumnFragment"/>
                     </column>
-                    <column property="businessKey" autoWidth="true" flexGrow="2"/>
+                    <column property="businessKey" autoWidth="true" flexGrow="1"/>
                     <column key="state" header="msg://processInstance.state" autoWidth="true" flexGrow="1"
                             sortable="false">
                         <fragmentRenderer class="io.flowset.control.view.processinstance.column.state.ProcessInstanceStateColumnFragment"/>
                     </column>
-                    <column key="actions" sortable="false" flexGrow="0" autoWidth="true"/>
                 </columns>
             </dataGrid>
         </vbox>

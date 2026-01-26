@@ -20,7 +20,6 @@ public abstract class HistoryActivityMapper {
     @Autowired
     Metadata metadata;
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "activityInstanceId", source = "id")
     @Mapping(target = "cancelled", source = "canceled")
     public abstract HistoricActivityInstanceData fromHistoryActivityDto(HistoricActivityInstanceDto source);
