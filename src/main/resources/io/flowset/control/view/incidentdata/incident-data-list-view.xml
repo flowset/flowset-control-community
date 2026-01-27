@@ -39,7 +39,11 @@
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">
-                <column property="activityId"/>
+                <column property="incidentId">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.incidentdata.column.IncidentIdColumnFragment"/>
+                </column>
+                <column property="activityId" autoWidth="true"/>
                 <column property="timestamp" flexGrow="1"/>
                 <column property="message"/>
                 <column property="processInstanceId"/>

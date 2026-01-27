@@ -23,7 +23,6 @@ public abstract class DeploymentMapper {
     Metadata metadata;
 
     @Mapping(target = "deploymentId", source = "id")
-    @Mapping(target = "id", ignore = true)
     public abstract DeploymentData fromDto(DeploymentDto source);
 
     @Mapping(target = "deploymentId", source = "id")

@@ -8,7 +8,6 @@ package io.flowset.control.view.processdefinition;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.view.processinstancemigration.ProcessInstanceMigrationView;
@@ -48,8 +47,6 @@ public class ProcessDefinitionListItemActionsFragment extends Fragment<Horizonta
     @ViewComponent
     protected JmixButton startProcessBtn;
     @ViewComponent
-    protected JmixButton viewDetailsBtn;
-    @ViewComponent
     protected Button activateBtn;
     @ViewComponent
     protected DropdownButton suspendedProcessActions;
@@ -68,7 +65,6 @@ public class ProcessDefinitionListItemActionsFragment extends Fragment<Horizonta
         activeProcessActions.addClassName(LumoUtility.Margin.End.AUTO);
         suspendedProcessActions.addClassName(LumoUtility.Margin.End.AUTO);
         startProcessBtn.addClassNames(LumoUtility.Height.MEDIUM);
-        viewDetailsBtn.addClassNames(LumoUtility.Height.MEDIUM);
         activateBtn.addClassNames(LumoUtility.Height.MEDIUM);
         activeProcessActions.addClassNames(LumoUtility.Height.MEDIUM);
         suspendedProcessActions.addClassNames(LumoUtility.Height.MEDIUM);
@@ -111,15 +107,6 @@ public class ProcessDefinitionListItemActionsFragment extends Fragment<Horizonta
                 .withViewConfigurer(view -> view.setProcessDefinitionId(processDefinition.getId()))
                 .build()
                 .open();
-    }
-
-    @Subscribe("viewDetailsBtn")
-    public void onViewDetailsBtnClick(ClickEvent<Button> event) {
-        viewNavigators.detailView(getView(), ProcessDefinitionData.class)
-                .withViewClass(ProcessDefinitionDetailView.class)
-                .withRouteParameters(new RouteParameters("id", processDefinition.getId()))
-                .withBackwardNavigation(true)
-                .navigate();
     }
 
     @Subscribe("activeProcessActions.delete")

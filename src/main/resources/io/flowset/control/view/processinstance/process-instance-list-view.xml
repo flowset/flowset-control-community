@@ -43,7 +43,14 @@
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">
-                <column property="id" flexGrow="1"/>
+                <column property="id" flexGrow="1" frozen="true">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.processinstance.column.instanceid.InstanceIdColumnFragment">
+                        <properties>
+                            <property name="showCopyButton" value="false"/>
+                        </properties>
+                    </fragmentRenderer>
+                </column>
                 <column property="processDefinitionId" resizable="true" header="msg://processKey" flexGrow="2"
                         autoWidth="true"/>
                 <column property="businessKey" flexGrow="1" autoWidth="true"/>
@@ -53,7 +60,6 @@
                 </column>
                 <column property="startTime" autoWidth="true"/>
                 <column property="endTime" flexGrow="1" autoWidth="true"/>
-                <column key="actions" sortable="false" autoWidth="true" flexGrow="0"/>
             </columns>
             <emptyStateComponent>
                 <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>

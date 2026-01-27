@@ -16,7 +16,6 @@
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
             <hbox classNames="buttons-panel" padding="false">
-                <button action="runtimeUserTasksGrid.view" themeNames="small primary"/>
                 <button action="runtimeUserTasksGrid.reassign" themeNames="small"/>
                 <simplePagination id="userTasksPagination" dataLoader="runtimeUserTasksDl"/>
             </hbox>
@@ -33,6 +32,10 @@
                             type="list_itemTracking"/>
                 </actions>
                 <columns resizable="true">
+                    <column property="taskId">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment"/>
+                    </column>
                     <column property="name" />
                     <column property="taskDefinitionKey" sortable="false" />
                     <column property="assignee" />

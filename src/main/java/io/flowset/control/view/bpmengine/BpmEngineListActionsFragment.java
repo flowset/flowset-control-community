@@ -3,9 +3,7 @@ package io.flowset.control.view.bpmengine;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.RouteParameters;
 import io.jmix.flowui.Dialogs;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.action.DialogAction;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -30,8 +28,6 @@ public class BpmEngineListActionsFragment extends FragmentRenderer<HorizontalLay
     @ViewComponent
     protected JmixButton markAsDefaultBtn;
     @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
     protected Dialogs dialogs;
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -51,13 +47,6 @@ public class BpmEngineListActionsFragment extends FragmentRenderer<HorizontalLay
         if (BooleanUtils.isNotTrue(item.getIsDefault())) {
             markAsDefaultBtn.setVisible(true);
         }
-    }
-
-    @Subscribe(id = "editBtn", subject = "clickListener")
-    public void onEditBtnClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(sourceDataGrid)
-                .withRouteParameters(new RouteParameters("id", item.getId().toString()))
-                .navigate();
     }
 
     @Subscribe(id = "markAsDefaultBtn", subject = "clickListener")

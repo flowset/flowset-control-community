@@ -45,7 +45,6 @@
                 <column property="state">
                     <fragmentRenderer class="io.flowset.control.view.processinstance.column.state.ProcessInstanceStateColumnFragment"/>
                 </column>
-                <column key="actions" sortable="false" autoWidth="true" flexGrow="0"/>
             </columns>
         </dataGrid>
         <hbox id="lookupActions">

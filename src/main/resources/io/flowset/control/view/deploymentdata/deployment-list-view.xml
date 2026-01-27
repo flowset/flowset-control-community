@@ -69,12 +69,14 @@
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">
-                <column property="deploymentId" flexGrow="1"/>
+                <column property="deploymentId" flexGrow="1">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.deploymentdata.column.DeploymentIdColumnFragment"/>
+                </column>
                 <column property="name" autoWidth="true" flexGrow="1"/>
                 <column property="deploymentTime"/>
                 <column property="source"/>
                 <column property="tenantId"/>
-                <column key="actions" sortable="false" editable="false" autoWidth="true" flexGrow="0"/>
             </columns>
             <emptyStateComponent>
                 <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER" width="100%"/>

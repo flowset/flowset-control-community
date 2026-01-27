@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="processDefinitionDc" class="io.flowset.control.entity.processdefinition.ProcessDefinitionData"/>
+    </data>
+    <content>
+        <hbox id="root" padding="false" width="100%" justifyContent="START" themeNames="spacing-s"
+              classNames="overflow-hidden" alignItems="BASELINE">
+            <startSlot>
+                <button id="keyBtn" themeNames="tertiary-inline link" whiteSpace="NOWRAP"
+                        width="auto"
+                        classNames="overflow-hidden text-ellipsis flex-shrink"/>
+            </startSlot>
+
+            <endSlot>
+                <button id="previewBtn" themeNames="tertiary-inline"/>
+            </endSlot>
+        </hbox>
+    </content>
+</fragment>

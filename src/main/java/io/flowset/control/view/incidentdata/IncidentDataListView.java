@@ -19,7 +19,6 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder;
 import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
@@ -151,9 +150,6 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
             layout.addClassNames(LumoUtility.Padding.Top.XSMALL, LumoUtility.Padding.Bottom.XSMALL);
             layout.setWidth("min-content");
 
-            JmixButton viewBtn = createViewButton(incidentData);
-            layout.add(viewBtn);
-
             if (StringUtils.equals(incidentData.getIncidentId(), incidentData.getCauseIncidentId())) {
                 if (incidentData.isJobFailed()) {
                     JmixButton retryJobBtn = createRetryJobButton(incidentData);
@@ -222,18 +218,6 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     @Override
     protected void loadData() {
         incidentsDl.load();
-    }
-
-    protected JmixButton createViewButton(IncidentData incidentData) {
-        JmixButton viewBtn = uiComponents.create(JmixButton.class);
-        viewBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        viewBtn.setText(messages.getMessage("actions.View"));
-        viewBtn.setIcon(VaadinIcon.EYE.create());
-        viewBtn.addClickListener(buttonClickEvent -> viewNavigators.view(this, IncidentDataDetailView.class)
-                .withRouteParameters(new RouteParameters("id", incidentData.getIncidentId()))
-                .withBackwardNavigation(true)
-                .navigate());
-        return viewBtn;
     }
 
     protected void loadProcessDefinitions(List<IncidentData> incidents) {

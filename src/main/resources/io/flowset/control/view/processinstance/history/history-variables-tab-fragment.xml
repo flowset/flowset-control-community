@@ -16,7 +16,6 @@
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
             <hbox classNames="buttons-panel" padding="false">
-                <button action="historicVariableInstancesGrid.view" themeNames="small primary"/>
                 <simplePagination id="historicVariableInstancesPagination" dataLoader="historicVariableInstancesDl"/>
             </hbox>
             <dataGrid id="historicVariableInstancesGrid" width="100%" height="100%" themeNames="compact"
@@ -28,7 +27,14 @@
                             type="list_itemTracking"/>
                 </actions>
                 <columns resizable="true">
-                    <column property="name"/>
+                    <column property="name">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.historicvariableinstancedata.column.VariableNameColumnFragment">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </fragmentRenderer>
+                    </column>
                     <column property="type" sortable="false"/>
                     <column key="value" sortable="false" header="msg://io.flowset.control.view.processinstance.history/value"/>
                     <column property="createTime" sortable="false"/>

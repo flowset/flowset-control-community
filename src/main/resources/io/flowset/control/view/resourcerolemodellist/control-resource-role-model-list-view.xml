@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://io.jmix.securityflowui.view.resourcerole/resourceRoleModelListView.title"
+      messagesGroup="io.jmix.securityflowui.view.resourcerole"
+      extends="io/jmix/securityflowui/view/resourcerole/resource-role-model-list-view.xml">
+    <layout>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="editBtn" visible="false"/>
+        </hbox>
+        <dataGrid id="roleModelsTable">
+            <columns>
+                <column property="name">
+                    <fragmentRenderer class="io.flowset.control.view.resourcerolemodellist.column.ResourceRoleNameColumnFragment"/>
+                </column>
+            </columns>
+        </dataGrid>
+    </layout>
+</view>

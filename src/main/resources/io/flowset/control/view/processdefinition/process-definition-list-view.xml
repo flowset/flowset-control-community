@@ -84,8 +84,14 @@
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">
-                <column property="name" flexGrow="3"/>
-                <column property="key" flexGrow="2"/>
+                <column property="name" flexGrow="2">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.processdefinition.column.ProcessNameColumnFragment"/>
+                </column>
+                <column property="key" flexGrow="2">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.processdefinition.column.ProcessKeyColumnFragment"/>
+                </column>
                 <column property="version" autoWidth="true" flexGrow="1"/>
                 <column key="status" header="msg://processDefinitionList.status" autoWidth="true" sortable="false"
                         flexGrow="1"/>

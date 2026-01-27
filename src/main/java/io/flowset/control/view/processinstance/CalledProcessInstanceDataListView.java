@@ -5,22 +5,13 @@
 
 package io.flowset.control.view.processinstance;
 
-import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouterLink;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataManager;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
-import io.jmix.flowui.UiComponents;
-import io.jmix.flowui.ViewNavigators;
-import io.jmix.flowui.component.UiComponentUtils;
-import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.DefaultMainViewParent;
 import io.jmix.flowui.view.DialogMode;
 import io.jmix.flowui.view.Install;
@@ -39,8 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
-
 @Route(value = "called-process-instances", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_CalledProcessInstanceData.list")
 @ViewDescriptor(path = "called-process-instance-data-list-view.xml")
@@ -49,15 +38,11 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public class CalledProcessInstanceDataListView extends StandardListView<ProcessInstanceData> {
 
     @Autowired
-    protected UiComponents uiComponents;
-    @Autowired
     protected ProcessInstanceService processInstanceService;
     @Autowired
     protected DataManager dataManager;
     @Autowired
     protected Messages messages;
-    @Autowired
-    protected ViewNavigators viewNavigators;
     @Autowired
     protected ComponentHelper componentHelper;
 
@@ -87,35 +72,5 @@ public class CalledProcessInstanceDataListView extends StandardListView<ProcessI
     protected Renderer<ProcessInstanceData> processInstancesDataGridProcessDefinitionIdRenderer() {
         return new TextRenderer<>(item -> item.getProcessDefinitionVersion() == null ? item.getProcessDefinitionId() :
                 componentHelper.getProcessLabel(item.getProcessDefinitionKey(), item.getProcessDefinitionVersion()));
-    }
-
-
-    @Supply(to = "processInstancesDataGrid.actions", subject = "renderer")
-    protected Renderer<ProcessInstanceData> processInstancesDataGridActionsRenderer() {
-        return new ComponentRenderer<>(item -> {
-            JmixButton viewButton = uiComponents.create(JmixButton.class);
-            viewButton.setText(messages.getMessage("actions.View"));
-            viewButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-            viewButton.setIcon(VaadinIcon.EYE.create());
-            viewButton.addClickListener(event -> {
-                if (UiComponentUtils.isComponentAttachedToDialog(this)) {
-                    RouterLink routerLink = new RouterLink(ProcessInstanceDetailView.class,
-                            new RouteParameters("id", item.getId()));
-                    getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
-                } else {
-                    openProcessInstanceDetailView(item);
-                }
-            });
-
-            return viewButton;
-        });
-    }
-
-    protected void openProcessInstanceDetailView(ProcessInstanceData item) {
-        viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
-                .withViewClass(ProcessInstanceDetailView.class)
-                .withRouteParameters(new RouteParameters("id", item.getId()))
-                .withBackwardNavigation(true)
-                .navigate();
     }
 }

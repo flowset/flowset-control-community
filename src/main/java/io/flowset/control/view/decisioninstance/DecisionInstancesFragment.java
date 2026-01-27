@@ -17,10 +17,8 @@ import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.Fragments;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.ViewNavigators;
-import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
 import io.jmix.flowui.component.pagination.SimplePagination;
@@ -29,7 +27,6 @@ import io.jmix.flowui.data.pagination.PaginationDataLoaderImpl;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
-import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.BaseCollectionLoader;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
@@ -46,8 +43,6 @@ import io.jmix.flowui.view.ViewComponent;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
-import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.decisioninstance.DecisionInstanceLoadContext;
 import io.flowset.control.service.decisioninstance.DecisionInstanceService;
 import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
@@ -55,8 +50,6 @@ import io.flowset.control.view.decisioninstance.filter.ActivityIdHeaderFilter;
 import io.flowset.control.view.decisioninstance.filter.EvaluationTimeHeaderFilter;
 import io.flowset.control.view.decisioninstance.filter.ProcessInstanceIdHeaderFilter;
 import io.flowset.control.view.decisioninstance.filter.ProcessDefinitionKeyHeaderFilter;
-import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
-import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.control.view.util.ComponentHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -79,8 +72,6 @@ public class DecisionInstancesFragment extends Fragment<VerticalLayout> {
     protected ViewNavigators viewNavigators;
     @Autowired
     protected DecisionInstanceService decisionInstanceService;
-    @Autowired
-    protected Fragments fragments;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -222,38 +213,6 @@ public class DecisionInstancesFragment extends Fragment<VerticalLayout> {
             Component dateSpan = componentHelper.createDateSpan(instance.getEvaluationTime());
             dateSpan.addClassNames(LumoUtility.Overflow.HIDDEN, LumoUtility.TextOverflow.ELLIPSIS);
             return dateSpan;
-        });
-    }
-
-    @Supply(to = "decisionInstancesGrid.processDefinitionKey", subject = "renderer")
-    protected Renderer<HistoricDecisionInstanceShortData> decisionInstancesGridProcessDefinitionKeyRenderer() {
-        return new ComponentRenderer<>(instance -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText(instance.getProcessDefinitionKey());
-            button.addThemeName("tertiary-inline");
-            button.addClickListener(event ->
-                    viewNavigators.detailView(UiComponentUtils.getCurrentView(), ProcessDefinitionData.class)
-                    .withViewClass(ProcessDefinitionDetailView.class)
-                    .withRouteParameters(new RouteParameters("id", instance.getProcessDefinitionId()))
-                    .withBackwardNavigation(true)
-                    .navigate());
-            return button;
-        });
-    }
-
-    @Supply(to = "decisionInstancesGrid.processInstanceId", subject = "renderer")
-    protected Renderer<HistoricDecisionInstanceShortData> decisionInstancesGridProcessInstanceIdRenderer() {
-        return new ComponentRenderer<>(instance -> {
-            JmixButton button = uiComponents.create(JmixButton.class);
-            button.setText(instance.getProcessInstanceId());
-            button.addThemeName("tertiary-inline");
-            button.addClickListener(
-                    event -> viewNavigators.detailView(UiComponentUtils.getCurrentView(), ProcessInstanceData.class )
-                    .withViewClass(ProcessInstanceDetailView.class)
-                    .withRouteParameters(new RouteParameters("id", instance.getProcessInstanceId()))
-                    .withBackwardNavigation(true)
-                    .navigate());
-            return button;
         });
     }
 

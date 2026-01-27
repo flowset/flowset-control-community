@@ -83,8 +83,6 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     protected UserTaskService userTaskService;
 
     @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
     protected DialogWindows dialogWindows;
 
 
@@ -380,22 +378,6 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     @Install(to = "tasksDataGrid.processDefinitionId", subject = "tooltipGenerator")
     protected String tasksDataGridProcessDefinitionIdTooltipGenerator(final UserTaskData userTaskData) {
         return getFormattedProcess(userTaskData);
-    }
-
-    @Supply(to = "tasksDataGrid.actions", subject = "renderer")
-    protected Renderer<UserTaskData> tasksDataGridActionsRenderer() {
-        return new ComponentRenderer<>(userTaskData -> {
-            JmixButton viewButton = uiComponents.create(JmixButton.class);
-            viewButton.setText(messages.getMessage("actions.View"));
-            viewButton.setIcon(VaadinIcon.EYE.create());
-            viewButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-            viewButton.addClassNames(LumoUtility.Padding.Top.XSMALL, LumoUtility.Padding.Bottom.XSMALL);
-            viewButton.addClickListener(event -> dialogWindows.detail(this, UserTaskData.class)
-                    .editEntity(userTaskData)
-                    .build()
-                    .open());
-            return viewButton;
-        });
     }
 
     @Override

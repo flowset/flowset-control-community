@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-  ~ Copyright (c) Haulmont 2025. All Rights Reserved.
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
   ~ Use is subject to license terms.
   -->
 
@@ -21,8 +21,14 @@
     </actions>
     <content>
         <hbox id="root" padding="false" spacing="false" classNames="overflow-hidden">
-            <span dataContainer="processInstanceDc" property="instanceId" classNames="w-full overflow-hidden overflow-ellipsis"/>
-            <button id="copyBtn" icon="COPY" themeNames="tertiary-inline" classNames="text-secondary" action="copy"/>
+            <startSlot>
+                <button id="idBtn" themeNames="tertiary-inline link" whiteSpace="NOWRAP"
+                        width="auto"
+                        classNames="overflow-hidden text-ellipsis flex-shrink"/>
+            </startSlot>
+            <endSlot>
+                <button id="copyBtn" icon="COPY" themeNames="tertiary-inline" classNames="text-secondary" action="copy"/>
+            </endSlot>
         </hbox>
     </content>
 </fragment>

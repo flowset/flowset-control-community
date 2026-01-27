@@ -1,0 +1,28 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+:host([theme~='link']) .vaadin-button-container {
+    justify-content: start;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+:host([theme~='link'])[active] {
+    --vaadin-button-background:  transparent !important;
+}
+
+:host([theme~='link'])::part(label) {
+    overflow: hidden!important;
+}
+
+:host([theme~='link']) [part='label']:hover {
+    text-decoration: underline;
+}
+
+:host([disabled][theme~='link']) {
+    --vaadin-button-text-color: var(--lumo-body-text-color);
+    font-weight: normal !important;
+}

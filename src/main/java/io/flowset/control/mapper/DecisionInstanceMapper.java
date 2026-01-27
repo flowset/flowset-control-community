@@ -22,7 +22,6 @@ public abstract class DecisionInstanceMapper {
     Metadata metadata;
 
     @Mapping(target = "decisionInstanceId", source = "id")
-    @Mapping(target = "id", ignore = true)
     public abstract HistoricDecisionInstanceShortData fromHistoricDecisionInstance(HistoricDecisionInstance source);
 
     HistoricDecisionInstanceShortData historicDecisionInstanceShortDataClassFactory() {
