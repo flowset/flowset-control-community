@@ -8,22 +8,30 @@ package io.flowset.control.view.incidentdata.filter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.QueryParameters;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.grid.DataGridColumn;
 import io.jmix.flowui.model.InstanceContainer;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.IncidentData;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.flowset.control.view.incidentdata.IncidentHeaderFilter;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
 
+import static io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder.TIMESTAMP_AFTER_FILTER_PARAM;
+import static io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder.TIMESTAMP_BEFORE_FILTER_PARAM;
+import static io.flowset.control.view.util.FilterQueryParamUtils.*;
+import static io.flowset.control.view.util.FilterQueryParamUtils.convertLocalDateTimeParamValue;
 import static io.flowset.control.view.util.JsUtils.SET_DEFAULT_TIME_SCRIPT;
 
-public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter {
+public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter implements HasFilterUrlParamHeaderFilter {
 
-    private TypedDateTimePicker<LocalDateTime> timestampAfter;
-    private TypedDateTimePicker<LocalDateTime> timestampBefore;
+    private TypedDateTimePicker<LocalDateTime> timestampAfterField;
+    private TypedDateTimePicker<LocalDateTime> timestampBeforeField;
 
     public IncidentTimestampHeaderFilter(Grid<IncidentData> dataGrid, DataGridColumn<IncidentData> column,
                                          InstanceContainer<IncidentFilter> filterDc) {
@@ -45,22 +53,24 @@ public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter {
 
     @Override
     public void apply() {
-        LocalDateTime dateBefore = this.timestampBefore.getValue();
+        IncidentFilter incidentFilter = filterDc.getItem();
+
+        LocalDateTime dateBefore = this.timestampBeforeField.getValue();
         if (dateBefore != null) {
-            ZoneId zoneId = this.timestampBefore.getZoneId();
+            ZoneId zoneId = this.timestampBeforeField.getZoneId();
             ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            filterDc.getItem().setIncidentTimestampBefore(dateBefore.atZone(zone).toOffsetDateTime());
+            incidentFilter.setIncidentTimestampBefore(dateBefore.atZone(zone).toOffsetDateTime());
         } else {
-            filterDc.getItem().setIncidentTimestampBefore(null);
+            incidentFilter.setIncidentTimestampBefore(null);
         }
 
-        LocalDateTime dateAfter = this.timestampAfter.getValue();
+        LocalDateTime dateAfter = this.timestampAfterField.getValue();
         if (dateAfter != null) {
-            ZoneId zoneId = this.timestampAfter.getZoneId();
+            ZoneId zoneId = this.timestampAfterField.getZoneId();
             ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            filterDc.getItem().setIncidentTimestampAfter(dateAfter.atZone(zone).toOffsetDateTime());
+            incidentFilter.setIncidentTimestampAfter(dateAfter.atZone(zone).toOffsetDateTime());
         } else {
-            filterDc.getItem().setIncidentTimestampAfter(null);
+            incidentFilter.setIncidentTimestampAfter(null);
         }
 
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, dateAfter != null
@@ -68,33 +78,54 @@ public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter {
     }
 
     @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        LocalDateTime timestampBefore = getLocalDateTimeParam(queryParameters, TIMESTAMP_BEFORE_FILTER_PARAM);
+        timestampBeforeField.setTypedValue(timestampBefore);
+
+        LocalDateTime timestampAfter = getLocalDateTimeParam(queryParameters, TIMESTAMP_AFTER_FILTER_PARAM);
+        timestampAfterField.setTypedValue(timestampAfter);
+
+        apply();
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+
+        paramValues.put(TIMESTAMP_BEFORE_FILTER_PARAM, convertLocalDateTimeParamValue(timestampBeforeField.getValue()));
+        paramValues.put(TIMESTAMP_AFTER_FILTER_PARAM, convertLocalDateTimeParamValue(timestampAfterField.getValue()));
+
+        return paramValues;
+    }
+
+    @Override
     protected void resetFilterValues() {
-        timestampAfter.clear();
-        timestampBefore.clear();
+        timestampAfterField.clear();
+        timestampBeforeField.clear();
     }
 
     @SuppressWarnings("unchecked")
     private Component createDateBeforeFilter() {
-        timestampBefore = uiComponents.create(TypedDateTimePicker.class);
-        timestampBefore.setMax(LocalDateTime.now());
-        timestampBefore.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
-        timestampBefore.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
-        timestampBefore.setLabel(messages.getMessage(IncidentFilter.class, "IncidentFilter.incidentTimestampBefore"));
-        setDefaultTime(timestampBefore);
+        timestampBeforeField = uiComponents.create(TypedDateTimePicker.class);
+        timestampBeforeField.setMax(LocalDateTime.now());
+        timestampBeforeField.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
+        timestampBeforeField.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
+        timestampBeforeField.setLabel(messages.getMessage(IncidentFilter.class, "IncidentFilter.incidentTimestampBefore"));
+        setDefaultTime(timestampBeforeField);
 
-        return timestampBefore;
+        return timestampBeforeField;
     }
 
     @SuppressWarnings("unchecked")
     private Component createDateAfterFilter() {
-        timestampAfter = uiComponents.create(TypedDateTimePicker.class);
-        timestampAfter.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
-        timestampAfter.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
-        timestampAfter.setMax(LocalDateTime.now());
-        timestampAfter.setLabel(messages.getMessage(IncidentFilter.class, "IncidentFilter.incidentTimestampAfter"));
-        setDefaultTime(timestampAfter);
+        timestampAfterField = uiComponents.create(TypedDateTimePicker.class);
+        timestampAfterField.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
+        timestampAfterField.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
+        timestampAfterField.setMax(LocalDateTime.now());
+        timestampAfterField.setLabel(messages.getMessage(IncidentFilter.class, "IncidentFilter.incidentTimestampAfter"));
+        setDefaultTime(timestampAfterField);
 
-        return timestampAfter;
+        return timestampAfterField;
     }
 
     private void setDefaultTime(TypedDateTimePicker<LocalDateTime> dateTimePicker) {

@@ -1,32 +1,40 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
-package io.flowset.control.view.processinstance;
+package io.flowset.control.facet.urlqueryparameters;
 
-import com.google.common.collect.ImmutableMap;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.QueryParameters;
-import io.jmix.flowui.component.grid.DataGrid;
-import io.jmix.flowui.facet.UrlQueryParametersFacet;
-import io.jmix.flowui.facet.urlqueryparameters.AbstractUrlQueryParametersBinder;
-import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.model.InstanceContainer;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.flowset.control.view.processinstance.ProcessInstanceViewMode;
 import io.flowset.control.view.processinstance.filter.ProcessInstanceStateHeaderFilter;
+import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.grid.headerfilter.DataGridHeaderFilter;
+import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.InstanceContainer;
 import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBinder {
+public class ProcessInstanceListQueryParamBinder extends GridCustomHeaderFilterUrlQueryParametersBinder<ProcessInstanceData> {
+    public static final String INSTANCE_ID_FILTER_PARAM = "id";
+    public static final String BUSINESS_KEY_FILTER_PARAM = "businessKey";
+    public static final String STATE_FILTER_PARAM = "state";
+    public static final String HAS_INCIDENTS_FILTER_PARAM = "withIncidents";
+    public static final String STARTED_AFTER_FILTER_PARAM = "startedAfter";
+    public static final String STARTED_BEFORE_FILTER_PARAM = "startedBefore";
+    public static final String END_AFTER_FILTER_PARAM = "endAfter";
+    public static final String END_BEFORE_FILTER_PARAM = "endBefore";
 
     private static final String MODE_URL_PARAM = "mode";
     private static final String PRIMARY_THEME = "primary";
@@ -37,10 +45,11 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
     private final ProcessInstanceStateHeaderFilter stateHeaderFilter;
     private final List<JmixButton> modeButtons;
 
-    public ProcessInstanceListParamBinder(HorizontalLayout buttonsPanel,
-                                          InstanceContainer<ProcessInstanceFilter> filterDc,
-                                          Runnable loadDelegate,
-                                          DataGrid<ProcessInstanceData> dataGrid) {
+    public ProcessInstanceListQueryParamBinder(HorizontalLayout buttonsPanel,
+                                               InstanceContainer<ProcessInstanceFilter> filterDc,
+                                               Runnable loadDelegate,
+                                               DataGrid<ProcessInstanceData> dataGrid) {
+        super(dataGrid);
 
         this.filterDc = filterDc;
         this.loadDelegate = loadDelegate;
@@ -54,13 +63,13 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
                     modeBtn.addClickListener(clickEvent -> {
                         boolean active = modeBtn.hasThemeName(PRIMARY_THEME);
                         if (!active) {
-                            activateModeButton(buttonIdx);
+                            activateModeButton(buttonIdx, true);
                         }
                     });
                     return modeBtn;
                 }).toList();
-    }
 
+    }
 
     @Override
     public Component getComponent() {
@@ -76,30 +85,51 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
             if (mode != null) {
                 switch (mode) {
                     case ALL:
-                        activateModeButton(0);
+                        activateModeButton(0, false);
                         break;
                     case ACTIVE:
-                        activateModeButton(1);
+                        activateModeButton(1, false);
                         break;
                     case COMPLETED:
-                        activateModeButton(2);
+                        activateModeButton(2, false);
                         break;
                     default:
                         break;
                 }
             }
         }
+        updateFilterValues(queryParameters);
     }
 
-    private void activateModeButton(int activeButtonIdx) {
+    protected void handleFilterApply(DataGridHeaderFilter.ApplyEvent applyEvent) {
+        super.handleFilterApply(applyEvent);
+
+        this.loadDelegate.run();
+    }
+
+    protected void updateFilterValues(QueryParameters queryParameters) {
+        super.updateFilterValues(queryParameters);
+
+        this.loadDelegate.run();
+    }
+
+    private void activateModeButton(int activeButtonIdx, boolean load) {
         updateButtons(activeButtonIdx);
 
         ProcessInstanceViewMode mode = ProcessInstanceViewMode.values()[activeButtonIdx];
 
-        loadInstances(mode);
+        updateFilterByMode(mode, this.filterDc.getItem());
+        if (load) {
+            this.loadDelegate.run();
+        }
 
-        QueryParameters qp = new QueryParameters(ImmutableMap.of(MODE_URL_PARAM, Collections.singletonList(mode.getId())));
-        fireQueryParametersChanged(new UrlQueryParametersFacet.UrlQueryParametersChangeEvent(this, qp));
+        Map<String, String> params = new HashMap<>();
+        params.put(MODE_URL_PARAM, mode.getId());
+        if (mode == ProcessInstanceViewMode.COMPLETED) {
+            params.put(STATE_FILTER_PARAM, null);
+        }
+
+        updateQueryParams(params);
 
         if (stateHeaderFilter != null) {
             stateHeaderFilter.update(mode);
@@ -118,29 +148,24 @@ public class ProcessInstanceListParamBinder extends AbstractUrlQueryParametersBi
                 });
     }
 
-    private void loadInstances(ProcessInstanceViewMode mode) {
+    protected void updateFilterByMode(ProcessInstanceViewMode mode, ProcessInstanceFilter filter) {
         if (mode == null) {
-            this.filterDc.getItem().setState(null);
-            this.filterDc.getItem().setUnfinished(true);
-            this.loadDelegate.run();
+            filter.setState(null);
+            filter.setUnfinished(true);
             return;
         }
 
         switch (mode) {
-            case ALL -> {
-                this.filterDc.getItem().setState(null);
-                this.filterDc.getItem().setUnfinished(null);
-                this.loadDelegate.run();
-            }
+            case ALL -> filter.setUnfinished(null);
             case COMPLETED -> {
-                this.filterDc.getItem().setState(ProcessInstanceState.COMPLETED);
-                this.filterDc.getItem().setUnfinished(null);
-                this.loadDelegate.run();
+                filter.setState(ProcessInstanceState.COMPLETED);
+                filter.setUnfinished(null);
             }
             default -> {
-                this.filterDc.getItem().setState(null);
-                this.filterDc.getItem().setUnfinished(true);
-                this.loadDelegate.run();
+                if (filter.getState() == ProcessInstanceState.COMPLETED) {
+                    filter.setState(null);
+                }
+                filter.setUnfinished(true);
             }
         }
     }

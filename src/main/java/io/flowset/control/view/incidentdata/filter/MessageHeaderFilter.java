@@ -8,16 +8,24 @@ package io.flowset.control.view.incidentdata.filter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.QueryParameters;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.model.InstanceContainer;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.view.incidentdata.IncidentHeaderFilter;
 import org.apache.commons.lang3.StringUtils;
 
-public class MessageHeaderFilter extends IncidentHeaderFilter {
+import java.util.HashMap;
+import java.util.Map;
 
-    protected TextField messageField;
+import static io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder.MESSAGE_FILTER_PARAM;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getStringParam;
+
+public class MessageHeaderFilter extends IncidentHeaderFilter implements HasFilterUrlParamHeaderFilter {
+    protected TypedTextField<String> messageField;
 
     public MessageHeaderFilter(Grid<IncidentData> dataGrid,
                                DataGridColumn<IncidentData> column,
@@ -38,7 +46,7 @@ public class MessageHeaderFilter extends IncidentHeaderFilter {
 
     @Override
     public void apply() {
-        String value = messageField.getValue();
+        String value = messageField.getTypedValue();
         if (StringUtils.isEmpty(value)) {
             value = null;
         }
@@ -47,8 +55,24 @@ public class MessageHeaderFilter extends IncidentHeaderFilter {
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, value != null);
     }
 
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        String paramValue = getStringParam(queryParameters, MESSAGE_FILTER_PARAM);
+        messageField.setTypedValue(paramValue);
+
+        apply();
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+        paramValues.put(MESSAGE_FILTER_PARAM, messageField.getTypedValue());
+
+        return paramValues;
+    }
+
     protected TextField createMessageFilter() {
-        messageField = uiComponents.create(TextField.class);
+        messageField = uiComponents.create(TypedTextField.class);
         messageField.setWidthFull();
         messageField.setMinWidth("30em");
         messageField.setClearButtonVisible(true);
