@@ -16,7 +16,6 @@ import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.view.processvariable.VariableInstanceDataDetail;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -31,8 +30,6 @@ import java.util.Objects;
 @EditedEntityContainer("processDefinitionDc")
 @DialogMode(width = "50em", height = "41em")
 public class StartProcessWithVariableView extends StandardDetailView<ProcessDefinitionData> {
-    @ViewComponent
-    protected JmixFormLayout processDefinitionFormLayout;
     @Autowired
     protected ProcessInstanceService processInstanceService;
     @ViewComponent
@@ -52,9 +49,6 @@ public class StartProcessWithVariableView extends StandardDetailView<ProcessDefi
                 LumoUtility.Padding.Left.LARGE,
                 LumoUtility.Padding.Right.LARGE,
                 LumoUtility.Padding.Bottom.MEDIUM);
-
-        processDefinitionFormLayout.getOwnComponents()
-                .forEach(component -> component.addClassNames(LumoUtility.Padding.Top.XSMALL));
     }
 
     @Supply(to = "variableGrid.value", subject = "renderer")

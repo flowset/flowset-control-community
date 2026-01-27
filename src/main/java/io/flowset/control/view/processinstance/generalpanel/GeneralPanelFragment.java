@@ -13,7 +13,6 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
@@ -22,7 +21,6 @@ import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
-import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -73,8 +71,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected ProcessDefinitionService processDefinitionService;
 
     @ViewComponent
-    protected JmixFormLayout processInstanceInfoGroupBox;
-    @ViewComponent
     protected TextField processDefinitionField;
     @ViewComponent
     protected DateTimePicker endTimeField;
@@ -93,12 +89,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected VerticalLayout runtimeInstanceActions;
     @ViewComponent
     protected JmixCheckbox externallyTerminatedField;
-
-
-    @Subscribe
-    public void onReady(ReadyEvent event) {
-        processInstanceInfoGroupBox.getComponents().forEach(component -> component.addClassNames(LumoUtility.Padding.Top.SMALL));
-    }
 
     @Subscribe(target = Target.HOST_CONTROLLER)
     public void onHostBeforeShow(View.BeforeShowEvent event) {

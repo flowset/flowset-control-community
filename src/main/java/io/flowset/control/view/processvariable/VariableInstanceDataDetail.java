@@ -127,7 +127,6 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
     @Subscribe
     public void onInit(InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.XSMALL);
-        valueForm.getOwnComponents().forEach(component -> component.addClassNames(LumoUtility.Padding.Top.SMALL));
     }
 
     @Subscribe

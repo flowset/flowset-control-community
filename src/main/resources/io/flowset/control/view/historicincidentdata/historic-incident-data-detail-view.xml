@@ -29,10 +29,10 @@
                                property="incidentId" readOnly="true" width="100%"/>
                     <div width="100%"
                          classNames="grid grid-flow-row grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-s">
-                        <dateTimePicker id="createTimeField" width="auto" classNames="pt-xs"
+                        <dateTimePicker id="createTimeField" width="auto"
                                         label="msg://io.flowset.control.entity.incident/HistoricIncidentData.createTime"
                                         property="createTime" readOnly="true" step="1ms"/>
-                        <dateTimePicker id="endTimeField" width="auto" classNames="pt-xs"
+                        <dateTimePicker id="endTimeField" width="auto"
                                         label="msg://io.flowset.control.entity.incident/HistoricIncidentData.endTime"
                                         property="endTime" readOnly="true" step="1ms"/>
                     </div>
@@ -41,13 +41,13 @@
                         <checkbox id="resolvedField"
                                   label="msg://io.flowset.control.entity.incident/HistoricIncidentData.resolved"
                                   property="resolved" readOnly="true"/>
-                        <textField id="typeField" classNames="pt-xs"
+                        <textField id="typeField"
                                    label="msg://io.flowset.control.entity.incident/IncidentData.type"
                                    property="type"
                                    readOnly="true"/>
                     </hbox>
 
-                    <textArea id="messageField" property="message" width="100%" classNames="pt-xs" colspan="2"
+                    <textArea id="messageField" property="message" width="100%" colspan="2"
                               maxHeight="6em"
                               label="msg://io.flowset.control.entity.incident/IncidentData.message" readOnly="true">
                         <suffix>
@@ -56,7 +56,6 @@
                     </textArea>
 
                     <textField id="configurationField" property="configuration" readOnly="true" width="100%"
-                               classNames="pt-xs"
                                label="msg://io.flowset.control.entity.incident/IncidentData.configuration"/>
                 </vbox>
             </vbox>
@@ -65,13 +64,13 @@
                     <h4 text="msg://processAndActivityGroup"/>
                     <textField id="processInstanceIdField" property="processInstanceId" readOnly="true"
                                label="msg://io.flowset.control.entity.incident/HistoricIncidentData.processInstanceId"
-                               width="100%" classNames="pt-xs"/>
+                               width="100%"/>
                     <textField id="processDefinitionIdField"
                                label="msg://io.flowset.control.entity.incident/IncidentData.processDefinitionId"
                                property="processDefinitionKey"
-                               readOnly="true" width="100%" classNames="pt-xs"/>
+                               readOnly="true" width="100%"/>
 
-                    <textField id="activityIdField" property="activityId" classNames="pt-xs"
+                    <textField id="activityIdField" property="activityId"
                                label="msg://io.flowset.control.entity.incident/IncidentData.activityId"
                                readOnly="true" width="100%"/>
                 </vbox>

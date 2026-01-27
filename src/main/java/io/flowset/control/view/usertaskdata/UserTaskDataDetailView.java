@@ -17,7 +17,6 @@ import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
-import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
@@ -34,8 +33,6 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
 
     @Autowired
     protected UserTaskService userTaskService;
-    @ViewComponent
-    protected JmixFormLayout form;
     @ViewComponent
     protected TypedTextField<String> delegationStateField;
     @ViewComponent
@@ -57,7 +54,6 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.XSMALL);
-        form.getOwnComponents().forEach(component -> component.addClassNames(LumoUtility.Padding.Top.SMALL));
         if(event.getSource() instanceof AllTasksView) {
             processDefinitionIdField.setVisible(true);
             processInstanceIdField.setVisible(true);

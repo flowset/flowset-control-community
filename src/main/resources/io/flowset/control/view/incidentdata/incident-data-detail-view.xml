@@ -25,7 +25,7 @@
                 <vbox width="100%" themeNames="spacing-s">
                     <h4 text="msg://generalGroup"/>
                     <textField id="incidentIdField"
-                               width="100%" classNames="pt-xs"
+                               width="100%"
                                label="msg://io.flowset.control.entity.incident/IncidentData.id"
                                property="incidentId" readOnly="true">
                         <suffix>
@@ -34,16 +34,16 @@
                     </textField>
                     <div width="100%"
                          classNames="grid grid-flow-row grid-cols-1 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-s">
-                        <dateTimePicker id="timestampField" width="auto" classNames="pt-xs"
+                        <dateTimePicker id="timestampField" width="auto"
                                         label="msg://io.flowset.control.entity.incident/IncidentData.timestamp"
                                         property="timestamp" readOnly="true" step="1ms"/>
-                        <textField id="typeField" classNames="pt-xs"
+                        <textField id="typeField"
                                    label="msg://io.flowset.control.entity.incident/IncidentData.type" width="100%"
                                    property="type"
                                    readOnly="true"/>
                     </div>
 
-                    <textArea id="messageField" property="message" width="100%" classNames="pt-xs" colspan="2"
+                    <textArea id="messageField" property="message" width="100%" colspan="2"
                               maxHeight="6em"
                               label="msg://io.flowset.control.entity.incident/IncidentData.message" readOnly="true">
                         <suffix>
@@ -52,7 +52,6 @@
                     </textArea>
 
                     <textField id="configurationField" property="configuration" readOnly="true" width="100%"
-                               classNames="pt-xs"
                                label="msg://io.flowset.control.entity.incident/IncidentData.configuration">
                         <suffix>
                             <button id="copyConfigurationBtn" icon="COPY_O" themeNames="tertiary-inline"/>
@@ -65,22 +64,22 @@
                     <h4 text="msg://processAndActivityGroup"/>
                     <textField id="processInstanceIdField" property="processInstanceId" readOnly="true"
                                label="msg://io.flowset.control.entity.incident/IncidentData.processInstanceId"
-                               width="100%" classNames="pt-xs">
+                               width="100%">
                         <suffix>
                             <button id="viewProcessInstanceBtn" icon="SEARCH" themeNames="tertiary-inline"/>
                         </suffix>
                     </textField>
                     <textField id="processDefinitionIdField"
                                label="msg://io.flowset.control.entity.incident/IncidentData.processDefinitionId"
-                               readOnly="true" width="100%" classNames="pt-xs">
+                               readOnly="true" width="100%">
                         <suffix>
                             <button id="viewProcessBtn" icon="SEARCH" themeNames="tertiary-inline"/>
                         </suffix>
                     </textField>
-                    <textField id="activityIdField" property="activityId" classNames="pt-xs"
+                    <textField id="activityIdField" property="activityId"
                                label="msg://io.flowset.control.entity.incident/IncidentData.activityId"
                                readOnly="true" width="100%"/>
-                    <textField id="failedActivityIdField" property="failedActivityId" classNames="pt-xs"
+                    <textField id="failedActivityIdField" property="failedActivityId"
                                label="msg://io.flowset.control.entity.incident/IncidentData.failedActivityId"
                                readOnly="true"
                                width="100%"/>

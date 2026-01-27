@@ -23,7 +23,7 @@
                        width="auto"
                        label="msg://processDefinitionIdLabel"/>
             <textField id="businessKeyField" label="msg://businessKeyField.label"
-                       colspan="2" width="100%" classNames="pt-xs"/>
+                       colspan="2" width="100%"/>
         </formLayout>
         <vbox id="variablesVBox" width="100%" padding="false" themeNames="spacing-s">
             <h4 text="msg://variableGrid.title"/>
