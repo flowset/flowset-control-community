@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
 package io.flowset.control.view.usertaskdata.column;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -13,7 +18,7 @@ import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@FragmentDescriptor("user-task-id-coulmn-fragment.xml")
+@FragmentDescriptor("user-task-id-column-fragment.xml")
 @RendererItemContainer("userTaskDc")
 public class UserTaskIdColumnFragment extends EntityDetailLinkFragment<HorizontalLayout, UserTaskData> {
     @ViewComponent

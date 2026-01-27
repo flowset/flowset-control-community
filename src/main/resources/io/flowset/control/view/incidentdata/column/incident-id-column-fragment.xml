@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
 <fragment xmlns="http://jmix.io/schema/flowui/fragment">
     <data>
         <instance id="incidentDc" class="io.flowset.control.entity.incident.IncidentData"/>
