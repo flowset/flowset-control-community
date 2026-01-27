@@ -15,6 +15,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -32,6 +33,7 @@ import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
@@ -95,7 +97,7 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         initFilter();
         initDataGridHeaderRow();
         setDefaultSort();
-        urlQueryParameters.registerBinder(new ProcessInstanceListParamBinder(modeButtonsGroup, processInstanceFilterDc,
+        urlQueryParameters.registerBinder(new ProcessInstanceListQueryParamBinder(modeButtonsGroup, processInstanceFilterDc,
                 this::startLoadData, processInstancesGrid));
     }
 
@@ -152,7 +154,7 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
                 .withViewConfigurer(view -> view.setProcessInstances(processInstancesGrid.getSelectedItems()))
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                      startLoadData();
+                        startLoadData();
                     }
                 })
                 .build()
@@ -251,11 +253,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
                 componentHelper.getProcessLabel(item.getProcessDefinitionKey(), item.getProcessDefinitionVersion());
     }
 
-    @Subscribe(id = "processInstanceFilterDc", target = Target.DATA_CONTAINER)
-    public void onProcessInstanceFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<ProcessInstanceFilter> event) {
-        startLoadData();
-    }
-
     @Install(to = "processInstancesGrid.startTime", subject = "partNameGenerator")
     protected String processInstancesGridStartTimePartNameGenerator(final ProcessInstanceData processInstanceData) {
         return "multiline-text-cell";
@@ -271,8 +268,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         processInstanceFilter.setUnfinished(true);
         processInstanceFilterDc.setItem(processInstanceFilter);
     }
-
-
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected BusinessKeyHeaderFilter createBusinessKeyColumnFilter(DataGridColumn<ProcessInstanceData> businessKeyColumn) {
@@ -304,7 +299,7 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         return new ProcessInstanceStateHeaderFilter(processInstancesGrid, stateColumn, processInstanceFilterDc);
     }
 
-    protected <T extends ProcessInstanceDataGridHeaderFilter> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<ProcessInstanceData>, T> filterProvider) {
+    protected <T extends ContainerDataGridHeaderFilter<ProcessInstanceFilter, ProcessInstanceData>> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<ProcessInstanceData>, T> filterProvider) {
         DataGridColumn<ProcessInstanceData> column = processInstancesGrid.getColumnByKey(columnName);
         T filterComponent = filterProvider.apply(column);
         BeanUtil.autowireContext(applicationContext, filterComponent);

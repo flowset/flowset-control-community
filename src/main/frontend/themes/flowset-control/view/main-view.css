@@ -58,6 +58,8 @@ vaadin-app-layout::part(drawer) {
 
 .jmix-main-view-application-title-base-link {
     color: var(--lumo-primary-contrast-color);
+    height: var(--lumo-size-xl);
+    align-items: center;
 }
 
 .jmix-main-view-application-title-base-link:hover {
@@ -92,7 +94,7 @@ vaadin-app-layout::part(drawer) {
 
 .jmix-main-view-footer .user-email {
     line-height: var(--lumo-line-height-s);
-    color: var(--lumo-contrast-10pct);
+    color: var(--user-avatar-bg-color);
 }
 
 .jmix-main-view-footer .user-avatar {
@@ -109,8 +111,8 @@ vaadin-app-layout::part(drawer) {
 }
 
 .logo-icon {
-    width: 1.85em;
-    height: 1.85em;
+    width: 1.75em;
+    height: 1.75em;
 }
 
 .jmix-list-menu .jmix-menu-item-link, .jmix-list-menu .jmix-menubar-item > vaadin-details-summary {
@@ -148,7 +150,7 @@ vaadin-app-layout::part(drawer) {
 .jmix-list-menu .menu-group-label {
     font-weight: 500;
     display: flex;
-    padding-top: 0.75em;
+    padding-top: 0.5em;
     color: var(--menu-group-item-color);
     text-transform: uppercase;
     padding-left: var(--lumo-space-s);

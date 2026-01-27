@@ -13,7 +13,7 @@
         <instance id="processDefinitionFilterDc" class="io.flowset.control.entity.filter.ProcessDefinitionFilter"/>
     </data>
     <facets>
-        <urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters">
             <pagination component="processDefinitionPagination"/>
         </urlQueryParameters>
     </facets>
@@ -63,7 +63,7 @@
             <button id="bulkRemoveBtn" action="processDefinitionsGrid.bulkRemove"/>
             <button id="bulkActivateBtn" action="processDefinitionsGrid.bulkActivate"/>
             <button id="bulkSuspendBtn" action="processDefinitionsGrid.bulkSuspend"/>
-            <simplePagination id="processDefinitionPagination" dataLoader="processDefinitionsDl" autoLoad="true"
+            <simplePagination id="processDefinitionPagination" dataLoader="processDefinitionsDl"
                               alignSelf="END"/>
         </hbox>
         <dataGrid id="processDefinitionsGrid"

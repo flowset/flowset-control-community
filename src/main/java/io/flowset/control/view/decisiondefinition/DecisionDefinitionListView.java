@@ -6,25 +6,34 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
+import io.flowset.control.entity.filter.DecisionDefinitionFilter;
+import io.flowset.control.facet.urlqueryparameters.DecisionDefinitionListQueryParamBinder;
+import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
+import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
+import io.flowset.control.view.decisiondeployment.DecisionDeploymentView;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.*;
-import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
-import io.flowset.control.entity.filter.DecisionDefinitionFilter;
-import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
-import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
-import io.flowset.control.view.decisiondeployment.DecisionDeploymentView;
+import io.jmix.flowui.view.DefaultMainViewParent;
+import io.jmix.flowui.view.Install;
+import io.jmix.flowui.view.Subscribe;
+import io.jmix.flowui.view.Target;
+import io.jmix.flowui.view.ViewComponent;
+import io.jmix.flowui.view.ViewController;
+import io.jmix.flowui.view.ViewDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -34,37 +43,39 @@ import java.util.List;
 @ViewDescriptor("decision-definition-list-view.xml")
 public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<DecisionDefinitionData> {
 
+    @ViewComponent
+    protected UrlQueryParametersFacet urlQueryParameters;
     @Autowired
-    private Metadata metadata;
+    protected Metadata metadata;
     @Autowired
-    private DecisionDefinitionService decisionDefinitionService;
+    protected DecisionDefinitionService decisionDefinitionService;
     @Autowired
-    private ViewNavigators viewNavigators;
+    protected ViewNavigators viewNavigators;
     @Autowired
-    private Fragments fragments;
+    protected Fragments fragments;
 
     @ViewComponent
-    private InstanceContainer<DecisionDefinitionFilter> decisionDefinitionFilterDc;
+    protected InstanceContainer<DecisionDefinitionFilter> decisionDefinitionFilterDc;
     @ViewComponent
-    private JmixFormLayout filterFormLayout;
+    protected JmixFormLayout filterFormLayout;
     @ViewComponent
-    private HorizontalLayout filterPanel;
+    protected HorizontalLayout filterPanel;
     @ViewComponent
-    private CollectionLoader<DecisionDefinitionData> decisionDefinitionsDl;
+    protected CollectionLoader<DecisionDefinitionData> decisionDefinitionsDl;
     @ViewComponent
-    private TypedTextField<String> nameField;
+    protected TypedTextField<String> nameField;
     @ViewComponent
-    private JmixCheckbox lastVersionOnlyCb;
+    protected JmixCheckbox lastVersionOnlyCb;
+
+    protected DecisionDefinitionListQueryParamBinder urlQueryParamBinder;
 
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
-    }
-
-    @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
         initFilter();
+        urlQueryParamBinder = new DecisionDefinitionListQueryParamBinder(decisionDefinitionFilterDc, this::startLoadData, filterFormLayout);
+        urlQueryParameters.registerBinder(urlQueryParamBinder);
     }
 
     @Subscribe(id = "clearBtn", subject = "clickListener")
@@ -73,15 +84,7 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
         filter.setKeyLike(null);
         filter.setNameLike(null);
         filter.setLatestVersionOnly(true);
-    }
-
-    @Subscribe(id = "decisionDefinitionFilterDc", target = Target.DATA_CONTAINER)
-    public void onDecisionDefinitionFilterDcItemPropertyChange(
-            final InstanceContainer.ItemPropertyChangeEvent<DecisionDefinitionFilter> event) {
-        if (lastVersionOnlyCb.getValue() && !Strings.isNullOrEmpty(nameField.getValue())) {
-            return;
-        }
-        startLoadData();
+        urlQueryParamBinder.resetParameters();
     }
 
     @Subscribe("nameField")
@@ -92,6 +95,23 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
             lastVersionOnlyCb.setValue(false);
         }
         lastVersionOnlyCb.setReadOnly(!nameEmpty);
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("keyField")
+    public void onKeyFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<String>, String> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("lastVersionOnlyCb")
+    public void onLastVersionOnlyCbComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
     }
 
     @Subscribe("decisionDefinitionsGrid.deploy")

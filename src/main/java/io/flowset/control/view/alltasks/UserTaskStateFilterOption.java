@@ -6,6 +6,7 @@
 package io.flowset.control.view.alltasks;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.Nullable;
 
 
@@ -29,7 +30,7 @@ public enum UserTaskStateFilterOption implements EnumClass<String> {
     @Nullable
     public static UserTaskStateFilterOption fromId(String id) {
         for (UserTaskStateFilterOption at : UserTaskStateFilterOption.values()) {
-            if (at.getId().equals(id)) {
+            if (StringUtils.equalsIgnoreCase(at.getId(), id)) {
                 return at;
             }
         }

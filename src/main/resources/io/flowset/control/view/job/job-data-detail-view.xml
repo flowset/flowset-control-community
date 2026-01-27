@@ -33,8 +33,7 @@
                         <responsiveStep minWidth="0" columns="1"/>
                     </responsiveSteps>
                     <vbox width="100%" themeNames="spacing-s" padding="false">
-                        <textField id="idField" property="jobId" label="msg://jobId" readOnly="true" width="100%"
-                                   classNames="pt-xs">
+                        <textField id="idField" property="jobId" label="msg://jobId" readOnly="true" width="100%">
                             <suffix>
                                 <button id="copyIdBtn" icon="COPY_O" themeNames="tertiary-inline"
                                         action="copyIdAction"/>
@@ -43,7 +42,7 @@
                         <hbox expand="jobTypeField" width="100%"
                               padding="false" classNames="lg:flex-row 2xl:flex-row xl:flex-row md:flex-col sm:flex-col">
                             <textField id="jobTypeField"
-                                       readOnly="true" width="100%" label="msg://jobType" classNames="pt-xs"/>
+                                       readOnly="true" width="100%" label="msg://jobType"/>
                             <vbox padding="false" classNames="text-s text-secondary font-semibold"
                                   themeNames="spacing-xs" width="auto">
                                 <span text="msg://io.flowset.control.entity.job/JobData.state"/>
@@ -55,18 +54,17 @@
                         <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-3 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1"
                              width="100%">
                             <dateTimePicker id="createTimeField" property="createTime" width="100%" readOnly="true"
-                                            classNames="pt-xs col-span-2"
+                                            classNames="col-span-2"
                                             step="1ms" label="msg://io.flowset.control.entity.job/JobData.createTime"/>
                             <textField id="priorityField" property="priority" width="100%" readOnly="true"
-                                       classNames="pt-xs" label="msg://io.flowset.control.entity.job/JobData.priority"/>
+                                       label="msg://io.flowset.control.entity.job/JobData.priority"/>
                         </div>
                         <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-3 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1"
                              width="100%">
                             <dateTimePicker id="dueDateField" property="dueDate" width="100%" readOnly="true" step="1ms"
-                                            classNames="pt-xs col-span-2"
+                                            classNames="col-span-2"
                                             label="msg://io.flowset.control.entity.job/JobData.dueDate"/>
                             <textField id="retriesField" property="retries" width="100%" readOnly="true"
-                                       classNames="pt-xs"
                                        label="msg://io.flowset.control.entity.job/JobData.retries"/>
                         </div>
                     </vbox>
@@ -74,22 +72,22 @@
                         <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-2 sm:grid-cols-1"
                              width="100%">
                             <textField id="activityField" label="msg://activity"
-                                       readOnly="true" width="100%" classNames="pt-xs"/>
+                                       readOnly="true" width="100%"/>
                             <textField id="failedActivityIdField" property="failedActivityId"
                                        label="msg://io.flowset.control.entity.job/JobData.failedActivityId"
-                                       readOnly="true" width="100%" classNames="pt-xs"/>
+                                       readOnly="true" width="100%"/>
                         </div>
 
                         <textField id="processDefinitionIdField"
                                    label="msg://io.flowset.control.entity.job/JobData.processDefinitionId"
-                                   readOnly="true" width="100%" classNames="pt-xs">
+                                   readOnly="true" width="100%">
                             <suffix>
                                 <button id="viewProcessBtn" action="viewProcessAction" themeNames="tertiary-inline"/>
                             </suffix>
                         </textField>
                         <textField id="processInstanceIdField" property="processInstanceId" readOnly="true"
                                    label="msg://io.flowset.control.entity.job/JobData.processInstanceId"
-                                   width="100%" classNames="pt-xs">
+                                   width="100%">
                             <suffix>
                                 <button id="viewProcessInstanceBtn" action="viewProcessInstanceAction" icon="SEARCH"
                                         themeNames="tertiary-inline"/>
@@ -101,7 +99,7 @@
             <vbox padding="false" expand="stackTraceField" classNames="col-span-2">
                 <textArea id="exceptionMessageField" dataContainer="jobDataDc" property="exceptionMessage"
                           minHeight="5em"
-                          readOnly="true" width="100%" classNames="pt-xs"
+                          readOnly="true" width="100%"
                           label="msg://exceptionMessage">
                     <suffix>
                         <button id="copyErrorBtn" icon="COPY_O" themeNames="tertiary-inline" action="copyErrorAction"/>

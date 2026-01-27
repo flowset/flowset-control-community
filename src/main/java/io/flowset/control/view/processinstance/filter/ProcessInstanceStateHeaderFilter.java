@@ -10,6 +10,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.combobox.JmixComboBox;
@@ -20,14 +21,22 @@ import io.jmix.flowui.model.InstanceContainer;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.flowset.control.view.processinstance.ProcessInstanceViewMode;
 import io.flowset.control.view.util.ComponentHelper;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class ProcessInstanceStateHeaderFilter extends ProcessInstanceDataGridHeaderFilter {
+import static io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder.HAS_INCIDENTS_FILTER_PARAM;
+import static io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder.STATE_FILTER_PARAM;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getBooleanParam;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getSingleParam;
+
+public class ProcessInstanceStateHeaderFilter extends ProcessInstanceDataGridHeaderFilter implements HasFilterUrlParamHeaderFilter {
     private JmixComboBox<ProcessInstanceState> stateComboBox;
     private JmixCheckbox withIncidentsCheckBox;
     private ComponentHelper componentHelper;
@@ -93,16 +102,18 @@ public class ProcessInstanceStateHeaderFilter extends ProcessInstanceDataGridHea
 
     @Override
     public void apply() {
+        ProcessInstanceFilter instanceFilter = filterDc.getItem();
+
         ProcessInstanceState state = stateComboBox.getValue();
         if (viewMode == ProcessInstanceViewMode.ALL || viewMode == ProcessInstanceViewMode.ACTIVE) {
-            filterDc.getItem().setState(state);
+            instanceFilter.setState(state);
         }
 
         Boolean withIncidents = withIncidentsCheckBox.getValue();
         if (BooleanUtils.isTrue(withIncidents)) {
-            filterDc.getItem().setWithIncidents(withIncidents);
+            instanceFilter.setWithIncidents(withIncidents);
         } else {
-            filterDc.getItem().setWithIncidents(null);
+            instanceFilter.setWithIncidents(null);
         }
 
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, state != null || BooleanUtils.isTrue(withIncidents));
@@ -122,5 +133,37 @@ public class ProcessInstanceStateHeaderFilter extends ProcessInstanceDataGridHea
                 this.stateComboBox.setItems(List.of(ProcessInstanceState.ACTIVE, ProcessInstanceState.SUSPENDED));
             }
         }
+    }
+
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        if (viewMode == null || viewMode == ProcessInstanceViewMode.ALL || viewMode == ProcessInstanceViewMode.ACTIVE) {
+            ProcessInstanceState state = getSingleParam(queryParameters, STATE_FILTER_PARAM, ProcessInstanceState::fromId);
+            stateComboBox.setValue(state);
+        }
+
+        Boolean withIncidents = getBooleanParam(queryParameters, HAS_INCIDENTS_FILTER_PARAM);
+        if (withIncidents != null) {
+            withIncidentsCheckBox.setValue(withIncidents);
+        } else {
+            withIncidentsCheckBox.clear();
+        }
+
+        apply();
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+        ProcessInstanceState state = null;
+        if (viewMode == null || viewMode == ProcessInstanceViewMode.ALL || viewMode == ProcessInstanceViewMode.ACTIVE) {
+            state = stateComboBox.getValue();
+        }
+        paramValues.put(STATE_FILTER_PARAM, state != null ? state.getId().toLowerCase() : null);
+
+        Boolean withIncidents = withIncidentsCheckBox.getValue();
+        paramValues.put(HAS_INCIDENTS_FILTER_PARAM, withIncidents != null ? Boolean.toString(withIncidents) : null);
+
+        return paramValues;
     }
 }

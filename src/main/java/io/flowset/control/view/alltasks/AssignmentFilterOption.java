@@ -1,9 +1,9 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
-package io.flowset.control.entity.processdefinition;
+package io.flowset.control.view.alltasks;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
 
@@ -11,14 +11,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.Nullable;
 
 
-public enum ProcessDefinitionState implements EnumClass<String> {
+public enum AssignmentFilterOption implements EnumClass<String> {
 
-    ACTIVE("Active"),
-    SUSPENDED("Suspended");
+    ASSIGNED("ASSIGNED"),
+    UNASSIGNED("UNASSIGNED");
 
     private final String id;
 
-    ProcessDefinitionState(String id) {
+    AssignmentFilterOption(String id) {
         this.id = id;
     }
 
@@ -27,8 +27,8 @@ public enum ProcessDefinitionState implements EnumClass<String> {
     }
 
     @Nullable
-    public static ProcessDefinitionState fromId(String id) {
-        for (ProcessDefinitionState at : ProcessDefinitionState.values()) {
+    public static AssignmentFilterOption fromId(String id) {
+        for (AssignmentFilterOption at : AssignmentFilterOption.values()) {
             if (StringUtils.equalsIgnoreCase(at.getId(), id)) {
                 return at;
             }

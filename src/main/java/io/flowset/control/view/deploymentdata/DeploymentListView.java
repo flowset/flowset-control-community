@@ -1,35 +1,31 @@
 package io.flowset.control.view.deploymentdata;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import feign.RequestInterceptor;
-import feign.auth.BasicAuthRequestInterceptor;
+import io.flowset.control.facet.urlqueryparameters.DeploymentListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Fragments;
+import io.jmix.flowui.component.ComponentContainer;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.deployment.DeploymentData;
-import io.flowset.control.entity.engine.AuthType;
-import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.entity.filter.DeploymentFilter;
-import io.flowset.control.property.EngineConnectionCheckProperties;
-import io.flowset.control.restsupport.FeignClientProvider;
 import io.flowset.control.service.deployment.DeploymentLoadContext;
 import io.flowset.control.service.deployment.DeploymentService;
-import io.flowset.control.service.engine.EngineService;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -39,51 +35,43 @@ import java.util.Set;
 @ViewDescriptor(path = "deployment-list-view.xml")
 public class DeploymentListView extends AbstractListViewWithDelayedLoad<DeploymentData> {
 
+    @ViewComponent
+    protected UrlQueryParametersFacet urlQueryParameters;
     @Autowired
-    private DeploymentService deploymentService;
+    protected DeploymentService deploymentService;
     @Autowired
-    private Metadata metadata;
+    protected Metadata metadata;
 
     @ViewComponent
-    private InstanceContainer<DeploymentFilter> deploymentFilterDc;
+    protected InstanceContainer<DeploymentFilter> deploymentFilterDc;
     @ViewComponent
-    private CollectionLoader<DeploymentData> deploymentDatasDl;
+    protected CollectionLoader<DeploymentData> deploymentDatasDl;
     @ViewComponent
-    private JmixFormLayout filterFormLayout;
+    protected JmixFormLayout filterFormLayout;
     @ViewComponent
-    private HorizontalLayout filterPanel;
+    protected HorizontalLayout filterPanel;
     @Autowired
-    private Fragments fragments;
-    @Autowired
-    private FeignClientProvider feignClientProvider;
-    @Autowired
-    private EngineConnectionCheckProperties engineConnectionCheckProperties;
-    @Autowired
-    private EngineService engineService;
+    protected Fragments fragments;
     @ViewComponent
-    private DataGrid<DeploymentData> deploymentsDataGrid;
+    protected DataGrid<DeploymentData> deploymentsDataGrid;
     @Autowired
-    private DialogWindows dialogWindows;
+    protected DialogWindows dialogWindows;
+    private DeploymentListQueryParamBinder queryParamBinder;
 
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
-    }
-
-    @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
         initFilter();
+
+        queryParamBinder = new DeploymentListQueryParamBinder(deploymentFilterDc, this::startLoadData, filterFormLayout);
+        urlQueryParameters.registerBinder(queryParamBinder);
+
+        addFilterValueChangeListeners(filterFormLayout);
     }
 
     @Subscribe("applyFilter")
     public void onApplyFilter(ActionPerformedEvent event) {
-        startLoadData();
-    }
-
-    @Subscribe(id = "deploymentFilterDc", target = Target.DATA_CONTAINER)
-    public void onDeploymentFilterDcItemPropertyChange(
-            final InstanceContainer.ItemPropertyChangeEvent<DeploymentFilter> event) {
         startLoadData();
     }
 
@@ -94,21 +82,9 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         filter.setNameLike(null);
         filter.setDeploymentAfter(null);
         filter.setDeploymentBefore(null);
-    }
 
-
-    @Nullable
-    protected RequestInterceptor createBpmEngineRequestInterceptor(BpmEngine engine) {
-        RequestInterceptor requestInterceptor = null;
-        if (BooleanUtils.isTrue(engine.getAuthEnabled())) {
-            if (engine.getAuthType() == AuthType.BASIC) {
-                requestInterceptor = new BasicAuthRequestInterceptor(engine.getBasicAuthUsername(), engine.getBasicAuthPassword());
-            } else if (engine.getAuthType() == AuthType.HTTP_HEADER) {
-                requestInterceptor = requestTemplate ->
-                    requestTemplate.header(engine.getHttpHeaderName(), engine.getHttpHeaderValue());
-            }
-        }
-        return requestInterceptor;
+        queryParamBinder.resetParameters();
+        startLoadData();
     }
 
     protected void initFilterFormStyles() {
@@ -178,5 +154,17 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     @Subscribe("deploymentsDataGrid.refresh")
     public void onDeploymentsDataGridRefresh(final ActionPerformedEvent event) {
         startLoadData();
+    }
+
+    protected void addFilterValueChangeListeners(ComponentContainer componentContainer) {
+        for (Component component : componentContainer.getOwnComponents()) {
+            if (component instanceof HasValue<?, ?> hasValue) {
+                hasValue.addValueChangeListener(valueChangeEvent -> {
+                    if (valueChangeEvent.isFromClient()) {
+                        startLoadData();
+                    }
+                });
+            }
+        }
     }
 }

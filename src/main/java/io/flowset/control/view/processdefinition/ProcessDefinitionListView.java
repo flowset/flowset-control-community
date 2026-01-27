@@ -5,6 +5,7 @@
 
 package io.flowset.control.view.processdefinition;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -20,8 +21,13 @@ import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.component.SupportsTypedValue;
+import io.jmix.flowui.component.checkbox.JmixCheckbox;
+import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
@@ -30,6 +36,7 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionState;
+import io.flowset.control.facet.urlqueryparameters.ProcessDefinitionListQueryParamBinder;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.newprocessdeployment.NewProcessDeploymentView;
@@ -75,16 +82,19 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
 
     @ViewComponent
     protected DataGrid<ProcessDefinitionData> processDefinitionsGrid;
+    @ViewComponent
+    protected UrlQueryParametersFacet urlQueryParameters;
+
+    protected ProcessDefinitionListQueryParamBinder filterParamBinder;
 
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
-    }
-
-    @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
         initFilter();
+
+        this.filterParamBinder = new ProcessDefinitionListQueryParamBinder(processDefinitionFilterDc, this::startLoadData, filterFormLayout);
+        urlQueryParameters.registerBinder(filterParamBinder);
     }
 
     @Install(to = "processDefinitionsDl", target = Target.DATA_LOADER)
@@ -129,12 +139,6 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         return (int) processDefinitionService.getCount(processDefinitionFilterDc.getItemOrNull());
     }
 
-    @Subscribe(id = "processDefinitionFilterDc", target = Target.DATA_CONTAINER)
-    public void onProcessDefinitionFilterDcItemPropertyChange(final InstanceContainer.ItemPropertyChangeEvent<ProcessDefinitionFilter> event) {
-        startLoadData();
-    }
-
-
     @Subscribe(id = "clearBtn", subject = "clickListener")
     public void onClearBtnClick(final ClickEvent<JmixButton> event) {
         ProcessDefinitionFilter filter = processDefinitionFilterDc.getItem();
@@ -142,6 +146,36 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         filter.setNameLike(null);
         filter.setState(null);
         filter.setLatestVersionOnly(true);
+        filterParamBinder.resetParameters();
+        startLoadData();
+    }
+
+    @Subscribe("nameField")
+    public void onNameFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<String>, String> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("keyField")
+    public void onKeyFieldTypedValueChange(final SupportsTypedValue.TypedValueChangeEvent<TypedTextField<String>, String> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("stateComboBox")
+    public void onStateComboBoxComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixComboBox<ProcessDefinitionState>, ProcessDefinitionState> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
+    }
+
+    @Subscribe("lastVersionOnlyCb")
+    public void onLastVersionOnlyCbComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
     }
 
     @Supply(to = "stateComboBox", subject = "renderer")

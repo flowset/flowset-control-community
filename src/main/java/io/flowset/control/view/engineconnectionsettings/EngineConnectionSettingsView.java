@@ -24,7 +24,6 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.UiEventPublisher;
 import io.jmix.flowui.component.combobox.EntityComboBox;
-import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textfield.JmixPasswordField;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.exception.ValidationException;
@@ -58,8 +57,6 @@ public class EngineConnectionSettingsView extends StandardView {
     protected JmixPasswordField basicAuthPassword;
     @ViewComponent
     protected TypedTextField<Object> engineNameField;
-    @ViewComponent
-    protected JmixFormLayout form;
     @Autowired
     protected EngineService engineService;
     @Autowired
@@ -96,7 +93,6 @@ public class EngineConnectionSettingsView extends StandardView {
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.XSMALL);
-        form.getOwnComponents().forEach(component -> component.addClassNames(LumoUtility.Padding.Top.SMALL));
         BpmEngine selectedEngine = engineService.getSelectedEngine();
 
         bpmEnginesComboBox.setValue(selectedEngine);

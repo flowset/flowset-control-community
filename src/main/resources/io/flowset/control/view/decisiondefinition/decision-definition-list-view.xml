@@ -10,7 +10,7 @@
         <instance id="decisionDefinitionFilterDc" class="io.flowset.control.entity.filter.DecisionDefinitionFilter"/>
     </data>
     <facets>
-        <urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters">
             <pagination component="decisionDefinitionPagination"/>
         </urlQueryParameters>
     </facets>

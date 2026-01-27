@@ -7,8 +7,10 @@ package io.flowset.control.view.processinstance.filter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import com.vaadin.flow.router.QueryParameters;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
+import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
@@ -16,13 +18,19 @@ import io.jmix.flowui.model.InstanceContainer;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.Map;
 
+import static io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder.END_AFTER_FILTER_PARAM;
+import static io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder.END_BEFORE_FILTER_PARAM;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getLocalDateTimeParam;
+import static io.flowset.control.view.util.FilterQueryParamUtils.convertLocalDateTimeParamValue;
 import static io.flowset.control.view.util.JsUtils.SET_DEFAULT_TIME_SCRIPT;
 
-public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter {
+public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter implements HasFilterUrlParamHeaderFilter {
 
-    protected TypedDateTimePicker<LocalDateTime> endTimeBefore;
-    protected TypedDateTimePicker<LocalDateTime> endTimeAfter;
+    protected TypedDateTimePicker<LocalDateTime> endTimeBeforeField;
+    protected TypedDateTimePicker<LocalDateTime> endTimeAfterField;
 
     public EndTimeHeaderFilter(DataGrid<ProcessInstanceData> dataGrid, DataGridColumn<ProcessInstanceData> column,
                                InstanceContainer<ProcessInstanceFilter> filterDc) {
@@ -46,28 +54,30 @@ public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter {
 
     @Override
     protected void resetFilterValues() {
-        endTimeBefore.clear();
-        endTimeAfter.clear();
+        endTimeBeforeField.clear();
+        endTimeAfterField.clear();
     }
 
     @Override
     public void apply() {
-        LocalDateTime endTimeBefore = this.endTimeBefore.getValue();
+        ProcessInstanceFilter instanceFilter = filterDc.getItem();
+
+        LocalDateTime endTimeBefore = this.endTimeBeforeField.getValue();
         if (endTimeBefore != null) {
-            ZoneId zoneId = this.endTimeBefore.getZoneId();
+            ZoneId zoneId = this.endTimeBeforeField.getZoneId();
             ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            filterDc.getItem().setEndTimeBefore(endTimeBefore.atZone(zone).toOffsetDateTime());
+            instanceFilter.setEndTimeBefore(endTimeBefore.atZone(zone).toOffsetDateTime());
         } else {
-            filterDc.getItem().setEndTimeBefore(null);
+            instanceFilter.setEndTimeBefore(null);
         }
 
-        LocalDateTime endTimeAfter = this.endTimeAfter.getValue();
+        LocalDateTime endTimeAfter = this.endTimeAfterField.getValue();
         if (endTimeAfter != null) {
-            ZoneId zoneId = this.endTimeAfter.getZoneId();
+            ZoneId zoneId = this.endTimeAfterField.getZoneId();
             ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            filterDc.getItem().setEndTimeAfter(endTimeAfter.atZone(zone).toOffsetDateTime());
+            instanceFilter.setEndTimeAfter(endTimeAfter.atZone(zone).toOffsetDateTime());
         } else {
-            filterDc.getItem().setEndTimeAfter(null);
+            instanceFilter.setEndTimeAfter(null);
         }
 
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, endTimeAfter != null
@@ -75,27 +85,48 @@ public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter {
     }
 
     protected Component createEndTimeBeforeFilter() {
-        endTimeBefore = uiComponents.create(TypedDateTimePicker.class);
-        endTimeBefore.setMax(LocalDateTime.now());
-        endTimeBefore.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
-        endTimeBefore.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
-        endTimeBefore.setLabel(messages.getMessage(ProcessInstanceFilter.class, "ProcessInstanceFilter.endTimeBefore"));
+        endTimeBeforeField = uiComponents.create(TypedDateTimePicker.class);
+        endTimeBeforeField.setMax(LocalDateTime.now());
+        endTimeBeforeField.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
+        endTimeBeforeField.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
+        endTimeBeforeField.setLabel(messages.getMessage(ProcessInstanceFilter.class, "ProcessInstanceFilter.endTimeBefore"));
 
-        return endTimeBefore;
+        return endTimeBeforeField;
     }
 
     protected Component createEndTimeAfterFilter() {
-        endTimeAfter = uiComponents.create(TypedDateTimePicker.class);
-        endTimeAfter.setMax(LocalDateTime.now());
-        endTimeAfter.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
-        endTimeAfter.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
-        endTimeAfter.setLabel(messages.getMessage(ProcessInstanceFilter.class, "ProcessInstanceFilter.endTimeAfter"));
-        setDefaultTime(endTimeAfter);
+        endTimeAfterField = uiComponents.create(TypedDateTimePicker.class);
+        endTimeAfterField.setMax(LocalDateTime.now());
+        endTimeAfterField.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
+        endTimeAfterField.setTimePlaceholder(messages.getMessage(getClass(), "selectTime"));
+        endTimeAfterField.setLabel(messages.getMessage(ProcessInstanceFilter.class, "ProcessInstanceFilter.endTimeAfter"));
+        setDefaultTime(endTimeAfterField);
 
-        return endTimeAfter;
+        return endTimeAfterField;
     }
 
     private void setDefaultTime(TypedDateTimePicker<LocalDateTime> dateTimePicker) {
         dateTimePicker.getElement().executeJs(SET_DEFAULT_TIME_SCRIPT);
+    }
+
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        LocalDateTime endBeforeValue = getLocalDateTimeParam(queryParameters, END_BEFORE_FILTER_PARAM);
+        endTimeBeforeField.setTypedValue(endBeforeValue);
+
+        LocalDateTime endAfterValue = getLocalDateTimeParam(queryParameters, END_AFTER_FILTER_PARAM);
+        endTimeAfterField.setTypedValue(endAfterValue);
+
+        apply();
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+
+        paramValues.put(END_BEFORE_FILTER_PARAM, convertLocalDateTimeParamValue(endTimeBeforeField.getValue()));
+        paramValues.put(END_AFTER_FILTER_PARAM, convertLocalDateTimeParamValue(endTimeAfterField.getValue()));
+
+        return paramValues;
     }
 }

@@ -8,6 +8,7 @@ package io.flowset.control.view.processinstance.history;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.event.SortEvent;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import io.jmix.core.DataLoadContext;
@@ -32,6 +33,7 @@ import io.flowset.control.view.processinstance.event.HistoryVariableCountUpdateE
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
@@ -64,6 +66,7 @@ public class HistoryVariablesTabFragment extends Fragment<VerticalLayout> implem
 
     public void refreshIfRequired() {
         if (!initialized) {
+            setVariablesDefaultSort();
             this.filter = metadata.create(VariableFilter.class);
             filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
@@ -127,5 +130,11 @@ public class HistoryVariablesTabFragment extends Fragment<VerticalLayout> implem
             return variableInstance.getValue().toString();
         }
         return null;
+    }
+
+    protected void setVariablesDefaultSort() {
+        List<GridSortOrder<HistoricVariableInstanceData>> gridSortOrders = Collections.singletonList(new GridSortOrder<>(historicVariableInstancesGrid.getColumnByKey("name"),
+                SortDirection.ASCENDING));
+        historicVariableInstancesGrid.sort(gridSortOrders);
     }
 }
