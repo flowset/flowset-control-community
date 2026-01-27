@@ -42,31 +42,31 @@
                         <responsiveStep minWidth="0" columns="1"/>
                     </responsiveSteps>
                     <details id="generalFilters" width="100%" themeNames="reverse small" opened="true">
-                        <textField id="taskKeyLikeField" classNames="pt-xs" property="taskKeyLike"
+                        <textField id="taskKeyLikeField" property="taskKeyLike"
                                    clearButtonVisible="true"
                                    label="msg://io.flowset.control.entity.filter/UserTaskFilter.taskKeyLike"
                                    width="100%"/>
-                        <textField id="taskNameLikeField" classNames="pt-xs" property="taskNameLike"
+                        <textField id="taskNameLikeField" property="taskNameLike"
                                    clearButtonVisible="true"
                                    label="msg://io.flowset.control.entity.filter/UserTaskFilter.taskNameLike"
                                    width="100%"/>
-                        <comboBox label="msg://processDefinition" classNames="pt-xs" id="processDefinitionLookup"
+                        <comboBox label="msg://processDefinition" id="processDefinitionLookup"
                                   clearButtonVisible="true" width="100%"/>
-                        <radioButtonGroup id="stateTypeGroup" label="msg://state" classNames="pt-xs" />
+                        <radioButtonGroup id="stateTypeGroup" label="msg://state" />
                     </details>
                     <details id="assignmentFilters" width="100%" themeNames="reverse small" opened="true">
                         <div width="100%">
-                            <radioButtonGroup id="assignmentTypeGroup" classNames="pt-xs" itemsEnum="io.flowset.control.view.alltasks.AssignmentFilterOption"/>
+                            <radioButtonGroup id="assignmentTypeGroup" itemsEnum="io.flowset.control.view.alltasks.AssignmentFilterOption"/>
                             <textField id="assigneeField" property="assigneeLike" width="100%" classNames="pt-xs"
                                        label="msg://io.flowset.control.entity.filter/UserTaskFilter.assigneeLike"
                                        clearButtonVisible="true"/>
                         </div>
                     </details>
                     <details id="creationDateFilters" width="100%" themeNames="reverse small" opened="true">
-                        <dateTimePicker id="createdAfterField" property="createdAfter" classNames="pt-xs"
+                        <dateTimePicker id="createdAfterField" property="createdAfter"
                                         label="msg://io.flowset.control.entity.filter/UserTaskFilter.createdAfter"
                                         width="auto" maxWidth="20em"/>
-                        <dateTimePicker id="createdBeforeField" classNames="pt-xs"
+                        <dateTimePicker id="createdBeforeField"
                                         label="msg://io.flowset.control.entity.filter/UserTaskFilter.createdBefore"
                                         property="createdBefore" width="auto" maxWidth="20em"/>
                     </details>

@@ -34,7 +34,7 @@
                         <anchor id="baseLink"
                                 href="."
                                 text="msg://applicationTitle.text"
-                                classNames="jmix-main-view-application-title-base-link flex gap-xs items-center"/>
+                                classNames="jmix-main-view-application-title-base-link flex gap-s items-center"/>
                     </h2>
                 </hbox>
                 <nav id="navigation"

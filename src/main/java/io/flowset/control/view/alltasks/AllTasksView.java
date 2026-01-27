@@ -444,7 +444,6 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     }
 
     protected void initFilterFormStyles() {
-        filterFormLayout.getOwnComponents().forEach(component -> component.addClassName(LumoUtility.Padding.Top.XSMALL));
         filterFormLayout.addClassNames(LumoUtility.Flex.GROW);
     }
 

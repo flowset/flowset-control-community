@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.data.event.SortEvent;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -56,6 +57,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -125,6 +127,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     public void onHostBeforeShow(View.BeforeShowEvent event) {
         ProcessInstanceData item = processInstanceDataDc.getItem();
         if (item.getState() != ProcessInstanceState.COMPLETED) {
+            setVariablesDefaultSort();
             this.variableFilter = metadata.create(VariableFilter.class);
             this.variableFilter.setProcessInstanceId(item.getInstanceId());
 
@@ -421,6 +424,12 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     protected String getSelectedActivityId() {
         ActivityInstanceTreeItem item = activityInstancesTree.getSingleSelectedItem();
         return item != null ? item.getActivityId() : null;
+    }
+
+    protected void setVariablesDefaultSort() {
+        List<GridSortOrder<VariableInstanceData>> gridSortOrders = Collections.singletonList(new GridSortOrder<>(runtimeVariablesGrid.getColumnByKey("name"),
+                SortDirection.ASCENDING));
+        runtimeVariablesGrid.sort(gridSortOrders);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")

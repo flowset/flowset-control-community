@@ -11,7 +11,7 @@
     <content>
         <hbox id="root" expand="userIndicatorBox" padding="false" width="100%" themeNames="spacing-s" minWidth="0">
             <hbox id="userIndicatorBox" padding="false" width="100%" alignItems="CENTER" themeNames="spacing-s overflow-hidden" minWidth="0">
-                <avatar id="userAvatar" classNames="user-avatar bg-base-10 text-primary-contrast border-primary-50 border rounded-m text-l"/>
+                <avatar id="userAvatar" classNames="user-avatar bg-base-10 text-primary-contrast border-primary-50 border rounded-m text-xl"/>
                 <vbox padding="false" height="100%" spacing="false" minWidth="0">
                     <userIndicator id="userIndicator" width="100%" classNames="flex items-center overflow-hidden overflow-ellipsis text-primary-contrast"/>
                     <span id="emailField" width="100%" classNames="text-xs text-tertiary overflow-hidden overflow-ellipsis user-email"/>

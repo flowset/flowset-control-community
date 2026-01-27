@@ -7,8 +7,7 @@ package io.flowset.control.view.historicactivityinstancedata;
 
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.jmix.core.LoadContext;
-import io.jmix.flowui.component.formlayout.JmixFormLayout;
+import io.jmix.core.LoadContext;;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.activity.HistoricActivityInstanceData;
@@ -29,14 +28,11 @@ public class HistoricActivityInstanceDataDetailView extends StandardDetailView<H
     @Autowired
     protected ActivityService activityService;
     @ViewComponent
-    protected JmixFormLayout form;
-    @ViewComponent
     protected TypedTextField<Object> durationField;
 
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.XSMALL);
-        form.getOwnComponents().forEach(component -> component.addClassNames(LumoUtility.Padding.Top.SMALL));
     }
 
     @Subscribe

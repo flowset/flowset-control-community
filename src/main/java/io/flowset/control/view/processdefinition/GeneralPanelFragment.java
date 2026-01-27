@@ -11,14 +11,12 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiEventPublisher;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
-import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -54,8 +52,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected VerticalLayout upperPanel;
     @ViewComponent
     protected JmixButton infoBtn;
-    @ViewComponent
-    protected JmixFormLayout processDefinitionForm;
     @ViewComponent
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
     @ViewComponent
@@ -95,11 +91,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected CopyComponentValueToClipboardAction copyKeyAction;
     @Autowired
     protected UiEventPublisher uiEventPublisher;
-
-    @Subscribe
-    public void onReady(ReadyEvent event) {
-        processDefinitionForm.getComponents().forEach(component -> component.addClassNames(LumoUtility.Padding.Top.SMALL));
-    }
 
     @Subscribe(target = Target.HOST_CONTROLLER)
     public void onHostBeforeShow(View.BeforeShowEvent event) {
