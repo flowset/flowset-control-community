@@ -7,6 +7,7 @@ package io.flowset.control.service.deployment;
 
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.entity.deployment.DeploymentResource;
+import io.flowset.control.entity.filter.DeploymentFilter;
 import org.camunda.bpm.engine.repository.DeploymentWithDefinitions;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
@@ -44,7 +45,16 @@ public interface DeploymentService {
     List<DeploymentData> findAll(DeploymentLoadContext context);
 
     /**
+     * Loads from the engine the total count of deployments that match the specified filter.
+     *
+     * @param filter a filter to get count of deployments
+     * @return a count of deployments
+     */
+    long getCount(@Nullable DeploymentFilter filter);
+
+    /**
      * Loads all resource names for provided deployment id.
+     *
      * @param deploymentId id of a deployment
      * @return a list of deployed resource names
      */
@@ -52,18 +62,20 @@ public interface DeploymentService {
 
     /**
      * Loads resource data for provided deployment and resource ids
+     *
      * @param deploymentId id of the deployment
-     * @param resourceId id of the resource
+     * @param resourceId   id of the resource
      * @return resource with binary data
      */
     Resource getDeploymentResourceData(String deploymentId, String resourceId);
 
     /**
      * Deletes a deployment.
-     * @param deploymentId id of the deployment
+     *
+     * @param deploymentId              id of the deployment
      * @param deleteAllRelatedInstances remove process instances
-     * @param skipCustomListeners skip custom listeners
-     * @param skipIoMappings skip IO mappings
+     * @param skipCustomListeners       skip custom listeners
+     * @param skipIoMappings            skip IO mappings
      */
     void deleteById(String deploymentId, boolean deleteAllRelatedInstances, boolean skipCustomListeners,
                     boolean skipIoMappings);

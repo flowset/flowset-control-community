@@ -8,6 +8,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.facet.urlqueryparameters.DeploymentListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
+import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
@@ -154,6 +155,12 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     @Subscribe("deploymentsDataGrid.refresh")
     public void onDeploymentsDataGridRefresh(final ActionPerformedEvent event) {
         startLoadData();
+    }
+
+    @Install(to = "pagination", subject = "totalCountDelegate")
+    private Integer paginationTotalCountDelegate(final DataLoadContext dataLoadContext) {
+        DeploymentFilter filter = deploymentFilterDc.getItemOrNull();
+        return (int) deploymentService.getCount(filter);
     }
 
     protected void addFilterValueChangeListeners(ComponentContainer componentContainer) {

@@ -75,8 +75,8 @@ public class DeploymentServiceImpl implements DeploymentService {
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (isConnectionError(rootCause)) {
-                log.error("Unable to deployment '{}' because of connection error: ",  context.getResourceName(), e);
-                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+                log.error("Unable to deployment '{}' because of connection error: ", context.getResourceName(), e);
+                throw new EngineConnectionFailedException(e.getMessage(), 1, e.getMessage());
             }
             throw e;
         }
@@ -94,7 +94,7 @@ public class DeploymentServiceImpl implements DeploymentService {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (isConnectionError(rootCause)) {
                 log.error("Unable to load deployment by id '{}' because of connection error: ", deploymentId, e);
-                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+                throw new EngineConnectionFailedException(e.getMessage(), 1, e.getMessage());
             }
             if (e instanceof FeignException feignException && feignException.status() == 404) {
                 log.error("Unable to find deployment by id {}", deploymentId, e);
@@ -130,7 +130,27 @@ public class DeploymentServiceImpl implements DeploymentService {
             }
             if (isConnectionError(rootCause)) {
                 log.error("Unable to load deployments because of connection error: ", e);
-                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+                throw new EngineConnectionFailedException(e.getMessage(), 1, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public long getCount(@Nullable DeploymentFilter filter) {
+        try {
+            DeploymentQuery deploymentQuery = createDeploymentQuery(filter, null);
+
+            return deploymentQuery.count();
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load count of deployments because BPM engine not selected");
+                return 0L;
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load count deployments because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), 1, e.getMessage());
             }
             throw e;
         }
@@ -194,7 +214,7 @@ public class DeploymentServiceImpl implements DeploymentService {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (isConnectionError(rootCause)) {
                 log.error("Unable to delete deployment by id '{}' because of connection error: ", deploymentId, e);
-                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+                throw new EngineConnectionFailedException(e.getMessage(), 1, e.getMessage());
             }
             throw e;
         }

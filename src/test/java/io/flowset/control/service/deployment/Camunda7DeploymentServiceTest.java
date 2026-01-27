@@ -5,7 +5,9 @@
 
 package io.flowset.control.service.deployment;
 
+import io.flowset.control.entity.filter.DeploymentFilter;
 import io.flowset.control.exception.EngineConnectionFailedException;
+import io.jmix.core.DataManager;
 import io.jmix.core.Resources;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.exception.RemoteEngineParseException;
@@ -27,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,6 +42,10 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
 
     @RunningEngine
     static Camunda7Container<?> camunda7;
+
+    @Autowired
+    DataManager dataManager;
+
 
     @Autowired
     DeploymentService deploymentService;
@@ -151,6 +158,103 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
 
         //when and then
         assertThatThrownBy(() -> deploymentService.findById(deployment.getId()))
+                .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
+    @DisplayName("Get count of all deployments if filter is null")
+    void givenDeployedResourcesAndNullFilter_whenGetCount_thenAllDeploymentsCountReturned() {
+        //given
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/supportRequest.bpmn");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/contractApproval.bpmn");
+
+        //when
+        long count = deploymentService.getCount(null);
+
+        //then
+        assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("Get count of deployments filtered by name like")
+    void givenDeployedResourcesAndFilterByName_whenGetCount_thenAllDeploymentsCountReturned() {
+        //given
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/supportRequest.bpmn");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/vacationApproval.bpmn");
+
+        DeploymentFilter filter = dataManager.create(DeploymentFilter.class);
+        filter.setNameLike("Approval");
+
+        //when
+        long count = deploymentService.getCount(filter);
+
+        //then
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Get count of deployments filtered by name like")
+    void givenDeployedResourcesAndFilterByKey_whenGetCount_thenAllDeploymentsCountReturned() {
+        //given
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/supportRequest.bpmn");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/contractApproval.bpmn");
+
+        DeploymentFilter filter = dataManager.create(DeploymentFilter.class);
+        filter.setNameLike("Approval");
+
+        //when
+        long count = deploymentService.getCount(filter);
+
+        //then
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Get count of deployments filtered by deployment after")
+    void givenDeployedResourcesAndDeploymentAfter_whenGetCount_thenAllDeploymentsCountReturned() {
+        //given
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/supportRequest.bpmn");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/contractApproval.bpmn");
+
+        DeploymentFilter filter = dataManager.create(DeploymentFilter.class);
+        filter.setDeploymentAfter(OffsetDateTime.now().plusHours(1));
+
+        //when
+        long count = deploymentService.getCount(filter);
+
+        //then
+        assertThat(count).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Get count of deployments filtered by deployment before")
+    void givenDeployedResourcesAndDeploymentBefore_whenGetCount_thenAllDeploymentsCountReturned() {
+        //given
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/supportRequest.bpmn");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/contractApproval.bpmn");
+
+        DeploymentFilter filter = dataManager.create(DeploymentFilter.class);
+        filter.setDeploymentBefore(OffsetDateTime.now().minusHours(1));
+
+        //when
+        long count = deploymentService.getCount(filter);
+
+        //then
+        assertThat(count).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when get deployments count if engine is not available")
+    void givenDeployedResourcesAndNotAvailableEngine_whenGetCount_thenExceptionThrown() {
+        //given
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/supportRequest.bpmn");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/contractApproval.bpmn");
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> deploymentService.getCount(null))
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
 
