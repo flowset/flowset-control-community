@@ -15,7 +15,6 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
@@ -23,6 +22,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder;
 import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
+import io.flowset.control.view.incidentdata.column.IncidentProcessColumnFragment;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -98,6 +98,8 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected DataGrid<IncidentData> incidentsDataGrid;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
+    @Autowired
+    private Fragments fragments;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -135,7 +137,19 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
 
     @Supply(to = "incidentsDataGrid.processDefinitionId", subject = "renderer")
     protected Renderer<IncidentData> incidentsDataGridProcessDefinitionIdRenderer() {
-        return new TextRenderer<>(this::getFormattedProcess);
+        return new ComponentRenderer<>(incidentData -> {
+            String processId = incidentData.getProcessDefinitionId();
+            if (processId == null) {
+                return null;
+            }
+            IncidentProcessColumnFragment processColumnFragment = fragments.create(this, IncidentProcessColumnFragment.class);
+            processColumnFragment.setItem(incidentData);
+            ProcessDefinitionData processDefinitionData = processDefinitionsMap.computeIfAbsent(processId,
+                    processDefinitionId -> processDefinitionService.getById(processDefinitionId));
+            processColumnFragment.setProcessDefinitionData(processDefinitionData);
+
+            return processColumnFragment;
+        });
     }
 
     @Subscribe("incidentsDataGrid")
@@ -228,21 +242,6 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
 
         List<ProcessDefinitionData> definitions = processDefinitionService.findAll(new ProcessDefinitionLoadContext().setFilter(filter));
         definitions.forEach(processDefinitionData -> processDefinitionsMap.put(processDefinitionData.getProcessDefinitionId(), processDefinitionData));
-    }
-
-    @Nullable
-    protected String getFormattedProcess(IncidentData incidentData) {
-        if (StringUtils.isEmpty(incidentData.getProcessDefinitionId())) {
-            return null;
-        }
-        ProcessDefinitionData processDefinitionData = processDefinitionsMap.computeIfAbsent(incidentData.getProcessDefinitionId(),
-                processDefinitionId -> processDefinitionService.getById(processDefinitionId));
-
-        if (processDefinitionData == null) {
-            log.warn("Process definition with id '{}' not found", incidentData.getProcessDefinitionId());
-            return null;
-        }
-        return componentHelper.getProcessLabel(processDefinitionData);
     }
 
     protected void initDataGridHeaderRow() {

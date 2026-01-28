@@ -110,7 +110,11 @@
                             <fragmentRenderer
                                     class="io.flowset.control.view.alltasks.TaskKeyColumnFragment"/>
                         </column>
-                        <column property="name"/>
+                        <column property="name" autoWidth="true"/>
+                        <column property="processInstanceId" header="msg://processInstanceColumnLabel">
+                            <fragmentRenderer
+                                    class="io.flowset.control.view.usertaskdata.column.UserTaskInstanceIdColumnFragment"/>
+                        </column>
                         <column property="processDefinitionId" header="msg://processColumnLabel"/>
                         <column property="createTime" autoWidth="true"/>
                         <column property="assignee" autoWidth="true"/>

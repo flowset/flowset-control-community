@@ -46,7 +46,10 @@
                 <column property="activityId" autoWidth="true"/>
                 <column property="timestamp" flexGrow="1"/>
                 <column property="message"/>
-                <column property="processInstanceId"/>
+                <column property="processInstanceId">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.incidentdata.column.IncidentProcessInstanceIdColumnFragment"/>
+                </column>
                 <column property="processDefinitionId" flexGrow="2"/>
                 <column property="type" autoWidth="true" flexGrow="0"/>
                 <column key="actions" sortable="false" autoWidth="true" flexGrow="0"/>

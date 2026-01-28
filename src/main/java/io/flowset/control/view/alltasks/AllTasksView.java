@@ -12,17 +12,16 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.facet.urlqueryparameters.AllUserTaskListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
+import io.flowset.control.view.usertaskdata.column.UserTaskProcessColumnFragment;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -31,8 +30,8 @@ import io.jmix.core.Sort;
 import io.jmix.core.entity.EntityValues;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
@@ -132,6 +131,8 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     protected JmixRadioButtonGroup<UserTaskStateFilterOption> stateTypeGroup;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
+    @Autowired
+    protected Fragments fragments;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
     protected AllUserTaskListQueryParamBinder queryParamBinder;
@@ -372,12 +373,20 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
 
     @Supply(to = "tasksDataGrid.processDefinitionId", subject = "renderer")
     protected Renderer<UserTaskData> tasksDataGridProcessDefinitionIdRenderer() {
-        return new TextRenderer<>(this::getFormattedProcess);
+        return new ComponentRenderer<>(userTaskData -> {
+            ProcessDefinitionData processDefinitionData = findProcess(userTaskData);
+
+            UserTaskProcessColumnFragment processColumnFragment = fragments.create(this, UserTaskProcessColumnFragment.class);
+            processColumnFragment.setProcessDefinitionData(processDefinitionData);
+            processColumnFragment.setItem(userTaskData);
+            return processColumnFragment;
+        });
     }
 
     @Install(to = "tasksDataGrid.processDefinitionId", subject = "tooltipGenerator")
     protected String tasksDataGridProcessDefinitionIdTooltipGenerator(final UserTaskData userTaskData) {
-        return getFormattedProcess(userTaskData);
+        ProcessDefinitionData processDefinitionData = findProcess(userTaskData);
+        return componentHelper.getProcessLabel(processDefinitionData);
     }
 
     @Override
@@ -454,11 +463,9 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         }
     }
 
-    protected String getFormattedProcess(UserTaskData userTaskData) {
-        ProcessDefinitionData processDefinitionData = processDefinitionsMap.computeIfAbsent(userTaskData.getProcessDefinitionId(),
+    protected ProcessDefinitionData findProcess(UserTaskData userTaskData) {
+        return processDefinitionsMap.computeIfAbsent(userTaskData.getProcessDefinitionId(),
                 processDefinitionId -> processDefinitionService.getById(processDefinitionId));
-
-        return componentHelper.getProcessLabel(processDefinitionData);
     }
 
     protected void setDefaultSort() {

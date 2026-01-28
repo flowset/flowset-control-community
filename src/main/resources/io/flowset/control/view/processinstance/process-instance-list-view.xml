@@ -52,7 +52,10 @@
                     </fragmentRenderer>
                 </column>
                 <column property="processDefinitionId" resizable="true" header="msg://processKey" flexGrow="2"
-                        autoWidth="true"/>
+                        autoWidth="true">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.processinstance.column.ProcessColumnFragment"/>
+                </column>
                 <column property="businessKey" flexGrow="1" autoWidth="true"/>
                 <column property="state" sortable="false" autoWidth="true" flexGrow="1">
                     <fragmentRenderer

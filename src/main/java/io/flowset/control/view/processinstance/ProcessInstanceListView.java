@@ -10,8 +10,6 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
-import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -236,11 +234,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
                 .withBackwardNavigation(true)
                 .withRouteParameters(new RouteParameters("id", selectedInstance.getId()))
                 .navigate();
-    }
-
-    @Supply(to = "processInstancesGrid.processDefinitionId", subject = "renderer")
-    protected Renderer<ProcessInstanceData> processInstancesGridProcessRenderer() {
-        return new TextRenderer<>(this::getProcessDisplayName);
     }
 
     @Install(to = "processInstancesGrid.processDefinitionId", subject = "tooltipGenerator")
