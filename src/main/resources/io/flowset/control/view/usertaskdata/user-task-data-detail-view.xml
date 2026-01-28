@@ -18,6 +18,8 @@
     </facets>
     <actions>
         <action id="closeAction" type="detail_close" text="msg:///actions.Close"/>
+        <action id="reassignAction" icon="RETWEET" text="msg:///actions.Reassign" actionVariant="PRIMARY"/>
+        <action id="completeAction" icon="CHECK" text="msg:///actions.Complete"/>
     </actions>
     <layout>
         <formLayout id="form" dataContainer="userTaskDataDc" width="auto">
@@ -47,6 +49,8 @@
             <textField id="descriptionField" property="description" readOnly="true"/>
         </formLayout>
         <hbox id="detailActions" width="100%" justifyContent="END">
+            <button id="reassignBtn" action="reassignAction"/>
+            <button id="completeBtn" action="completeAction"/>
             <button id="closeBtn" action="closeAction"/>
         </hbox>
     </layout>

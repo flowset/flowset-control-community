@@ -21,6 +21,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.facet.urlqueryparameters.AllUserTaskListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
+import io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment;
 import io.flowset.control.view.usertaskdata.column.UserTaskProcessColumnFragment;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -299,6 +300,16 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     @Install(to = "tasksDataGrid.taskDefinitionKey", subject = "tooltipGenerator")
     protected String tasksDataGridTaskDefinitionKeyTooltipGenerator(final UserTaskData userTaskData) {
         return userTaskData.getTaskDefinitionKey();
+    }
+
+    @Supply(to = "tasksDataGrid.taskId", subject = "renderer")
+    private Renderer<UserTaskData> tasksDataGridTaskIdRenderer() {
+        return new ComponentRenderer<>(userTask -> {
+            UserTaskIdColumnFragment taskIdFragment = fragments.create(this, UserTaskIdColumnFragment.class);
+            taskIdFragment.setItem(userTask);
+            taskIdFragment.setAfterSaveCloseListener(this::startLoadData);
+            return taskIdFragment;
+        });
     }
 
     @Subscribe("assignmentTypeGroup")

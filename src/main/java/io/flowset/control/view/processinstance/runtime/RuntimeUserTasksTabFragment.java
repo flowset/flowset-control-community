@@ -8,12 +8,14 @@ package io.flowset.control.view.processinstance.runtime;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.event.SortEvent;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
+import io.flowset.control.view.processinstance.event.UserTaskUpdateEvent;
+import io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -49,6 +51,8 @@ public class RuntimeUserTasksTabFragment extends Fragment<VerticalLayout> {
     protected DialogWindows dialogWindows;
     @Autowired
     protected ViewNavigators viewNavigators;
+    @Autowired
+    protected Fragments fragments;
 
     @ViewComponent
     protected CollectionLoader<UserTaskData> runtimeUserTasksDl;
@@ -144,5 +148,16 @@ public class RuntimeUserTasksTabFragment extends Fragment<VerticalLayout> {
     @Subscribe("runtimeUserTasksGrid")
     public void onRuntimeUserTasksGridGridSort(final SortEvent<DataGrid<UserTaskData>, GridSortOrder<DataGrid<UserTaskData>>> event) {
         runtimeUserTasksDl.load();
+    }
+
+    @Supply(to = "runtimeUserTasksGrid.taskId", subject = "renderer")
+    private Renderer<UserTaskData> runtimeUserTasksGridTaskIdRenderer() {
+        return new ComponentRenderer<>(userTask -> {
+            UserTaskIdColumnFragment taskIdFragment = fragments.create(this, UserTaskIdColumnFragment.class);
+            taskIdFragment.setItem(userTask);
+            taskIdFragment.setAfterSaveCloseListener(() ->
+                    uiEventPublisher.publishEventForCurrentUI(new UserTaskUpdateEvent(this)));
+            return taskIdFragment;
+        });
     }
 }

@@ -32,10 +32,7 @@
                             type="list_itemTracking"/>
                 </actions>
                 <columns resizable="true">
-                    <column property="taskId">
-                        <fragmentRenderer
-                                class="io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment"/>
-                    </column>
+                    <column property="taskId"/>
                     <column property="name" />
                     <column property="taskDefinitionKey" sortable="false" />
                     <column property="assignee" />
