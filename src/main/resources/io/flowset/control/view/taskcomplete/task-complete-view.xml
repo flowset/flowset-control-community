@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://taskCompleteView.title">
+    <data>
+        <collection id="variablesDc" class="io.flowset.control.entity.variable.VariableInstanceData"/>
+    </data>
+    <actions>
+        <action id="cancelAction" type="view_close"/>
+        <action id="completeTaskAction" icon="CHECK" text="msg:///actions.Complete" actionVariant="PRIMARY"/>
+    </actions>
+    <layout>
+        <span text="msg://completeUserTaskMsg"/>
+
+        <vbox id="variablesVBox" width="100%" padding="false" themeNames="spacing-s">
+            <flexLayout classNames="gap-s" alignItems="CENTER">
+                <h4 text="msg://variableGrid.title"/>
+                <icon icon="QUESTION_CIRCLE" classNames="text-tertiary" size="0.8em">
+                    <tooltip text="msg://variables.helpText" position="END_BOTTOM"/>
+                </icon>
+            </flexLayout>
+            <hbox id="variablesGridPanel" classNames="buttons-panel" themeNames="spacing-s">
+                <button id="createVariableBtn" action="variablesGrid.add" themeNames="primary small"/>
+                <button id="editVariableBtn" action="variablesGrid.edit" themeNames="small"/>
+                <button id="removeVariableBtn" action="variablesGrid.remove" themeNames="small"/>
+            </hbox>
+            <dataGrid id="variablesGrid" dataContainer="variablesDc" maxHeight="15em">
+                <columns>
+                    <column property="name"/>
+                    <column key="value" header="msg://variableValue.title" sortable="false"/>
+                    <column property="type"/>
+                </columns>
+                <actions>
+                    <action id="add" type="list_add"/>
+                    <action id="edit" type="list_edit"/>
+                    <action id="remove" type="list_remove"/>
+                </actions>
+            </dataGrid>
+        </vbox>
+        <hbox id="lookupActions" classNames="buttons-panel" justifyContent="END">
+            <button id="completeBtn" action="completeTaskAction"/>
+            <button id="cancelBtn" action="cancelAction"/>
+        </hbox>
+    </layout>
+</view>

@@ -14,9 +14,12 @@ import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.view.StandardOutcome;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @FragmentDescriptor("user-task-id-column-fragment.xml")
 @RendererItemContainer("userTaskDc")
@@ -28,6 +31,12 @@ public class UserTaskIdColumnFragment extends EntityDetailLinkFragment<Horizonta
     @Autowired
     protected DialogWindows dialogWindows;
 
+    protected Runnable afterSaveCloseListener;
+
+    public void setAfterSaveCloseListener(Runnable afterSaveCloseListener) {
+        this.afterSaveCloseListener = afterSaveCloseListener;
+    }
+
     @Override
     public void setItem(UserTaskData item) {
         super.setItem(item);
@@ -37,6 +46,13 @@ public class UserTaskIdColumnFragment extends EntityDetailLinkFragment<Horizonta
 
     @Subscribe(id = "idBtn", subject = "clickListener")
     public void onIdBtnClick(final ClickEvent<JmixButton> event) {
-        openDialogDetailView(UserTaskData.class);
+        dialogWindows.detail(getCurrentView(), UserTaskData.class)
+                .withAfterCloseListener(viewAfterCloseEvent -> {
+                    if (viewAfterCloseEvent.closedWith(StandardOutcome.SAVE) && afterSaveCloseListener != null) {
+                        afterSaveCloseListener.run();
+                    }
+                })
+                .editEntity(item)
+                .open();
     }
 }
