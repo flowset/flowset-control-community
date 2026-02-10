@@ -17,6 +17,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.processinstance.event.UserTaskUpdateEvent;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
@@ -190,6 +191,11 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     @EventListener
     public void handleExternalRetriesUpdate(ExternalTaskRetriesUpdateEvent event) {
         initBpmnViewerFragment();
+    }
+
+    @EventListener
+    public void handleUserTaskUpdate(UserTaskUpdateEvent event) {
+        reopenView();
     }
 
     public void reopenView() {

@@ -15,13 +15,19 @@ import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.view.alltasks.AllTasksView;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
+import io.flowset.control.view.taskcomplete.TaskCompleteView;
+import io.flowset.control.view.taskreassign.TaskReassignView;
 import io.jmix.core.LoadContext;
+import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
+import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collections;
 import java.util.Date;
 
 @Route(value = "bpm/user-task/:id", layout = DefaultMainViewParent.class)
@@ -49,12 +55,18 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
     protected TypedTextField<String> processDefinitionIdField;
     @ViewComponent
     protected TypedTextField<String> processInstanceIdField;
+    @Autowired
+    protected DialogWindows dialogWindows;
+    @ViewComponent
+    protected BaseAction reassignAction;
+    @ViewComponent
+    protected BaseAction completeAction;
 
 
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.XSMALL);
-        if(event.getSource() instanceof AllTasksView) {
+        if (event.getSource() instanceof AllTasksView) {
             processDefinitionIdField.setVisible(true);
             processInstanceIdField.setVisible(true);
         }
@@ -69,6 +81,8 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
             createTimeField.setVisible(false);
             lastUpdatedField.setVisible(false);
             formKeyField.setVisible(false);
+            reassignAction.setVisible(false);
+            completeAction.setVisible(false);
         } else {
             startTimeField.setVisible(false);
             endTimeField.setVisible(false);
@@ -91,5 +105,29 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
     public void onViewProcessDefinitionClick(final ClickEvent<JmixButton> event) {
         RouterLink routerLink = new RouterLink(ProcessDefinitionDetailView.class, new RouteParameters("id", getEditedEntity().getProcessDefinitionId()));
         getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
+    }
+
+    @Subscribe("reassignAction")
+    public void onReassignAction(final ActionPerformedEvent event) {
+        dialogWindows.view(this, TaskReassignView.class)
+                .withViewConfigurer(taskReassignView -> taskReassignView.setTaskDataList(Collections.singletonList(getEditedEntity())))
+                .withAfterCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
+                        close(StandardOutcome.SAVE);
+                    }
+                })
+                .open();
+    }
+
+    @Subscribe("completeAction")
+    public void onCompleteAction(final ActionPerformedEvent event) {
+        dialogWindows.view(this, TaskCompleteView.class)
+                .withViewConfigurer(taskCompleteView -> taskCompleteView.setUserTask(getEditedEntity()))
+                .withAfterCloseListener(afterCloseEvent -> {
+                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
+                        close(StandardOutcome.SAVE);
+                    }
+                })
+                .open();
     }
 }

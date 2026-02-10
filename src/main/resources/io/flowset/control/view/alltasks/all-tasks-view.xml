@@ -102,10 +102,7 @@
                         </action>
                     </actions>
                     <columns resizable="true">
-                        <column property="taskId" frozen="true">
-                            <fragmentRenderer
-                                    class="io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment"/>
-                        </column>
+                        <column property="taskId" frozen="true"/>
                         <column property="taskDefinitionKey" autoWidth="true" sortable="false">
                             <fragmentRenderer
                                     class="io.flowset.control.view.alltasks.TaskKeyColumnFragment"/>
