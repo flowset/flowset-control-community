@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
 package io.flowset.control.entity.decisiondefinition;
 
 import io.jmix.core.entity.annotation.JmixId;
@@ -31,7 +36,7 @@ public class DecisionDefinitionData {
 
     protected String tenantId;
 
-    protected String version;
+    protected Integer version;
 
     protected String versionTag;
 

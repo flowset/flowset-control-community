@@ -64,7 +64,7 @@ public abstract class AbstractProcessHeaderFilter<F, E> extends ContainerDataGri
         processKeyComboBox = createProcessComboBox();
         processVersionComboBox = createProcessVersionComboBox();
         useSpecificVersionChkBox = uiComponents.create(Checkbox.class);
-        useSpecificVersionChkBox.setLabel(messages.getMessage(getClass(), "useSpecificVersion"));
+        useSpecificVersionChkBox.setLabel(messages.getMessage("processColumnFilter.useSpecificVersion.label"));
         useSpecificVersionChkBox.addValueChangeListener(event -> {
             boolean useVersion = BooleanUtils.isTrue(event.getValue());
             processVersionComboBox.setVisible(useVersion);
@@ -126,7 +126,7 @@ public abstract class AbstractProcessHeaderFilter<F, E> extends ContainerDataGri
         JmixComboBox<String> processComboBox = uiComponents.create(JmixComboBox.class);
         processComboBox.addClassNames(LumoUtility.Padding.Top.NONE);
         processComboBox.setClearButtonVisible(true);
-        processComboBox.setLabel(messages.getMessage(getClass(), "processFilterLabel"));
+        processComboBox.setLabel(messages.getMessage("processColumnFilter.processField.label"));
         processComboBox.setMinWidth("30em");
         processComboBox.addValueChangeListener(event -> {
             processVersionComboBox.setValue(null);
@@ -168,8 +168,8 @@ public abstract class AbstractProcessHeaderFilter<F, E> extends ContainerDataGri
             }
         });
         processVersionComboBox.setClearButtonVisible(true);
-        processVersionComboBox.setPlaceholder(messages.getMessage(getClass(), "enterProcessVersionValue"));
-        processVersionComboBox.setLabel(messages.getMessage(getClass(), "processVersionFilterLabel"));
+        processVersionComboBox.setPlaceholder(messages.getMessage("processColumnFilter.versionField.placeholder"));
+        processVersionComboBox.setLabel(messages.getMessage("processColumnFilter.versionField.label"));
         processVersionComboBox.setMinWidth("10em");
         processVersionComboBox.setItemLabelGenerator(item -> {
             Integer version = item.getVersion();

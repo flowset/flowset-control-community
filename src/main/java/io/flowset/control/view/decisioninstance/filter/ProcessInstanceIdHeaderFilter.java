@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
@@ -19,10 +19,13 @@ public class ProcessInstanceIdHeaderFilter
 
     protected TextField processInstanceId;
 
+    protected final Runnable loadDelegate;
+
     public ProcessInstanceIdHeaderFilter(DataGrid<HistoricDecisionInstanceShortData> dataGrid,
                                          DataGridColumn<HistoricDecisionInstanceShortData> column,
-                                         InstanceContainer<DecisionInstanceFilter> filterDc) {
+                                         InstanceContainer<DecisionInstanceFilter> filterDc, Runnable loadDelegate) {
         super(dataGrid, column, filterDc);
+        this.loadDelegate = loadDelegate;
     }
 
     @Override
@@ -30,6 +33,8 @@ public class ProcessInstanceIdHeaderFilter
         String value = processInstanceId.getValue();
         filterDc.getItem().setProcessInstanceId(value);
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, value != null);
+
+        this.loadDelegate.run();
     }
 
     @Override

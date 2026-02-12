@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="decisionDefinitionDc"
+                  class="io.flowset.control.entity.decisiondefinition.DecisionDefinitionData" provided="true"/>
+    </data>
+    <actions>
+        <action id="copyIdAction" type="control_copyComponentValueToClipboard">
+            <properties>
+                <property name="text" value=""/>
+            </properties>
+        </action>
+        <action id="copyKeyAction" type="control_copyComponentValueToClipboard">
+            <properties>
+                <property name="text" value=""/>
+            </properties>
+        </action>
+    </actions>
+    <content>
+        <flexLayout classNames="decision-slide-panel">
+            <flexLayout id="decisionDetailsPanel" width="min-content" height="100%" classNames="bordered-container">
+                <vbox id="upperPanel" themeNames="spacing-s" classNames="decision-properties-panel" padding="false">
+                    <h4 text="msg://decisionInformationHeader.text" classNames="pt-s pb-s pr-m pl-m"/>
+                    <formLayout id="decisionDefinitionForm" dataContainer="decisionDefinitionDc" width="inherit"
+                                classNames="pt-s pb-s pr-m pl-m box-border" >
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="1"/>
+                            <responsiveStep minWidth="60em" columns="2"/>
+                            <responsiveStep minWidth="80em" columns="3"/>
+                        </responsiveSteps>
+                        <textArea property="name" readOnly="true" width="100%"/>
+                        <textField id="keyField" property="key" readOnly="true" label="msg://io.flowset.control.entity.decisiondefinition/DecisionDefinitionData.key"
+                                   classNames="flex-grow"
+                                   dataContainer="decisionDefinitionDc">
+                            <suffix>
+                                <button id="copyKeyButton" icon="COPY_O" themeNames="tertiary-inline" action="copyKeyAction"/>
+                            </suffix>
+                        </textField>
+                        <textField id="idField" property="id" readOnly="true">
+                            <suffix>
+                                <button id="copyIdButton" icon="COPY_O" themeNames="tertiary-inline" action="copyIdAction"/>
+                            </suffix>
+                        </textField>
+
+                        <details opened="true" themeNames="reverse small" summaryText="msg://io.flowset.control.view.decisiondefinition/deploymentGroup"
+                                 width="100%"
+                                 classNames="pt-s">
+                            <vbox padding="false" width="100%" themeNames="spacing-xs">
+                                <textField id="deploymentIdField" readOnly="true" width="100%"
+                                           label="msg://io.flowset.control.view.decisiondefinition/deploymentId">
+                                    <suffix>
+                                        <button id="viewDeployment" icon="SEARCH" themeNames="tertiary-inline"/>
+                                    </suffix>
+                                </textField>
+
+                                <dateTimePicker id="deploymentTimeField" readOnly="true" width="100%"
+                                                label="msg://io.flowset.control.view.decisiondefinition/deploymentTime" step="1ms"/>
+                                <textField id="deploymentSourceField" readOnly="true" width="100%"
+                                           label="msg://io.flowset.control.view.decisiondefinition/deploymentSource"/>
+                            </vbox>
+                        </details>
+                    </formLayout>
+                </vbox>
+                <vbox themeNames="spacing-xs" classNames="shadow-s p-s decision-details-actions-panel" width="min-content">
+                    <button id="infoBtn" icon="INFO_CIRCLE" title="msg://viewDecisionInformation.title" classNames="bordered-button" themeNames="small"/>
+                </vbox>
+            </flexLayout>
+        </flexLayout>
+    </content>
+</fragment>

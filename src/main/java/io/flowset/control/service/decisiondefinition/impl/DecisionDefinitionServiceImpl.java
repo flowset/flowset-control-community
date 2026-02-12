@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
 package io.flowset.control.service.decisiondefinition.impl;
 
 import feign.FeignException;
@@ -171,9 +175,12 @@ public class DecisionDefinitionServiceImpl implements DecisionDefinitionService 
 
     protected DecisionDefinitionQuery createDecisionDefinitionQuery(@Nullable DecisionDefinitionFilter filter,
                                                                     @Nullable Sort sort) {
-        DecisionDefinitionQuery decisionDefinitionQuery = new DecisionDefinitionQueryImpl(decisionDefinitionApiClient);
+        DecisionDefinitionQueryImpl decisionDefinitionQuery = new DecisionDefinitionQueryImpl(decisionDefinitionApiClient);
         String tenantId = engineTenantProvider.getCurrentUserTenantId();
         addIfNotNull(tenantId, decisionDefinitionQuery::tenantIdIn);
+        if (tenantId == null) {
+            decisionDefinitionQuery.setWithoutTenantId(true);
+        }
         addDecisionDefinitionFilters(decisionDefinitionQuery, filter);
         addDecisionDefinitionSort(decisionDefinitionQuery, sort);
         return decisionDefinitionQuery;

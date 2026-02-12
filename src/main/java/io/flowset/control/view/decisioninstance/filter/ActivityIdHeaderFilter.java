@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
@@ -18,11 +18,13 @@ public class ActivityIdHeaderFilter
         extends ContainerDataGridHeaderFilter<DecisionInstanceFilter, HistoricDecisionInstanceShortData> {
 
     protected TextField activityId;
+    protected final Runnable loadDelegate;
 
     public ActivityIdHeaderFilter(DataGrid<HistoricDecisionInstanceShortData> dataGrid,
                                   DataGridColumn<HistoricDecisionInstanceShortData> column,
-                                  InstanceContainer<DecisionInstanceFilter> filterDc) {
+                                  InstanceContainer<DecisionInstanceFilter> filterDc, Runnable loadDelegate) {
         super(dataGrid, column, filterDc);
+        this.loadDelegate = loadDelegate;
     }
 
     @Override
@@ -30,6 +32,8 @@ public class ActivityIdHeaderFilter
         String value = activityId.getValue();
         filterDc.getItem().setActivityId(value);
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, value != null);
+
+        this.loadDelegate.run();
     }
 
     @Override

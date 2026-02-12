@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (c) Haulmont 2024. All Rights Reserved.
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
   ~ Use is subject to license terms.
   -->
 
@@ -14,27 +14,12 @@
         <instance id="decisionInstanceFilterDc" class="io.flowset.control.entity.filter.DecisionInstanceFilter"/>
     </data>
     <content>
-        <vbox spacing="false" height="100%">
-            <vbox id="decisionInstanceVBox" width="100%" themeNames="spacing-xs">
-                <hbox width="100%">
-                    <h4 text="msg://decisionInstances"/>
-                    <hbox classNames="ml-auto">
-                        <hbox spacing="false" alignItems="END">
-                            <label text="msg://instancesCurrentVersion"
-                                   setFor="currentVersionsInstancesCountSpan"/>
-                            <span id="currentVersionsInstancesCountSpan"/>
-                        </hbox>
-                        <hbox spacing="false">
-                            <label text="msg://instancesAllVersions"
-                                   setFor="allVersionsInstancesCountSpan"/>
-                            <span id="allVersionsInstancesCountSpan"/>
-                        </hbox>
-                    </hbox>
-                </hbox>
-                <hbox id="processInstancesButtons" classNames="buttons-panel" alignItems="BASELINE">
+        <vbox height="100%" themeNames="spacing-xs">
+            <vbox id="decisionInstanceVBox" width="100%" themeNames="spacing-xs" padding="false" >
+                <hbox padding="false" id="decisionInstancesButtons" classNames="buttons-panel" alignItems="BASELINE">
                     <button id="refreshDecisionInstanceBtn" action="decisionInstancesGrid.refresh"
                             themeNames="small success primary"/>
-                    <simplePagination id="decisionInstancesPagination" />
+                    <simplePagination id="decisionInstancesPagination" dataLoader="decisionInstancesDl"/>
                 </hbox>
             </vbox>
             <dataGrid id="decisionInstancesGrid" dataContainer="decisionInstancesDc" width="100%"
@@ -49,10 +34,7 @@
                                 class="io.flowset.control.view.decisioninstance.column.DecisionInstanceIdColumnFragment"/>
                     </column>
                     <column property="evaluationTime"/>
-                    <column property="processDefinitionKey">
-                        <fragmentRenderer
-                                class="io.flowset.control.view.decisioninstance.column.DecisionInstanceProcessColumnFragment"/>
-                    </column>
+                    <column property="processDefinitionId"/>
                     <column property="processInstanceId">
                         <fragmentRenderer
                                 class="io.flowset.control.view.decisioninstance.column.DecisionInstanceProcessInstanceColumnFragment"/>

@@ -192,6 +192,7 @@ public class QueryUtils {
         wrapAndAddStringIfNotEmpty(filter.getNameLike(), decisionDefinitionQuery::decisionDefinitionNameLike);
         addIfStringNotEmpty(filter.getKey(), decisionDefinitionQuery::decisionDefinitionKey);
         addCollectionIfNotEmpty(filter.getIdIn(), decisionDefinitionQuery::decisionDefinitionIdIn);
+        addIfNotNull(filter.getVersion(), decisionDefinitionQuery::decisionDefinitionVersion);
         addIfTrue(filter.getLatestVersionOnly(), decisionDefinitionQuery::latestVersion);
     }
 
