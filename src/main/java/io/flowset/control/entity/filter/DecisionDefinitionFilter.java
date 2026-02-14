@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
@@ -9,7 +9,6 @@ import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionState;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,4 +34,6 @@ public class DecisionDefinitionFilter {
     protected String nameLike;
 
     protected Boolean latestVersionOnly = true;
+
+    protected Integer version;
 }

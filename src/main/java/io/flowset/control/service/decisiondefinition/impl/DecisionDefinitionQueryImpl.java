@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
 package io.flowset.control.service.decisiondefinition.impl;
 
 import lombok.Getter;
@@ -48,6 +53,10 @@ public class DecisionDefinitionQueryImpl extends BaseQuery<DecisionDefinitionQue
 
     public DecisionDefinitionQueryImpl(DecisionDefinitionApiClient decisionDefinitionApiClient) {
         this.decisionDefinitionApiClient = decisionDefinitionApiClient;
+    }
+
+    public void setWithoutTenantId(Boolean withoutTenantId) {
+        this.withoutTenantId = withoutTenantId;
     }
 
     @Override

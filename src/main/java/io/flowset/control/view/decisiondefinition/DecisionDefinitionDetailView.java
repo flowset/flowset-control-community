@@ -1,53 +1,47 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
 package io.flowset.control.view.decisiondefinition;
 
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.ViewEngineConnectionFailedException;
+import io.jmix.core.DataManager;
 import io.jmix.core.LoadContext;
+import io.jmix.core.Sort;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.codeeditor.CodeEditor;
 import io.jmix.flowui.component.combobox.JmixComboBox;
-import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
-import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.tabsheet.JmixTabSheet;
-import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.DefaultMainViewParent;
-import io.jmix.flowui.view.DialogMode;
-import io.jmix.flowui.view.EditedEntityContainer;
-import io.jmix.flowui.view.Install;
-import io.jmix.flowui.view.MessageBundle;
-import io.jmix.flowui.view.PrimaryDetailView;
-import io.jmix.flowui.view.StandardDetailView;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.Target;
-import io.jmix.flowui.view.ViewComponent;
-import io.jmix.flowui.view.ViewController;
-import io.jmix.flowui.view.ViewDescriptor;
+import io.jmix.flowui.model.InstanceLoader;
+import io.jmix.flowui.view.*;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
-import io.flowset.control.entity.deployment.DeploymentData;
+import io.flowset.control.entity.filter.DecisionDefinitionFilter;
+import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
-import io.flowset.control.service.deployment.DeploymentService;
-import io.flowset.control.view.decisioninstance.DecisionInstancesFragment;
-import io.flowset.control.view.deploymentdata.DeploymentDetailView;
+import io.flowset.control.service.decisioninstance.DecisionInstanceService;
+import io.flowset.control.service.processinstance.ProcessInstanceService;
+import io.flowset.control.view.decisiondefinition.detail.GeneralPanelFragment;
 import io.flowset.control.view.event.TitleUpdateEvent;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Route(value = "bpm/decision-definitions/:id", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_DecisionDefinition.detail")
@@ -58,59 +52,48 @@ import java.util.Objects;
 public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDefinitionData> {
 
     @Autowired
-    private DecisionDefinitionService decisionDefinitionService;
+    protected DecisionDefinitionService decisionDefinitionService;
+
     @Autowired
-    private DeploymentService deploymentService;
+    protected UiComponents uiComponents;
     @Autowired
-    private UiComponents uiComponents;
+    protected UiEventPublisher uiEventPublisher;
+    @ViewComponent
+    protected MessageBundle messageBundle;
     @Autowired
-    private UiEventPublisher uiEventPublisher;
-    @Autowired
-    private ViewNavigators viewNavigators;
+    protected DataManager dataManager;
 
     @ViewComponent
-    private InstanceContainer<DecisionDefinitionData> decisionDefinitionDc;
+    protected InstanceContainer<DecisionDefinitionData> decisionDefinitionDc;
     @ViewComponent
-    private JmixComboBox<DecisionDefinitionData> versionComboBox;
-    @ViewComponent
-    private TypedDateTimePicker<Comparable> deploymentTimeField;
-    @ViewComponent
-    private TypedTextField<Object> deploymentSourceField;
-    @ViewComponent
-    private DecisionInstancesFragment decisionInstancesFragment;
-    @ViewComponent
-    private MessageBundle messageBundle;
-    @ViewComponent
-    private CodeEditor dmnXmlEditor;
-    @ViewComponent
-    private DmnViewerFragment viewerFragment;
-    @ViewComponent
-    private JmixFormLayout decisionDefinitionForm;
-    @ViewComponent
-    private JmixTabSheet tabSheet;
-    @ViewComponent
-    private HorizontalLayout detailActions;
-    @ViewComponent
-    private TypedTextField<Object> deploymentIdField;
+    protected JmixComboBox<DecisionDefinitionData> versionComboBox;
 
-    private String title = "";
+    @ViewComponent
+    protected CodeEditor dmnXmlEditor;
+    @ViewComponent
+    protected DmnViewerFragment viewerFragment;
+    @ViewComponent
+    protected JmixTabSheet tabSheet;
+
+    @ViewComponent
+    protected InstanceLoader<DecisionDefinitionData> decisionDefinitionDl;
+
+    protected String title = "";
+
+
+    @ViewComponent
+    protected GeneralPanelFragment generalPanel;
+    @ViewComponent("tabSheet.decisionInstancesTab")
+    protected Tab tabSheetDecisionInstancesTab;
+
+    @Autowired
+    protected ProcessInstanceService processInstanceService;
+    @Autowired
+    protected DecisionInstanceService decisionInstanceService;
 
     @Subscribe
     public void onInit(final InitEvent event) {
-        addClassNames(LumoUtility.Padding.NONE);
         initTabIcons();
-        decisionDefinitionForm.addClassName(LumoUtility.Padding.Right.XSMALL);
-        detailActions.addClassNames(LumoUtility.Padding.Bottom.SMALL, LumoUtility.Padding.Right.MEDIUM,
-                LumoUtility.Padding.Top.XSMALL);
-    }
-
-    @Subscribe(id = "viewDeployment", subject = "clickListener")
-    public void onViewDeploymentClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(this, DeploymentData.class)
-                .withViewClass(DeploymentDetailView.class)
-                .withRouteParameters(new RouteParameters("id", getEditedEntity().getDeploymentId()))
-                .withBackwardNavigation(true)
-                .navigate();
     }
 
     @Subscribe
@@ -125,14 +108,14 @@ public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDef
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
+        decisionDefinitionDl.load();
+
         initVersionLookup(getEditedEntity());
-        initDeploymentData();
     }
 
     protected void initTabIcons() {
-        tabSheet.getTabAt(0).addComponentAsFirst(VaadinIcon.INFO_CIRCLE_O.create());
-        tabSheet.getTabAt(1).addComponentAsFirst(VaadinIcon.SITEMAP.create());
-        tabSheet.getTabAt(2).addComponentAsFirst(VaadinIcon.FILE_CODE.create());
+        tabSheet.getTabAt(0).addComponentAsFirst(VaadinIcon.SITEMAP.create());
+        tabSheet.getTabAt(1).addComponentAsFirst(VaadinIcon.FILE_CODE.create());
     }
 
     @Install(to = "decisionDefinitionDl", target = Target.DATA_LOADER)
@@ -148,13 +131,13 @@ public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDef
     }
 
     @Subscribe("versionComboBox")
-    protected void onVersionLookupValueChange(
-            AbstractField.ComponentValueChangeEvent<ComboBox<DecisionDefinitionData>, DecisionDefinitionData> event) {
-        DecisionDefinitionData selectedProcessDefinition = event.getValue();
-        decisionDefinitionDc.setItem(selectedProcessDefinition);
-        decisionInstancesFragment.initInstancesCountLabels();
-        sendUpdateViewTitleEvent();
-        initDeploymentData();
+    protected void onVersionLookupValueChange(AbstractField.ComponentValueChangeEvent<ComboBox<DecisionDefinitionData>, DecisionDefinitionData> event) {
+        if (event.isFromClient()) {
+            DecisionDefinitionData selectedProcessDefinition = event.getValue();
+            decisionDefinitionDc.setItem(selectedProcessDefinition);
+
+            sendUpdateViewTitleEvent();
+        }
     }
 
     @Subscribe(id = "decisionDefinitionDc", target = Target.DATA_CONTAINER)
@@ -166,23 +149,65 @@ public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDef
 
         String dmnXml = decisionDefinitionService.getDmnXml(decisionDefinition.getDecisionDefinitionId());
         viewerFragment.initViewer();
-        viewerFragment.setDmnXml(dmnXml);
+        viewerFragment.setDmnXml(dmnXml, decisionDefinition.getKey());
+        generalPanel.refresh();
+        updateCurrentVersionInstancesCount();
 
         dmnXmlEditor.setValue(dmnXml);
 
         sendUpdateViewTitleEvent();
     }
 
+    @Install(to = "versionComboBox", subject = "itemsFetchCallback")
+    protected Stream<DecisionDefinitionData> versionComboBoxItemsFetchCallback(final Query<Object, String> query) {
+        int limit = query.getLimit();
+        int offset = query.getOffset();
+
+        DecisionDefinitionFilter filter = dataManager.create(DecisionDefinitionFilter.class);
+        filter.setKey(getEditedEntity().getKey());
+        filter.setLatestVersionOnly(false);
+
+        query.getFilter().ifPresent(s -> {
+            if (StringUtils.isNotBlank(s) && NumberUtils.isParsable(s)) {
+                int version = Integer.parseInt(s);
+                filter.setVersion(version);
+            }
+        });
+
+        DecisionDefinitionLoadContext loadContext = new DecisionDefinitionLoadContext()
+                .setFilter(filter)
+                .setSort(Sort.by(Sort.Direction.DESC, "version"))
+                .setFirstResult(offset)
+                .setMaxResults(limit);
+
+        return decisionDefinitionService.findAll(loadContext).stream();
+    }
+
+    @Install(to = "versionComboBox", subject = "itemLabelGenerator")
+    protected String versionComboBoxItemLabelGenerator(final DecisionDefinitionData item) {
+        return item.getVersion() != null ? String.valueOf(item.getVersion()) : null;
+    }
+
+    protected void updateCurrentVersionInstancesCount() {
+        long currentVersionInstancesCount = decisionInstanceService.getCountByDecisionDefinitionId(getEditedEntity().getDecisionDefinitionId());
+        updateTabCaption(currentVersionInstancesCount);
+    }
+
+    protected void updateTabCaption(long count) {
+        tabSheetDecisionInstancesTab.setLabel(messageBundle.formatMessage("decisionInstancesTab.label", count));
+        tabSheetDecisionInstancesTab.addComponentAsFirst(VaadinIcon.TASKS.create());
+    }
+
     protected void sendUpdateViewTitleEvent() {
         this.title = messageBundle.formatMessage("decisionDefinition.title.name", getEditedEntity().getKey());
 
         FlexLayout flexLayout = uiComponents.create(FlexLayout.class);
-        flexLayout.addClassNames(LumoUtility.Margin.Left.XSMALL, LumoUtility.Gap.SMALL);
+        flexLayout.addClassNames(LumoUtility.Margin.Left.XSMALL, LumoUtility.Gap.SMALL, LumoUtility.AlignItems.CENTER);
 
         Span version = uiComponents.create(Span.class);
         version.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.FontWeight.BOLD);
         version.setText(messageBundle.formatMessage("decisionDefinition.title.version",
-                getEditedEntity().getVersion()));
+                getEditedEntity().getVersion().toString()));
 
         flexLayout.add(version);
 
@@ -190,19 +215,6 @@ public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDef
     }
 
     protected void initVersionLookup(DecisionDefinitionData decisionDefinition) {
-        List<DecisionDefinitionData> optionsList = decisionDefinitionService.findAllByKey(decisionDefinition.getKey());
-        versionComboBox.setItems(optionsList);
-        versionComboBox.setItemLabelGenerator(DecisionDefinitionData::getVersion);
         versionComboBox.setValue(decisionDefinition);
-    }
-
-    protected void initDeploymentData() {
-        DeploymentData deployment = deploymentService.findById(getEditedEntity().getDeploymentId());
-        if (deployment != null) {
-            String source = deployment.getSource();
-            deploymentIdField.setTypedValue(deployment.getDeploymentId());
-            deploymentSourceField.setTypedValue(source);
-            deploymentTimeField.setTypedValue(deployment.getDeploymentTime());
-        }
     }
 }

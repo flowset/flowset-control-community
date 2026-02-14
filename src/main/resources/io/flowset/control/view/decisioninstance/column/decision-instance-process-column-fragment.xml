@@ -11,7 +11,7 @@
     <content>
         <hbox id="root" padding="false" spacing="false" classNames="overflow-hidden">
             <startSlot>
-                <button id="processKeyBtn" themeNames="tertiary-inline link" whiteSpace="NOWRAP"
+                <button id="processIdBtn" themeNames="tertiary-inline link" whiteSpace="NOWRAP"
                         width="auto"
                         classNames="overflow-hidden text-ellipsis flex-shrink"/>
             </startSlot>

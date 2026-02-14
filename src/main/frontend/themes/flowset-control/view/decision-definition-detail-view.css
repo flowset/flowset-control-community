@@ -1,0 +1,37 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+.decision-details-actions-panel {
+    border-radius: inherit;
+}
+
+.decision-slide-panel {
+    padding: var(--lumo-space-xs);
+}
+
+.decision-properties-panel {
+    box-sizing: border-box;
+    box-shadow: -4px 4px 6px -2px var(--lumo-shade-40pct);
+    width: 0 !important;
+    opacity: 0;
+    transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out, height 0.3s ease-in-out;
+    overflow: hidden;
+    border-bottom-left-radius: inherit;
+}
+
+.decision-properties-panel.active {
+    width: 25em !important;
+    opacity: 1;
+    overflow-y: auto;
+}
+
+.decision-details-diagram-box {
+    overflow: hidden;
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+}
+
+.decision-details-diagram-box #viewerFragment {
+   border-color: var(--lumo-contrast-20pct);
+}

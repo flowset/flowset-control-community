@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<view xmlns="http://jmix.io/schema/flowui/view"
-      focusComponent="decisionDefinitionForm">
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view">
     <data>
         <instance id="decisionDefinitionDc"
                   class="io.flowset.control.entity.decisiondefinition.DecisionDefinitionData">
@@ -8,71 +12,41 @@
         </instance>
         <instance id="decisionInstanceFilterDc" class="io.flowset.control.entity.filter.DecisionInstanceFilter"/>
     </data>
-    <facets>
-        <dataLoadCoordinator auto="true"/>
-    </facets>
     <actions>
         <action id="closeAction" type="view_close" text="msg:///actions.Close"/>
     </actions>
-    <layout spacing="false">
-        <tabSheet id="tabSheet" width="100%" height="100%">
-            <tab id="generalTab" label="msg://tab.general">
-                <split orientation="HORIZONTAL" height="100%" width="100%" splitterPosition="35"
-                       themeNames="splitter-spacing">
-                    <formLayout id="decisionDefinitionForm" dataContainer="decisionDefinitionDc" width="100%" height="100%">
-                        <responsiveSteps>
-                            <responsiveStep minWidth="0" columns="1"/>
-                            <responsiveStep minWidth="60em" columns="2"/>
-                            <responsiveStep minWidth="80em" columns="3"/>
-                        </responsiveSteps>
-                        <textArea property="name" readOnly="true"/>
-                        <hbox id="keyAndVersionHBox" expand="keyField" alignItems="BASELINE" padding="false">
-                            <textField id="keyField" property="key" readOnly="true" label="msg://key">
-                                <suffix>
-                                    <button id="copyKeyButton" icon="COPY_O" themeNames="tertiary-inline"/>
-                                </suffix>
-                            </textField>
-                            <comboBox id="versionComboBox" required="true" width="8em"
-                                      label="msg://version" colspan="2"/>
-                        </hbox>
-                        <textField id="idField" property="id" readOnly="true">
-                            <suffix>
-                                <button id="copyIdButton" icon="COPY_O" themeNames="tertiary-inline"/>
-                            </suffix>
-                        </textField>
-                        <textField id="versionTagField" property="versionTag" readOnly="true"/>
-                        <details opened="true" themeNames="reverse small" summaryText="msg://deploymentGroup" width="100%"
-                                 classNames="pt-s">
-                            <vbox padding="false" width="100%" themeNames="spacing-xs">
-                                <textField id="deploymentIdField" readOnly="true" width="100%" classNames="pt-xs"
-                                           label="msg://deploymentId">
-                                    <suffix>
-                                        <button id="viewDeployment" icon="SEARCH" themeNames="tertiary-inline"/>
-                                    </suffix>
-                                </textField>
-                                <dateTimePicker id="deploymentTimeField" readOnly="true" width="100%" classNames="pt-xs"
-                                                label="msg://deploymentTime" step="1ms"/>
-                                <textField id="deploymentSourceField" readOnly="true" width="100%" classNames="pt-xs"
-                                           label="msg://deploymentSource"/>
-                            </vbox>
-                        </details>
-                    </formLayout>
-                    <div height="100%">
-                        <fragment class="io.flowset.control.view.decisioninstance.DecisionInstancesFragment"
-                                  id="decisionInstancesFragment"/>
-                    </div>
-                </split>
-            </tab>
-            <tab id="dmnViewerTab" label="msg://tab.schema" enabled="true">
-                <div width="100%" height="100%">
-                    <fragment id="viewerFragment" class="io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment"/>
+    <layout spacing="false" padding="false" expand="box" height="100%">
+        <hbox id="box" width="100%" spacing="false" classNames="overflow-hidden">
+            <split id="rootBox" orientation="VERTICAL" splitterPosition="65" themeNames="splitter-spacing" width="100%"
+                   height="100%">
+                <vbox width="100%" height="100%" themeNames="spacing-s" padding="false" classNames="pt-s pb-s relative">
+                    <hbox padding="false" themeNames="spacing-l" width="100%" alignItems="CENTER"
+                          classNames="pl-s pr-s">
+                        <comboBox id="versionComboBox" required="true" width="8em" label="msg://io.flowset.control.entity.decisiondefinition/DecisionDefinitionData.version"
+                                  classNames="pt-0"/>
+                        <textField id="versionTagField" property="versionTag" dataContainer="decisionDefinitionDc" readOnly="true" label="msg://io.flowset.control.entity.decisiondefinition/DecisionDefinitionData.versionTag"
+                                   classNames="pt-0"/>
+                    </hbox>
+                    <hbox id="diagramBox" height="100%" classNames="decision-details-diagram-box" width="100%">
+                        <fragment id="viewerFragment" class="io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment"/>
+                    </hbox>
+                </vbox>
+                <div classNames="p-s">
+                    <tabSheet id="tabSheet" width="100%" height="100%" themeNames="ide-scroll-buttons bordered" classNames="box-border flex-grow">
+                        <tab id="decisionInstancesTab" label="msg://decisionInstancesTab.label">
+                            <fragment class="io.flowset.control.view.decisioninstance.DecisionInstancesFragment"
+                                      id="decisionInstancesFragment"/>
+                        </tab>
+                        <tab id="dmnXmlTab" label="msg://tab.xml" enabled="true">
+                            <codeEditor id="dmnXmlEditor" mode="XML" readOnly="true" width="100%" height="100%" css="padding:0"/>
+                        </tab>
+                    </tabSheet>
                 </div>
-            </tab>
-            <tab id="dmnXmlTab" label="msg://tab.xml" enabled="true">
-                <codeEditor id="dmnXmlEditor" mode="XML" readOnly="true" width="100%" height="100%" css="padding:0"/>
-            </tab>
-        </tabSheet>
-        <hbox id="detailActions" alignSelf="END">
+            </split>
+            <fragment id="generalPanel" class="io.flowset.control.view.decisiondefinition.detail.GeneralPanelFragment"/>
+        </hbox>
+
+        <hbox id="detailActions" classNames="pl-s pr-s">
             <button id="closeButton" action="closeAction"/>
         </hbox>
     </layout>

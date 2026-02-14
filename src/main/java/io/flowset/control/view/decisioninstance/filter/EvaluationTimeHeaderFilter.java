@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
@@ -23,35 +23,42 @@ import static io.flowset.control.view.util.JsUtils.SET_DEFAULT_TIME_SCRIPT;
 public class EvaluationTimeHeaderFilter
         extends ContainerDataGridHeaderFilter<DecisionInstanceFilter, HistoricDecisionInstanceShortData> {
 
-    private TypedDateTimePicker<LocalDateTime> evaluatedAfter;
-    private TypedDateTimePicker<LocalDateTime> evaluatedBefore;
+    protected TypedDateTimePicker<LocalDateTime> evaluatedAfter;
+    protected TypedDateTimePicker<LocalDateTime> evaluatedBefore;
+    
+    protected final Runnable loadDelegate;
 
     public EvaluationTimeHeaderFilter(DataGrid<HistoricDecisionInstanceShortData> dataGrid,
                                       DataGridColumn<HistoricDecisionInstanceShortData> column,
-                                      InstanceContainer<DecisionInstanceFilter> filterDc) {
+                                      InstanceContainer<DecisionInstanceFilter> filterDc, Runnable loadDelegate) {
         super(dataGrid, column, filterDc);
+        this.loadDelegate = loadDelegate;
     }
 
     @Override
     public void apply() {
         LocalDateTime startTimeBefore = this.evaluatedBefore.getValue();
+        DecisionInstanceFilter decisionInstanceFilter = filterDc.getItem();
+        
         if (startTimeBefore != null) {
             ZoneId zoneId = this.evaluatedBefore.getZoneId();
             ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            filterDc.getItem().setEvaluatedBefore(startTimeBefore.atZone(zone).toOffsetDateTime());
+            decisionInstanceFilter.setEvaluatedBefore(startTimeBefore.atZone(zone).toOffsetDateTime());
         } else {
-            filterDc.getItem().setEvaluatedBefore(null);
+            decisionInstanceFilter.setEvaluatedBefore(null);
         }
         LocalDateTime startTimeAfter = this.evaluatedAfter.getValue();
         if (startTimeAfter != null) {
             ZoneId zoneId = this.evaluatedAfter.getZoneId();
             ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            filterDc.getItem().setEvaluatedAfter(startTimeAfter.atZone(zone).toOffsetDateTime());
+            decisionInstanceFilter.setEvaluatedAfter(startTimeAfter.atZone(zone).toOffsetDateTime());
         } else {
-            filterDc.getItem().setEvaluatedAfter(null);
+            decisionInstanceFilter.setEvaluatedAfter(null);
         }
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, startTimeAfter != null
                 || startTimeBefore != null);
+        
+        this.loadDelegate.run();
     }
 
     @Override
@@ -72,7 +79,7 @@ public class EvaluationTimeHeaderFilter
     }
 
     @SuppressWarnings("unchecked")
-    private Component createEvaluatedBeforeFilter() {
+    protected Component createEvaluatedBeforeFilter() {
         evaluatedBefore = uiComponents.create(TypedDateTimePicker.class);
         evaluatedBefore.setMax(LocalDateTime.now());
         evaluatedBefore.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
@@ -83,7 +90,7 @@ public class EvaluationTimeHeaderFilter
     }
 
     @SuppressWarnings("unchecked")
-    private Component createEvaluatedAfterFilter() {
+    protected Component createEvaluatedAfterFilter() {
         evaluatedAfter = uiComponents.create(TypedDateTimePicker.class);
         evaluatedAfter.setMax(LocalDateTime.now());
         evaluatedAfter.setDatePlaceholder(messages.getMessage(getClass(), "selectDate"));
@@ -93,7 +100,7 @@ public class EvaluationTimeHeaderFilter
         return evaluatedAfter;
     }
 
-    private void setDefaultTime(TypedDateTimePicker<LocalDateTime> dateTimePicker) {
+    protected void setDefaultTime(TypedDateTimePicker<LocalDateTime> dateTimePicker) {
         dateTimePicker.getElement().executeJs(SET_DEFAULT_TIME_SCRIPT);
     }
 }

@@ -9,6 +9,7 @@
 @import url('view/main-view-top-menu.css');
 @import url('view/login-view.css');
 @import url('view/dashboard-fragment.css');
+@import url('view/decision-definition-detail-view.css');
 @import url('view/all-tasks-view.css');
 @import url('view/process-definition-detail-view.css');
 @import url('view/process-instance-detail-view.css');
