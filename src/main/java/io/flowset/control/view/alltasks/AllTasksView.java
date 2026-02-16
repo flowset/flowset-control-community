@@ -23,11 +23,7 @@ import io.flowset.control.facet.urlqueryparameters.AllUserTaskListQueryParamBind
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment;
 import io.flowset.control.view.usertaskdata.column.UserTaskProcessColumnFragment;
-import io.jmix.core.DataLoadContext;
-import io.jmix.core.LoadContext;
-import io.jmix.core.Messages;
-import io.jmix.core.Metadata;
-import io.jmix.core.Sort;
+import io.jmix.core.*;
 import io.jmix.core.entity.EntityValues;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.flowui.DialogWindows;
@@ -62,6 +58,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -397,7 +394,7 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     @Install(to = "tasksDataGrid.processDefinitionId", subject = "tooltipGenerator")
     protected String tasksDataGridProcessDefinitionIdTooltipGenerator(final UserTaskData userTaskData) {
         ProcessDefinitionData processDefinitionData = findProcess(userTaskData);
-        return componentHelper.getProcessLabel(processDefinitionData);
+        return processDefinitionData != null ? componentHelper.getProcessLabel(processDefinitionData) : null;
     }
 
     @Override
@@ -474,8 +471,13 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         }
     }
 
+    @Nullable
     protected ProcessDefinitionData findProcess(UserTaskData userTaskData) {
-        return processDefinitionsMap.computeIfAbsent(userTaskData.getProcessDefinitionId(),
+        String processId = userTaskData.getProcessDefinitionId();
+        if (processId == null) {
+            return null;
+        }
+        return processDefinitionsMap.computeIfAbsent(processId,
                 processDefinitionId -> processDefinitionService.getById(processDefinitionId));
     }
 

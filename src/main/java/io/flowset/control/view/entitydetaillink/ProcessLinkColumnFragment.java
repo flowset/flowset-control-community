@@ -69,7 +69,8 @@ public abstract class ProcessLinkColumnFragment<E extends Component, V> extends 
         return componentHelper.getProcessLabel(processDefinitionData);
     }
 
+    @Nullable
     protected String getProcessDefinitionId() {
-        return processDefinitionData.getId();
+        return processDefinitionData != null ? processDefinitionData.getId() : null;
     }
 }

@@ -61,6 +61,10 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
     protected BaseAction reassignAction;
     @ViewComponent
     protected BaseAction completeAction;
+    @ViewComponent
+    protected JmixButton viewProcessInstance;
+    @ViewComponent
+    protected JmixButton viewProcessDefinition;
 
 
     @Subscribe
@@ -87,6 +91,9 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
             startTimeField.setVisible(false);
             endTimeField.setVisible(false);
         }
+
+        viewProcessInstance.setVisible(getEditedEntity().getProcessInstanceId() != null);
+        viewProcessDefinition.setVisible(getEditedEntity().getProcessDefinitionId() != null);
     }
 
     @Install(to = "userTaskDataDl", target = Target.DATA_LOADER)
