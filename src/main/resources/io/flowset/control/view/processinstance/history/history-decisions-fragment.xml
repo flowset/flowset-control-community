@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="processInstanceDataDc"
+                  class="io.flowset.control.entity.processinstance.ProcessInstanceData" provided="true"/>
+
+        <collection id="historyDecisionsDc"
+                    class="io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData">
+            <loader id="historyDecisionsDl" readOnly="true"/>
+        </collection>
+    </data>
+    <content>
+        <vbox id="root" height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
+            <hbox classNames="buttons-panel" padding="false">
+                <simplePagination id="decisionsPagination" dataLoader="historyDecisionsDl"/>
+            </hbox>
+            <dataGrid id="historyTasksGrid" width="100%" height="100%" themeNames="compact"
+                      dataContainer="historyDecisionsDc">
+                <actions>
+                    <action id="view"
+                            text="msg:///actions.View"
+                            icon="EYE"
+                            type="list_itemTracking"/>
+                </actions>
+                <columns resizable="true">
+                    <column property="decisionInstanceId" sortable="false">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.decisioninstance.column.DecisionInstanceIdColumnFragment">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </fragmentRenderer>
+                    </column>
+                    <column property="activityId" sortable="false"/>
+                    <column property="decisionDefinitionId" sortable="false"/>
+                    <column property="evaluationTime"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+    </content>
+</fragment>

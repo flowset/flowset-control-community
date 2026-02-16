@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 @ViewController(id = "bpm_DecisionDefinition.detail")
 @ViewDescriptor("decision-definition-detail-view.xml")
 @EditedEntityContainer("decisionDefinitionDc")
-@DialogMode(width = "50em", height = "37.5em")
+@DialogMode(minWidth = "80em", width = "90%", minHeight = "50em", height = "80%")
 @PrimaryDetailView(DecisionDefinitionData.class)
 public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDefinitionData> {
 

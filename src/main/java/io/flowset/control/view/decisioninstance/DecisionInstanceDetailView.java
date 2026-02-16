@@ -6,9 +6,11 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
@@ -37,35 +39,35 @@ import java.util.Objects;
 @ViewController(id = "bpm_DecisionInstance.detail")
 @ViewDescriptor("decision-instance-detail-view.xml")
 @EditedEntityContainer("decisionInstanceDc")
-@DialogMode(width = "50em", height = "37.5em")
+@DialogMode(minWidth = "80em", width = "90%", minHeight = "50em", height = "80%")
 @PrimaryDetailView(HistoricDecisionInstanceShortData.class)
 public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecisionInstanceShortData> {
 
     @Autowired
-    private DecisionDefinitionService decisionDefinitionService;
+    protected DecisionDefinitionService decisionDefinitionService;
     @Autowired
-    private DecisionInstanceService decisionInstanceService;
+    protected DecisionInstanceService decisionInstanceService;
     @Autowired
-    private ViewNavigators viewNavigators;
+    protected ViewNavigators viewNavigators;
     @Autowired
-    private ProcessInstanceService processInstanceService;
+    protected ProcessInstanceService processInstanceService;
     @Autowired
-    private ActivityService activityService;
+    protected ActivityService activityService;
 
     @ViewComponent
-    private InstanceContainer<HistoricDecisionInstanceShortData> decisionInstanceDc;
+    protected InstanceContainer<HistoricDecisionInstanceShortData> decisionInstanceDc;
     @ViewComponent
-    private DmnViewerFragment dmnViewerFragment;
+    protected DmnViewerFragment dmnViewerFragment;
     @ViewComponent
-    private CopyComponentValueToClipboardAction copyToClipboardAction;
+    protected CopyComponentValueToClipboardAction copyToClipboardAction;
     @ViewComponent
-    private TypedTextField<String> decisionInstanceIdTextField;
+    protected TypedTextField<String> decisionInstanceIdTextField;
     @ViewComponent
-    private HorizontalLayout detailActions;
+    protected HorizontalLayout detailActions;
     @ViewComponent
-    private TypedTextField<Object> activityNameTextField;
+    protected TypedTextField<Object> activityNameTextField;
     @ViewComponent
-    private TypedTextField<Object> processBusinessKeyTextField;
+    protected TypedTextField<Object> processBusinessKeyTextField;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -92,20 +94,31 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
 
     @Subscribe(id = "viewProcessDefinition", subject = "clickListener")
     public void onViewProcessDefinitionClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(this, ProcessDefinitionData.class)
-                .withViewClass(ProcessDefinitionDetailView.class)
-                .withRouteParameters(new RouteParameters("id", getEditedEntity().getProcessDefinitionId()))
-                .withBackwardNavigation(true)
-                .navigate();
+        if (UiComponentUtils.isComponentAttachedToDialog(this)) {
+            RouterLink routerLink = new RouterLink(ProcessDefinitionDetailView.class, new RouteParameters("id", getEditedEntity().getProcessDefinitionId()));
+            getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
+        } else {
+            viewNavigators.detailView(this, ProcessDefinitionData.class)
+                    .withViewClass(ProcessDefinitionDetailView.class)
+                    .withRouteParameters(new RouteParameters("id", getEditedEntity().getProcessDefinitionId()))
+                    .withBackwardNavigation(true)
+                    .navigate();
+        }
+
     }
 
     @Subscribe(id = "viewProcessInstance", subject = "clickListener")
     public void onViewProcessInstanceClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(this, ProcessInstanceData.class)
-                .withViewClass(ProcessInstanceDetailView.class)
-                .withRouteParameters(new RouteParameters("id", getEditedEntity().getProcessInstanceId()))
-                .withBackwardNavigation(true)
-                .navigate();
+        if (UiComponentUtils.isComponentAttachedToDialog(this)) {
+            RouterLink routerLink = new RouterLink(ProcessInstanceDetailView.class, new RouteParameters("id", getEditedEntity().getProcessInstanceId()));
+            getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
+        } else {
+            viewNavigators.detailView(this, ProcessInstanceData.class)
+                    .withViewClass(ProcessInstanceDetailView.class)
+                    .withRouteParameters(new RouteParameters("id", getEditedEntity().getProcessInstanceId()))
+                    .withBackwardNavigation(true)
+                    .navigate();
+        }
     }
 
     @Supply(to = "inputsDataGrid.value", subject = "renderer")
@@ -118,7 +131,7 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
         return new TextRenderer<>(e -> e.getValue() != null ? e.getValue().toString() : null);
     }
 
-    private ShowDecisionInstanceCmd createDecisionInstanceClientData(
+    protected ShowDecisionInstanceCmd createDecisionInstanceClientData(
             HistoricDecisionInstanceShortData decisionInstance) {
         ShowDecisionInstanceCmd decisionInstanceClientData = new ShowDecisionInstanceCmd();
         decisionInstanceClientData.setOutputDataList(decisionInstance.getOutputs().stream().map(output -> {
@@ -132,14 +145,14 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
     }
 
     @Install(to = "decisionInstanceDl", target = Target.DATA_LOADER)
-    private HistoricDecisionInstanceShortData decisionDefinitionDlDelegate(
+    protected HistoricDecisionInstanceShortData decisionDefinitionDlDelegate(
             final LoadContext<HistoricDecisionInstanceShortData> loadContext) {
         HistoricDecisionInstanceShortData item = decisionInstanceDc.getItemOrNull();
         String id = item == null ? Objects.requireNonNull(loadContext.getId()).toString() : item.getId();
         return decisionInstanceService.getById(id);
     }
 
-    private void initAdditionalFields() {
+    protected void initAdditionalFields() {
         HistoricDecisionInstanceShortData decisionInstanceDcItem = decisionInstanceDc.getItem();
         if (decisionInstanceDcItem.getActivityInstanceId() != null) {
             HistoricActivityInstanceData activityInstanceData = activityService.findById(

@@ -29,7 +29,7 @@ public abstract class DecisionInstanceMapper {
     }
 
     @Mapping(target = "decisionInputInstanceId", source = "id")
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "id")
     public abstract HistoricDecisionInputInstanceShortData fromHistoricDecisionInputInstance(HistoricDecisionInputInstance source);
 
     HistoricDecisionInputInstanceShortData historicDecisionInputInstanceShortDataClassFactory() {
@@ -37,7 +37,7 @@ public abstract class DecisionInstanceMapper {
     }
 
     @Mapping(target = "decisionOutputInstanceId", source = "id")
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "id")
     public abstract HistoricDecisionOutputInstanceShortData fromHistoricDecisionOutputInstance(HistoricDecisionOutputInstance source);
 
     HistoricDecisionOutputInstanceShortData historicDecisionOutputInstanceShortDataClassFactory() {

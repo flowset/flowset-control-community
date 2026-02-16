@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="definitions_01ca8" name="DRD"
+             namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.39.0">
+  <decision id="decision_testDmn" name="testDmn" camunda:versionTag="1.0" camunda:historyTimeToLive="180">
+    <decisionTable id="decisionTable_03vnnub">
+      <input id="input1" label="Amount" biodi:width="192">
+        <inputExpression id="input_b187d" typeRef="number">
+          <text></text>
+        </inputExpression>
+      </input>
+      <output id="output_1937d" label="Check Result" name="result" typeRef="string"/>
+      <rule id="DecisionRule_1dt1dqx">
+        <inputEntry id="UnaryTests_1pkhr1y">
+          <text>value &gt; 0</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_1ngqo6m">
+          <text>"ok"</text>
+        </outputEntry>
+      </rule>
+      <rule id="DecisionRule_184tk79">
+        <inputEntry id="UnaryTests_12py7iw">
+          <text>value &lt;= 0</text>
+        </inputEntry>
+        <outputEntry id="LiteralExpression_0gdcpxp">
+          <text>"not ok"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_1dpwo7b">
+      <dmndi:DMNShape id="DMNShape_1trotcl" dmnElementRef="decision_testDmn">
+        <dc:Bounds height="80" width="180" x="150" y="150"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
