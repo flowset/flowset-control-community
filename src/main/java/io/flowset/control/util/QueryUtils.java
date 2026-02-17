@@ -194,6 +194,8 @@ public class QueryUtils {
         addCollectionIfNotEmpty(filter.getIdIn(), decisionDefinitionQuery::decisionDefinitionIdIn);
         addIfNotNull(filter.getVersion(), decisionDefinitionQuery::decisionDefinitionVersion);
         addIfTrue(filter.getLatestVersionOnly(), decisionDefinitionQuery::latestVersion);
+        addIfNotNull(filter.getVersionTag(), decisionDefinitionQuery::versionTag);
+        addIfNotNull(filter.getDeploymentId(), decisionDefinitionQuery::deploymentId);
     }
 
     public static void addDecisionInstanceFilters(HistoricDecisionInstanceQuery decisionInstanceQuery,
