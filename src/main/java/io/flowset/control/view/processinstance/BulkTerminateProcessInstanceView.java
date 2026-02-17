@@ -12,8 +12,10 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.jmix.flowui.Notifications;
+import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,7 +25,7 @@ import java.util.List;
 @Route(value = "bpm/bulkterminateprocessinstance", layout = DefaultMainViewParent.class)
 @ViewController("bpm_BulkTerminateProcessInstance")
 @ViewDescriptor("bulk-terminate-process-instance-view.xml")
-@DialogMode(width = "35em")
+@DialogMode(width = "42em")
 public class BulkTerminateProcessInstanceView extends StandardView {
     public static final int REASON_MAX_LENGTH = 4000;
 
@@ -37,6 +39,12 @@ public class BulkTerminateProcessInstanceView extends StandardView {
 
     @ViewComponent
     protected TextArea reasonTextArea;
+    @ViewComponent
+    protected JmixCheckbox skipIoMappingsField;
+    @ViewComponent
+    protected JmixCheckbox skipCustomListenersField;
+    @ViewComponent
+    protected JmixCheckbox skipSubprocessesField;
 
     protected Collection<ProcessInstanceData> processInstances;
 
@@ -51,12 +59,20 @@ public class BulkTerminateProcessInstanceView extends StandardView {
         reasonTextArea.getStyle().set("resize", "vertical");
         reasonTextArea.getStyle().set("overflow", "auto");
         reasonTextArea.setMaxLength(REASON_MAX_LENGTH);
+
+        skipIoMappingsField.setValue(true);
+        skipCustomListenersField.setValue(true);
     }
 
     @Subscribe("okBtn")
     protected void onOkBtnClick(ClickEvent<Button> event) {
         List<String> ids = processInstances.stream().map(ProcessInstanceData::getInstanceId).toList();
-        processInstanceService.terminateByIdsAsync(ids, reasonTextArea.getValue());
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(ids)
+                .setReason(reasonTextArea.getValue())
+                .setSkipCustomListeners(skipCustomListenersField.getValue())
+                .setSkipIoMappings(skipIoMappingsField.getValue())
+                .setSkipSubprocesses(skipSubprocessesField.getValue());
+        processInstanceService.terminateByIdsAsync(context);
         notifications.create(messageBundle.getMessage("bulkTerminateProcessesStarted"))
                 .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
                 .show();

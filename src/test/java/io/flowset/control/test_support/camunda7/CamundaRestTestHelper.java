@@ -219,6 +219,11 @@ public class CamundaRestTestHelper {
         return restHelper.getList(camunda, "/history/process-instance?processDefinitionId=" + processId, HistoricProcessInstanceDto.class);
     }
 
+    @Nullable
+    public List<ProcessInstanceDto> findRuntimeSubprocessInstances(Camunda7Container<?> camunda, String parentProcessInstanceId) {
+        return restHelper.getList(camunda, "/process-instance?superProcessInstanceId=" + parentProcessInstanceId, ProcessInstanceDto.class);
+    }
+
     public List<HistoricDetailDto> getVariableLog(Camunda7Container<?> camunda, String processInstanceId) {
         return restHelper.getList(camunda, "/history/detail?variableUpdates=true&excludeTaskDetails=true&processInstanceId=" + processInstanceId, HistoricDetailDto.class);
     }
