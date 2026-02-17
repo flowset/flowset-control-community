@@ -100,14 +100,12 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     @ViewComponent
     protected HorizontalLayout detailActions;
 
-    protected String title;
-    @Autowired
-    protected ExternalTaskService externalTaskService;
     @ViewComponent
     protected JmixButton viewProcessBtn;
     @ViewComponent
     protected JmixButton viewProcessInstanceBtn;
 
+    protected String title;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -120,6 +118,7 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
         if (!openInDialog) {
             sendUpdateViewTitleEvent();
         }
+        detailActions.setJustifyContentMode(openInDialog ? FlexComponent.JustifyContentMode.END : FlexComponent.JustifyContentMode.START);
     }
 
     @Subscribe
@@ -161,13 +160,17 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     public void onViewStacktraceBtnClick(final ClickEvent<JmixButton> event) {
         if (getEditedEntity().isJobFailed()) {
             dialogWindows.view(this, JobErrorDetailsView.class)
-                    .withViewConfigurer(view -> view.setJobId(getEditedEntity().getConfiguration()))
-                    .build()
+                    .withViewConfigurer(view -> {
+                        view.setJobId(getEditedEntity().getConfiguration());
+                        view.setErrorMessage(getEditedEntity().getMessage());
+                    })
                     .open();
         } else if (getEditedEntity().isExternalTaskFailed()) {
             dialogWindows.view(this, ExternalTaskErrorDetailsView.class)
-                    .withViewConfigurer(view -> view.setExternalTaskId(getEditedEntity().getConfiguration()))
-                    .build()
+                    .withViewConfigurer(view -> {
+                        view.setExternalTaskId(getEditedEntity().getConfiguration());
+                        view.setErrorMessage(getEditedEntity().getMessage());
+                    })
                     .open();
         }
     }

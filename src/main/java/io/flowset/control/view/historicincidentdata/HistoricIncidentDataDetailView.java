@@ -30,8 +30,6 @@ public class HistoricIncidentDataDetailView extends StandardDetailView<HistoricI
 
     @Autowired
     protected IncidentService incidentService;
-    @ViewComponent
-    protected JmixButton viewStacktraceBtn;
 
     @ViewComponent
     protected TypedTextField<Object> configurationField;
@@ -68,38 +66,10 @@ public class HistoricIncidentDataDetailView extends StandardDetailView<HistoricI
     }
 
     protected void initIncidentTypeRelatedFields() {
-        boolean notEmptyPayload = getEditedEntity().getConfiguration() != null;
-        boolean historyJobLogPresent = jobService.isHistoryJobLogPresent(getEditedEntity().getConfiguration());
-
         if (getEditedEntity().isExternalTaskFailed()) {
-            viewStacktraceBtn.setVisible(notEmptyPayload && historyJobLogPresent);
             configurationField.setLabel(messages.getMessage("io.flowset.control.view.incidentdata/externalTaskIdLabel"));
         } else if (getEditedEntity().isJobFailed()) {
             configurationField.setLabel(messages.getMessage("io.flowset.control.view.incidentdata/jobIdLabel"));
-            viewStacktraceBtn.setVisible(notEmptyPayload && historyJobLogPresent);
-        } else {
-            viewStacktraceBtn.setVisible(false);
-        }
-    }
-
-    @Subscribe(id = "viewStacktraceBtn", subject = "clickListener")
-    public void onViewStacktraceBtnClick(final ClickEvent<JmixButton> event) {
-        if (getEditedEntity().isJobFailed()) {
-            dialogWindows.view(this, JobErrorDetailsView.class)
-                    .withViewConfigurer(view -> {
-                        view.setJobId(getEditedEntity().getConfiguration());
-                        view.fromHistory();
-                    })
-                    .build()
-                    .open();
-        } else if (getEditedEntity().isExternalTaskFailed()) {
-            dialogWindows.view(this, ExternalTaskErrorDetailsView.class)
-                    .withViewConfigurer(view -> {
-                        view.setExternalTaskId(getEditedEntity().getConfiguration());
-                        view.fromHistory();
-                    })
-                    .build()
-                    .open();
         }
     }
 

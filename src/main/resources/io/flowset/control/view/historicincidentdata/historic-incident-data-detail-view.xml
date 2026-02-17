@@ -49,11 +49,7 @@
 
                     <textArea id="messageField" property="message" width="100%" colspan="2"
                               maxHeight="6em"
-                              label="msg://io.flowset.control.entity.incident/IncidentData.message" readOnly="true">
-                        <suffix>
-                            <button id="viewStacktraceBtn" themeNames="tertiary-inline" icon="CODE"/>
-                        </suffix>
-                    </textArea>
+                              label="msg://io.flowset.control.entity.incident/IncidentData.message" readOnly="true"/>
 
                     <textField id="configurationField" property="configuration" readOnly="true" width="100%"
                                label="msg://io.flowset.control.entity.incident/IncidentData.configuration"/>

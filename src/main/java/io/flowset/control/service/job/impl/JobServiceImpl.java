@@ -208,26 +208,6 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public String getHistoryErrorDetails(String jobId) {
-        ResponseEntity<String> response = engineRestClient.getStacktraceHistoricJobLog(jobId);
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return Strings.nullToEmpty(response.getBody());
-        }
-        return "";
-    }
-
-    @Override
-    public boolean isHistoryJobLogPresent(String jobId) {
-        try {
-            ResponseEntity<HistoricJobLogDto> jobLogResponse = historyApiClient.getHistoricJobLog(jobId);
-            return jobLogResponse.getStatusCode().is2xxSuccessful() && jobLogResponse.getBody() != null;
-        } catch (FeignException e) {
-            log.error("Error checking job log presence for jobId: {}, error: ", jobId, e);
-            return false;
-        }
-    }
-
-    @Override
     public void activateJob(String jobId) {
         try {
             SuspensionStateDto suspensionStateDto = new SuspensionStateDto()

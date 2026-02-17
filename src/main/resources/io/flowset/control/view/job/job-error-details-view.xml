@@ -7,14 +7,31 @@
 <view xmlns="http://jmix.io/schema/flowui/view"
       title="msg://jobErrorDetailsView.title">
     <actions>
-        <action id="copy" type="control_copyComponentValueToClipboard"/>
+        <action id="copyErrorDetailsAction" type="control_copyComponentValueToClipboard"/>
+        <action id="copyErrorMessageAction" type="control_copyComponentValueToClipboard"/>
         <action id="close" type="view_close" text="msg:///actions.Close"/>
     </actions>
     <layout>
-        <codeEditor id="errorDetailsCodeEditor" readOnly="true"
-                    maxHeight="30em" mode="TEXT"/>
+        <split id="splitBox" width="100%" height="100%" splitterPosition="35" themeNames="splitter-spacing">
+            <vbox width="100%" height="100%" themeNames="spacing-s" padding="false">
+                <hbox justifyContent="BETWEEN" width="100%" padding="false">
+                    <span text="msg://errorMessageField.label" classNames="font-semibold text-secondary"/>
+                    <button action="copyErrorMessageAction" themeNames="tertiary-inline"/>
+                </hbox>
+                <codeEditor height="100%" width="100%" id="errorMessageCodeEditor" readOnly="true"
+                            classNames="box-border"
+                            mode="TEXT"/>
+            </vbox>
+            <vbox width="100%" height="100%" themeNames="spacing-s" padding="false">
+                <hbox justifyContent="BETWEEN" width="100%" padding="false">
+                    <span text="msg://errorDetailsField.label" classNames="font-semibold text-secondary"/>
+                    <button action="copyErrorDetailsAction" themeNames="tertiary-inline"/>
+                </hbox>
+                <codeEditor id="errorDetailsCodeEditor" readOnly="true" classNames="box-border"
+                            height="100%" mode="TEXT" width="100%"/>
+            </vbox>
+        </split>
         <hbox width="100%" justifyContent="END">
-            <button action="copy"/>
             <button action="close"/>
         </hbox>
     </layout>

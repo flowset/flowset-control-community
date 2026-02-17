@@ -339,54 +339,6 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
         assertThatThrownBy(() -> jobService.activateJob(jobId))
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
-    /*
-    TODO: fix
-    @Test
-    @DisplayName("Get history error details of active job by existing job id")
-    void givenExistingActiveJobWithError_whenGetHistoryErrorDetails_thenErrorIsReturned() {
-        //given
-        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
-        sampleDataManager.deploy("test_support/testResolvedFailedJobIncident.bpmn")
-                .startByKey("testResolvedFailedJobIncident")
-                .waitJobsExecution();
-
-        List<String> instanceIds = sampleDataManager.getStartedInstances("testFailedJobIncident");
-        JobDto failedJob = camundaRestTestHelper.getFailedJobs(camunda7, instanceIds).get(0);
-
-        //when
-        String errorDetails = jobService.getHistoryErrorDetails(failedJob.getId());
-
-        //then
-        assertThat(errorDetails).isNotNull()
-                .contains("Some service not available");
-    }*/
-
-    /*TODO Fix
-    @Test
-    @DisplayName("Get history error details of completed job by existing job")
-    void givenExistingCompletedJobWithError_whenGetHistoryErrorDetails_thenErrorIsReturned() {
-        //given
-        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
-        sampleDataManager.deploy("test_support/testResolvedFailedJobIncident.bpmn")
-                .startByKey("testResolvedFailedJobIncident")
-                .waitJobsExecution()
-                .retryFailedJobs()
-                .waitJobsExecution();
-
-        List<String> instanceIds = sampleDataManager.getStartedInstances("testResolvedFailedJobIncident");
-        List<HistoricIncidentDto> incidents = camundaRestTestHelper.findHistoricIncidentsByInstanceId(camunda7, instanceIds.get(0));
-
-        String jobId = null;
-
-
-        //when
-        String errorDetails = jobService.getHistoryErrorDetails("jobLogId");
-
-        //then
-        assertThat(errorDetails).isNotNull()
-                .contains("Some service not available");
-    }*/
-
 
     private void waitForBatchExecution() {
         boolean batchExists;
