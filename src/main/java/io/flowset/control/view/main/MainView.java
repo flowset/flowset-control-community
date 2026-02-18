@@ -142,7 +142,7 @@ public class MainView extends StandardMainView {
     protected void onUserEngineSelectEvent(UserEngineSelectEvent event) {
         notifications.create(messageBundle.formatMessage("engineChanged", event.getEngine().getName()),
                         messageBundle.formatMessage("engineChanged.description", event.getEngine().getBaseUrl()))
-                .withPosition(Notification.Position.TOP_END)
+                .withPosition(Notification.Position.TOP_CENTER)
                 .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
                 .withDuration(4000)
                 .show();

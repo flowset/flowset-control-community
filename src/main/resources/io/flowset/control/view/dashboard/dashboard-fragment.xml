@@ -17,6 +17,20 @@
             <div id="dashboardContainer"
                  classNames="grid grid-flow-row grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-m"
                  width="100%">
+                <hbox padding="false" width="100%" alignItems="BASELINE" classNames="col-span-3">
+                    <startSlot>
+                        <hbox padding="false" width="100%" themeNames="spacing-s" alignItems="BASELINE">
+                            <span text="msg://dashboardFragment.header" classNames="text-l text-secondary font-semibold"/>
+                            <button id="refreshBtn" title="msg:///actions.Refresh" icon="REFRESH" themeNames="tertiary-inline"/>
+                        </hbox>
+                    </startSlot>
+                    <endSlot>
+                        <hbox id="urlTextBox" width="100%" justifyContent="END" themeNames="spacing-s" alignItems="BASELINE">
+                            <span text="msg://urlLabel" classNames="text-body"/>
+                            <span id="urlText" classNames="text-secondary"/>
+                        </hbox>
+                    </endSlot>
+                </hbox>
                 <vbox classNames="col-span-2" padding="false" height="100%">
                     <div classNames="grid grid-flow-row grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 col-span-1 gap-m ml-auto mr-auto"
                          width="100%">

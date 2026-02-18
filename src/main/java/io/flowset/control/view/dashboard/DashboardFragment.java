@@ -8,6 +8,8 @@ package io.flowset.control.view.dashboard;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
@@ -79,6 +81,10 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
     protected UiProperties uiProperties;
     @Autowired
     protected EngineUiService engineUiService;
+    @ViewComponent
+    protected HorizontalLayout urlTextBox;
+    @ViewComponent
+    protected Span urlText;
 
     @Subscribe
     public void onReady(final ReadyEvent event) {
@@ -96,6 +102,7 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
             dashboardContainer.setVisible(true);
 
             updateDashboardCards();
+            updateDashboardHeader();
         }
     }
 
@@ -128,6 +135,16 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
 
     }
 
+    protected void updateDashboardHeader() {
+        BpmEngine selectedEngine = selectedEngineDc.getItemOrNull();
+        if (selectedEngine != null) {
+            urlTextBox.setVisible(true);
+            urlText.setText(selectedEngine.getBaseUrl());
+        } else {
+            urlTextBox.setVisible(false);
+        }
+    }
+
     @Subscribe(id = "createBpmEnginBtn", subject = "clickListener")
     public void onCreateBpmEnginBtnClick(final ClickEvent<JmixButton> event) {
         dialogWindows.detail(getCurrentView(), BpmEngine.class)
@@ -140,6 +157,11 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
                     }
                 })
                 .open();
+    }
+
+    @Subscribe(id = "refreshBtn", subject = "clickListener")
+    public void onRefreshBtnClick(final ClickEvent<JmixButton> event) {
+        updateDashboard();
     }
 
     protected DashboardData loadDashboardData(BpmEngine engine) {
