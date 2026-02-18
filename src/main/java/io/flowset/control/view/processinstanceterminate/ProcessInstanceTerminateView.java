@@ -2,6 +2,8 @@ package io.flowset.control.view.processinstanceterminate;
 
 
 import com.vaadin.flow.router.Route;
+import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
+import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
@@ -20,7 +22,13 @@ public class ProcessInstanceTerminateView extends StandardView {
     private ProcessInstanceService processInstanceService;
 
     @ViewComponent
-    private JmixTextArea reasonTextArea;
+    protected JmixTextArea reasonTextArea;
+    @ViewComponent
+    protected JmixCheckbox skipIoMappingsField;
+    @ViewComponent
+    protected JmixCheckbox skipCustomListenersField;
+    @ViewComponent
+    protected JmixCheckbox skipSubprocessesField;
 
     protected ProcessInstanceData processInstanceData;
 
@@ -28,12 +36,24 @@ public class ProcessInstanceTerminateView extends StandardView {
         this.processInstanceData = processInstanceData;
     }
 
+    @Subscribe
+    public void onBeforeShow(final BeforeShowEvent event) {
+        skipIoMappingsField.setValue(true);
+        skipCustomListenersField.setValue(true);
+    }
+
     @Subscribe("terminateAction")
     public void onTerminateAction(final ActionPerformedEvent event) {
         String processInstanceId = processInstanceData.getId();
         String reasonValue = reasonTextArea.getValue();
 
-        processInstanceService.terminateByIdsAsync(Collections.singletonList(processInstanceId), reasonValue);
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(Collections.singletonList(processInstanceId))
+                .setReason(reasonValue)
+                .setSkipCustomListeners(skipCustomListenersField.getValue())
+                .setSkipIoMappings(skipIoMappingsField.getValue())
+                .setSkipSubprocesses(skipSubprocessesField.getValue());
+
+        processInstanceService.terminateByIdsAsync(context);
 
         close(StandardOutcome.SAVE);
     }

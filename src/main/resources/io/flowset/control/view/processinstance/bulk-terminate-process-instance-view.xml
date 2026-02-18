@@ -8,6 +8,31 @@
       title="msg://bulkDeleteProcessInstanceView.title">
     <layout>
         <span text="msg://bulkDeleteProcessInstanceMsg" width="100%"/>
+        <formLayout width="100%" classNames="pt-m">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="2"/>
+            </responsiveSteps>
+            <hbox padding="false" themeNames="spacing-s"  alignItems="BASELINE">
+                <checkbox id="skipIoMappingsField" label="msg://skipIoMappingsField.label"/>
+                <icon icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em">
+                    <tooltip text="msg://skipIoMappingsField.tooltipText"/>
+                </icon>
+            </hbox>
+
+            <hbox padding="false" themeNames="spacing-s" alignItems="BASELINE">
+                <checkbox id="skipCustomListenersField" label="msg://skipCustomListenersField.label"/>
+                <icon icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em">
+                    <tooltip text="msg://skipCustomListenersField.tooltipText"/>
+                </icon>
+            </hbox>
+            <hbox padding="false" themeNames="spacing-s"  alignItems="BASELINE">
+                <checkbox id="skipSubprocessesField" label="msg://skipSubprocessesFieldLabel"/>
+                <icon icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em">
+                    <tooltip text="msg://skipSubprocessField.tooltipText"/>
+                </icon>
+            </hbox>
+        </formLayout>
+
         <textArea id="reasonTextArea" clearButtonVisible="true" valueChangeMode="EAGER" themeNames="helper-above-field"
                   minHeight="7em" label="msg://deleteReason" width="100%"/>
 

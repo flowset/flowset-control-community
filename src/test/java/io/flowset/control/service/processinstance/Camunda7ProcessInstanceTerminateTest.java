@@ -13,8 +13,10 @@ import io.flowset.control.test_support.camunda7.AbstractCamunda7IntegrationTest;
 import io.flowset.control.test_support.camunda7.Camunda7Container;
 import io.flowset.control.test_support.camunda7.CamundaRestTestHelper;
 import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
+import io.flowset.control.test_support.camunda7.dto.response.HistoricDetailDto;
 import io.flowset.control.test_support.camunda7.dto.response.HistoricProcessInstanceDto;
 import io.flowset.control.test_support.camunda7.dto.response.RuntimeProcessInstanceDto;
+import org.camunda.community.rest.client.model.ProcessInstanceDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -88,9 +90,11 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
         camundaRestTestHelper.suspendInstanceByProcessId(camunda7, processId);
 
         List<String> suspendedInstanceIds = camundaRestTestHelper.getSuspendedInstancesByProcessId(camunda7, processId);
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(suspendedInstanceIds)
+                .setReason(reason);
 
         //when
-        processInstanceService.terminateByIdsAsync(suspendedInstanceIds, reason);
+        processInstanceService.terminateByIdsAsync(context);
         waitForBatchExecution();
 
         //then
@@ -109,6 +113,115 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                     assertThat(foundHistoricInstance.getDeleteReason()).isEqualTo(reason);
                 });
 
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @DisplayName("Terminate asynchronously process instances with custom listeners by ids")
+    void givenExistingInstancesWithCustomListener_whenTerminateByIdsAsync_thenInstancesTerminatedAndListenersProcessed(boolean skipCustomListeners) {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/terminateinstance/testSkipCustomListeners.bpmn")
+                .startByKey("testSkipCustomListeners");
+
+        String processId = sampleDataManager.getDeployedProcessVersions("testSkipCustomListeners").get(0);
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testSkipCustomListeners");
+
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(instanceIds)
+                .setSkipCustomListeners(skipCustomListeners)
+                .setReason("Test custom listeners");
+
+        //when
+        processInstanceService.terminateByIdsAsync(context);
+        waitForBatchExecution();
+
+        //then
+        List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
+        assertThat(foundRuntimeInstances).isEmpty();
+
+        List<HistoricProcessInstanceDto> foundHistoricInstances = camundaRestTestHelper.getHistoryInstancesById(camunda7, processId);
+        assertThat(foundHistoricInstances).hasSize(1)
+                .first()
+                .satisfies(foundHistoricInstance -> {
+                    List<HistoricDetailDto> variableLog = camundaRestTestHelper.getVariableLog(camunda7, foundHistoricInstance.getId());
+
+                    assertThat(variableLog).hasSize(skipCustomListeners ? 0 : 1);
+                    if (!skipCustomListeners) {
+                        assertThat(variableLog.get(0).getVariableName()).isEqualTo("variableFromListener");
+                    }
+                });
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @DisplayName("Terminate asynchronously process instances with input/output variable mapping by ids")
+    void givenExistingInstancesWithIoMapping_whenTerminateByIdsAsync_thenInstancesTerminatedAndMappingsHandled(boolean skipIoMapping) {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/terminateinstance/testSkipIoMapping.bpmn")
+                .startByKey("testSkipIoMapping");
+
+        String processId = sampleDataManager.getDeployedProcessVersions("testSkipIoMapping").get(0);
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testSkipIoMapping");
+
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(instanceIds)
+                .setSkipIoMappings(skipIoMapping)
+                .setReason("Test I/O variable mapping");
+
+        //when
+        processInstanceService.terminateByIdsAsync(context);
+        waitForBatchExecution();
+
+        //then
+        List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
+        assertThat(foundRuntimeInstances).isEmpty();
+
+        List<HistoricProcessInstanceDto> foundHistoricInstances = camundaRestTestHelper.getHistoryInstancesById(camunda7, processId);
+        assertThat(foundHistoricInstances).hasSize(1)
+                .first()
+                .satisfies(foundHistoricInstance -> {
+                    List<HistoricDetailDto> variableLog = camundaRestTestHelper.getVariableLog(camunda7, foundHistoricInstance.getId());
+
+                    assertThat(variableLog).hasSize(skipIoMapping ? 0 : 1);
+                    if (!skipIoMapping) {
+                        assertThat(variableLog.get(0).getVariableName()).isEqualTo("variableFromMapping");
+                    }
+                });
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    @DisplayName("Terminate asynchronously process instances with subprocess by ids")
+    void givenExistingInstancesWithSubprocess_whenTerminateByIdsAsync_thenInstancesTerminatedAndSubprocessHandled(boolean skipSubprocesses) {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/terminateinstance/testSkipSubprocess.bpmn")
+                .deploy("test_support/terminateinstance/testSkipSubprocessMain.bpmn")
+                .startByKey("testSkipSubprocessMain");
+
+        String processId = sampleDataManager.getDeployedProcessVersions("testSkipSubprocessMain").get(0);
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testSkipSubprocessMain");
+
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(instanceIds)
+                .setSkipSubprocesses(skipSubprocesses)
+                .setReason("Test subprocesses");
+
+        //when
+        processInstanceService.terminateByIdsAsync(context);
+        waitForBatchExecution();
+
+        //then
+        List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
+        assertThat(foundRuntimeInstances).isEmpty();
+
+        List<HistoricProcessInstanceDto> foundHistoricInstances = camundaRestTestHelper.getHistoryInstancesById(camunda7, processId);
+        assertThat(foundHistoricInstances).hasSize(1)
+                .first()
+                .satisfies(foundHistoricInstance -> {
+                    List<ProcessInstanceDto> runtimeSubprocessInstances = camundaRestTestHelper.findRuntimeSubprocessInstances(camunda7, foundHistoricInstance.getId());
+
+                    assertThat(runtimeSubprocessInstances).hasSize(skipSubprocesses ? 1 : 0);
+                });
     }
 
     @Test
@@ -150,7 +263,7 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
 
 
         //when and then
-        assertThatThrownBy(() ->  processInstanceService.terminateById(instanceId))
+        assertThatThrownBy(() -> processInstanceService.terminateById(instanceId))
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
 
@@ -166,9 +279,11 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
 
         String processId = sampleDataManager.getDeployedProcessVersions("visitPlanning").get(0);
         List<String> activeInstanceIds = camundaRestTestHelper.getActiveInstancesByProcessId(camunda7, processId);
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(activeInstanceIds)
+                .setReason(reason);
 
         //when
-        processInstanceService.terminateByIdsAsync(activeInstanceIds, reason);
+        processInstanceService.terminateByIdsAsync(context);
         waitForBatchExecution();
 
         //then
@@ -199,10 +314,12 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
         String processId = sampleDataManager.getDeployedProcessVersions("visitPlanning").get(0);
         List<String> activeInstanceIds = camundaRestTestHelper.getActiveInstancesByProcessId(camunda7, processId);
 
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(activeInstanceIds);
+
         camunda7.stop();
 
         //when and then
-        assertThatThrownBy(() -> processInstanceService.terminateByIdsAsync(activeInstanceIds, null))
+        assertThatThrownBy(() -> processInstanceService.terminateByIdsAsync(context))
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
 

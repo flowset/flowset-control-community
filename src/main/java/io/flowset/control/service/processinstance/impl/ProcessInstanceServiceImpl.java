@@ -7,6 +7,7 @@ package io.flowset.control.service.processinstance.impl;
 
 import feign.FeignException;
 import feign.utils.ExceptionUtils;
+import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
 import io.jmix.core.Sort;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
@@ -19,6 +20,7 @@ import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.camunda.bpm.engine.history.HistoricProcessInstance;
 import org.camunda.bpm.engine.runtime.Execution;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
@@ -26,10 +28,7 @@ import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.community.rest.client.api.HistoryApiClient;
 import org.camunda.community.rest.client.api.ProcessInstanceApiClient;
-import org.camunda.community.rest.client.model.CountResultDto;
-import org.camunda.community.rest.client.model.HistoricProcessInstanceDto;
-import org.camunda.community.rest.client.model.HistoricProcessInstanceQueryDto;
-import org.camunda.community.rest.client.model.ProcessInstanceSuspensionStateAsyncDto;
+import org.camunda.community.rest.client.model.*;
 import org.camunda.community.rest.impl.RemoteHistoryService;
 import org.camunda.community.rest.impl.RemoteRuntimeService;
 import org.springframework.http.ResponseEntity;
@@ -305,13 +304,17 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     }
 
     @Override
-    public void terminateByIdsAsync(List<String> processInstanceIds, @Nullable String reason) {
+    public void terminateByIdsAsync(ProcessInstanceBulkTerminateContext context) {
         try {
-            remoteRuntimeService.deleteProcessInstancesAsync(processInstanceIds, reason);
+            remoteRuntimeService.deleteProcessInstancesAsync(context.getProcessInstanceIds(),
+                    null, null, context.getReason(),
+                    BooleanUtils.toBoolean(context.getSkipCustomListeners()),
+                    BooleanUtils.toBoolean(context.getSkipSubprocesses()),
+                    BooleanUtils.toBoolean(context.getSkipIoMappings()));
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
-                log.warn("Unable to load terminate instances by ids '{}' because BPM engine not selected", processInstanceIds);
+                log.warn("Unable to load terminate instances by ids because BPM engine not selected");
             }
             if (isConnectionError(rootCause)) {
                 log.error("Unable to terminate process instances because of connection error: ", e);
