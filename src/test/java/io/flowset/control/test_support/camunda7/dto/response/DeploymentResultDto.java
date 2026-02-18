@@ -16,4 +16,5 @@ import java.util.Map;
 @Setter
 public class DeploymentResultDto extends IdDto {
     private Map<String, ProcessDefinitionDto> deployedProcessDefinitions = new HashMap<>();
+    private Map<String, DecisionDefinitionDto> deployedDecisionDefinitions = new HashMap<>();
 }

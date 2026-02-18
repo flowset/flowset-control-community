@@ -113,7 +113,7 @@ public class DecisionDefinitionQueryImpl extends BaseQuery<DecisionDefinitionQue
     @Override
     public DecisionDefinitionQuery decisionDefinitionIdIn(String... strings) {
         this.decisionDefinitionIdIn = String.join(",", strings);
-        return null;
+        return this;
     }
 
     @Override

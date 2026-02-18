@@ -4,6 +4,7 @@ import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.filter.DecisionDefinitionFilter;
 import org.springframework.lang.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -58,5 +59,13 @@ public interface DecisionDefinitionService {
      * @return a decision definition content in the DMN XML format
      */
     String getDmnXml(String decisionDefinitionId);
+
+    /**
+     * Loads decision definitions with the specified identifiers.
+     *
+     * @param ids a list of decision definition ids
+     * @return found decision definitions
+     */
+    List<DecisionDefinitionData> findAllByIds(Collection<String> ids);
 }
 
