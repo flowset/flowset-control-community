@@ -28,9 +28,6 @@ public class DecisionInstanceIdColumnFragment extends EntityDetailLinkFragment<H
     @Autowired
     protected DecisionInstanceService decisionInstanceService;
 
-    @Autowired
-    protected DialogWindows dialogWindows;
-
     @ViewComponent
     protected JmixButton idBtn;
 

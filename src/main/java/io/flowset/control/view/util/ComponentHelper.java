@@ -14,6 +14,7 @@ import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.UiComponents;
+import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import lombok.AllArgsConstructor;
@@ -93,6 +94,31 @@ public class ComponentHelper {
     }
 
     /**
+     * Retrieves a display name of the specified decision in the <decisionKey> (ver. <decisionVersion>) format.
+     *
+     * @param decision the decision definition for showing in the column or in the text field.
+     * @return the decision label to show as a value of the Decision column or text field.
+     */
+    @Nullable
+    public String getDecisionLabel(@Nullable DecisionDefinitionData decision) {
+        return Optional.ofNullable(decision)
+                .map(decisionDefinitionData -> getDecisionLabel(decision.getKey(), decisionDefinitionData.getVersion()))
+                .orElse(null);
+    }
+
+    /**
+     * Retrieves a display name of the decision with the specified key and version in the <decisionKey> (ver. <decisionVersion>) format.
+     *
+     * @param decisionKey     the decision key for showing in the column or in the text field.
+     * @param decisionVersion the decision version for showing in the column or in the text field.
+     * @return the decision label to show as a value of the Decision column or text field.
+     */
+    @Nullable
+    public String getDecisionLabel(String decisionKey, Integer decisionVersion) {
+        return messages.formatMessage("", "common.decisionDefinitionKeyAndVersion", decisionKey, decisionVersion);
+    }
+
+    /**
      * Retrieves a display name of the process with the specified key and version in the <processKey> (ver. <processVersion>) format.
      *
      * @param processKey     the process key for showing in the column or in the text field.
@@ -131,7 +157,7 @@ public class ComponentHelper {
      * Adds components to represent an "error" state within the provided empty state container.
      *
      * @param emptyStateBox the container to which the "error" state components will be added
-     * @param errorText the error message text to display within the "error" state
+     * @param errorText     the error message text to display within the "error" state
      */
     public void addErrorStateGridStateComponents(VerticalLayout emptyStateBox, String errorText) {
         Icon warningIcon = VaadinIcon.WARNING.create();

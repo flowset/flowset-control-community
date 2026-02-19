@@ -1,0 +1,64 @@
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="decisionInstanceDc"
+                  class="io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData" provided="true"/>
+    </data>
+
+    <actions>
+        <action id="copyDecisionInstanceIdAction" type="control_copyComponentValueToClipboard"/>
+    </actions>
+    <content>
+        <flexLayout classNames="decision-instance-slide-panel">
+            <flexLayout id="instanceDetailsPanel" width="min-content" height="100%" classNames="bordered-container">
+                <vbox id="upperPanel" themeNames="spacing-s" visible="false" classNames="decision-instance-properties-panel">
+                    <h4 text="msg://instanceInformation"/>
+                    <formLayout id="decisionInstanceInfoGroupBox" dataContainer="decisionInstanceDc" width="100%">
+                        <responsiveSteps>
+                            <responsiveStep minWidth="0" columns="1"/>
+                        </responsiveSteps>
+                        <textField id="decisionInstanceIdTextField" property="decisionInstanceId" readOnly="true">
+                            <suffix>
+                                <button id="copyDecisionInstanceId"
+                                        icon="COPY_O"
+                                        themeNames="tertiary-inline"/>
+                            </suffix>
+                        </textField>
+                        <dateTimePicker property="evaluationTime" readOnly="true" width="auto" step="1ms"/>
+                        <textField id="decisionDefinitionField" label="msg://decisionDefinition" readOnly="true" width="auto" property="decisionDefinitionId">
+                            <suffix>
+                                <button id="openDecisionDefinitionEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline"
+                                        title="msg://openDecisionDefinition"/>
+                            </suffix>
+                        </textField>
+
+                        <textField id="processInstanceField" property="processInstanceId"
+                                   readOnly="true" width="auto" >
+                            <suffix>
+                                <button id="openProcessInstanceEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline"
+                                        title="msg://openProcessInstance"/>
+                            </suffix>
+                        </textField>
+                        <textField id="processBusinessKeyTextField" label="msg://processBusinessKey" readOnly="true"/>
+                        <textField id="processDefinitionField" property="processDefinitionId"
+                                   readOnly="true" width="auto" >
+                            <suffix>
+                                <button id="openProcessDefinitionEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessDefinition"/>
+                            </suffix>
+                        </textField>
+                        <textField property="activityId" readOnly="true" width="auto"/>
+                        <textField id="activityNameTextField" label="msg://activityName" readOnly="true"/>
+
+                    </formLayout>
+                </vbox>
+                <vbox themeNames="spacing-xs" classNames="shadow-s p-s decision-instance-details-actions-panel">
+                    <button id="infoBtn" icon="INFO_CIRCLE" title="msg://viewDecisionInstanceDetails" classNames="bordered-button"/>
+                </vbox>
+            </flexLayout>
+        </flexLayout>
+    </content>
+</fragment>

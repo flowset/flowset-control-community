@@ -13,7 +13,7 @@ import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.view.decisiondefinition.DecisionDefinitionDetailView;
 import io.flowset.control.view.entitydetaillink.EntityDetailLinkFragment;
-import io.jmix.core.Messages;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
@@ -31,7 +31,7 @@ public class DecisionDefinitionColumnFragment extends EntityDetailLinkFragment<H
     @ViewComponent
     protected JmixButton idBtn;
     @Autowired
-    protected Messages messages;
+    protected ComponentHelper componentHelper;
 
     protected DecisionDefinitionData decisionDefinitionData;
 
@@ -46,8 +46,7 @@ public class DecisionDefinitionColumnFragment extends EntityDetailLinkFragment<H
 
         String linkText;
         if (decisionDefinitionData != null) {
-            linkText = messages.formatMessage("", "common.decisionDefinitionKeyAndVersion", decisionDefinitionData.getKey(),
-                    decisionDefinitionData.getVersion().toString());
+            linkText = componentHelper.getDecisionLabel(decisionDefinitionData.getKey(), decisionDefinitionData.getVersion());
         } else {
             linkText = item.getDecisionDefinitionKey();
         }

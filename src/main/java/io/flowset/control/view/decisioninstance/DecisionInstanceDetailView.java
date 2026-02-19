@@ -1,34 +1,31 @@
 package io.flowset.control.view.decisioninstance;
 
-import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.html.H5;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
+import io.flowset.control.view.event.TitleUpdateEvent;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.LoadContext;
+import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.UiEventPublisher;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.UiComponentUtils;
-import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
-import io.flowset.control.action.CopyComponentValueToClipboardAction;
-import io.flowset.control.entity.activity.HistoricActivityInstanceData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInputInstanceShortData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionOutputInstanceShortData;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
-import io.flowset.control.entity.processinstance.ProcessInstanceData;
-import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.service.decisioninstance.DecisionInstanceService;
-import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
-import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.uikit.component.dmnviewer.command.ShowDecisionInstanceCmd;
 import io.flowset.uikit.component.dmnviewer.model.DecisionInstanceOutputData;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
@@ -36,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
-@Route(value = "bpm/decision-instances/:id", layout = DefaultMainViewParent.class)
+@Route(value = "decision-instances/:id", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_DecisionInstance.detail")
 @ViewDescriptor("decision-instance-detail-view.xml")
 @EditedEntityContainer("decisionInstanceDc")
@@ -50,79 +47,67 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
     protected DecisionInstanceService decisionInstanceService;
     @Autowired
     protected ViewNavigators viewNavigators;
-    @Autowired
-    protected ProcessInstanceService processInstanceService;
-    @Autowired
-    protected ActivityService activityService;
 
     @ViewComponent
     protected InstanceContainer<HistoricDecisionInstanceShortData> decisionInstanceDc;
     @ViewComponent
     protected DmnViewerFragment dmnViewerFragment;
+    @Autowired
+    protected UiEventPublisher uiEventPublisher;
     @ViewComponent
-    protected CopyComponentValueToClipboardAction copyToClipboardAction;
+    protected MessageBundle messageBundle;
+
+    @Autowired
+    protected UiComponents uiComponents;
+
+    @Autowired
+    protected ComponentHelper componentHelper;
+
     @ViewComponent
-    protected TypedTextField<String> decisionInstanceIdTextField;
+    protected InstanceContainer<DecisionDefinitionData> decisionDefinitionDc;
+
     @ViewComponent
     protected HorizontalLayout detailActions;
-    @ViewComponent
-    protected TypedTextField<Object> activityNameTextField;
-    @ViewComponent
-    protected TypedTextField<Object> processBusinessKeyTextField;
+    @ViewComponent("tabsheet.inputsTab")
+    protected Tab tabsheetInputsTab;
+    @ViewComponent("tabsheet.outputsTab")
+    protected Tab tabsheetOutputsTab;
+    
+    protected String title = "";
 
     @Subscribe
     public void onInit(final InitEvent event) {
         detailActions.addClassNames(LumoUtility.Padding.Top.SMALL);
 
         boolean openedInDialog = UiComponentUtils.isComponentAttachedToDialog(this);
-        detailActions.setJustifyContentMode(openedInDialog ? FlexComponent.JustifyContentMode.END: FlexComponent.JustifyContentMode.START);
+        detailActions.setJustifyContentMode(openedInDialog ? FlexComponent.JustifyContentMode.END : FlexComponent.JustifyContentMode.START);
+
+        initTabIcons();
     }
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
+        String decisionDefinitionId = decisionInstanceDc.getItem().getDecisionDefinitionId();
+        DecisionDefinitionData decisionDefinitionData = decisionDefinitionService.getById(decisionDefinitionId);
+        decisionDefinitionDc.setItem(decisionDefinitionData);
+
         dmnViewerFragment.initViewer();
-        String dmnXml = decisionDefinitionService.getDmnXml(decisionInstanceDc.getItem().getDecisionDefinitionId());
+        String dmnXml = decisionDefinitionService.getDmnXml(decisionDefinitionId);
         dmnViewerFragment.setDmnXml(dmnXml, setDmnXmlJson ->
                 dmnViewerFragment.showDecisionDefinition(decisionInstanceDc.getItem().getDecisionDefinitionKey(),
                         showDecisionDefinitionJson -> dmnViewerFragment.showDecisionInstance(
                                 createDecisionInstanceClientData(decisionInstanceDc.getItem())))
         );
-        initAdditionalFields();
     }
 
-    @Subscribe(id = "copyDecisionInstanceId", subject = "clickListener")
-    public void onCopyDecisionInstanceIdClick(final ClickEvent<JmixButton> event) {
-        copyToClipboardAction.setTarget(decisionInstanceIdTextField);
-        copyToClipboardAction.actionPerform(event.getSource());
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        sendUpdateViewTitleEvent();
     }
 
-    @Subscribe(id = "viewProcessDefinition", subject = "clickListener")
-    public void onViewProcessDefinitionClick(final ClickEvent<JmixButton> event) {
-        if (UiComponentUtils.isComponentAttachedToDialog(this)) {
-            RouterLink routerLink = new RouterLink(ProcessDefinitionDetailView.class, new RouteParameters("id", getEditedEntity().getProcessDefinitionId()));
-            getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
-        } else {
-            viewNavigators.detailView(this, ProcessDefinitionData.class)
-                    .withViewClass(ProcessDefinitionDetailView.class)
-                    .withRouteParameters(new RouteParameters("id", getEditedEntity().getProcessDefinitionId()))
-                    .withBackwardNavigation(true)
-                    .navigate();
-        }
-
-    }
-
-    @Subscribe(id = "viewProcessInstance", subject = "clickListener")
-    public void onViewProcessInstanceClick(final ClickEvent<JmixButton> event) {
-        if (UiComponentUtils.isComponentAttachedToDialog(this)) {
-            RouterLink routerLink = new RouterLink(ProcessInstanceDetailView.class, new RouteParameters("id", getEditedEntity().getProcessInstanceId()));
-            getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
-        } else {
-            viewNavigators.detailView(this, ProcessInstanceData.class)
-                    .withViewClass(ProcessInstanceDetailView.class)
-                    .withRouteParameters(new RouteParameters("id", getEditedEntity().getProcessInstanceId()))
-                    .withBackwardNavigation(true)
-                    .navigate();
-        }
+    @Override
+    public String getPageTitle() {
+        return title;
     }
 
     @Supply(to = "inputsDataGrid.value", subject = "renderer")
@@ -133,6 +118,52 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
     @Supply(to = "outputsDataGrid.value", subject = "renderer")
     protected Renderer<HistoricDecisionOutputInstanceShortData> outputValueRenderer() {
         return new TextRenderer<>(e -> e.getValue() != null ? e.getValue().toString() : null);
+    }
+
+    @Install(to = "decisionInstanceDl", target = Target.DATA_LOADER)
+    protected HistoricDecisionInstanceShortData decisionDefinitionDlDelegate(
+            final LoadContext<HistoricDecisionInstanceShortData> loadContext) {
+        HistoricDecisionInstanceShortData item = decisionInstanceDc.getItemOrNull();
+        String id = item == null ? Objects.requireNonNull(loadContext.getId()).toString() : item.getId();
+        return decisionInstanceService.getById(id);
+    }
+
+    protected void sendUpdateViewTitleEvent() {
+        this.title = messageBundle.formatMessage("decisionInstanceDetailView.title", getEditedEntity().getDecisionInstanceId());
+
+        String titleText = messageBundle.getMessage("decisionInstanceDetailView.baseTitle");
+        FlexLayout titleLayout = createTitleLayout();
+
+        uiEventPublisher.publishEventForCurrentUI(new TitleUpdateEvent(this, titleText, titleLayout));
+    }
+
+    protected FlexLayout createTitleLayout() {
+        FlexLayout flexLayout = uiComponents.create(FlexLayout.class);
+        flexLayout.addClassNames(LumoUtility.Margin.Left.XSMALL, LumoUtility.Gap.SMALL);
+        flexLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+
+        H5 instanceId = createInstanceIdComponent();
+
+        Span decisionDefinitionBadge = createDecisionBadge();
+
+        flexLayout.add(instanceId, decisionDefinitionBadge);
+        return flexLayout;
+    }
+
+    protected Span createDecisionBadge() {
+        Span decisionDefinitionBadge = uiComponents.create(Span.class);
+        decisionDefinitionBadge.getElement().getThemeList().add("badge normal pill");
+
+        String decisionBadgeText = componentHelper.getDecisionLabel(decisionDefinitionDc.getItemOrNull());
+        decisionDefinitionBadge.setText(decisionBadgeText);
+
+        return decisionDefinitionBadge;
+    }
+    protected H5 createInstanceIdComponent() {
+        H5 instanceId = new H5("\"%s\"".formatted(getEditedEntity().getDecisionInstanceId()));
+        instanceId.setHeightFull();
+        instanceId.addClassNames(LumoUtility.TextColor.BODY);
+        return instanceId;
     }
 
     protected ShowDecisionInstanceCmd createDecisionInstanceClientData(
@@ -148,29 +179,8 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
         return decisionInstanceClientData;
     }
 
-    @Install(to = "decisionInstanceDl", target = Target.DATA_LOADER)
-    protected HistoricDecisionInstanceShortData decisionDefinitionDlDelegate(
-            final LoadContext<HistoricDecisionInstanceShortData> loadContext) {
-        HistoricDecisionInstanceShortData item = decisionInstanceDc.getItemOrNull();
-        String id = item == null ? Objects.requireNonNull(loadContext.getId()).toString() : item.getId();
-        return decisionInstanceService.getById(id);
-    }
-
-    protected void initAdditionalFields() {
-        HistoricDecisionInstanceShortData decisionInstanceDcItem = decisionInstanceDc.getItem();
-        if (decisionInstanceDcItem.getActivityInstanceId() != null) {
-            HistoricActivityInstanceData activityInstanceData = activityService.findById(
-                    decisionInstanceDcItem.getActivityInstanceId());
-            if (activityInstanceData != null) {
-                activityNameTextField.setTypedValue(activityInstanceData.getActivityName());
-            }
-        }
-        if (decisionInstanceDcItem.getProcessInstanceId() != null) {
-            ProcessInstanceData processInstanceData = processInstanceService.getProcessInstanceById(
-                    decisionInstanceDcItem.getProcessInstanceId());
-            if (processInstanceData != null) {
-                processBusinessKeyTextField.setTypedValue(processInstanceData.getBusinessKey());
-            }
-        }
+    protected void initTabIcons() {
+        tabsheetInputsTab.addComponentAsFirst(VaadinIcon.DOWNLOAD_ALT.create());
+        tabsheetOutputsTab.addComponentAsFirst(VaadinIcon.UPLOAD_ALT.create());
     }
 }

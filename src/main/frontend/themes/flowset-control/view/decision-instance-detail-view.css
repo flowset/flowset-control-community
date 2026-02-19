@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+.decision-instance-details-actions-panel {
+    border-radius: inherit;
+}
+
+.decision-instance-slide-panel {
+    padding: var(--lumo-space-xs);
+}
+
+.decision-instance-properties-panel {
+    box-shadow: -4px 4px 6px -2px var(--lumo-shade-40pct);
+}
+
+.decision-instance-details-diagram-box {
+    overflow: hidden;
+    padding: var(--lumo-space-xs);
+}
