@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.camunda.community.rest.client.api.HistoryApiClient;
 import org.camunda.community.rest.client.api.ProcessDefinitionApiClient;
 import org.camunda.community.rest.client.api.ProcessInstanceApiClient;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
+import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.addTenant;
 
 @Service("control_DashboardService")
@@ -77,7 +79,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<ProcessExecutionGraphEntry> getRecentActivityStatistics(BpmEngine bpmEngine) {
         OffsetDateTime from = OffsetDateTime.now().minusDays(uiProperties.getRecentActivityDays()).with(LocalTime.MIN);
-        OffsetDateTime to = OffsetDateTime.now().minusDays(1).with(LocalTime.MAX);
+        OffsetDateTime to = OffsetDateTime.now();
 
         HistoryApiClient historyApiClient = historyApiClientByEngineId
                 .computeIfAbsent(bpmEngine.getId(), engineId -> createClient(bpmEngine, HistoryApiClient.class));
@@ -100,7 +102,12 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("Error while user task count loading, status code {}", response.getStatusCode());
             return 0;
         } catch (FeignException e) {
-            log.error("Error while user task count loading ", e);
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load user tasks count because of connection error: {} ", e.getMessage());
+            } else {
+                log.error("Error while user task count loading ", e);
+            }
             return 0;
         }
     }
@@ -126,7 +133,12 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("Error while deployed processes count loading, status code {}", response.getStatusCode());
             return 0;
         } catch (FeignException e) {
-            log.error("Error while deployed processes count loading ", e);
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load deployed processes count because of connection error: {} ", e.getMessage());
+            } else {
+                log.error("Error while deployed processes count loading ", e);
+            }
             return 0;
         }
     }
@@ -145,7 +157,13 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("Error while running process instances count loading, status code {}", response.getStatusCode());
             return 0;
         } catch (FeignException e) {
-            log.error("Error while running process instances loading", e);
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Error while running process instances loading because of connection error: {}", e.getMessage());
+            } else {
+                log.error("Error while running process instances loading", e);
+            }
+
             return 0;
         }
     }
@@ -164,7 +182,13 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("Error while suspended process instances count loading, status code {}", response.getStatusCode());
             return 0;
         } catch (FeignException e) {
-            log.error("Error while suspended process instances loading", e);
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Error while suspended process instances loading because of connection error: {}", e.getMessage());
+            } else {
+                log.error("Error while suspended process instances loading", e);
+            }
+
             return 0;
         }
     }
@@ -196,7 +220,13 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("Error on process process definition statistics, status code {}", response.getStatusCode());
             return List.of();
         } catch (FeignException e) {
-            log.error("Error while process definition statistics loading", e);
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Error while process definition statistics loading because of connection error: {}", e.getMessage());
+            } else {
+                log.error("Error while process definition statistics loading", e);
+            }
+
 
             return List.of();
         }
@@ -261,7 +291,12 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("Unable to load started instances by period: from '{}', to '{}', status code: {}", from, to, response.getStatusCode().value());
             return List.of();
         } catch (FeignException e) {
-            log.error("Unable to load started instances by period: from '{}', to '{}'", from, to, e);
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load started instances by period: from '{}', to '{}' because of connection error: {}", from, to, e.getMessage());
+            } else {
+                log.error("Unable to load started instances by period: from '{}', to '{}'", from, to, e);
+            }
             return List.of();
         }
     }
@@ -278,7 +313,13 @@ public class DashboardServiceImpl implements DashboardService {
             log.error("Unable to load finished instances by period: from '{}', to '{}', status code: {}", from, to, response.getStatusCode().value());
             return List.of();
         } catch (FeignException e) {
-            log.error("Unable to load finished instances by period: from '{}', to '{}'", from, to, e);
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load finished instances by period: from '{}', to '{}' because of connection error: {}", from, to, e.getMessage());
+            } else {
+                log.error("Unable to load finished instances by period: from '{}', to '{}'", from, to, e);
+            }
+
             return List.of();
         }
     }
