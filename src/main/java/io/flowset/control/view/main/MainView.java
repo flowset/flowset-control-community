@@ -186,6 +186,16 @@ public class MainView extends StandardMainView {
                         .withTitle(messageBundle.getMessage("menu.supportGroup.label")),
                 "about");
 
+        ListMenu.MenuItem decisionsMenu = menu.getMenuItem("decisions");
+        if (decisionsMenu != null) {
+            decisionsMenu.setPrefixComponent(new SvgIcon("icons/table.svg"));
+        }
+
+        ListMenu.MenuItem decisionInstancesMenu = menu.getMenuItem("decisionInstances");
+        if (decisionInstancesMenu != null) {
+            decisionInstancesMenu.setPrefixComponent(new SvgIcon("icons/table_view.svg"));
+        }
+
         ListMenu.MenuItem dashboardMenu = menu.getMenuItem("dashboard");
         if (dashboardMenu != null) {
             dashboardMenu.setPrefixComponent(new SvgIcon("icons/dashboard.svg"));

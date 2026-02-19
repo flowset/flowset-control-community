@@ -85,7 +85,7 @@
                 </tabSheet>
             </split>
         </split>
-        <hbox id="detailActions" alignSelf="END">
+        <hbox id="detailActions" width="100%">
             <button id="closeButton" action="closeAction"/>
         </hbox>
     </layout>

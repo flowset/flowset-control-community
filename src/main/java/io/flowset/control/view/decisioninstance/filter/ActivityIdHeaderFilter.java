@@ -7,17 +7,26 @@ package io.flowset.control.view.decisioninstance.filter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.TextField;
-import io.jmix.flowui.component.grid.DataGrid;
-import io.jmix.flowui.component.grid.DataGridColumn;
-import io.jmix.flowui.model.InstanceContainer;
+import com.vaadin.flow.router.QueryParameters;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
+import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
+import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.model.InstanceContainer;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.flowset.control.facet.urlqueryparameters.DecisionInstanceListQueryParamBinder.ACTIVITY_ID_FILTER_PARAM;
+import static io.flowset.control.view.util.FilterQueryParamUtils.getStringParam;
 
 public class ActivityIdHeaderFilter
-        extends ContainerDataGridHeaderFilter<DecisionInstanceFilter, HistoricDecisionInstanceShortData> {
+        extends ContainerDataGridHeaderFilter<DecisionInstanceFilter, HistoricDecisionInstanceShortData> implements HasFilterUrlParamHeaderFilter {
 
-    protected TextField activityId;
+    protected TypedTextField<String> activityIdField;
     protected final Runnable loadDelegate;
 
     public ActivityIdHeaderFilter(DataGrid<HistoricDecisionInstanceShortData> dataGrid,
@@ -29,7 +38,7 @@ public class ActivityIdHeaderFilter
 
     @Override
     public void apply() {
-        String value = activityId.getValue();
+        String value = activityIdField.getTypedValue();
         filterDc.getItem().setActivityId(value);
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, value != null);
 
@@ -43,17 +52,30 @@ public class ActivityIdHeaderFilter
 
     @Override
     protected void resetFilterValues() {
-        activityId.clear();
+        activityIdField.clear();
     }
 
     protected TextField createActivityIdFilter() {
-        activityId = uiComponents.create(TextField.class);
-        activityId.setWidthFull();
-        activityId.setMinWidth("30em");
-        activityId.setClearButtonVisible(true);
-        activityId.setLabel(messages.getMessage(DecisionInstanceFilter.class,
+        activityIdField = uiComponents.create(TypedTextField.class);
+        activityIdField.setWidthFull();
+        activityIdField.setMinWidth("30em");
+        activityIdField.setClearButtonVisible(true);
+        activityIdField.setLabel(messages.getMessage(DecisionInstanceFilter.class,
                 "DecisionInstanceFilter.activityId"));
-        activityId.setPlaceholder(messages.getMessage(getClass(), "activityId.placeHolder"));
-        return activityId;
+        activityIdField.setPlaceholder(messages.getMessage(getClass(), "activityId.placeHolder"));
+        return activityIdField;
+    }
+
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        String activityParamValue = getStringParam(queryParameters, ACTIVITY_ID_FILTER_PARAM);
+        activityIdField.setTypedValue(activityParamValue);
+    }
+
+    @Override
+    public Map<String, String> getQueryParamValues() {
+        Map<String, String> paramValues = new HashMap<>();
+        paramValues.put(ACTIVITY_ID_FILTER_PARAM, activityIdField.getTypedValue());
+        return paramValues;
     }
 }

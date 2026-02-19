@@ -23,6 +23,10 @@ public class DecisionInstanceFilter {
     @JmixId
     protected UUID id;
 
+    protected String decisionInstanceId;
+
+    protected String decisionDefinitionKey;
+
     protected String decisionDefinitionId;
 
     protected String processDefinitionId;

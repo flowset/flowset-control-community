@@ -21,6 +21,9 @@
     <item id="decisions" view="bpm_DecisionDefinition.list"
           title="msg://io.flowset.control.view.decisiondefinition/decisionDefinitionListView.title"
           icon="vaadin:table"/>
+    <item id="decisionInstances" view="DecisionInstanceData.list"
+          description="msg://io.flowset.control/menu_config.decisionInstances.description"
+          title="msg://io.flowset.control/menu_config.decisionInstances.title"/>
 
     <!-- System group -->
     <item id="deployments" view="bpm_Deployment.list"

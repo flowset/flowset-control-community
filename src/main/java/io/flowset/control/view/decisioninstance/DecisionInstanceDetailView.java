@@ -1,6 +1,7 @@
 package io.flowset.control.view.decisioninstance;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -72,6 +73,9 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
     @Subscribe
     public void onInit(final InitEvent event) {
         detailActions.addClassNames(LumoUtility.Padding.Top.SMALL);
+
+        boolean openedInDialog = UiComponentUtils.isComponentAttachedToDialog(this);
+        detailActions.setJustifyContentMode(openedInDialog ? FlexComponent.JustifyContentMode.END: FlexComponent.JustifyContentMode.START);
     }
 
     @Subscribe

@@ -6,8 +6,10 @@
 package io.flowset.control.view.processinstance.history;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.view.processinstance.event.*;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Fragments;
@@ -213,36 +215,38 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     protected void updateUserTasksTabCaption(long userTasksCount) {
         updateTabCaption(USER_TASKS_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.tasksTabCaption",
-                userTasksCount, VaadinIcon.USER_CARD);
+                userTasksCount, VaadinIcon.USER_CARD.create());
     }
 
     protected void updateVariablesTabCaption(long variablesCount) {
         updateTabCaption(VARIABLES_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.historicVariableInstancesTabCaption",
-                variablesCount, VaadinIcon.CURLY_BRACKETS);
+                variablesCount, VaadinIcon.CURLY_BRACKETS.create());
     }
 
     protected void updateIncidentTabCaption(long incidentCount) {
         updateTabCaption(INCIDENTS_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.incidentsTabCaption",
-                incidentCount, VaadinIcon.WARNING);
+                incidentCount, VaadinIcon.WARNING.create());
     }
 
     protected void updateDecisionsTabCaption(long decisionsCount) {
+        SvgIcon svgIcon = new SvgIcon("icons/table_view.svg");
+        svgIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
         updateTabCaption(DECISIONS_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.decisionsTabCaption",
-                decisionsCount, VaadinIcon.TABLE);
+                decisionsCount, svgIcon);
     }
 
     protected void updateActivityTabCaption(long activitiesCount) {
         updateTabCaption(ACTIVITIES_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.historicActivityInstancesTabCaption",
-                activitiesCount, VaadinIcon.CUBES);
+                activitiesCount, VaadinIcon.CUBES.create());
     }
 
-    protected void updateTabCaption(int tabIndex, String messageKey, long count, VaadinIcon icon) {
+    protected void updateTabCaption(int tabIndex, String messageKey, long count, Component icon) {
         historyTabsheet.getTabAt(tabIndex).setLabel(messageBundle.formatMessage(messageKey, count));
-        historyTabsheet.getTabAt(tabIndex).addComponentAsFirst(icon.create());
+        historyTabsheet.getTabAt(tabIndex).addComponentAsFirst(icon);
     }
 
     protected Tab createTab(String id, String messageKey, VaadinIcon icon) {

@@ -8,6 +8,7 @@ package io.flowset.control.view.decisiondefinition;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -195,7 +196,10 @@ public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDef
 
     protected void updateTabCaption(long count) {
         tabSheetDecisionInstancesTab.setLabel(messageBundle.formatMessage("decisionInstancesTab.label", count));
-        tabSheetDecisionInstancesTab.addComponentAsFirst(VaadinIcon.TASKS.create());
+
+        SvgIcon icon = new SvgIcon("icons/table_view.svg");
+        icon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+        tabSheetDecisionInstancesTab.addComponentAsFirst(icon);
     }
 
     protected void sendUpdateViewTitleEvent() {

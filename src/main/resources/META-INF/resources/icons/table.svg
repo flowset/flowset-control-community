@@ -1,0 +1,6 @@
+<!--
+  - Copyright (c) Haulmont 2026. All Rights Reserved.
+  - Use is subject to license terms.
+  -->
+
+<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" ><path d="M120-120v-720h720v720H120Zm320-240H200v160h240v-160Zm80 0v160h240v-160H520Zm-80-80v-160H200v160h240Zm80 0h240v-160H520v160ZM200-680h560v-80H200v80Z"/></svg>

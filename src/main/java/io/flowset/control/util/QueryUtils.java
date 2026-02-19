@@ -203,6 +203,8 @@ public class QueryUtils {
         if (filter == null) {
             return;
         }
+        addIfStringNotEmpty(filter.getDecisionInstanceId(), decisionInstanceQuery::decisionInstanceId);
+        addIfStringNotEmpty(filter.getDecisionDefinitionKey(), decisionInstanceQuery::decisionDefinitionKey);
         addIfStringNotEmpty(filter.getDecisionDefinitionId(), decisionInstanceQuery::decisionDefinitionId);
         addIfStringNotEmpty(filter.getProcessDefinitionKey(), decisionInstanceQuery::processDefinitionKey);
         addIfStringNotEmpty(filter.getProcessInstanceId(), decisionInstanceQuery::processInstanceId);

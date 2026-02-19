@@ -84,6 +84,11 @@ public abstract class AbstractProcessHeaderFilter<F, E> extends ContainerDataGri
 
     @Override
     public void updateComponents(QueryParameters queryParameters) {
+        updateProcessFields(queryParameters);
+        apply();
+    }
+
+    protected void updateProcessFields(QueryParameters queryParameters) {
         String processIdValue = getStringParam(queryParameters, PROCESS_ID_PARAM);
 
         ProcessDefinitionData version = null;
@@ -95,7 +100,6 @@ public abstract class AbstractProcessHeaderFilter<F, E> extends ContainerDataGri
             processKey = getStringParam(queryParameters, PROCESS_KEY_PARAM);
         }
         updateFields(version, processKey);
-        apply();
     }
 
     protected void updateFields(@Nullable ProcessDefinitionData version, @Nullable String processKey) {
@@ -127,6 +131,7 @@ public abstract class AbstractProcessHeaderFilter<F, E> extends ContainerDataGri
         processComboBox.addClassNames(LumoUtility.Padding.Top.NONE);
         processComboBox.setClearButtonVisible(true);
         processComboBox.setLabel(messages.getMessage("processColumnFilter.processField.label"));
+        processComboBox.setPlaceholder(messages.getMessage("processColumnFilter.processField.placeholder"));
         processComboBox.setMinWidth("30em");
         processComboBox.addValueChangeListener(event -> {
             processVersionComboBox.setValue(null);
