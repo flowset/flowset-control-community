@@ -87,17 +87,18 @@ public class DecisionInstanceDetailView extends StandardDetailView<HistoricDecis
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
-        String decisionDefinitionId = decisionInstanceDc.getItem().getDecisionDefinitionId();
+        HistoricDecisionInstanceShortData decisionInstance = decisionInstanceDc.getItem();
+
+        String decisionDefinitionId = decisionInstance.getDecisionDefinitionId();
         DecisionDefinitionData decisionDefinitionData = decisionDefinitionService.getById(decisionDefinitionId);
         decisionDefinitionDc.setItem(decisionDefinitionData);
 
         dmnViewerFragment.initViewer();
         String dmnXml = decisionDefinitionService.getDmnXml(decisionDefinitionId);
-        dmnViewerFragment.setDmnXml(dmnXml, setDmnXmlJson ->
-                dmnViewerFragment.showDecisionDefinition(decisionInstanceDc.getItem().getDecisionDefinitionKey(),
-                        showDecisionDefinitionJson -> dmnViewerFragment.showDecisionInstance(
-                                createDecisionInstanceClientData(decisionInstanceDc.getItem())))
-        );
+        dmnViewerFragment.setDmnXml(dmnXml, decisionInstance.getDecisionDefinitionKey());
+        dmnViewerFragment.addImportCompleteListener(importCompleteEvent -> {
+            dmnViewerFragment.showDecisionInstance(createDecisionInstanceClientData(decisionInstance));
+        });
     }
 
     @Subscribe

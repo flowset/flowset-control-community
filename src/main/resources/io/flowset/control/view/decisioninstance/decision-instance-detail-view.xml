@@ -17,15 +17,15 @@
         <action id="closeAction" type="view_close" text="msg:///actions.Close"/>
         <action id="copyToClipboardAction" type="control_copyComponentValueToClipboard"/>
     </actions>
-    <layout expand="box" padding="false" spacing="false">
-        <hbox id="box" width="100%" spacing="false">
+    <layout expand="box" padding="false" spacing="false" height="100%">
+        <hbox id="box" width="100%" spacing="false" classNames="overflow-hidden">
             <split orientation="VERTICAL" width="100%" height="100%" splitterPosition="60"
                    themeNames="splitter-spacing">
-                <div height="auto" classNames="decision-instance-details-diagram-box">
+                <div height="100%" classNames="decision-instance-details-diagram-box m-s">
                     <fragment id="dmnViewerFragment" class="io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment"/>
                 </div>
-                <div classNames="p-xs">
-                    <tabSheet id="tabsheet" themeNames="hide-scroll-buttons bordered" height="100%" width="100%" minHeight="30em" classNames="box-border">
+                <div classNames="p-s">
+                    <tabSheet id="tabsheet" themeNames="hide-scroll-buttons bordered" height="100%" width="100%" minHeight="30em" classNames="box-border flex-grow">
                         <tab id="inputsTab" label="msg://inputs.tab">
                             <dataGrid id="inputsDataGrid"
                                       width="100%"
@@ -57,7 +57,7 @@
             </split>
             <fragment class="io.flowset.control.view.decisioninstance.DecisionInstanceGeneralPanelFragment"/>
         </hbox>
-        <hbox id="detailActions" width="100%" classNames="pl-s pr-s">
+        <hbox id="detailActions" width="100%" classNames="sticky-buttons-bottom-panel p-s">
             <button id="closeButton" action="closeAction"/>
         </hbox>
     </layout>
