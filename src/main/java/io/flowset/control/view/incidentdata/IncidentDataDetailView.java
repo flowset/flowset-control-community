@@ -24,12 +24,12 @@ import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.flowui.*;
+import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
-import io.flowset.control.service.externaltask.ExternalTaskService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.JobService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
@@ -38,6 +38,7 @@ import io.flowset.control.view.externaltask.ExternalTaskErrorDetailsView;
 import io.flowset.control.view.job.JobErrorDetailsView;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
+import io.flowset.control.view.util.ComponentHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -76,6 +77,8 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     protected ProcessDefinitionService processDefinitionService;
     @Autowired
     protected JobService jobService;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
     @ViewComponent
     protected JmixButton viewStacktraceBtn;
@@ -99,6 +102,8 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     protected TypedTextField<String> processDefinitionIdField;
     @ViewComponent
     protected HorizontalLayout detailActions;
+    @ViewComponent
+    protected JmixTextArea messageField;
 
     @ViewComponent
     protected JmixButton viewProcessBtn;
@@ -129,6 +134,8 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
         } else {
             detailActions.addClassNames("sticky-buttons-bottom-panel");
         }
+        messageField.getStyle().set("resize", "vertical");
+        messageField.getStyle().set("overflow", "auto");
         initIncidentTypeRelatedFields();
         initProcessFields();
         initCauseIncidentFields();
@@ -159,19 +166,24 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     @Subscribe(id = "viewStacktraceBtn", subject = "clickListener")
     public void onViewStacktraceBtnClick(final ClickEvent<JmixButton> event) {
         if (getEditedEntity().isJobFailed()) {
-            dialogWindows.view(this, JobErrorDetailsView.class)
+            DialogWindow<JobErrorDetailsView> jobErrorDialogView = dialogWindows.view(this, JobErrorDetailsView.class)
                     .withViewConfigurer(view -> {
                         view.setJobId(getEditedEntity().getConfiguration());
                         view.setErrorMessage(getEditedEntity().getMessage());
                     })
-                    .open();
+                    .build();
+
+            componentHelper.addFullScreenButton(jobErrorDialogView);
+            jobErrorDialogView.open();
         } else if (getEditedEntity().isExternalTaskFailed()) {
-            dialogWindows.view(this, ExternalTaskErrorDetailsView.class)
+            DialogWindow<ExternalTaskErrorDetailsView> externalTaskErrorDialogView = dialogWindows.view(this, ExternalTaskErrorDetailsView.class)
                     .withViewConfigurer(view -> {
                         view.setExternalTaskId(getEditedEntity().getConfiguration());
                         view.setErrorMessage(getEditedEntity().getMessage());
                     })
-                    .open();
+                    .build();
+            componentHelper.addFullScreenButton(externalTaskErrorDialogView);
+            externalTaskErrorDialogView.open();
         }
     }
 

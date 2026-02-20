@@ -5,8 +5,11 @@
 
 package io.flowset.control.view.util;
 
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -17,6 +20,9 @@ import io.jmix.flowui.UiComponents;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.view.DialogWindow;
+import io.jmix.flowui.view.View;
 import lombok.AllArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -29,6 +35,8 @@ import java.util.TimeZone;
 @Component
 @AllArgsConstructor
 public class ComponentHelper {
+    public static final String FULL_SCREEN_DIALOG_CLASS_NAME = "full-screen-dialog";
+
     protected final UiComponents uiComponents;
     protected final Messages messages;
     protected final DatatypeFormatter datatypeFormatter;
@@ -170,5 +178,48 @@ public class ComponentHelper {
         errorMessage.addClassNames(LumoUtility.TextColor.ERROR, LumoUtility.FontSize.SMALL);
 
         emptyStateBox.add(warningIcon, headerError, errorMessage);
+    }
+
+    /**
+     * Adds a full-screen toggle button to the dialog window's header.
+     *
+     * @param dialogWindow a dialog window
+     * @param <V> a type of view opened in the dialog window
+     */
+    public <V extends View<?>> void addFullScreenButton(DialogWindow<V> dialogWindow) {
+        dialogWindow.getElement().getComponent()
+                .ifPresent(component -> {
+                    if (component instanceof Dialog dialog) {
+                        Dialog.DialogHeader dialogHeader = dialog.getHeader();
+                        if (dialogHeader != null) {
+                            JmixButton toggleFullScreenBtn = createToggleFullScreenButton(dialogWindow);
+
+                            dialogHeader.addComponentAsFirst(toggleFullScreenBtn);
+                        }
+                    }
+                });
+    }
+
+    protected <V extends View<?>> JmixButton createToggleFullScreenButton(DialogWindow<V> dialogWindow) {
+        SvgIcon fullScreenIcon = new SvgIcon("icons/fullscreen.svg");
+        fullScreenIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+
+        SvgIcon exitFullScreenIcon = new SvgIcon("icons/fullscreen_exit.svg");
+        exitFullScreenIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+
+        JmixButton toggleFullScreenBtn = uiComponents.create(JmixButton.class);
+        toggleFullScreenBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY_INLINE);
+        toggleFullScreenBtn.setIcon(fullScreenIcon);
+
+        toggleFullScreenBtn.addClickListener(event -> {
+            if (dialogWindow.hasClassName(FULL_SCREEN_DIALOG_CLASS_NAME)) {
+                toggleFullScreenBtn.setIcon(fullScreenIcon);
+                dialogWindow.removeClassName(FULL_SCREEN_DIALOG_CLASS_NAME);
+            } else {
+                toggleFullScreenBtn.setIcon(exitFullScreenIcon);
+                dialogWindow.addClassName(FULL_SCREEN_DIALOG_CLASS_NAME);
+            }
+        });
+        return toggleFullScreenBtn;
     }
 }

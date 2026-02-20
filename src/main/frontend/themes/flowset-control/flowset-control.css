@@ -103,3 +103,10 @@ vaadin-button[theme~='badge'][theme~='has-icon'] vaadin-icon {
 vaadin-button.data-grid-column-action > vaadin-icon {
     padding: 0.175em;
 }
+
+.full-screen-dialog::part(overlay) {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
