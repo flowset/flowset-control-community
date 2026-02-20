@@ -148,24 +148,6 @@ public class ExternalTaskServiceImpl implements ExternalTaskService {
         }
     }
 
-    @Override
-    public String getHistoryErrorDetails(String externalTaskId) {
-        try {
-            ResponseEntity<String> response = historyApiClient.getErrorDetailsHistoricExternalTaskLog(externalTaskId);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                return Strings.nullToEmpty(response.getBody());
-            }
-            return "";
-        } catch (Exception e) {
-            Throwable rootCause = ExceptionUtils.getRootCause(e);
-            if (isConnectionError(rootCause)) {
-                log.error("Unable to get historic error details for task '{}' because of connection error: ", externalTaskId, e);
-                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
-            }
-            throw e;
-        }
-    }
-
     protected ExternalTaskQuery createExternalTaskQuery() {
         ExternalTaskQuery externalTaskQuery = remoteExternalTaskService.createExternalTaskQuery();
         String tenantId = engineTenantProvider.getCurrentUserTenantId();

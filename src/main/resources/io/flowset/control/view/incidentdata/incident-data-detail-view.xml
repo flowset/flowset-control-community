@@ -108,7 +108,7 @@
         </formLayout>
         <hbox id="detailActions" width="100%">
             <button id="retryBtn" icon="ROTATE_LEFT" themeNames="primary" text="msg:///actions.Retry"/>
-            <button id="closeBtn" action="closeAction" classNames="ml-auto"/>
+            <button id="closeBtn" action="closeAction"/>
         </hbox>
     </layout>
 </view>

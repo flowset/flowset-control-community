@@ -54,12 +54,4 @@ public interface ExternalTaskService {
      * @return error details
      */
     String getErrorDetails(String externalTaskId);
-
-    /**
-     * Loads from the engine history the error details for the completed external task instance with the specified identifier.
-     *
-     * @param externalTaskId an identifier of completed external task instance
-     * @return error details
-     */
-    String getHistoryErrorDetails(String externalTaskId);
 }

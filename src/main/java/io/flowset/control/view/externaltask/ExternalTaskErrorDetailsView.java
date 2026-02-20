@@ -6,53 +6,50 @@
 package io.flowset.control.view.externaltask;
 
 import com.vaadin.flow.router.Route;
-import io.jmix.flowui.action.view.ViewCloseAction;
-import io.jmix.flowui.component.codeeditor.CodeEditor;
-import io.jmix.flowui.view.DefaultMainViewParent;
-import io.jmix.flowui.view.DialogMode;
-import io.jmix.flowui.view.StandardView;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.ViewComponent;
-import io.jmix.flowui.view.ViewController;
-import io.jmix.flowui.view.ViewDescriptor;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
 import io.flowset.control.service.externaltask.ExternalTaskService;
+import io.jmix.flowui.kit.component.codeeditor.JmixCodeEditor;
+import io.jmix.flowui.view.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Route(value = "external-task-error-details", layout = DefaultMainViewParent.class)
 @ViewController("ExternalTaskErrorDetailsView")
 @ViewDescriptor("external-task-error-details-view.xml")
-@DialogMode(width = "52em")
+@DialogMode(minWidth = "60em", width = "70%", minHeight = "40em", height = "70%", resizable = true)
 public class ExternalTaskErrorDetailsView extends StandardView {
     @Autowired
     protected ExternalTaskService externalTaskService;
     @ViewComponent
-    protected CodeEditor errorDetailsCodeEditor;
+    protected JmixCodeEditor errorDetailsCodeEditor;
     @ViewComponent
-    protected CopyComponentValueToClipboardAction copy;
+    protected JmixCodeEditor errorMessageCodeEditor;
+    @ViewComponent
+    protected CopyComponentValueToClipboardAction copyErrorDetailsAction;
+    @ViewComponent
+    protected CopyComponentValueToClipboardAction copyErrorMessageAction;
 
     protected String externalTaskId;
-    protected boolean fromHistory = false;
-    @ViewComponent
-    private ViewCloseAction close;
+    protected String errorMessage;
 
     public void setExternalTaskId(String externalTaskId) {
         this.externalTaskId = externalTaskId;
     }
 
-    public void fromHistory() {
-        this.fromHistory = true;
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
-        String stacktrace;
-        if (fromHistory) {
-            stacktrace = externalTaskService.getHistoryErrorDetails(externalTaskId);
-        } else {
-            stacktrace = externalTaskService.getErrorDetails(externalTaskId);
-        }
+        String stacktrace = externalTaskService.getErrorDetails(externalTaskId);
+
         errorDetailsCodeEditor.setValue(stacktrace);
-        copy.setTarget(errorDetailsCodeEditor);
+        copyErrorDetailsAction.setTarget(errorDetailsCodeEditor);
+        copyErrorDetailsAction.setVisible(StringUtils.isNotEmpty(stacktrace));
+
+        errorMessageCodeEditor.setValue(errorMessage);
+        copyErrorMessageAction.setTarget(errorMessageCodeEditor);
+        copyErrorMessageAction.setVisible(StringUtils.isNotEmpty(errorMessage));
     }
 }

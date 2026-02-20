@@ -76,23 +76,6 @@ public interface JobService {
     String getErrorDetails(String jobId);
 
     /**
-     * Loads from the engine history the error details of the job with the specified identifier.
-     *
-     * @param jobId a job identifier
-     * @return error details
-     */
-    String getHistoryErrorDetails(String jobId);
-
-
-    /**
-     * Loads from the engine history the job with the specified identifier.
-     *
-     * @param jobId a job identifier
-     * @return boolean
-     */
-    boolean isHistoryJobLogPresent(String jobId);
-
-    /**
      * Activates a job with the specified identifier.
      *
      * @param jobId the identifier of the job to be activated

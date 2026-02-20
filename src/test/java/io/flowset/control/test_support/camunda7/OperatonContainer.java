@@ -63,7 +63,7 @@ public class OperatonContainer extends Camunda7Container<OperatonContainer> {
 
     @Override
     public EngineType getEngineType() {
-        return EngineType.CAMUNDA_7; //TODO: change type
+        return EngineType.OPERATON;
     }
 
     @Override

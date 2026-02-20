@@ -5,6 +5,7 @@
 
 package io.flowset.control.configuration;
 
+import io.flowset.control.uicomponent.codeeditor.ControlCodeEditorLoader;
 import io.flowset.control.uicomponent.grid.ControlDataGridLoader;
 import io.flowset.control.uicomponent.menu.ControlListMenu;
 import io.flowset.control.uicomponent.menu.ControlListMenuLoader;
@@ -12,6 +13,7 @@ import io.flowset.control.uicomponent.spinner.SpinnerLoader;
 import io.flowset.control.uicomponent.treedatagrid.NoClickTreeDataGridLoader;
 import io.flowset.control.uicomponent.treedatagrid.NoClickTreeGrid;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.kit.component.codeeditor.JmixCodeEditor;
 import io.jmix.flowui.sys.registration.ComponentRegistration;
 import io.jmix.flowui.sys.registration.ComponentRegistrationBuilder;
 import org.springframework.context.annotation.Bean;
@@ -47,6 +49,14 @@ public class UiComponentRegistrationConfiguration {
         return ComponentRegistrationBuilder
                 .create(DataGrid.class)
                 .withComponentLoader("dataGrid", ControlDataGridLoader.class)
+                .build();
+    }
+
+    @Bean
+    public ComponentRegistration controlCodeEditor() {
+        return ComponentRegistrationBuilder
+                .create(JmixCodeEditor.class)
+                .withComponentLoader("codeEditor", ControlCodeEditorLoader.class)
                 .build();
     }
 }
