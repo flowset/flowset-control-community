@@ -22,6 +22,8 @@
                 <property name="text" value=""/>
             </properties>
         </action>
+        <action id="refreshAction" icon="REFRESH"
+                description="msg:///actions.Refresh"/>
     </actions>
     <content>
         <flexLayout classNames="process-slide-panel">
@@ -71,6 +73,7 @@
                 </vbox>
                 <vbox themeNames="spacing-xs" classNames="shadow-s p-s process-details-actions-panel" width="min-content">
                     <button id="infoBtn" icon="INFO_CIRCLE" title="msg://hideProcessInformation.title" classNames="bordered-button" themeNames="small"/>
+                    <button id="refreshBtn" action="refreshAction" classNames="bordered-button" themeNames="small"/>
                     <vbox themeNames="spacing-xs" id="runtimeInstanceActions" padding="false">
                         <button id="startProcessBtn" icon="PLAY_CIRCLE" title="msg://startProcessBtn.title" themeNames="small"
                                 classNames="bordered-button"/>
