@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://decisionInstanceDataListView.title"
+      focusComponent="decisionInstancesDataGrid">
+    <data>
+        <collection id="decisionInstancesDc"
+                    class="io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData">
+            <loader id="decisionInstancesDl" readOnly="true"/>
+        </collection>
+        <instance id="decisionFilterDc" class="io.flowset.control.entity.filter.DecisionInstanceFilter"/>
+    </data>
+    <facets>
+        <urlQueryParameters id="urlQueryParameters">
+            <pagination component="pagination"/>
+        </urlQueryParameters>
+    </facets>
+    <actions>
+        <action id="selectAction" type="lookup_select"/>
+        <action id="discardAction" type="lookup_discard"/>
+    </actions>
+    <layout>
+        <hbox id="buttonsPanel" classNames="buttons-panel">
+            <button id="refreshButton" themeNames="success primary" action="decisionInstancesDataGrid.refreshAction"/>
+            <simplePagination id="pagination" dataLoader="decisionInstancesDl"/>
+        </hbox>
+        <dataGrid id="decisionInstancesDataGrid"
+                  width="100%"
+                  minHeight="20em"
+                  dataContainer="decisionInstancesDc"
+                  columnReorderingAllowed="true">
+            <actions>
+                <action id="refreshAction" type="list_refresh"/>
+                <action id="viewAction" type="list_edit" text="msg:///actions.View"/>
+            </actions>
+            <columns resizable="true">
+                <column property="decisionInstanceId" sortable="false">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.decisioninstance.column.DecisionInstanceIdColumnFragment"/>
+                </column>
+                <column property="decisionDefinitionId" sortable="false"/>
+                <column property="evaluationTime" />
+                <column property="processInstanceId" sortable="false">
+                    <fragmentRenderer
+                            class="io.flowset.control.view.decisioninstance.column.DecisionInstanceProcessInstanceColumnFragment"/>
+                </column>
+                <column property="processDefinitionId" sortable="false"/>
+                <column property="activityId" sortable="false"/>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" visible="false">
+            <button id="selectButton" action="selectAction"/>
+            <button id="discardButton" action="discardAction"/>
+        </hbox>
+    </layout>
+</view>

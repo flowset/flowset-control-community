@@ -44,11 +44,13 @@ public class CamundaDataCleaner implements EngineDataCleaner<Camunda7Container<?
             removeResourceByIds(camunda, "/job");
             removeResourceByIds(camunda, "/process-instance");
             removeResourceByIds(camunda, "/process-definition");
+            removeResourceByIds(camunda, "/decision-definition");
             removeResourceByIds(camunda, "/deployment");
 
             //remove history data
             removeResourceByIds(camunda, "/history/batch");
             removeResourceByIds(camunda, "/history/process-instance");
+            removeResourceByIds(camunda, "/history/decision-instance");
 
             logDataCleanResult(camunda);
         }

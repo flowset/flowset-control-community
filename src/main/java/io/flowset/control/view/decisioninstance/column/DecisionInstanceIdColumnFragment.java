@@ -8,16 +8,25 @@ package io.flowset.control.view.decisioninstance.column;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
+import io.flowset.control.service.decisioninstance.DecisionInstanceService;
+import io.flowset.control.view.decisioninstance.DecisionInstanceDetailView;
 import io.flowset.control.view.entitydetaillink.EntityDetailLinkFragment;
+import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @FragmentDescriptor("decision-instance-id-column-fragment.xml")
 @RendererItemContainer("decisionInstanceDc")
 public class DecisionInstanceIdColumnFragment extends EntityDetailLinkFragment<HorizontalLayout, HistoricDecisionInstanceShortData> {
+
+    @Autowired
+    protected DecisionInstanceService decisionInstanceService;
 
     @ViewComponent
     protected JmixButton idBtn;
@@ -32,5 +41,16 @@ public class DecisionInstanceIdColumnFragment extends EntityDetailLinkFragment<H
     @Subscribe(id = "idBtn", subject = "clickListener")
     public void onIdBtnClick(final ClickEvent<JmixButton> event) {
         openDetailView(HistoricDecisionInstanceShortData.class);
+    }
+
+    @Override
+    protected void openDialogDetailView(Class<HistoricDecisionInstanceShortData> entityClass) {
+        HistoricDecisionInstanceShortData decisionInstance = decisionInstanceService.getById(item.getDecisionInstanceId()); //to get decision instance with inputs/outputs
+
+        HistoricDecisionInstanceShortData entity = decisionInstance != null ? decisionInstance : item;
+        dialogWindows.detail(getCurrentView(), HistoricDecisionInstanceShortData.class)
+                .withViewClass(DecisionInstanceDetailView.class)
+                .editEntity(entity)
+                .open();
     }
 }

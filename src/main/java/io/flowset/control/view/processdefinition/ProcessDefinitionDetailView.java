@@ -19,12 +19,7 @@ import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.core.Sort;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.Dialogs;
-import io.jmix.flowui.Notifications;
-import io.jmix.flowui.UiComponents;
-import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.*;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.codeeditor.CodeEditor;
 import io.jmix.flowui.model.CollectionContainer;
@@ -43,6 +38,7 @@ import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
+import io.flowset.control.uicomponent.viewer.handler.BusinessRuleTaskOverlayClickHandler;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.flowset.control.view.event.TitleUpdateEvent;
 import io.flowset.control.view.processdefinition.event.ReloadSelectedProcess;
@@ -95,6 +91,8 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected Metadata metadata;
     @Autowired
     protected CallActivityOverlayClickHandler callActivityClickHandler;
+    @Autowired
+    protected BusinessRuleTaskOverlayClickHandler businessRuleTaskClickHandler;
 
     @ViewComponent
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
@@ -279,6 +277,12 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent -> {
             callActivityClickHandler.handleProcessNavigation(processDefinitionDataDc.getItem(),
                     callActivityOverlayClickEvent.getCallActivity(),
+                    UiComponentUtils.isComponentAttachedToDialog(this));
+        });
+        viewerFragment.showDecisionLinkOverlays();
+        viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent -> {
+            businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
+                    businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
                     UiComponentUtils.isComponentAttachedToDialog(this));
         });
         showStatistics();

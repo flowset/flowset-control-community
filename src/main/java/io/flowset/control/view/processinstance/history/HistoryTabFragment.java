@@ -6,8 +6,10 @@
 package io.flowset.control.view.processinstance.history;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.view.processinstance.event.*;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Fragments;
@@ -18,10 +20,8 @@ import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.MessageBundle;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
-import io.flowset.control.entity.filter.ActivityFilter;
-import io.flowset.control.entity.filter.IncidentFilter;
-import io.flowset.control.entity.filter.UserTaskFilter;
-import io.flowset.control.entity.filter.VariableFilter;
+import io.flowset.control.entity.filter.*;
+import io.flowset.control.service.decisioninstance.DecisionInstanceService;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.incident.IncidentService;
@@ -38,11 +38,13 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     public static final String USER_TASKS_TAB_ID = "historyTasksTab";
     public static final String VARIABLES_TAB_ID = "historyVariablesTab";
     public static final String INCIDENTS_TAB_ID = "historyIncidentsTab";
+    public static final String DECISIONS_TAB_ID = "historyDecisionsTab";
 
     public static final int ACTIVITIES_TAB_IDX = 0;
     public static final int USER_TASKS_TAB_IDX = 1;
     public static final int VARIABLES_TAB_IDX = 2;
     public static final int INCIDENTS_TAB_IDX = 3;
+    public static final int DECISIONS_TAB_IDX = 4;
 
     @Autowired
     protected Metadata metadata;
@@ -59,6 +61,8 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     protected UserTaskService userTaskService;
     @Autowired
     protected IncidentService incidentService;
+    @Autowired
+    protected DecisionInstanceService decisionInstanceService;
 
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
@@ -76,6 +80,7 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
         initUserTasksTab();
         initVariablesTab();
         initIncidentsTab();
+        initDecisionsTab();
     }
 
     public void refresh() {
@@ -84,6 +89,7 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
             loadAndUpdateUserTasksCount();
             loadAndUpdateVariablesCount();
             loadAndUpdateIncidentsCount();
+            loadAndUpdateDecisionsCount();
             this.initialized = true;
         }
         historyTabsheet.setSelectedIndex(ACTIVITIES_TAB_IDX);
@@ -129,6 +135,11 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
         updateIncidentTabCaption(event.getCount());
     }
 
+    @EventListener
+    public void handleDecisionCountUpdate(DecisionCountUpdateEvent event) {
+        updateDecisionsTabCaption(event.getCount());
+    }
+
     protected void loadAndUpdateActivitiesCount() {
         ActivityFilter activityFilter = metadata.create(ActivityFilter.class);
         activityFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
@@ -165,6 +176,14 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
         updateUserTasksTabCaption(historyTasksCount);
     }
 
+    protected void loadAndUpdateDecisionsCount() {
+        DecisionInstanceFilter decisionInstanceFilter = metadata.create(DecisionInstanceFilter.class);
+        decisionInstanceFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+
+        long decisionsCount = decisionInstanceService.getHistoryDecisionInstancesCount(decisionInstanceFilter);
+        updateDecisionsTabCaption(decisionsCount);
+    }
+
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initUserTasksTab() {
@@ -187,34 +206,47 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
         historyTabsheet.add(incidentsTab, new LazyTabContent(() -> fragments.create(getParentController(), HistoryIncidentsTabFragment.class)), INCIDENTS_TAB_IDX);
     }
 
+    protected void initDecisionsTab() {
+        Tab decisionsTab = createTab(DECISIONS_TAB_ID, "ProcessInstanceEditHistoryFragment.decisionsTabCaption",
+                VaadinIcon.TABLE);
+        historyTabsheet.add(decisionsTab, new LazyTabContent(() -> fragments.create(getParentController(), HistoryDecisionsFragment.class)), DECISIONS_TAB_IDX);
+    }
 
     protected void updateUserTasksTabCaption(long userTasksCount) {
         updateTabCaption(USER_TASKS_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.tasksTabCaption",
-                userTasksCount, VaadinIcon.USER_CARD);
+                userTasksCount, VaadinIcon.USER_CARD.create());
     }
 
     protected void updateVariablesTabCaption(long variablesCount) {
         updateTabCaption(VARIABLES_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.historicVariableInstancesTabCaption",
-                variablesCount, VaadinIcon.CURLY_BRACKETS);
+                variablesCount, VaadinIcon.CURLY_BRACKETS.create());
     }
 
     protected void updateIncidentTabCaption(long incidentCount) {
         updateTabCaption(INCIDENTS_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.incidentsTabCaption",
-                incidentCount, VaadinIcon.WARNING);
+                incidentCount, VaadinIcon.WARNING.create());
+    }
+
+    protected void updateDecisionsTabCaption(long decisionsCount) {
+        SvgIcon svgIcon = new SvgIcon("icons/table_view.svg");
+        svgIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+        updateTabCaption(DECISIONS_TAB_IDX,
+                "ProcessInstanceEditHistoryFragment.decisionsTabCaption",
+                decisionsCount, svgIcon);
     }
 
     protected void updateActivityTabCaption(long activitiesCount) {
         updateTabCaption(ACTIVITIES_TAB_IDX,
                 "ProcessInstanceEditHistoryFragment.historicActivityInstancesTabCaption",
-                activitiesCount, VaadinIcon.CUBES);
+                activitiesCount, VaadinIcon.CUBES.create());
     }
 
-    protected void updateTabCaption(int tabIndex, String messageKey, long count, VaadinIcon icon) {
+    protected void updateTabCaption(int tabIndex, String messageKey, long count, Component icon) {
         historyTabsheet.getTabAt(tabIndex).setLabel(messageBundle.formatMessage(messageKey, count));
-        historyTabsheet.getTabAt(tabIndex).addComponentAsFirst(icon.create());
+        historyTabsheet.getTabAt(tabIndex).addComponentAsFirst(icon);
     }
 
     protected Tab createTab(String id, String messageKey, VaadinIcon icon) {
@@ -230,8 +262,8 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
         Component contentByTab = historyTabsheet.getContentByTab(tab);
         return contentByTab != null
                 ? contentByTab.getChildren()
-                        .findFirst()
-                        .orElse(null)
+                .findFirst()
+                .orElse(null)
                 : null;
     }
 

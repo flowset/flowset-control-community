@@ -93,12 +93,11 @@ public interface ProcessInstanceService {
     void terminateById(String processInstanceId);
 
     /**
-     * Asynchronously terminates process instances with the specified identifiers.
+     * Asynchronously terminates process instances with the specified context.
      *
-     * @param processInstanceIds a list of process instance identifiers
-     * @param reason             a reason to terminate
+     * @param context a context containing data like process instance identifiers
      */
-    void terminateByIdsAsync(List<String> processInstanceIds, @Nullable String reason);
+    void terminateByIdsAsync(ProcessInstanceBulkTerminateContext context);
 
     /**
      * Activates asynchronously the process instances with the specified identifiers.

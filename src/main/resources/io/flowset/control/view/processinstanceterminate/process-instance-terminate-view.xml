@@ -15,6 +15,30 @@
     <layout>
         <span text="msg://terminateProcessInstanceMsg"
               width="100%"/>
+        <formLayout width="100%" classNames="pt-m">
+            <responsiveSteps>
+                <responsiveStep minWidth="0" columns="2"/>
+            </responsiveSteps>
+            <hbox padding="false" themeNames="spacing-s"  alignItems="BASELINE">
+                <checkbox id="skipIoMappingsField" label="msg://io.flowset.control.view.processinstance/skipIoMappingsField.label"/>
+                <icon icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em">
+                    <tooltip text="msg://io.flowset.control.view.processinstance/skipIoMappingsField.tooltipText"/>
+                </icon>
+            </hbox>
+
+            <hbox padding="false" themeNames="spacing-s" alignItems="BASELINE">
+                <checkbox id="skipCustomListenersField" label="msg://io.flowset.control.view.processinstance/skipCustomListenersField.label"/>
+                <icon icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em">
+                    <tooltip text="msg://io.flowset.control.view.processinstance/skipCustomListenersField.tooltipText"/>
+                </icon>
+            </hbox>
+            <hbox padding="false" themeNames="spacing-s"  alignItems="BASELINE">
+                <checkbox id="skipSubprocessesField" label="msg://io.flowset.control.view.processinstance/skipSubprocessesFieldLabel"/>
+                <icon icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em">
+                    <tooltip text="msg://io.flowset.control.view.processinstance/skipSubprocessField.tooltipText"/>
+                </icon>
+            </hbox>
+        </formLayout>
         <textArea id="reasonTextArea" clearButtonVisible="true" valueChangeMode="EAGER" themeNames="helper-above-field"
                   minHeight="7em" label="msg://deleteReason" width="100%"/>
         <hbox id="actionsPanel" justifyContent="END" width="100%">

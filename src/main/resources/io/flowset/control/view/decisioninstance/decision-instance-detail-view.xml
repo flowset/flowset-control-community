@@ -8,6 +8,7 @@
             <collection id="inputsDc" property="inputs"/>
             <collection id="outputsDc" property="outputs"/>
         </instance>
+        <instance id="decisionDefinitionDc" class="io.flowset.control.entity.decisiondefinition.DecisionDefinitionData"/>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -16,76 +17,47 @@
         <action id="closeAction" type="view_close" text="msg:///actions.Close"/>
         <action id="copyToClipboardAction" type="control_copyComponentValueToClipboard"/>
     </actions>
-    <layout spacing="false">
-        <split orientation="HORIZONTAL" height="100%" width="100%" splitterPosition="30"
-               themeNames="splitter-spacing">
-
-            <vbox padding="false" spacing="false">
-                <formLayout id="decisionInstanceDataForm" dataContainer="decisionInstanceDc" width="100%">
-                    <responsiveSteps>
-                        <responsiveStep minWidth="0" columns="1"/>
-                        <responsiveStep minWidth="60em" columns="2"/>
-                        <responsiveStep minWidth="80em" columns="3"/>
-                    </responsiveSteps>
-                    <textField id="decisionInstanceIdTextField" property="decisionInstanceId" readOnly="true">
-                        <suffix>
-                            <button id="copyDecisionInstanceId"
-                                    icon="COPY_O"
-                                    themeNames="tertiary-inline"/>
-                        </suffix>
-                    </textField>
-                    <dateTimePicker property="evaluationTime" readOnly="true" width="100%" step="1ms"/>
-                    <textField id="processDefinitionIdTextField" property="processDefinitionId" readOnly="true">
-                        <suffix>
-                            <button id="viewProcessDefinition" icon="SEARCH" themeNames="tertiary-inline"/>
-                        </suffix>
-                    </textField>
-                    <textField id="processBusinessKeyTextField" label="msg://processBusinessKey" readOnly="true"/>
-                    <textField id="processInstanceIdTextField" property="processInstanceId" readOnly="true">
-                        <suffix>
-                            <button id="viewProcessInstance" icon="SEARCH" themeNames="tertiary-inline"/>
-                        </suffix>
-                    </textField>
-                    <textField id="activityIdTextField" property="activityId" readOnly="true"/>
-                    <textField id="activityNameTextField" label="msg://activityName" readOnly="true"/>
-                </formLayout>
-            </vbox>
-            <split orientation="VERTICAL" width="100%" height="100%" splitterPosition="50"
+    <layout expand="box" padding="false" spacing="false" height="100%">
+        <hbox id="box" width="100%" spacing="false" classNames="overflow-hidden">
+            <split orientation="VERTICAL" width="100%" height="100%" splitterPosition="60"
                    themeNames="splitter-spacing">
-                <div>
+                <div height="100%" classNames="decision-instance-details-diagram-box m-s">
                     <fragment id="dmnViewerFragment" class="io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment"/>
                 </div>
-                <tabSheet>
-                    <tab id="inputs" label="msg://inputs.tab">
-                        <dataGrid id="inputsDataGrid"
-                                  width="100%"
-                                  height="100%"
-                                  dataContainer="inputsDc"
-                                  columnReorderingAllowed="true">
-                            <columns resizable="true">
-                                <column property="clauseName"/>
-                                <column property="typeName"/>
-                                <column key="value" header="msg://valueColumn.header" sortable="false"/>
-                            </columns>
-                        </dataGrid>
-                    </tab>
-                    <tab id="outputs" label="msg://outputs.tab">
-                        <dataGrid id="outputsDataGrid"
-                                  width="100%"
-                                  height="100%"
-                                  dataContainer="outputsDc"
-                                  columnReorderingAllowed="true">
-                            <columns resizable="true">
-                                <column property="clauseName"/>
-                                <column property="typeName"/>
-                                <column key="value" header="msg://valueColumn.header" sortable="false"/>
-                            </columns>
-                        </dataGrid>
-                    </tab>
-                </tabSheet>
+                <div classNames="p-s">
+                    <tabSheet id="tabsheet" themeNames="hide-scroll-buttons bordered" height="100%" width="100%" minHeight="30em" classNames="box-border flex-grow">
+                        <tab id="inputsTab" label="msg://inputs.tab">
+                            <dataGrid id="inputsDataGrid"
+                                      width="100%"
+                                      height="100%"
+                                      dataContainer="inputsDc"
+                                      columnReorderingAllowed="true">
+                                <columns resizable="true">
+                                    <column property="clauseName"/>
+                                    <column property="typeName"/>
+                                    <column key="value" header="msg://valueColumn.header" sortable="false"/>
+                                </columns>
+                            </dataGrid>
+                        </tab>
+                        <tab id="outputsTab" label="msg://outputs.tab">
+                            <dataGrid id="outputsDataGrid"
+                                      width="100%"
+                                      height="100%"
+                                      dataContainer="outputsDc"
+                                      columnReorderingAllowed="true">
+                                <columns resizable="true">
+                                    <column property="clauseName"/>
+                                    <column property="typeName"/>
+                                    <column key="value" header="msg://valueColumn.header" sortable="false"/>
+                                </columns>
+                            </dataGrid>
+                        </tab>
+                    </tabSheet>
+                </div>
             </split>
-        </split>
-        <hbox id="detailActions" alignSelf="END">
+            <fragment class="io.flowset.control.view.decisioninstance.DecisionInstanceGeneralPanelFragment"/>
+        </hbox>
+        <hbox id="detailActions" width="100%" classNames="sticky-buttons-bottom-panel p-s">
             <button id="closeButton" action="closeAction"/>
         </hbox>
     </layout>

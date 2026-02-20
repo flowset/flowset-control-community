@@ -142,7 +142,7 @@ public class MainView extends StandardMainView {
     protected void onUserEngineSelectEvent(UserEngineSelectEvent event) {
         notifications.create(messageBundle.formatMessage("engineChanged", event.getEngine().getName()),
                         messageBundle.formatMessage("engineChanged.description", event.getEngine().getBaseUrl()))
-                .withPosition(Notification.Position.TOP_END)
+                .withPosition(Notification.Position.TOP_CENTER)
                 .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
                 .withDuration(4000)
                 .show();
@@ -185,6 +185,16 @@ public class MainView extends StandardMainView {
         menu.addMenuItemBefore(new ControlListMenu.GroupLabelMenuItem("supportLabel")
                         .withTitle(messageBundle.getMessage("menu.supportGroup.label")),
                 "about");
+
+        ListMenu.MenuItem decisionsMenu = menu.getMenuItem("decisions");
+        if (decisionsMenu != null) {
+            decisionsMenu.setPrefixComponent(new SvgIcon("icons/table.svg"));
+        }
+
+        ListMenu.MenuItem decisionInstancesMenu = menu.getMenuItem("decisionInstances");
+        if (decisionInstancesMenu != null) {
+            decisionInstancesMenu.setPrefixComponent(new SvgIcon("icons/table_view.svg"));
+        }
 
         ListMenu.MenuItem dashboardMenu = menu.getMenuItem("dashboard");
         if (dashboardMenu != null) {

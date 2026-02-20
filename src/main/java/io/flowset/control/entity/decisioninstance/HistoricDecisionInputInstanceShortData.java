@@ -1,12 +1,13 @@
 package io.flowset.control.entity.decisioninstance;
 
+import io.jmix.core.CopyingSystemState;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.Transient;
 
 @JmixEntity(annotatedPropertiesOnly = true)
-public class HistoricDecisionInputInstanceShortData {
+public class HistoricDecisionInputInstanceShortData implements CopyingSystemState<HistoricDecisionInputInstanceShortData> {
 
     @JmixId
     @JmixProperty(mandatory = true)
@@ -73,5 +74,10 @@ public class HistoricDecisionInputInstanceShortData {
 
     public void setValue(Object value) {
         this.value = value;
+    }
+
+    @Override
+    public void copyFrom(HistoricDecisionInputInstanceShortData source) {
+        this.value = source.value;
     }
 }

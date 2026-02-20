@@ -8,6 +8,7 @@ package io.flowset.control.view.decisiondefinition;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -47,7 +48,7 @@ import java.util.stream.Stream;
 @ViewController(id = "bpm_DecisionDefinition.detail")
 @ViewDescriptor("decision-definition-detail-view.xml")
 @EditedEntityContainer("decisionDefinitionDc")
-@DialogMode(width = "50em", height = "37.5em")
+@DialogMode(minWidth = "80em", width = "90%", minHeight = "50em", height = "80%")
 @PrimaryDetailView(DecisionDefinitionData.class)
 public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDefinitionData> {
 
@@ -195,7 +196,10 @@ public class DecisionDefinitionDetailView extends StandardDetailView<DecisionDef
 
     protected void updateTabCaption(long count) {
         tabSheetDecisionInstancesTab.setLabel(messageBundle.formatMessage("decisionInstancesTab.label", count));
-        tabSheetDecisionInstancesTab.addComponentAsFirst(VaadinIcon.TASKS.create());
+
+        SvgIcon icon = new SvgIcon("icons/table_view.svg");
+        icon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+        tabSheetDecisionInstancesTab.addComponentAsFirst(icon);
     }
 
     protected void sendUpdateViewTitleEvent() {

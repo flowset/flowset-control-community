@@ -6,9 +6,7 @@
 package io.flowset.control.test_support.camunda7;
 
 import io.flowset.control.test_support.camunda7.dto.request.StartProcessDto;
-import io.flowset.control.test_support.camunda7.dto.response.DeploymentResultDto;
-import io.flowset.control.test_support.camunda7.dto.response.JobDto;
-import io.flowset.control.test_support.camunda7.dto.response.RuntimeProcessInstanceDto;
+import io.flowset.control.test_support.camunda7.dto.response.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +33,8 @@ public class CamundaSampleDataManager {
     private final Map<String, List<String>> processInstanceByProcessKey = new HashMap<>();
     private final Map<String, List<String>> deployedProcessesByKey = new HashMap<>();
 
+    private final Map<String, List<String>> deployedDecisionsByKey = new HashMap<>();
+
     public CamundaSampleDataManager(Camunda7Container<?> camunda7) {
         this.camunda7 = camunda7;
     }
@@ -47,19 +47,34 @@ public class CamundaSampleDataManager {
     /**
      * Deploys a provided resource (e.g. BPMN 2.0 XML) located in the classpath to engine container.
      *
-     * @param bpmnXmlPath a resource to deploy in engine.
+     * @param resourcePath a resource to deploy in engine.
      * @return current instance of bean
      */
-    public CamundaSampleDataManager deploy(String bpmnXmlPath) {
-        DeploymentResultDto deployment = camundaRestTestHelper.createDeployment(camunda7, bpmnXmlPath);
-        log.info("Deploy {} processes from the file by path {}", deployment.getDeployedProcessDefinitions().size(), bpmnXmlPath);
+    public CamundaSampleDataManager deploy(String resourcePath) {
+        DeploymentResultDto deployment = camundaRestTestHelper.createDeployment(camunda7, resourcePath);
+        Map<String, ProcessDefinitionDto> deployedProcessDefinitions = deployment.getDeployedProcessDefinitions();
 
-        deployment.getDeployedProcessDefinitions().forEach((processDefinitionId, processDefinitionDto) -> {
-            List<String> ids = deployedProcessesByKey.getOrDefault(processDefinitionDto.getKey(), new ArrayList<>());
-            ids.add(processDefinitionId);
+        if (deployedProcessDefinitions != null) {
+            log.info("Deploy {} processes from the file by path {}", deployedProcessDefinitions.size(), resourcePath);
 
-            deployedProcessesByKey.put(processDefinitionDto.getKey(), ids);
-        });
+            deployedProcessDefinitions.forEach((processDefinitionId, processDefinitionDto) -> {
+                List<String> ids = deployedProcessesByKey.getOrDefault(processDefinitionDto.getKey(), new ArrayList<>());
+                ids.add(processDefinitionId);
+
+                deployedProcessesByKey.put(processDefinitionDto.getKey(), ids);
+            });
+        }
+
+        Map<String, DecisionDefinitionDto> deployedDecisionDefinitions = deployment.getDeployedDecisionDefinitions();
+        if (deployedDecisionDefinitions != null) {
+            log.info("Deploy {} decisions from the file by path {}", deployedDecisionDefinitions.size(), resourcePath);
+            deployedDecisionDefinitions.forEach((decisionDefinitionId, decisionDefinitionDto) -> {
+                List<String> ids = deployedDecisionsByKey.getOrDefault(decisionDefinitionDto.getKey(), new ArrayList<>());
+                ids.add(decisionDefinitionId);
+
+                deployedDecisionsByKey.put(decisionDefinitionDto.getKey(), ids);
+            });
+        }
 
         return this;
     }
@@ -199,6 +214,10 @@ public class CamundaSampleDataManager {
 
     public List<String> getDeployedProcessVersions(String key) {
         return deployedProcessesByKey.get(key);
+    }
+
+    public List<String> getDeployedDecisionVersions(String key) {
+        return deployedDecisionsByKey.get(key);
     }
 
     public List<String> getStartedInstances(String processKey) {

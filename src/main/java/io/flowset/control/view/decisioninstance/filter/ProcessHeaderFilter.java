@@ -5,6 +5,7 @@
 
 package io.flowset.control.view.decisioninstance.filter;
 
+import com.vaadin.flow.router.QueryParameters;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
@@ -28,6 +29,19 @@ public class ProcessHeaderFilter
 
     @Override
     public void apply() {
+        updateFilterState();
+
+        this.loadDelegate.run();
+    }
+
+
+    @Override
+    public void updateComponents(QueryParameters queryParameters) {
+        super.updateProcessFields(queryParameters);
+        updateFilterState();
+    }
+
+    protected void updateFilterState() {
         ProcessDefinitionData processVersion = null;
         String processKey = processKeyComboBox.getValue();
         boolean useVersion = BooleanUtils.isTrue(useSpecificVersionChkBox.getValue());
@@ -42,8 +56,5 @@ public class ProcessHeaderFilter
             incidentFilter.setProcessDefinitionId(null);
         }
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, processVersion != null || processKey != null);
-
-        this.loadDelegate.run();
     }
-
 }

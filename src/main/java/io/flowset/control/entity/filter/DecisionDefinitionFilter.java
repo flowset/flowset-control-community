@@ -33,6 +33,10 @@ public class DecisionDefinitionFilter {
     @InstanceName
     protected String nameLike;
 
+    protected String versionTag;
+
+    protected String deploymentId;
+
     protected Boolean latestVersionOnly = true;
 
     protected Integer version;

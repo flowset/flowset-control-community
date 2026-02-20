@@ -194,6 +194,8 @@ public class QueryUtils {
         addCollectionIfNotEmpty(filter.getIdIn(), decisionDefinitionQuery::decisionDefinitionIdIn);
         addIfNotNull(filter.getVersion(), decisionDefinitionQuery::decisionDefinitionVersion);
         addIfTrue(filter.getLatestVersionOnly(), decisionDefinitionQuery::latestVersion);
+        addIfNotNull(filter.getVersionTag(), decisionDefinitionQuery::versionTag);
+        addIfNotNull(filter.getDeploymentId(), decisionDefinitionQuery::deploymentId);
     }
 
     public static void addDecisionInstanceFilters(HistoricDecisionInstanceQuery decisionInstanceQuery,
@@ -201,6 +203,8 @@ public class QueryUtils {
         if (filter == null) {
             return;
         }
+        addIfStringNotEmpty(filter.getDecisionInstanceId(), decisionInstanceQuery::decisionInstanceId);
+        addIfStringNotEmpty(filter.getDecisionDefinitionKey(), decisionInstanceQuery::decisionDefinitionKey);
         addIfStringNotEmpty(filter.getDecisionDefinitionId(), decisionInstanceQuery::decisionDefinitionId);
         addIfStringNotEmpty(filter.getProcessDefinitionKey(), decisionInstanceQuery::processDefinitionKey);
         addIfStringNotEmpty(filter.getProcessInstanceId(), decisionInstanceQuery::processInstanceId);

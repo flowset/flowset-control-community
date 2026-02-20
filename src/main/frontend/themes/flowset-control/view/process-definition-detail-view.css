@@ -36,7 +36,7 @@
    border-color: var(--lumo-contrast-20pct);
 }
 
-.process-details-diagram-box .bpmn-viewer-zoom-reset-btn {
+.process-details-diagram-box .bpmn-viewer-right-side-actions {
     float: right;
     position: absolute;
 }

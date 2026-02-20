@@ -25,7 +25,7 @@ import org.camunda.community.rest.impl.RemoteRepositoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
@@ -169,6 +169,32 @@ public class DecisionDefinitionServiceImpl implements DecisionDefinitionService 
                         decisionDefinitionId);
                 return null;
             }
+            throw e;
+        }
+    }
+
+    @Override
+    public List<DecisionDefinitionData> findAllByIds(Collection<String> ids) {
+        try {
+            List<DecisionDefinition> decisionDefinitions = createDecisionDefinitionQuery()
+                    .decisionDefinitionIdIn(String.join(",", ids))
+                    .list();
+
+            return decisionDefinitions
+                    .stream()
+                    .map(decisionDefinitionMapper::fromDecisionDefinitionModel)
+                    .toList();
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load decision definitions by ids because BPM engine not selected");
+                return Collections.emptyList();
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable load decision definition by ids because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+
             throw e;
         }
     }
