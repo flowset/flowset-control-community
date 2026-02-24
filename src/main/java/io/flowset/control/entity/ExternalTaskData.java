@@ -12,13 +12,12 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
 import java.util.Date;
-import java.util.UUID;
 
 @JmixEntity
 public class ExternalTaskData {
-    @JmixGeneratedValue
+
     @JmixId
-    protected UUID id;
+    protected String id;
 
     protected String externalTaskId;
 
@@ -161,11 +160,11 @@ public class ExternalTaskData {
         this.externalTaskId = externalTaskId;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

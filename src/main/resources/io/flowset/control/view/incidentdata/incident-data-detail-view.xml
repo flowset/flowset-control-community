@@ -18,6 +18,18 @@
     </facets>
     <actions>
         <action id="closeAction" type="detail_close"/>
+        <action id="copyIdAction" type="control_copyComponentValueToClipboard">
+            <properties>
+                <property name="text" value=""/>
+            </properties>
+        </action>
+        <action id="copyConfigurationAction" type="control_copyComponentValueToClipboard">
+            <properties>
+                <property name="text" value=""/>
+            </properties>
+        </action>
+        <action id="openJobAction" icon="SEARCH" description="msg://openJobAction.text"/>
+        <action id="openExternalTaskAction" icon="SEARCH" description="msg://openExternalTask.text"/>
     </actions>
     <layout expand="form">
         <formLayout id="form" dataContainer="incidentDataDc">
@@ -29,7 +41,7 @@
                                label="msg://io.flowset.control.entity.incident/IncidentData.id"
                                property="incidentId" readOnly="true">
                         <suffix>
-                            <button id="copyIdBtn" icon="COPY_O" themeNames="tertiary-inline"/>
+                            <button id="copyIdBtn" action="copyIdAction" themeNames="tertiary-inline"/>
                         </suffix>
                     </textField>
                     <div width="100%"
@@ -54,7 +66,7 @@
                     <textField id="configurationField" property="configuration" readOnly="true" width="100%"
                                label="msg://io.flowset.control.entity.incident/IncidentData.configuration">
                         <suffix>
-                            <button id="copyConfigurationBtn" icon="COPY_O" themeNames="tertiary-inline"/>
+                            <button id="configurationBtn" themeNames="tertiary-inline"/>
                         </suffix>
                     </textField>
                 </vbox>

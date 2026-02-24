@@ -21,12 +21,14 @@ import org.camunda.bpm.engine.externaltask.ExternalTask;
 import org.camunda.bpm.engine.externaltask.ExternalTaskQuery;
 import org.camunda.community.rest.client.api.ExternalTaskApiClient;
 import org.camunda.community.rest.client.api.HistoryApiClient;
+import org.camunda.community.rest.client.model.ExternalTaskDto;
 import org.camunda.community.rest.impl.RemoteExternalTaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.QueryUtils.*;
@@ -78,6 +80,30 @@ public class ExternalTaskServiceImpl implements ExternalTaskService {
             }
             if (isConnectionError(rootCause)) {
                 log.error("Unable to load external tasks because of connection error: ", e);
+                throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public ExternalTaskData findById(String externalTaskId) {
+        try {
+            ResponseEntity<ExternalTaskDto> externalTaskResponse = externalTaskApiClient.getExternalTask(externalTaskId);
+            if (externalTaskResponse.getStatusCode().is2xxSuccessful()) {
+                return Optional.ofNullable(externalTaskResponse.getBody())
+                        .map(externalTaskMapper::fromExternalTaskDto)
+                        .orElse(null);
+            }
+            return null;
+        } catch (Exception e) {
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof EngineNotSelectedException) {
+                log.warn("Unable to load external task by id '{}' because BPM engine not selected", externalTaskId);
+                return null;
+            }
+            if (isConnectionError(rootCause)) {
+                log.error("Unable to load external task by id '{}' because of connection error: ", externalTaskId, e);
                 throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
             throw e;

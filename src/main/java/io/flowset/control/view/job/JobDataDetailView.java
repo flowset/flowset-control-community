@@ -114,8 +114,8 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
 
         JobDefinitionData jobDefinition = jobService.findJobDefinition(getEditedEntity().getJobDefinitionId());
         if (jobDefinition != null) {
-            activityField.setValue(jobDefinition.getActivityId());
-            jobTypeField.setValue(jobDefinition.getJobType());
+            activityField.setTypedValue(jobDefinition.getActivityId());
+            jobTypeField.setTypedValue(jobDefinition.getJobType());
         }
 
         updateActionsVisibility();
