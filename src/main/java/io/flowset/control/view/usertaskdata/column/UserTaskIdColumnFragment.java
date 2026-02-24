@@ -9,15 +9,12 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.view.entitydetaillink.EntityDetailLinkFragment;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.StandardOutcome;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
@@ -26,11 +23,6 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public class UserTaskIdColumnFragment extends EntityDetailLinkFragment<HorizontalLayout, UserTaskData> {
     @ViewComponent
     protected JmixButton idBtn;
-    @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected DialogWindows dialogWindows;
-
     protected Runnable afterSaveCloseListener;
 
     public void setAfterSaveCloseListener(Runnable afterSaveCloseListener) {

@@ -12,14 +12,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.view.entitydetaillink.EntityDetailLinkFragment;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDiagramView;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
@@ -29,12 +26,8 @@ public class ProcessKeyColumnFragment extends EntityDetailLinkFragment<Horizonta
 
     @ViewComponent
     protected JmixButton keyBtn;
-    @Autowired
-    protected ViewNavigators viewNavigators;
     @ViewComponent
     protected JmixButton previewBtn;
-    @Autowired
-    protected DialogWindows dialogWindows;
 
     @Subscribe
     public void onAttachEvent(final AttachEvent event) {
