@@ -56,8 +56,6 @@ public class BulkTerminateProcessInstanceView extends StandardView {
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
         addClassNames(LumoUtility.Gap.XSMALL);
-        reasonTextArea.getStyle().set("resize", "vertical");
-        reasonTextArea.getStyle().set("overflow", "auto");
         reasonTextArea.setMaxLength(REASON_MAX_LENGTH);
 
         skipIoMappingsField.setValue(true);

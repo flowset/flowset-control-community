@@ -48,7 +48,7 @@
                     </hbox>
 
                     <textArea id="messageField" property="message" width="100%" colspan="2"
-                              minHeight="6em"
+                              minHeight="6em" classNames="vertical-resize"
                               label="msg://io.flowset.control.entity.incident/IncidentData.message" readOnly="true"/>
 
                     <textField id="configurationField" property="configuration" readOnly="true" width="100%"

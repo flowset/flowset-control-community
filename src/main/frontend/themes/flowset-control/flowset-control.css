@@ -104,6 +104,11 @@ vaadin-button.data-grid-column-action > vaadin-icon {
     padding: 0.175em;
 }
 
+.vertical-resize {
+    resize: vertical;
+    overflow: auto;
+}
+
 .full-screen-dialog::part(overlay) {
     width: 100%;
     height: 100%;

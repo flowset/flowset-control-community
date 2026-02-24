@@ -10,7 +10,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.incident.HistoricIncidentData;
@@ -41,9 +40,6 @@ public class HistoricIncidentDataDetailView extends StandardDetailView<HistoricI
     @Autowired
     protected JobServiceImpl jobService;
 
-    @ViewComponent
-    protected JmixTextArea messageField;
-
     @Subscribe
     public void onInit(final InitEvent event) {
         addClassNames(LumoUtility.Padding.Top.XSMALL);
@@ -54,8 +50,6 @@ public class HistoricIncidentDataDetailView extends StandardDetailView<HistoricI
         initIncidentTypeRelatedFields();
         initCauseIncidentFields();
         initRootCauseIncidentFields();
-        messageField.getStyle().set("resize", "vertical");
-        messageField.getStyle().set("overflow", "auto");
     }
 
     @Install(to = "historicIncidentDataDl", target = Target.DATA_LOADER)

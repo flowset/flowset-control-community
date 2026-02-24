@@ -24,7 +24,6 @@ import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.flowui.*;
-import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
@@ -102,8 +101,6 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     protected TypedTextField<String> processDefinitionIdField;
     @ViewComponent
     protected HorizontalLayout detailActions;
-    @ViewComponent
-    protected JmixTextArea messageField;
 
     @ViewComponent
     protected JmixButton viewProcessBtn;
@@ -134,8 +131,6 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
         } else {
             detailActions.addClassNames("sticky-buttons-bottom-panel");
         }
-        messageField.getStyle().set("resize", "vertical");
-        messageField.getStyle().set("overflow", "auto");
         initIncidentTypeRelatedFields();
         initProcessFields();
         initCauseIncidentFields();
