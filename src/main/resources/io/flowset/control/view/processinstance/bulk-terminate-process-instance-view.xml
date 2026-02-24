@@ -34,7 +34,7 @@
         </formLayout>
 
         <textArea id="reasonTextArea" clearButtonVisible="true" valueChangeMode="EAGER" themeNames="helper-above-field"
-                  minHeight="7em" label="msg://deleteReason" width="100%"/>
+                  minHeight="7em" label="msg://deleteReason" width="100%" classNames="vertical-resize"/>
 
         <hbox justifyContent="END" width="100%">
             <button id="okBtn" text="msg:///actions.Terminate" icon="DOT_CIRCLE"

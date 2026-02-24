@@ -40,6 +40,7 @@ import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
+import io.flowset.control.view.util.ComponentHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -80,6 +81,8 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     protected JobService jobService;
     @Autowired
     protected ExternalTaskService externalTaskService;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
     @ViewComponent
     protected JmixButton viewStacktraceBtn;
@@ -173,19 +176,24 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     @Subscribe(id = "viewStacktraceBtn", subject = "clickListener")
     public void onViewStacktraceBtnClick(final ClickEvent<JmixButton> event) {
         if (getEditedEntity().isJobFailed()) {
-            dialogWindows.view(this, JobErrorDetailsView.class)
+            DialogWindow<JobErrorDetailsView> jobErrorDialogView = dialogWindows.view(this, JobErrorDetailsView.class)
                     .withViewConfigurer(view -> {
                         view.setJobId(getEditedEntity().getConfiguration());
                         view.setErrorMessage(getEditedEntity().getMessage());
                     })
-                    .open();
+                    .build();
+
+            componentHelper.addFullScreenButton(jobErrorDialogView);
+            jobErrorDialogView.open();
         } else if (getEditedEntity().isExternalTaskFailed()) {
-            dialogWindows.view(this, ExternalTaskErrorDetailsView.class)
+            DialogWindow<ExternalTaskErrorDetailsView> externalTaskErrorDialogView = dialogWindows.view(this, ExternalTaskErrorDetailsView.class)
                     .withViewConfigurer(view -> {
                         view.setExternalTaskId(getEditedEntity().getConfiguration());
                         view.setErrorMessage(getEditedEntity().getMessage());
                     })
-                    .open();
+                    .build();
+            componentHelper.addFullScreenButton(externalTaskErrorDialogView);
+            externalTaskErrorDialogView.open();
         }
     }
 

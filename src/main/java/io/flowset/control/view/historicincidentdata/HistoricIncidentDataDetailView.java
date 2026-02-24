@@ -5,20 +5,16 @@
 
 package io.flowset.control.view.historicincidentdata;
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.impl.JobServiceImpl;
-import io.flowset.control.view.externaltask.ExternalTaskErrorDetailsView;
-import io.flowset.control.view.job.JobErrorDetailsView;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
