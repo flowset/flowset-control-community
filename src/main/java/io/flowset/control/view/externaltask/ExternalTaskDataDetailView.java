@@ -8,17 +8,24 @@ package io.flowset.control.view.externaltask;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
+import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.action.DialogAction;
+import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.kit.action.ActionVariant;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.ExternalTaskData;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Objects;
 
 @Route(value = "external-tasks/:id", layout = DefaultMainViewParent.class)
 @ViewController("ExternalTaskData.detail")
@@ -39,15 +46,24 @@ public class ExternalTaskDataDetailView extends StandardDetailView<ExternalTaskD
     protected MessageBundle messageBundle;
     @Autowired
     protected Messages messages;
+    @ViewComponent
+    protected InstanceLoader<ExternalTaskData> externalTaskDataDl;
+    @ViewComponent
+    protected HorizontalLayout detailActions;
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
+        externalTaskDataDl.load();
+
         String errorDetails = externalTaskService.getErrorDetails(getEditedEntity().getExternalTaskId());
         errorDetailsField.setValue(errorDetails);
 
         if (getEditedEntity().getRetries() != null && getEditedEntity().getRetries() == 0) {
             retryBtn.setVisible(true);
         }
+
+        boolean openedInDialog = UiComponentUtils.isComponentAttachedToDialog(this);
+        detailActions.setJustifyContentMode(openedInDialog ? FlexComponent.JustifyContentMode.END : FlexComponent.JustifyContentMode.START);
     }
 
     @Subscribe("retryBtn")
@@ -65,6 +81,11 @@ public class ExternalTaskDataDetailView extends StandardDetailView<ExternalTaskD
                                 }),
                         new DialogAction(DialogAction.Type.CANCEL))
                 .open();
+    }
+
+    @Install(to = "externalTaskDataDl", target = Target.DATA_LOADER)
+    protected ExternalTaskData externalTaskDataDlLoadDelegate(final LoadContext<ExternalTaskData> loadContext) {
+        return externalTaskService.findById(Objects.requireNonNull(loadContext.getId()).toString());
     }
 
 }

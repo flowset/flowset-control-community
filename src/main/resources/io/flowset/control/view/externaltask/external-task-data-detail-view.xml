@@ -50,7 +50,7 @@
                    maxHeight="10em"/>
         <hbox id="detailActions" width="100%">
             <button id="retryBtn" text="msg:///actions.Retry" icon="ROTATE_LEFT" visible="false" themeNames="primary"/>
-            <button id="closeBtn" action="closeAction" classNames="ml-auto"/>
+            <button id="closeBtn" action="closeAction"/>
         </hbox>
     </layout>
 </view>

@@ -5,30 +5,25 @@
 
 package io.flowset.control.view.incidentdata;
 
-import com.google.common.base.Strings;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H5;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import feign.FeignException;
+import io.flowset.control.action.CopyComponentValueToClipboardAction;
+import io.flowset.control.entity.ExternalTaskData;
+import io.flowset.control.entity.incident.IncidentData;
+import io.flowset.control.entity.job.JobData;
+import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.ViewEngineConnectionFailedException;
-import io.jmix.core.LoadContext;
-import io.jmix.core.Messages;
-import io.jmix.flowui.*;
-import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.view.*;
-import io.flowset.control.entity.incident.IncidentData;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.service.externaltask.ExternalTaskService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.JobService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
@@ -37,6 +32,14 @@ import io.flowset.control.view.externaltask.ExternalTaskErrorDetailsView;
 import io.flowset.control.view.job.JobErrorDetailsView;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
+import io.jmix.core.LoadContext;
+import io.jmix.core.Messages;
+import io.jmix.flowui.*;
+import io.jmix.flowui.component.textfield.TypedTextField;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
+import io.jmix.flowui.kit.action.BaseAction;
+import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.view.*;
 import io.flowset.control.view.util.ComponentHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +47,7 @@ import org.springframework.lang.Nullable;
 
 import java.util.Optional;
 
-import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
+import static io.flowset.control.util.ExceptionUtils.isNotFoundError;
 
 @Route(value = "bpm/incident/:id", layout = DefaultMainViewParent.class)
 @ViewController("IncidentData.detail")
@@ -77,6 +80,8 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     @Autowired
     protected JobService jobService;
     @Autowired
+    protected ExternalTaskService externalTaskService;
+    @Autowired
     protected ComponentHelper componentHelper;
 
     @ViewComponent
@@ -86,7 +91,7 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     @ViewComponent
     protected TypedTextField<String> incidentIdField;
     @ViewComponent
-    protected JmixButton copyConfigurationBtn;
+    protected JmixButton configurationBtn;
     @ViewComponent
     protected JmixButton viewCauseIncidentBtn;
     @ViewComponent
@@ -107,11 +112,21 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     @ViewComponent
     protected JmixButton viewProcessInstanceBtn;
 
+    @ViewComponent
+    protected BaseAction openJobAction;
+    @ViewComponent
+    protected BaseAction openExternalTaskAction;
+    @ViewComponent
+    protected CopyComponentValueToClipboardAction copyConfigurationAction;
+    @ViewComponent
+    protected CopyComponentValueToClipboardAction copyIdAction;
+
     protected String title;
 
     @Subscribe
     public void onInit(final InitEvent event) {
         this.title = messageBundle.getMessage("incidentDetails.title");
+        copyIdAction.setTarget(incidentIdField);
     }
 
     @Subscribe
@@ -195,48 +210,39 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
         return null;
     }
 
-    @Subscribe(id = "copyIdBtn", subject = "clickListener")
-    public void onCopyIdBtnClick(final ClickEvent<JmixButton> event) {
-        Element buttonElement = event.getSource().getElement();
-        String valueToCopy = Strings.nullToEmpty(incidentIdField.getTypedValue());
-        buttonElement.executeJs(COPY_SCRIPT_TEXT, valueToCopy)
-                .then(successResult -> notifications.create(messageBundle.getMessage("incidentIdCopied"))
-                                .withPosition(Notification.Position.TOP_END)
-                                .withThemeVariant(NotificationVariant.LUMO_SUCCESS)
-                                .show(),
-                        errorResult -> notifications.create(messageBundle.getMessage("incidentIdCopyFailed"))
-                                .withPosition(Notification.Position.TOP_END)
-                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                                .show());
-    }
-
-    @Subscribe(id = "copyConfigurationBtn", subject = "clickListener")
-    public void onCopyConfigurationBtnClick(final ClickEvent<JmixButton> event) {
-        String valueCopiedMsg;
-        String valueCopyFailedMsg;
-
-        if (getEditedEntity().isExternalTaskFailed()) {
-            valueCopiedMsg = "externalTaskIdCopied";
-            valueCopyFailedMsg = "externalTaskIdCopyFailed";
-        } else if (getEditedEntity().isJobFailed()) {
-            valueCopiedMsg = "jobIdCopied";
-            valueCopyFailedMsg = "jobIdCopyFailed";
-        } else {
-            valueCopiedMsg = "payloadCopied";
-            valueCopyFailedMsg = "payloadCopyFailed";
+    @Subscribe("openJobAction")
+    public void onOpenJobAction(final ActionPerformedEvent event) {
+        try {
+            JobData job = jobService.findById(getEditedEntity().getConfiguration());
+            dialogWindows.detail(this, JobData.class)
+                    .editEntity(job)
+                    .open();
+        } catch (FeignException e) {
+            if (isNotFoundError(e)) {
+                notifications.create(messageBundle.getMessage("jobNotFound"))
+                        .withType(Notifications.Type.WARNING)
+                        .show();
+            }
         }
 
-        Element buttonElement = event.getSource().getElement();
-        String valueToCopy = Strings.nullToEmpty(configurationField.getTypedValue());
-        buttonElement.executeJs(COPY_SCRIPT_TEXT, valueToCopy)
-                .then(successResult -> notifications.create(messageBundle.getMessage(valueCopiedMsg))
-                                .withPosition(Notification.Position.TOP_END)
-                                .withThemeVariant(NotificationVariant.LUMO_SUCCESS)
-                                .show(),
-                        errorResult -> notifications.create(messageBundle.getMessage(valueCopyFailedMsg))
-                                .withPosition(Notification.Position.TOP_END)
-                                .withThemeVariant(NotificationVariant.LUMO_ERROR)
-                                .show());
+    }
+
+    @Subscribe("openExternalTaskAction")
+    public void onOpenExternalTaskAction(final ActionPerformedEvent event) {
+        try {
+            ExternalTaskData externalTask = externalTaskService.findById(getEditedEntity().getConfiguration());
+            if (externalTask != null) {
+                dialogWindows.detail(this, ExternalTaskData.class)
+                        .editEntity(externalTask)
+                        .open();
+            }
+        } catch (FeignException e) {
+            if (isNotFoundError(e)) {
+                notifications.create(messageBundle.getMessage("externalTaskNotFound"))
+                        .withType(Notifications.Type.WARNING)
+                        .show();
+            }
+        }
     }
 
     @Subscribe(id = "retryBtn", subject = "clickListener")
@@ -321,14 +327,25 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
 
         if (getEditedEntity().isExternalTaskFailed()) {
             viewStacktraceBtn.setVisible(notEmptyPayload);
-            copyConfigurationBtn.setVisible(notEmptyPayload);
+            configurationBtn.setVisible(notEmptyPayload);
             configurationField.setLabel(messageBundle.getMessage("externalTaskIdLabel"));
+            if (notEmptyPayload) {
+                configurationBtn.setAction(openExternalTaskAction);
+            }
         } else if (getEditedEntity().isJobFailed()) {
             configurationField.setLabel(messageBundle.getMessage("jobIdLabel"));
-            copyConfigurationBtn.setVisible(notEmptyPayload);
+            configurationBtn.setVisible(notEmptyPayload);
             viewStacktraceBtn.setVisible(notEmptyPayload);
+            if (notEmptyPayload) {
+                configurationBtn.setAction(openJobAction);
+            }
         } else {
             viewStacktraceBtn.setVisible(false);
+
+            if (notEmptyPayload) {
+                copyConfigurationAction.setTarget(configurationField);
+                configurationBtn.setAction(copyConfigurationAction);
+            }
         }
     }
 

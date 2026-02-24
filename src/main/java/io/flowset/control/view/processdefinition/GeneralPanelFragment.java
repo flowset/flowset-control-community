@@ -20,6 +20,7 @@ import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.DataLoader;
@@ -126,6 +127,11 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
 
     }
 
+    @Subscribe("refreshAction")
+    public void onRefreshAction(final ActionPerformedEvent event) {
+        reloadProcessDefinition();
+    }
+
     @Subscribe(id = "viewDeployment", subject = "clickListener")
     public void onViewDeploymentClick(final ClickEvent<JmixButton> event) {
         viewNavigators.detailView(getCurrentView(), DeploymentData.class)
@@ -142,7 +148,7 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
                 .editEntity(processDefinitionDataDc.getItem())
                 .withAfterCloseListener(e -> {
                     if (e.closedWith(StandardOutcome.SAVE)) {
-                        reloadProcessInstances();
+                        reloadProcessDefinition();
                         notifications.create(messages.formatMessage(ProcessDefinitionDetailView.class, "startProcess.success",
                                         e.getView().getEditedEntity().getProcessDefinitionId()))
                                 .withType(Notifications.Type.SUCCESS)

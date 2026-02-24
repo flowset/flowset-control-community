@@ -24,6 +24,15 @@ public interface ExternalTaskService {
     List<ExternalTaskData> findRunningTasks(ExternalTaskLoadContext loadContext);
 
     /**
+     * Loads an external task instance with the specified identifier from the engine.
+     *
+     * @param externalTaskId external task identifier
+     * @return external task instance or null
+     */
+    @Nullable
+    ExternalTaskData findById(String externalTaskId);
+
+    /**
      * Loads from engine the total count of external task instances that match the specified filter.
      *
      * @param filter an external task filter instance

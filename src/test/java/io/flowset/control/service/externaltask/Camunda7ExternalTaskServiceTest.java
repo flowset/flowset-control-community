@@ -5,6 +5,8 @@
 
 package io.flowset.control.service.externaltask;
 
+import feign.FeignException;
+import io.flowset.control.entity.ExternalTaskData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.RemoteProcessEngineException;
 import io.jmix.core.DataManager;
@@ -284,6 +286,64 @@ public class Camunda7ExternalTaskServiceTest extends AbstractCamunda7Integration
 
         //then
         assertThat(errorDetails).isNull();
+    }
+
+    @Test
+    @DisplayName("Find existing external task by id")
+    void givenActiveExternalTask_whenFindById_thenExternalTaskReturned() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testFailedExternalTask.bpmn")
+                .startByKey("testFailedExternalTask");
+
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testFailedExternalTask");
+        String externalTaskId = camundaRestTestHelper.getExternalTaskIds(camunda7, instanceIds).get(0);
+
+        //when
+        ExternalTaskData foundExternalTask = externalTaskService.findById(externalTaskId);
+
+        //then
+        assertThat(foundExternalTask).isNotNull();
+        assertThat(foundExternalTask.getId()).isEqualTo(externalTaskId);
+        assertThat(foundExternalTask.getTopicName()).isEqualTo("failed-external-task-topic");
+        assertThat(foundExternalTask.getProcessInstanceId()).isEqualTo(instanceIds.get(0));
+        assertThat(foundExternalTask.getActivityId()).isEqualTo("failedExternalTask");
+    }
+
+    @Test
+    @DisplayName("Find external task by non-existing id")
+    void givenNonExistingExternalTaskId_whenFindById_thenExceptionThrown() {
+        //given
+        String externalTaskId = "non-existing-external-task-id";
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.findById(externalTaskId))
+                .isInstanceOf(FeignException.class)
+                .satisfies(throwable -> {
+                    FeignException feignException = (FeignException) throwable;
+                    assertThat(feignException.status()).isEqualTo(404);
+                });
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException thrown when find existing external task by id if engine is not available")
+    void givenActiveExternalTaskAndNotAvailableEngine_whenFindById_thenExceptionThrown() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testFailedExternalTask.bpmn")
+                .startByKey("testFailedExternalTask");
+
+        List<String> instanceIds = sampleDataManager.getStartedInstances("testFailedExternalTask");
+        String externalTaskId = camundaRestTestHelper.getExternalTaskIds(camunda7, instanceIds).get(0);
+
+        camunda7.stop();
+
+
+        //when and then
+        assertThatThrownBy(() -> externalTaskService.findById(externalTaskId))
+                .isInstanceOf(EngineConnectionFailedException.class);
     }
 
 
