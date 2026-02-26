@@ -10,6 +10,7 @@ import io.flowset.control.uicomponent.grid.ControlDataGridLoader;
 import io.flowset.control.uicomponent.menu.ControlListMenu;
 import io.flowset.control.uicomponent.menu.ControlListMenuLoader;
 import io.flowset.control.uicomponent.spinner.SpinnerLoader;
+import io.flowset.control.uicomponent.treedatagrid.ControlTreeDataGridLoader;
 import io.flowset.control.uicomponent.treedatagrid.NoClickTreeDataGridLoader;
 import io.flowset.control.uicomponent.treedatagrid.NoClickTreeGrid;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -49,6 +50,14 @@ public class UiComponentRegistrationConfiguration {
         return ComponentRegistrationBuilder
                 .create(DataGrid.class)
                 .withComponentLoader("dataGrid", ControlDataGridLoader.class)
+                .build();
+    }
+
+    @Bean
+    public ComponentRegistration controlTreeDataGrid() {
+        return ComponentRegistrationBuilder
+                .create(DataGrid.class)
+                .withComponentLoader("treeDataGrid", ControlTreeDataGridLoader.class)
                 .build();
     }
 
