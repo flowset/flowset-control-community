@@ -207,6 +207,7 @@ public class QueryUtils {
         addIfStringNotEmpty(filter.getDecisionDefinitionKey(), decisionInstanceQuery::decisionDefinitionKey);
         addIfStringNotEmpty(filter.getDecisionDefinitionId(), decisionInstanceQuery::decisionDefinitionId);
         addIfStringNotEmpty(filter.getProcessDefinitionKey(), decisionInstanceQuery::processDefinitionKey);
+        addIfStringNotEmpty(filter.getProcessDefinitionId(), decisionInstanceQuery::processDefinitionId);
         addIfStringNotEmpty(filter.getProcessInstanceId(), decisionInstanceQuery::processInstanceId);
         addIfStringNotEmpty(filter.getActivityId(), decisionInstanceQuery::activityIdIn);
         if (filter.getEvaluatedAfter() != null) {

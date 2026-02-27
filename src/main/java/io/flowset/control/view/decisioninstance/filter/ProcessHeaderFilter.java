@@ -46,14 +46,14 @@ public class ProcessHeaderFilter
         String processKey = processKeyComboBox.getValue();
         boolean useVersion = BooleanUtils.isTrue(useSpecificVersionChkBox.getValue());
 
-        DecisionInstanceFilter incidentFilter = filterDc.getItem();
+        DecisionInstanceFilter decisionInstanceFilter = filterDc.getItem();
         if (useVersion) {
             processVersion = processVersionComboBox.getValue();
-            incidentFilter.setProcessDefinitionId(processVersion != null ? processVersion.getProcessDefinitionId() : null);
-            incidentFilter.setProcessDefinitionKey(null);
+            decisionInstanceFilter.setProcessDefinitionId(processVersion != null ? processVersion.getProcessDefinitionId() : null);
+            decisionInstanceFilter.setProcessDefinitionKey(null);
         } else {
-            incidentFilter.setProcessDefinitionKey(processKey);
-            incidentFilter.setProcessDefinitionId(null);
+            decisionInstanceFilter.setProcessDefinitionKey(processKey);
+            decisionInstanceFilter.setProcessDefinitionId(null);
         }
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, processVersion != null || processKey != null);
     }
