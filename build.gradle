@@ -20,7 +20,7 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'com.vaadin'
 
 jmix {
-    bomVersion = '2.7.4'
+    bomVersion = '2.7.3'
 }
 
 group = 'io.flowset'
