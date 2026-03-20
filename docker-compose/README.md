@@ -8,7 +8,7 @@ The following Docker Compose files are provided:
     - PostgresQL which is used by **Flowset Control**
 
    **Note:** This Docker Compose is suitable for cases when you need to connect to already running external Camunda 7 engines.
-2. [docker-compose-full.yaml](docker-compose-core.yaml) which contains these components:
+2. [docker-compose-full.yaml](docker-compose-full.yaml) which contains these components:
     - **Flowset Control**
     - PostgresQL which is used by **Flowset Control**
     - Camunda 7 as the external BPM engine - an engine that runs on the `8082` port by default.
