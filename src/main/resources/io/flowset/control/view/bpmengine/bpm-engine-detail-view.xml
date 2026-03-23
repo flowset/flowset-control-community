@@ -12,6 +12,10 @@
             <fetchPlan extends="_base"/>
             <loader id="bpmEngineDl"/>
         </instance>
+        <instance id="engineAuthStateDc" class="io.flowset.control.entity.engine.EngineAuthState">
+            <fetchPlan extends="_base"/>
+            <loader id="engineAuthStateDl"/>
+        </instance>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -31,7 +35,7 @@
                                 <responsiveStep minWidth="0" columns="1"/>
                                 <responsiveStep minWidth="20em" columns="2"/>
                                 <responsiveStep minWidth="50em" columns="2"/>
-                                <responsiveStep minWidth="70em" columns="3"/>
+                                <responsiveStep minWidth="60em" columns="3"/>
                                 <responsiveStep minWidth="80em" columns="4"/>
                             </responsiveSteps>
                             <textField id="nameField" property="name" width="100%" classNames="pt-0"
@@ -57,11 +61,11 @@
                                        valueChangeMode="ON_BLUR"
                                        property="baseUrl"
                                        classNames="pt-s"/>
-                            <hbox padding="false">
+                            <hbox padding="false" maxWidth="20em">
                                 <comboBox id="environmentTypeField"
                                           label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType"
                                           required="false"
-                                          property="environmentType" width="AUTO" clearButtonVisible="true"/>
+                                          property="environmentType" width="100%" clearButtonVisible="true"/>
                             </hbox>
                         </formLayout>
                         <vbox id="details" padding="false"
@@ -79,6 +83,32 @@
                                                   itemsEnum="io.flowset.control.entity.engine.AuthType"/>
                                 <div id="authBox" width="100%"/>
                             </vbox>
+                            <details id="authStateBox" summaryText="msg://authStateBox.header" classNames="p-0 box-border"
+                                     visible="false">
+                                <hbox padding="false" alignItems="CENTER" width="AUTO" themeNames="spacing-xl">
+                                    <hbox alignItems="BASELINE" padding="false">
+                                        <checkbox dataContainer="engineAuthStateDc" property="isLocked"
+                                                  label="msg://io.flowset.control.entity.engine/EngineAuthState.isLocked"
+                                                  readOnly="true" required="false"/>
+                                        <icon icon="QUESTION_CIRCLE" size="0.9em" classNames="text-secondary">
+                                            <tooltip text="msg://isLockedField.tooltipText"/>
+                                        </icon>
+                                    </hbox>
+                                    <button enabled="false" id="unlockBtn" classNames="mt-0 mb-0"
+                                            text="msg:///actions.Unlock" themeNames="tertiary small" icon="UNLOCK"/>
+                                </hbox>
+                                <hbox>
+                                    <textField dataContainer="engineAuthStateDc" property="accessTokenRetries" readOnly="true"
+                                               required="false"
+                                               label="msg://io.flowset.control.entity.engine/EngineAuthState.accessTokenRetries"
+                                               classNames="pt-xs"/>
+                                    <dateTimePicker id="lockDateField" dataContainer="engineAuthStateDc" property="lockDate"
+                                                    readOnly="true"
+                                                    required="false"
+                                                    label="msg://io.flowset.control.entity.engine/EngineAuthState.lockDate"
+                                                    classNames="pt-s"/>
+                                </hbox>
+                            </details>
                         </vbox>
                     </vbox>
 <!--                </tab>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="bpmEngineDc"
+                  class="io.flowset.control.entity.engine.BpmEngine"
+                  provided="true"/>
+    </data>
+    <content>
+        <vbox id="root" padding="false">
+            <formLayout id="engineForm"
+                        width="100%"
+                        dataContainer="bpmEngineDc">
+                <responsiveSteps>
+                    <responsiveStep minWidth="0" columns="1"/>
+                    <responsiveStep minWidth="20em" columns="2"/>
+                    <responsiveStep minWidth="50em" columns="2"/>
+                    <responsiveStep minWidth="70em" columns="3"/>
+                    <responsiveStep minWidth="80em" columns="4"/>
+                </responsiveSteps>
+                <textField id="oauth2IssuerUriField" property="oauth2IssuerUri" required="true"
+                           label="msg://oauth2IssuerUri" classNames="pt-xs" colspan="2">
+                    <validators>
+                        <custom bean="control_UrlValidator"/>
+                    </validators>
+                </textField>
+                <div colspan="2"/>
+                <textField property="oauth2ClientId" required="true"
+                           label="msg://oauth2ClientId" classNames="pt-xs"/>
+                <passwordField property="oauth2ClientSecret" required="true"
+                               label="msg://oauth2ClientSecret" classNames="pt-xs"/>
+                <div colspan="2"/>
+                <textField property="oauth2Scope" label="msg://oauth2Scope" classNames="pt-xs" colspan="2" dataContainer="bpmEngineDc"
+                           helperText="msg://oauth2ScopeField.helpText"/>
+            </formLayout>
+        </vbox>
+    </content>
+</fragment>

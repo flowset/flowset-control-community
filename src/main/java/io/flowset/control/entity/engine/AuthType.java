@@ -12,7 +12,8 @@ import org.springframework.lang.Nullable;
 public enum AuthType implements EnumClass<String> {
 
     BASIC("Basic"),
-    HTTP_HEADER("HTTP header");
+    HTTP_HEADER("HTTP header"),
+    OAUTH2("OAuth2");
 
     private final String id;
 

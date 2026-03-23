@@ -149,25 +149,29 @@ public class MainView extends StandardMainView {
 
         selectedEngineDc.setItem(event.getEngine());
 
-        updateEngineStatusManually();
-
         View<?> currentView = getCurrentView();
         if (currentView == this) {
-            refreshDashboard();
+            applyToDashboard(DashboardFragment::setLoading);
         } else {
             viewNavigationSupport.navigate(getClass());
         }
 
+        updateEngineStatusManually();
+
     }
 
     protected void refreshDashboard() {
+        applyToDashboard(DashboardFragment::updateDashboard);
+    }
+
+    protected void applyToDashboard(Consumer<DashboardFragment> consumer) {
         Component initialLayout = getInitialLayout();
         if (initialLayout != null) {
             Component component = initialLayout.getChildren()
                     .findFirst()
                     .orElse(null);
             if (component instanceof DashboardFragment dashboardFragment) {
-                dashboardFragment.updateDashboard();
+                consumer.accept(dashboardFragment);
             }
         }
     }
