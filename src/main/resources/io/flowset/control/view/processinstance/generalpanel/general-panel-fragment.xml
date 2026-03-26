@@ -45,6 +45,19 @@
                                 <button id="openProcessDefinitionEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessDefinition"/>
                             </suffix>
                         </textField>
+                        <textField id="rootProcessInstanceIdField"  readOnly="true" width="auto"
+                                   dataContainer="processInstanceDataDc" property="rootProcessInstanceId">
+                            <suffix>
+                                <button id="openRootProcessInstanceEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessInstance"/>
+                            </suffix>
+                        </textField>
+                        <textField id="superProcessInstanceIdField"
+                                   dataContainer="processInstanceDataDc" property="superProcessInstanceId" readOnly="true" width="auto">
+                            <suffix>
+                                <button id="openSuperProcessInstanceEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline"
+                                        title="msg://io.flowset.control.view.processinstance/openProcessInstance"/>
+                            </suffix>
+                        </textField>
                         <textArea id="deleteReason" property="deleteReason" readOnly="true" maxHeight="5em" width="auto"/>
                         <checkbox id="externallyTerminatedField" property="externallyTerminated" readOnly="true"/>
                     </formLayout>

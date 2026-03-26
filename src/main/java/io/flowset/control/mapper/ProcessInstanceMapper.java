@@ -27,6 +27,7 @@ public abstract class ProcessInstanceMapper {
     @Autowired
     Metadata metadata;
 
+    @Mapping(target = "superProcessInstanceId", ignore = true)
     @Mapping(target = "hasIncidents", ignore = true)
     @Mapping(target = "instanceId", source = "id")
     @Mapping(target = "complete", constant = "false")

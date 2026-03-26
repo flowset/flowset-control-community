@@ -38,6 +38,7 @@ import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.control.view.processinstance.SuspendProcessInstanceView;
 import io.flowset.control.view.processinstancemigration.ProcessInstanceMigrationView;
 import io.flowset.control.view.processinstanceterminate.ProcessInstanceTerminateView;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
@@ -78,6 +79,10 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected JmixTextArea deleteReason;
 
     @ViewComponent
+    protected JmixButton openSuperProcessInstanceEditorBtn;
+    @ViewComponent
+    protected JmixButton openRootProcessInstanceEditorBtn;
+    @ViewComponent
     protected VerticalLayout upperPanel;
     @ViewComponent
     protected JmixButton infoBtn;
@@ -96,6 +101,8 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
 
         initProcessDefinitionField(processInstanceData);
 
+        initParentProcessInstanceFields(processInstanceData);
+
         boolean hasEndTime = processInstanceData.getEndTime() != null;
         endTimeField.setVisible(hasEndTime);
         deleteReason.setVisible(hasEndTime);
@@ -112,6 +119,17 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
             value = processInstanceData.getProcessDefinitionId();
         }
         processDefinitionField.setValue(value);
+    }
+
+    protected void initParentProcessInstanceFields(ProcessInstanceData processInstanceData) {
+        String superProcessInstanceId = processInstanceData.getSuperProcessInstanceId();
+
+        openSuperProcessInstanceEditorBtn.setVisible(superProcessInstanceId != null &&
+                !Strings.CI.equals(processInstanceData.getInstanceId(), superProcessInstanceId));
+
+        String rootInstanceId = processInstanceData.getRootProcessInstanceId();
+        openRootProcessInstanceEditorBtn.setVisible(rootInstanceId != null &&
+                !Strings.CI.equals(processInstanceData.getInstanceId(), rootInstanceId));
     }
 
     protected void initActionButtons() {
@@ -162,6 +180,31 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
                     .show();
         }
     }
+
+    @Subscribe(id = "openSuperProcessInstanceEditorBtn", subject = "clickListener")
+    public void onOpenSuperProcessInstanceEditorBtnClick(final ClickEvent<JmixButton> event) {
+        String superProcessInstanceId = processInstanceDataDc.getItem().getSuperProcessInstanceId();
+        if (superProcessInstanceId == null) {
+            return;
+        }
+        viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
+                .withRouteParameters(new RouteParameters("id", superProcessInstanceId))
+                .withBackwardNavigation(true)
+                .navigate();
+    }
+
+    @Subscribe(id = "openRootProcessInstanceEditorBtn", subject = "clickListener")
+    public void onOpenRootProcessInstanceEditorBtnClick(final ClickEvent<JmixButton> event) {
+        String rootProcessInstanceId = processInstanceDataDc.getItem().getRootProcessInstanceId();
+        if (rootProcessInstanceId == null) {
+            return;
+        }
+        viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
+                .withRouteParameters(new RouteParameters("id", rootProcessInstanceId))
+                .withBackwardNavigation(true)
+                .navigate();
+    }
+
 
     @Subscribe("suspendAction")
     public void onSuspendAction(final ActionPerformedEvent event) {
