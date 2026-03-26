@@ -52,6 +52,8 @@ import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
 import io.flowset.uikit.fragment.formviewer.FormViewerFragment;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 
@@ -153,7 +155,11 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
             Resource deploymentResourceData = deploymentService.getDeploymentResourceData(
                     selectedResource.getDeploymentId(), selectedResource.getResourceId());
             byte[] byteArrayContent = getByteArrayContent(deploymentResourceData);
-            downloader.download(() -> new ByteArrayInputStream(byteArrayContent), selectedResource.getName());
+            String downloadName = FilenameUtils.getName(selectedResource.getName());
+            if (StringUtils.isEmpty(downloadName)) {
+                downloadName = "resource-" + selectedResource.getResourceId();
+            }
+            downloader.download(() -> new ByteArrayInputStream(byteArrayContent), downloadName);
         }
     }
 
