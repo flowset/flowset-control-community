@@ -16,6 +16,7 @@
             <fetchPlan extends="_base"/>
         </collection>
         <instance id="engineDc" class="io.flowset.control.entity.engine.BpmEngine"/>
+        <instance id="engineAuthStateDc" class="io.flowset.control.entity.engine.EngineAuthState"/>
     </data>
     <actions>
         <action id="testConnectionAction" type="control_testEngineConnection"/>
@@ -52,7 +53,14 @@
             </textField>
             <textField id="environmentTypeField" readOnly="true" dataContainer="engineDc" property="environmentType"
                        label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType"/>
-            <h4 text="msg://authentication"/>
+            <hbox width="100%"  classNames="mt-s" alignItems="BASELINE" justifyContent="BETWEEN">
+                <h4 text="msg://authentication" classNames="pt-xs"/>
+                <hbox id="authStateBox" visible="false" padding="false" justifySelf="END" alignItems="BASELINE" themeNames="spacing-s">
+                    <icon icon="WARNING" size="0.85em" classNames="text-warning"/>
+                    <span text="msg://accessTokenRetrievalLockedMsg" classNames="text-warning text-s"/>
+                </hbox>
+            </hbox>
+
             <textField id="authenticationTypeField" readOnly="true"
                        label="msg://authType"/>
             <hbox id="basicAuthSettingsHBox" width="100%" themeNames="spacing-s">
@@ -83,6 +91,26 @@
                         <button id="copyCustomHeaderValueBtn" icon="COPY" themeNames="tertiary-inline"/>
                     </suffix>
                 </passwordField>
+            </vbox>
+            <vbox id="oauth2SettingsVBox" width="100%" themeNames="spacing-s" padding="false">
+                <textField id="oauth2IssuerUriField" readOnly="true" label="msg://oauth2IssuerUri" width="100%"
+                           classNames="pt-s" dataContainer="engineDc" property="oauth2IssuerUri">
+                    <suffix>
+                        <button id="copyOauth2IssuerUriBtn" icon="COPY" themeNames="tertiary-inline"/>
+                    </suffix>
+                </textField>
+                <hbox width="100%" expand="oauth2ClientIdField">
+                    <textField id="oauth2ClientIdField" readOnly="true" label="msg://oauth2ClientId" width="100%"
+                               classNames="pt-s" dataContainer="engineDc" property="oauth2ClientId">
+                        <suffix>
+                            <button id="copyOauth2ClientIdBtn" icon="COPY" themeNames="tertiary-inline"/>
+                        </suffix>
+                    </textField>
+                    <passwordField id="oauth2ClientSecretField" readOnly="true" label="msg://oauth2ClientSecret" width="100%"
+                                   classNames="pt-s" dataContainer="engineDc" property="oauth2ClientSecret"/>
+                </hbox>
+                <textField id="oauth2ScopeField" readOnly="true" label="msg://oauth2Scope" width="100%"
+                           classNames="pt-s" dataContainer="engineDc" property="oauth2Scope"/>
             </vbox>
         </formLayout>
         <hbox width="100%">
