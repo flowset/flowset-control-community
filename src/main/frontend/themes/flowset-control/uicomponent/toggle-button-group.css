@@ -6,12 +6,18 @@
 .toggle-button-group > vaadin-button {
     min-width: 9em;
     border-color: var(--toggle-button-border-color);
+    transition: all var(--transition-base);
+}
+
+.toggle-button-group > vaadin-button:hover {
+    border-color: var(--primary-gradient-end);
+    background: rgba(14, 165, 233, 0.05);
 }
 
 .toggle-button-group > :nth-child(1) {
-    border-radius: 1em 0 0 1em;
+    border-radius: var(--border-radius-lg) 0 0 var(--border-radius-lg);
 }
 
 .toggle-button-group > vaadin-button:last-child {
-    border-radius: 0 1em 1em 0;
+    border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0;
 }

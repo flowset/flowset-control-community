@@ -3,6 +3,7 @@
  * Use is subject to license terms.
  */
 
+/* Link buttons */
 :host([theme~='link']) .vaadin-button-container {
     justify-content: start;
     max-width: 100%;
@@ -11,18 +12,196 @@
 }
 
 :host([theme~='link'])[active] {
-    --vaadin-button-background:  transparent !important;
+    --vaadin-button-background: transparent !important;
 }
 
 :host([theme~='link'])::part(label) {
     overflow: hidden!important;
+    transition: color var(--transition-base);
+    position: relative;
 }
 
 :host([theme~='link']) [part='label']:hover {
     text-decoration: underline;
+    color: var(--primary-gradient-end);
 }
 
 :host([disabled][theme~='link']) {
     --vaadin-button-text-color: var(--lumo-body-text-color);
     font-weight: normal !important;
+}
+
+/* Primary buttons - Modern gradient with shimmer effect */
+:host([theme~='primary']) {
+    background: linear-gradient(135deg, var(--primary-gradient-start) 0%, var(--primary-gradient-end) 100%);
+    background-size: 200% 200%;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+}
+
+:host([theme~='primary']::before) {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+:host([theme~='primary']:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+    background-position: right center;
+}
+
+:host([theme~='primary']:hover::before) {
+    left: 100%;
+}
+
+:host([theme~='primary']:active) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+}
+
+/* Success buttons - Emerald gradient */
+:host([theme~='success']) {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    background-size: 200% 200%;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    color: white;
+}
+
+:host([theme~='success']:hover) {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    background-position: right center;
+}
+
+:host([theme~='success']:active) {
+    transform: translateY(0) scale(1);
+}
+
+/* Error buttons - Danger red gradient with pulse */
+:host([theme~='error']) {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    background-size: 200% 200%;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    color: white;
+    animation: pulse-danger 2s infinite;
+}
+
+@keyframes pulse-danger {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    }
+}
+
+:host([theme~='error']:hover) {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 24px rgba(239, 68, 68, 0.5);
+    background-position: right center;
+    animation: none;
+}
+
+:host([theme~='error']:active) {
+    transform: translateY(0) scale(1);
+}
+
+/* Warning buttons - Amber gradient */
+:host([theme~='warning']) {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    background-size: 200% 200%;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    color: white;
+}
+
+:host([theme~='warning']:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    background-position: right center;
+}
+
+:host([theme~='warning']:active) {
+    transform: translateY(0);
+}
+
+/* Contrast buttons - Modern dark with glow */
+:host([theme~='contrast']) {
+    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+:host([theme~='contrast']:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 20px rgba(139, 92, 246, 0.3);
+    background: linear-gradient(135deg, #374151 0%, #1F2937 100%);
+}
+
+:host([theme~='contrast']:active) {
+    transform: translateY(0);
+}
+
+/* Secondary/Tertiary buttons - Ghost style with border animation */
+:host([theme~='tertiary']),
+:host([theme~='tertiary-inline']) {
+    position: relative;
+    transition: all var(--transition-base);
+    overflow: hidden;
+}
+
+:host([theme~='tertiary']:hover),
+:host([theme~='tertiary-inline']:hover) {
+    background: rgba(14, 165, 233, 0.08);
+    transform: translateY(-1px);
+}
+
+:host([theme~='tertiary']:active),
+:host([theme~='tertiary-inline']:active) {
+    transform: translateY(0);
+}
+
+/* Disabled state */
+:host([disabled]) {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Icon buttons - Ripple effect */
+:host([theme~='icon']) {
+    border-radius: 50%;
+    transition: all var(--transition-base);
+}
+
+:host([theme~='icon']:hover) {
+    background: rgba(14, 165, 233, 0.1);
+    transform: rotate(5deg) scale(1.1);
+}
+
+:host([theme~='icon']:active) {
+    transform: rotate(0deg) scale(0.95);
+}
+
+/* Badge button styles */
+:host([theme~='badge']) {
+    border-radius: var(--border-radius-xl);
+    transition: all var(--transition-base);
+    padding: 0.25em 0.75em;
+}
+
+:host([theme~='badge']:hover) {
+    transform: scale(1.05);
+    box-shadow: var(--elevation-2);
 }

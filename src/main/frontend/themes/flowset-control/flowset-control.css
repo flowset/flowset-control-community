@@ -8,27 +8,100 @@
 }
 
 html {
-    --bpmn-history-activity-color: rgba(162, 224, 172, 0.45);
-    --dashboard-background-color: hsla(214, 61%, 25%, 0.02);
-    --toggle-button-border-color: rgba(48, 114, 132, 0.8);
+    /* BPMN Colors */
+    --bpmn-history-activity-color: rgba(134, 239, 172, 0.35);
 
-    --menu-item-hover-bg-color: #7EB3C2;
-    --menu-item-hover-color:rgb(16, 70, 86);
-    --user-avatar-bg-color: #7EB3C2;
-    --menu-group-item-color: #69CE87;
-    --side-menu-bg-color: rgb(16, 70, 86);
+    /* Modern Color Palette - Vibrant & Smooth */
+    --primary-gradient-start: #0EA5E9;
+    --primary-gradient-end: #06B6D4;
+    --primary-hover: #0284C7;
 
-    --engine-env-badge-prod-color: #9D174D;
-    --engine-env-badge-prod-bg-color: #FCE7F3;
-    --engine-env-badge-prod-border-color: #F472B6;
+    --accent-color: #10B981;
+    --accent-hover: #059669;
 
-    --engine-env-badge-qa-color: #0D9488;
-    --engine-env-badge-qa-bg-color:#F0FDFA;
+    --accent-secondary: #8B5CF6;
+    --accent-secondary-hover: #7C3AED;
+
+    /* Action Colors - Success */
+    --success-gradient-start: #10B981;
+    --success-gradient-end: #059669;
+    --success-light: rgba(16, 185, 129, 0.1);
+
+    /* Action Colors - Danger/Error */
+    --danger-gradient-start: #EF4444;
+    --danger-gradient-end: #DC2626;
+    --danger-light: rgba(239, 68, 68, 0.1);
+    --danger-glow: rgba(239, 68, 68, 0.5);
+
+    /* Action Colors - Warning */
+    --warning-gradient-start: #F59E0B;
+    --warning-gradient-end: #D97706;
+    --warning-light: rgba(245, 158, 11, 0.1);
+
+    /* Action Colors - Info */
+    --info-gradient-start: #3B82F6;
+    --info-gradient-end: #2563EB;
+    --info-light: rgba(59, 130, 246, 0.1);
+
+    /* Background & Surface Colors */
+    --dashboard-background-color: #F8FAFC;
+    --surface-elevated: #FFFFFF;
+    --surface-overlay: rgba(0, 0, 0, 0.02);
+    --surface-gradient-light: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+
+    /* Interactive Elements */
+    --toggle-button-border-color: rgba(6, 182, 212, 0.5);
+    --focus-ring-color: rgba(14, 165, 233, 0.15);
+
+    /* Menu & Navigation - Modern Deep Blue with Gradient */
+    --side-menu-bg-color: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+    --menu-item-hover-bg-color: rgba(14, 165, 233, 0.15);
+    --menu-item-hover-color: #06B6D4;
+    --menu-item-active-bg: rgba(14, 165, 233, 0.25);
+    --menu-group-item-color: #10B981;
+
+    /* User Interface Elements */
+    --user-avatar-bg-color: linear-gradient(135deg, #06B6D4 0%, #0EA5E9 100%);
+
+    /* Status Badges - Production (High Priority - Red) */
+    --engine-env-badge-prod-color: #BE123C;
+    --engine-env-badge-prod-bg-color: #FFF1F2;
+    --engine-env-badge-prod-border-color: #FB7185;
+
+    /* Status Badges - QA (Medium Priority - Teal) */
+    --engine-env-badge-qa-color: #0F766E;
+    --engine-env-badge-qa-bg-color: #F0FDFA;
     --engine-env-badge-qa-border-color: #5EEAD4;
 
-    --engine-env-badge-dev-color: #4B5563;
-    --engine-env-badge-dev-bg-color:#F3F4F6;
-    --engine-env-badge-dev-border-color: #9CA3AF;
+    /* Status Badges - Development (Low Priority - Gray) */
+    --engine-env-badge-dev-color: #475569;
+    --engine-env-badge-dev-bg-color: #F8FAFC;
+    --engine-env-badge-dev-border-color: #94A3B8;
+
+    /* Shadows & Depth - Enhanced elevation system */
+    --elevation-1: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --elevation-4: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Border Radius - Softer, more modern */
+    --border-radius-sm: 0.5rem;
+    --border-radius-md: 0.75rem;
+    --border-radius-lg: 1rem;
+    --border-radius-xl: 1.5rem;
+    --border-radius-2xl: 2rem;
+
+    /* Transitions - Smooth micro-interactions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Gradient Overlays for Cards */
+    --card-gradient-primary: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%);
+    --card-gradient-success: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+    --card-gradient-warning: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.05) 100%);
+    --card-gradient-danger: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.05) 100%);
 }
 
 [part="toggle"] {
@@ -46,7 +119,53 @@ html {
 .bordered-container {
     padding: 0;
     border: 1px var(--lumo-utility-border-style, solid) var(--lumo-utility-border-color, var(--lumo-contrast-20pct));
-    border-radius: var(--lumo-border-radius-l);
+    border-radius: var(--border-radius-lg);
+    transition: all var(--transition-base);
+    position: relative;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
+.bordered-container::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg,
+        var(--primary-gradient-start),
+        var(--primary-gradient-end),
+        var(--accent-color),
+        var(--accent-secondary)
+    );
+    background-size: 400% 400%;
+    border-radius: var(--border-radius-lg);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.bordered-container:hover {
+    border-color: transparent;
+    box-shadow: var(--elevation-3);
+    transform: translateY(-2px);
+}
+
+.bordered-container:hover::after {
+    opacity: 1;
+    animation: gradient-border-rotate 3s ease infinite;
+}
+
+@keyframes gradient-border-rotate {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 .sticky-buttons-bottom-panel {
@@ -75,12 +194,61 @@ vaadin-grid::part(multiline-text-cell) {
 }
 
 [theme~='badge'][theme~='warning'] {
-    color: var(--lumo-warning-text-color);
-    background-color: var(--lumo-warning-color-10pct);
+    color: var(--warning-gradient-end);
+    background: var(--warning-light);
+    border: 1px solid var(--warning-gradient-start);
+    transition: all var(--transition-base);
+}
+
+[theme~='badge'][theme~='warning']:hover {
+    background: linear-gradient(135deg, var(--warning-gradient-start) 0%, var(--warning-gradient-end) 100%);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+[theme~='badge'][theme~='error'] {
+    color: var(--danger-gradient-end);
+    background: var(--danger-light);
+    border: 1px solid var(--danger-gradient-start);
+    transition: all var(--transition-base);
+    animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+    50% {
+        box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.2);
+    }
+}
+
+[theme~='badge'][theme~='error']:hover {
+    background: linear-gradient(135deg, var(--danger-gradient-start) 0%, var(--danger-gradient-end) 100%);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px var(--danger-glow);
+    animation: none;
+}
+
+[theme~='badge'][theme~='success'] {
+    color: var(--success-gradient-end);
+    background: var(--success-light);
+    border: 1px solid var(--success-gradient-start);
+    transition: all var(--transition-base);
+}
+
+[theme~='badge'][theme~='success']:hover {
+    background: linear-gradient(135deg, var(--success-gradient-start) 0%, var(--success-gradient-end) 100%);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 vaadin-grid::part(error-cell) {
-    background-color: var(--lumo-error-color-10pct);
+    background: var(--card-gradient-danger);
+    border-left: 3px solid var(--danger-gradient-start);
 }
 
 vaadin-button[theme~='badge'][theme~='has-icon'] {

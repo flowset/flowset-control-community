@@ -9,8 +9,52 @@
 
 .bordered-card {
     border: 1px var(--lumo-utility-border-style, solid) var(--lumo-utility-border-color, var(--lumo-contrast-20pct));
-    border-radius: var(--lumo-border-radius-l);
-    box-shadow: var(--lumo-box-shadow-s);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--elevation-2);
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.bordered-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg,
+        var(--primary-gradient-start) 0%,
+        var(--primary-gradient-end) 25%,
+        var(--accent-color) 50%,
+        var(--accent-secondary) 75%,
+        var(--primary-gradient-start) 100%
+    );
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.bordered-card:hover {
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.15), 0 4px 8px rgba(16, 185, 129, 0.1);
+    transform: translateY(-4px);
+    border-color: rgba(14, 165, 233, 0.4);
+    background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 100%);
+}
+
+.bordered-card:hover::before {
+    opacity: 1;
+    animation: card-gradient-flow 3s linear infinite;
+}
+
+@keyframes card-gradient-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 200% 50%;
+    }
 }
 
 .suspend-instances-count-icon {

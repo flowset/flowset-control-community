@@ -35,14 +35,15 @@ vaadin-app-layout::part(drawer) {
     max-height: 100%;
     min-height: 100%;
 
-    background-color: var(--side-menu-bg-color);
+    background: var(--side-menu-bg-color);
 
-    border-start-end-radius: 0.85em;
-    border-end-end-radius: 0.85em;
+    border-start-end-radius: var(--border-radius-xl);
+    border-end-end-radius: var(--border-radius-xl);
     border: none;
+    box-shadow: var(--elevation-3);
 
-    --lumo-header-text-color: #fff;
-    --lumo-utility-border-color: #88A3AB;
+    --lumo-header-text-color: #F8FAFC;
+    --lumo-utility-border-color: rgba(148, 163, 184, 0.3);
 }
 
 
@@ -98,8 +99,9 @@ vaadin-app-layout::part(drawer) {
 }
 
 .jmix-main-view-footer .user-avatar {
-    background-color: var(--user-avatar-bg-color);
-    color: var(--lumo-primary-text-color);
+    background: var(--user-avatar-bg-color);
+    color: var(--lumo-primary-contrast-color);
+    box-shadow: var(--elevation-1);
 }
 
 .jmix-main-view-footer .jmix-user-indicator .jmix-user-indicator-label {
@@ -122,13 +124,16 @@ vaadin-app-layout::part(drawer) {
 .jmix-list-menu .jmix-menu-item-link:hover {
     background-color: var(--menu-item-hover-bg-color);
     color: var(--menu-item-hover-color);
-    border-radius: var(--lumo-border-radius-m);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-base);
+    transform: translateX(4px);
 }
 
 .jmix-list-menu .jmix-menubar-item > vaadin-details-summary:hover {
     background-color: var(--menu-item-hover-bg-color);
     color: var(--menu-item-hover-color);
-    border-radius: var(--lumo-border-radius-m);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-base);
 }
 
 .jmix-list-menu .jmix-menubar-item > vaadin-details-summary::part(toggle) {
@@ -144,7 +149,9 @@ vaadin-app-layout::part(drawer) {
 }
 
 .jmix-list-menu .jmix-menu-item-link {
-    padding: 0.35em var(--lumo-space-s);
+    padding: 0.5em var(--lumo-space-m);
+    transition: all var(--transition-base);
+    margin: 0.125em var(--lumo-space-xs);
 }
 
 .jmix-list-menu .menu-group-label {
@@ -162,8 +169,10 @@ vaadin-app-layout::part(drawer) {
 }
 
 .jmix-list-menu a[highlight][class*='jmix-menu-item-link'] {
-    background-color: #fff;
-    color: var(--lumo-primary-text-color);
+    background: var(--menu-item-active-bg);
+    color: var(--menu-item-hover-color);
+    border-left: 3px solid var(--primary-gradient-end);
+    font-weight: 500;
 }
 
 .select-engine-popover::part(overlay) {

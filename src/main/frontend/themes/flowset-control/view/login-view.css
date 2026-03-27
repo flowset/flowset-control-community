@@ -26,9 +26,11 @@
 }
 
 .flowset-control-login-form vaadin-login-form-wrapper {
-   box-shadow: var(--lumo-box-shadow-l);
-   border-radius: var(--lumo-border-radius-l);
+   box-shadow: var(--elevation-3);
+   border-radius: var(--border-radius-xl);
    height: 100%;
+   backdrop-filter: blur(10px);
+   background: rgba(255, 255, 255, 0.95);
 }
 
 @media (min-width: 360px) and (orientation: portrait) {

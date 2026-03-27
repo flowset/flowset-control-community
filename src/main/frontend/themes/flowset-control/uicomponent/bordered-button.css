@@ -5,16 +5,78 @@
 
 .bordered-button {
     border: 1px var(--lumo-utility-border-style, solid) var(--lumo-utility-border-color, var(--lumo-contrast-10pct));
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.bordered-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--primary-gradient-end) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    transition: width var(--transition-slow), height var(--transition-slow);
+    opacity: 0.2;
+}
+
+.bordered-button:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .bordered-button:active {
-    border: 1px var(--lumo-utility-border-style, solid) var(--lumo-utility-border-color, var(--lumo-contrast-30pct));
+    border: 1px var(--lumo-utility-border-style, solid) var(--primary-gradient-end);
+    transform: scale(0.96);
 }
 
 .bordered-button:hover {
-    border: 1px var(--lumo-utility-border-style, solid) var(--lumo-utility-border-color, var(--lumo-contrast-20pct));
+    border: 1px var(--lumo-utility-border-style, solid) var(--primary-gradient-end);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+    transform: translateY(-1px);
 }
 
 .bordered-button:focus {
-    border: 1px var(--lumo-utility-border-style, solid) var(--lumo-utility-border-color, var(--lumo-contrast-20pct));
+    border: 1px var(--lumo-utility-border-style, solid) var(--primary-gradient-end);
+    box-shadow: 0 0 0 3px var(--focus-ring-color);
+    outline: none;
+}
+
+/* Danger/Delete button variant */
+.bordered-button.danger,
+.bordered-button[data-action="delete"],
+.bordered-button[data-action="remove"] {
+    border-color: var(--danger-gradient-start);
+}
+
+.bordered-button.danger::before,
+.bordered-button[data-action="delete"]::before,
+.bordered-button[data-action="remove"]::before {
+    background: radial-gradient(circle, var(--danger-gradient-end) 0%, transparent 70%);
+}
+
+.bordered-button.danger:hover,
+.bordered-button[data-action="delete"]:hover,
+.bordered-button[data-action="remove"]:hover {
+    border-color: var(--danger-gradient-end);
+    box-shadow: 0 4px 12px var(--danger-glow);
+}
+
+/* Success/Confirm button variant */
+.bordered-button.success,
+.bordered-button[data-action="save"],
+.bordered-button[data-action="confirm"] {
+    border-color: var(--success-gradient-start);
+}
+
+.bordered-button.success:hover,
+.bordered-button[data-action="save"]:hover,
+.bordered-button[data-action="confirm"]:hover {
+    border-color: var(--success-gradient-end);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
