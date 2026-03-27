@@ -18,6 +18,7 @@
             <loader id="processInstanceFilterDl"/>
             <fetchPlan extends="_base"/>
         </instance>
+        <collection id="activityStatisticsDc" class="io.flowset.control.entity.activity.ProcessActivityStatistics"/>
     </data>
     <actions>
         <action id="closeAction" type="detail_close" text="msg:///actions.Close"/>

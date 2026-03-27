@@ -46,11 +46,11 @@ public class BulkTerminateProcessInstanceView extends StandardView {
     @ViewComponent
     protected JmixCheckbox skipSubprocessesField;
 
-    protected Collection<ProcessInstanceData> processInstances;
+    protected List<String> processInstanceIds;
 
     @SuppressWarnings("LombokSetterMayBeUsed")
-    public void setProcessInstances(Collection<ProcessInstanceData> processInstances) {
-        this.processInstances = processInstances;
+    public void setProcessInstanceIds(List<String> processInstanceIds) {
+        this.processInstanceIds = processInstanceIds;
     }
 
     @Subscribe
@@ -64,8 +64,7 @@ public class BulkTerminateProcessInstanceView extends StandardView {
 
     @Subscribe("okBtn")
     protected void onOkBtnClick(ClickEvent<Button> event) {
-        List<String> ids = processInstances.stream().map(ProcessInstanceData::getInstanceId).toList();
-        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(ids)
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(processInstanceIds)
                 .setReason(reasonTextArea.getValue())
                 .setSkipCustomListeners(skipCustomListenersField.getValue())
                 .setSkipIoMappings(skipIoMappingsField.getValue())

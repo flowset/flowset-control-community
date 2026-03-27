@@ -15,15 +15,22 @@
             <hbox id="processInstancesButtons" classNames="buttons-panel" alignItems="BASELINE">
                 <button id="refreshProcessInstanceBtn" action="processInstancesGrid.refresh"
                         themeNames="small success primary"/>
+                <button id="bulkTerminateBtn" action="processInstancesGrid.bulkTerminate" enabled="false" themeNames="small"/>
+                <button id="bulkSuspendBtn" action="processInstancesGrid.bulkSuspend" enabled="false" themeNames="small"/>
+                <button id="bulkActivateBtn" action="processInstancesGrid.bulkActivate" enabled="false" themeNames="small"/>
                 <div id="selectedActivityContainer"/>
                 <simplePagination id="processInstancesPagination" />
             </hbox>
             <dataGrid id="processInstancesGrid" dataContainer="processInstanceDataDc" themeNames="compact"
+                      selectionMode="MULTI"
                       width="100%" height="100%">
                 <actions>
                     <action id="edit" type="list_edit"
                             text="msg://viewProcessInstance" icon="EYE"/>
                     <action id="refresh" type="list_refresh"/>
+                    <action id="bulkTerminate" type="list_itemTracking" text="msg:///actions.Terminate" icon="DOT_CIRCLE"/>
+                    <action id="bulkActivate" type="list_itemTracking" text="msg:///actions.Activate" icon="PLAY"/>
+                    <action id="bulkSuspend" type="list_itemTracking" text="msg:///actions.Suspend" icon="PAUSE"/>
                 </actions>
                 <columns resizable="true">
                     <column property="id" autoWidth="true" flexGrow="1">
