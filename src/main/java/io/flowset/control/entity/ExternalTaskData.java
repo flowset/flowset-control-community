@@ -5,11 +5,12 @@
 
 package io.flowset.control.entity;
 
-import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -94,6 +95,11 @@ public class ExternalTaskData {
 
     public void setSuspended(Boolean suspended) {
         this.suspended = suspended;
+    }
+
+    @JmixProperty
+    public ExternalTaskState getState() {
+        return BooleanUtils.isTrue(suspended) ? ExternalTaskState.SUSPENDED : ExternalTaskState.ACTIVE;
     }
 
     public Integer getRetries() {

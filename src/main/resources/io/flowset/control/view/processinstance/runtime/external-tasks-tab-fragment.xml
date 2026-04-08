@@ -33,7 +33,11 @@
                 <columns resizable="true" sortable="false">
                     <column property="externalTaskId" frozen="true">
                         <fragmentRenderer
-                                class="io.flowset.control.view.externaltask.column.ExternalTaskIdColumnFragment"/>
+                                class="io.flowset.control.view.externaltask.column.ExternalTaskIdColumnFragment">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </fragmentRenderer>
                     </column>
                     <column property="activityId"/>
                     <column property="topicName" autoWidth="true"/>

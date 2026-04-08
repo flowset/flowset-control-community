@@ -6,7 +6,7 @@
 
 <view xmlns="http://jmix.io/schema/flowui/view"
       title="msg://externalTaskDataDetailView.title"
-      focusComponent="form">
+      focusComponent="infoBox">
     <data>
         <instance id="externalTaskDataDc"
                   class="io.flowset.control.entity.ExternalTaskData">
@@ -14,43 +14,105 @@
         </instance>
     </data>
     <actions>
-        <action id="closeAction" type="detail_close"/>
+        <action id="closeAction" type="view_close"/>
+        <action id="copyIdAction" type="control_copyComponentValueToClipboard"/>
+        <action id="copyErrorAction" type="control_copyComponentValueToClipboard"/>
+        <action id="copyErrorDetailsAction" type="control_copyComponentValueToClipboard"/>
+        <action id="retryAction" text="msg:///actions.Retry" icon="ROTATE_LEFT" visible="false"/>
+        <action id="viewProcessAction" icon="SEARCH"/>
+        <action id="viewProcessInstanceAction" icon="SEARCH"/>
     </actions>
-    <layout classNames="pt-xs gap-s">
-        <formLayout id="form" dataContainer="externalTaskDataDc">
-            <textField id="externalTaskIdField" property="externalTaskId" readOnly="true" classNames="pt-s"/>
-            <textField id="activityIdField" property="activityId" readOnly="true" classNames="pt-s"/>
-            <hbox width="100%">
-                <textField id="topicNameField" label="msg://io.flowset.control.entity/ExternalTaskData.topicName"
-                           property="topicName" readOnly="true" classNames="pt-s" width="100%"/>
-                <textField id="retriesField" label="msg://io.flowset.control.entity/ExternalTaskData.retries"
-                           property="retries" readOnly="true" classNames="pt-s" width="100%"/>
-            </hbox>
-            <dateTimePicker id="lockExpirationTimeField" property="lockExpirationTime" readOnly="true"
-                            classNames="pt-s" step="1ms"/>
-            <textField id="processDefinitionIdField" label="msg://process"
-                       property="processDefinitionId" readOnly="true" classNames="pt-s"/>
-            <textField id="processInstanceIdField" property="processInstanceId" readOnly="true" classNames="pt-s"/>
-
-            <hbox width="100%" alignItems="BASELINE">
-                <textField id="priorityField" label="msg://io.flowset.control.entity/ExternalTaskData.priority"
-                           property="priority" readOnly="true" classNames="pt-s"/>
-                <checkbox id="suspendedField" label="msg://io.flowset.control.entity/ExternalTaskData.suspended"
-                          property="suspended" readOnly="true" classNames="pt-s"/>
-            </hbox>
-
-            <textField id="workerIdField" property="workerId" readOnly="true" classNames="pt-s"/>
-            <textField id="businessKeyField" property="businessKey" readOnly="true" classNames="pt-s"/>
-            <textField id="activityInstanceIdField" property="activityInstanceId" readOnly="true" classNames="pt-s"/>
-        </formLayout>
-        <textField id="errorMessageField" label="msg://io.flowset.control.entity/ExternalTaskData.errorMessage"
-                   dataContainer="externalTaskDataDc" property="errorMessage" readOnly="true" classNames="pt-s"
-                   width="100%"/>
-        <textArea id="errorDetailsField" label="msg://errorDescription" classNames="pt-s" readOnly="true" width="100%" height="100%"
-                   maxHeight="10em"/>
+    <layout classNames="overflow-hidden" expand="infoBox">
+        <split id="infoBox" themeNames="splitter-spacing" width="100%">
+            <formLayout dataContainer="externalTaskDataDc">
+                <responsiveSteps>
+                    <responsiveStep minWidth="0" columns="1"/>
+                </responsiveSteps>
+                <vbox width="100%" themeNames="spacing-s" padding="false">
+                    <textField id="externalTaskIdField" dataContainer="externalTaskDataDc"
+                               label="msg://io.flowset.control.entity/ExternalTaskData.externalTaskId"
+                               property="externalTaskId" readOnly="true" width="100%">
+                        <suffix>
+                            <button id="copyIdBtn" icon="COPY_O" themeNames="tertiary-inline"
+                                    action="copyIdAction"/>
+                        </suffix>
+                    </textField>
+                    <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1"
+                         width="100%">
+                        <textField id="topicNameField" dataContainer="externalTaskDataDc"
+                                   label="msg://io.flowset.control.entity/ExternalTaskData.topicName"
+                                   property="topicName" readOnly="true" width="100%"/>
+                        <textField id="retriesField" dataContainer="externalTaskDataDc"
+                                   label="msg://io.flowset.control.entity/ExternalTaskData.retries"
+                                   property="retries" readOnly="true" width="100%"/>
+                    </div>
+                    <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1"
+                         width="100%">
+                        <dateTimePicker id="lockExpirationTimeField" dataContainer="externalTaskDataDc"
+                                        label="msg://io.flowset.control.entity/ExternalTaskData.lockExpirationTime"
+                                        property="lockExpirationTime" readOnly="true" step="1ms"
+                                        width="100%"/>
+                        <textField id="priorityField" dataContainer="externalTaskDataDc"
+                                   label="msg://io.flowset.control.entity/ExternalTaskData.priority"
+                                   property="priority" readOnly="true" width="100%"/>
+                    </div>
+                </vbox>
+                <vbox width="100%" themeNames="spacing-s" padding="false">
+                    <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1"
+                         width="100%">
+                        <textField id="activityIdField" dataContainer="externalTaskDataDc"
+                                   label="msg://io.flowset.control.entity/ExternalTaskData.activityId"
+                                   property="activityId" readOnly="true" width="100%"/>
+                        <textField id="stateField" dataContainer="externalTaskDataDc"
+                                   label="msg://io.flowset.control.entity/ExternalTaskData.state"
+                                   property="state" readOnly="true" width="100%"/>
+                    </div>
+                    <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 md:grid-cols-1 sm:grid-cols-1"
+                         width="100%">
+                        <textField id="workerIdField" dataContainer="externalTaskDataDc"
+                                   label="msg://io.flowset.control.entity/ExternalTaskData.workerId"
+                                   property="workerId" readOnly="true" width="100%"/>
+                        <textField id="businessKeyField" dataContainer="externalTaskDataDc"
+                                   label="msg://io.flowset.control.entity/ExternalTaskData.businessKey"
+                                   property="businessKey" readOnly="true" width="100%"/>
+                    </div>
+                    <textField id="activityInstanceIdField" dataContainer="externalTaskDataDc"
+                               label="msg://io.flowset.control.entity/ExternalTaskData.activityInstanceId"
+                               property="activityInstanceId" readOnly="true" width="100%"/>
+                    <textField id="processDefinitionIdField"
+                               label="msg://process"
+                               readOnly="true" width="100%">
+                        <suffix>
+                            <button id="viewProcessBtn" action="viewProcessAction" themeNames="tertiary-inline"/>
+                        </suffix>
+                    </textField>
+                    <textField id="processInstanceIdField" dataContainer="externalTaskDataDc"
+                               label="msg://io.flowset.control.entity/ExternalTaskData.processInstanceId"
+                               property="processInstanceId" readOnly="true" width="100%">
+                        <suffix>
+                            <button id="viewProcessInstanceBtn" action="viewProcessInstanceAction"
+                                    themeNames="tertiary-inline"/>
+                        </suffix>
+                    </textField>
+                </vbox>
+            </formLayout>
+            <vbox padding="false" expand="errorDetailsField">
+                <textArea id="errorMessageField" dataContainer="externalTaskDataDc" property="errorMessage"
+                          minHeight="5em" readOnly="true" width="100%" label="msg://errorMessageField.label">
+                    <suffix>
+                        <button id="copyErrorBtn" icon="COPY_O" themeNames="tertiary-inline" action="copyErrorAction"/>
+                    </suffix>
+                </textArea>
+                <codeEditor id="errorDetailsField" readOnly="true" minHeight="8em" width="100%"/>
+            </vbox>
+        </split>
         <hbox id="detailActions" width="100%">
-            <button id="retryBtn" text="msg:///actions.Retry" icon="ROTATE_LEFT" visible="false" themeNames="primary"/>
-            <button id="closeBtn" action="closeAction"/>
+            <button id="retryBtn" action="retryAction" themeNames="primary"/>
+            <hbox themeNames="spacing-s" classNames="ml-auto">
+                <button id="copyErrorDetailsBtn" text="msg://io.flowset.control.view.job/copyStacktraceBtn.text"
+                        icon="COPY" action="copyErrorDetailsAction"/>
+                <button action="closeAction"/>
+            </hbox>
         </hbox>
     </layout>
 </view>
