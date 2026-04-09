@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
@@ -8,6 +8,7 @@ package io.flowset.control.view.processdefinition;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -15,6 +16,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.ViewEngineConnectionFailedException;
+import io.flowset.control.mapper.ProcessElementMetadataMapper;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
@@ -31,6 +33,8 @@ import io.flowset.control.entity.activity.ProcessActivityStatistics;
 import io.flowset.control.entity.dashboard.IncidentStatistics;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
+import io.flowset.control.entity.processdefinition.CalledProcessReferenceData;
+import io.flowset.control.entity.decisiondefinition.DecisionReferenceData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.service.activity.ActivityService;
@@ -49,6 +53,7 @@ import io.flowset.uikit.component.bpmnviewer.command.ElementMarkerType;
 import io.flowset.uikit.component.bpmnviewer.command.RemoveMarkerCmd;
 import io.flowset.uikit.component.bpmnviewer.command.SetActivityStatisticsCmd;
 import io.flowset.uikit.component.bpmnviewer.event.ElementClickEvent;
+import io.flowset.uikit.component.bpmnviewer.event.XmlImportCompleteEvent;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -104,6 +109,10 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     @ViewComponent
     protected CollectionLoader<RuntimeProcessInstanceData> processInstanceDataDl;
     @ViewComponent
+    protected CollectionContainer<CalledProcessReferenceData> calledProcessesDc;
+    @ViewComponent
+    protected CollectionContainer<DecisionReferenceData> decisionsDc;
+    @ViewComponent
     protected InstanceContainer<ProcessInstanceFilter> processInstanceFilterDc;
 
     @ViewComponent
@@ -136,6 +145,12 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
 
     @ViewComponent("tabsheet.bpmnXmlTab")
     protected Tab tabsheetBpmnXmlTab;
+    @ViewComponent("tabsheet.calledProcessesTab")
+    protected Tab tabsheetCalledProcessesTab;
+    @ViewComponent("tabsheet.decisionsTab")
+    protected Tab tabsheetDecisionsTab;
+    @Autowired
+    protected ProcessElementMetadataMapper elementMetadataMapper;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -187,6 +202,11 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected void initTabIcons() {
         tabsheetProcessInstancesTab.addComponentAsFirst(VaadinIcon.TASKS.create());
         tabsheetBpmnXmlTab.addComponentAsFirst(VaadinIcon.FILE_CODE.create());
+        tabsheetCalledProcessesTab.addComponentAsFirst(VaadinIcon.SITEMAP.create());
+
+        SvgIcon decisionIcon = new SvgIcon("icons/table.svg");
+        decisionIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+        tabsheetDecisionsTab.addComponentAsFirst(decisionIcon);
     }
 
 
@@ -274,18 +294,33 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected void initViewer(String bpmnXml) {
         viewerFragment.initViewer(bpmnXml);
         viewerFragment.showCalledProcessOverlays();
-        viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent -> {
-            callActivityClickHandler.handleProcessNavigation(processDefinitionDataDc.getItem(),
-                    callActivityOverlayClickEvent.getCallActivity(),
-                    UiComponentUtils.isComponentAttachedToDialog(this));
-        });
+        viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent ->
+                callActivityClickHandler.handleProcessNavigation(processDefinitionDataDc.getItem(),
+                        callActivityOverlayClickEvent.getCallActivity(),
+                        UiComponentUtils.isComponentAttachedToDialog(this)));
         viewerFragment.showDecisionLinkOverlays();
-        viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent -> {
-            businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
-                    businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
-                    UiComponentUtils.isComponentAttachedToDialog(this));
-        });
+        viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent ->
+                businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
+                        businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
+                        UiComponentUtils.isComponentAttachedToDialog(this)));
+        viewerFragment.addImportCompleteListener(this::handleImportComplete);
         showStatistics();
+    }
+
+    protected void handleImportComplete(XmlImportCompleteEvent event) {
+        updateCalledProcessesAndDecisions(event);
+
+    }
+
+    protected void updateCalledProcessesAndDecisions(XmlImportCompleteEvent event) {
+        List<CalledProcessReferenceData> calledProcesses = elementMetadataMapper.fromCallActivities(event.getCalledProcesses());
+        List<DecisionReferenceData> decisions = elementMetadataMapper.fromBusinessRuleTasks(event.getCalledDecisions());
+
+        calledProcessesDc.setItems(calledProcesses);
+        decisionsDc.setItems(decisions);
+
+        updateCalledProcessesTabCaption(calledProcesses.size());
+        updateDecisionsTabCaption(decisions.size());
     }
 
     protected void showStatistics() {
@@ -350,6 +385,18 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         tabsheetProcessInstancesTab.addComponentAsFirst(VaadinIcon.TASKS.create());
     }
 
+    protected void updateCalledProcessesTabCaption(long count) {
+        tabsheetCalledProcessesTab.setLabel(messageBundle.formatMessage("calledProcessesTab.label", count));
+        tabsheetCalledProcessesTab.addComponentAsFirst(VaadinIcon.SITEMAP.create());
+    }
+
+    protected void updateDecisionsTabCaption(long count) {
+        tabsheetDecisionsTab.setLabel(messageBundle.formatMessage("decisionsTab.label", count));
+        SvgIcon decisionIcon = new SvgIcon("icons/table.svg");
+        decisionIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+        tabsheetDecisionsTab.addComponentAsFirst(decisionIcon);
+    }
+
     protected void initProcessInstanceFilter() {
         ProcessInstanceFilter processInstanceFilter = metadata.create(ProcessInstanceFilter.class);
         processInstanceFilter.setUnfinished(true);
@@ -377,4 +424,5 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         badge.setText(text);
         return badge;
     }
+
 }

@@ -1,0 +1,32 @@
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="processDefinitionDataDc"
+                  class="io.flowset.control.entity.processdefinition.ProcessDefinitionData"
+                  provided="true"/>
+        <collection id="decisionsDc"
+                    class="io.flowset.control.entity.decisiondefinition.DecisionReferenceData"
+                    provided="true"/>
+    </data>
+    <content>
+        <vbox id="root" width="100%" height="100%" padding="false">
+            <dataGrid id="decisionsGrid" width="100%" height="100%" themeNames="compact"
+                      dataContainer="decisionsDc">
+                <columns resizable="true">
+                    <column property="decisionRef">
+                        <fragmentRenderer
+                                class="io.flowset.control.view.processdefinition.column.DecisionRefColumnFragment"/>
+                    </column>
+                    <column property="binding" sortable="false"/>
+                    <column property="version" sortable="false"/>
+                    <column property="versionTag" sortable="false"/>
+                    <column property="elementId"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+    </content>
+</fragment>

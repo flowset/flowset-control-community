@@ -19,6 +19,7 @@ import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
+import io.flowset.control.view.processdefinition.ProcessDefinitionDiagramView;
 import io.flowset.control.view.processinstance.CalledProcessInstanceDataListView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.uikit.component.bpmnviewer.model.CallActivityData;
@@ -70,6 +71,22 @@ public class CallActivityOverlayClickHandler {
                         .withBackwardNavigation(true)
                         .navigate();
             }
+        }
+    }
+
+    /**
+     * Opens {@link ProcessDefinitionDiagramView} for the process called from the specified process and activity.
+     *
+     * @param parentProcess    parent process
+     * @param callActivityData the data from Call activity element from the parent process
+     */
+    public void handleProcessPreview(ProcessDefinitionData parentProcess,
+                                     CallActivityData callActivityData) {
+        ProcessDefinitionData calledProcess = findCalledProcess(callActivityData, parentProcess);
+        if (calledProcess != null) {
+            dialogWindows.view(getCurrentView(), ProcessDefinitionDiagramView.class)
+                    .withViewConfigurer(view -> view.setProcessDefinition(calledProcess))
+                    .open();
         }
     }
 

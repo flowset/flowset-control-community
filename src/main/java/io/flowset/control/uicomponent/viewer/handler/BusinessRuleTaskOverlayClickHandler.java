@@ -12,6 +12,7 @@ import io.flowset.control.entity.filter.DecisionDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
+import io.flowset.control.view.decisiondefinition.DecisionDefinitionDiagramView;
 import io.flowset.control.view.decisiondefinition.DecisionDefinitionDetailView;
 import io.flowset.uikit.component.bpmnviewer.event.DecisionLinkOverlayClickEvent;
 import io.flowset.uikit.component.bpmnviewer.model.BusinessRuleTaskData;
@@ -68,6 +69,22 @@ public class BusinessRuleTaskOverlayClickHandler {
                         .withBackwardNavigation(true)
                         .navigate();
             }
+        }
+    }
+
+    /**
+     * Opens {@link DecisionDefinitionDiagramView} for the decision called from the specified process and activity.
+     *
+     * @param parentProcess        parent process
+     * @param businessRuleTaskData the data from Business Rule Task element from the parent process
+     */
+    public void handleDecisionPreview(ProcessDefinitionData parentProcess,
+                                      BusinessRuleTaskData businessRuleTaskData) {
+        DecisionDefinitionData decisionDefinition = findDecisionDefinition(businessRuleTaskData, parentProcess);
+        if (decisionDefinition != null) {
+            dialogWindows.view(getCurrentView(), DecisionDefinitionDiagramView.class)
+                    .withViewConfigurer(view -> view.setDecisionDefinition(decisionDefinition))
+                    .open();
         }
     }
 
