@@ -19,6 +19,8 @@ public class JobFilter {
 
     protected String processInstanceId;
 
+    protected String jobDefinitionId;
+
     public String getProcessInstanceId() {
         return processInstanceId;
     }
@@ -33,5 +35,13 @@ public class JobFilter {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getJobDefinitionId() {
+        return jobDefinitionId;
+    }
+
+    public void setJobDefinitionId(String jobDefinitionId) {
+        this.jobDefinitionId = jobDefinitionId;
     }
 }

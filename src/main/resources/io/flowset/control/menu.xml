@@ -29,6 +29,9 @@
     <item id="deployments" view="bpm_Deployment.list"
           title="msg://io.flowset.control.view.deploymentdata/deploymentListView.title" icon="vaadin:file-process"/>
 
+    <item id="batches" view="bpm_AllBatchListView"
+          title="msg://io.flowset.control/menu_config.bpm_AllBatchListView.title" icon="CUBES"/>
+
     <menu id="administration" description="msg://io.flowset.control/menu_config.administration.description"
           opened="true"
           title="msg://io.flowset.control/menu_config.administration.title" icon="vaadin:cog">

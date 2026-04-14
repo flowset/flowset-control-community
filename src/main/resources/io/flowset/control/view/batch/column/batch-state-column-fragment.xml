@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="batchStatisticsDc" class="io.flowset.control.entity.batch.BatchStatisticsData"/>
+    </data>
+    <content>
+        <hbox id="root" padding="false" themeNames="spacing-xs" alignItems="CENTER" width="max-content">
+            <span id="stateBadge" themeNames="badge pill" dataContainer="batchStatisticsDc" property="state"/>
+            <icon id="failedJobsWarningIcon" icon="WARNING" classNames="icon-m p-xs text-error" visible="false">
+                <tooltip text="msg://batchHasFailedJobsTooltipText"/>
+            </icon>
+        </hbox>
+    </content>
+</fragment>

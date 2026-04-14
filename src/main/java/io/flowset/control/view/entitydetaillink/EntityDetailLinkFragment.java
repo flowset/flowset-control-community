@@ -8,6 +8,7 @@ package io.flowset.control.view.entitydetaillink;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.AccessManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.accesscontext.InMemoryCrudEntityContext;
@@ -18,9 +19,7 @@ import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.fragmentrenderer.FragmentRenderer;
 import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.view.OpenMode;
-import io.jmix.flowui.view.ViewInfo;
-import io.jmix.flowui.view.ViewRegistry;
+import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
@@ -39,6 +38,7 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
  */
 public abstract class EntityDetailLinkFragment<E extends Component, V> extends FragmentRenderer<E, V> {
     protected OpenMode openMode;
+    protected boolean useDialogFullScreen;
     protected String linkButtonId;
 
     @Autowired
@@ -54,9 +54,15 @@ public abstract class EntityDetailLinkFragment<E extends Component, V> extends F
     protected ApplicationContext applicationContext;
     @Autowired
     protected ViewRegistry viewRegistry;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
     public void setOpenMode(OpenMode openMode) {
         this.openMode = openMode;
+    }
+
+    public void setUseDialogFullScreen(boolean useDialogFullScreen) {
+        this.useDialogFullScreen = useDialogFullScreen;
     }
 
     public void setLinkButtonId(String linkButtonId) {
@@ -115,9 +121,13 @@ public abstract class EntityDetailLinkFragment<E extends Component, V> extends F
     }
 
     protected void openDialogDetailView(Class<V> entityClass) {
-        dialogWindows.detail(getCurrentView(), entityClass)
+        DialogWindow<View<?>> dialog = dialogWindows.detail(getCurrentView(), entityClass)
                 .editEntity(item)
-                .open();
+                .build();
+        if (useDialogFullScreen) {
+            componentHelper.addFullScreenButton(dialog);
+        }
+        dialog.open();
     }
 
     protected void openDetailViewInNewTab(Class<V> entityClass) {

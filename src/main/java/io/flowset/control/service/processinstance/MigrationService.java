@@ -5,6 +5,9 @@
 
 package io.flowset.control.service.processinstance;
 
+import io.flowset.control.entity.batch.BatchData;
+import org.springframework.lang.Nullable;
+
 import java.util.List;
 
 /**
@@ -46,6 +49,8 @@ public interface MigrationService {
      *
      * @param srcProcessDefinitionId    a source process definition identifier
      * @param targetProcessDefinitionId a target process definition identifier
+     * @return created batch or {@code null} if operation failed
      */
-    void migrateAllProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId);
+    @Nullable
+    BatchData migrateAllProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId);
 }

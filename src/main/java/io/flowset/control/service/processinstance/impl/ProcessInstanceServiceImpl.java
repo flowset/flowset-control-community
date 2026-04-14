@@ -7,6 +7,7 @@ package io.flowset.control.service.processinstance.impl;
 
 import feign.FeignException;
 import feign.utils.ExceptionUtils;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
 import io.jmix.core.Sort;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
@@ -15,6 +16,7 @@ import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
+import io.flowset.control.mapper.BatchMapper;
 import io.flowset.control.mapper.ProcessInstanceMapper;
 import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
@@ -53,6 +55,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     protected final RemoteHistoryService historyService;
     protected final ProcessInstanceApiClient processInstanceApiClient;
     protected final HistoryApiClient historyApiClient;
+    protected final BatchMapper batchMapper;
     protected final ProcessInstanceMapper processInstanceMapper;
     protected final EngineTenantProvider engineTenantProvider;
 
@@ -60,11 +63,14 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                                       RemoteHistoryService historyService,
                                       ProcessInstanceApiClient processInstanceApiClient,
                                       HistoryApiClient historyApiClient,
-                                      ProcessInstanceMapper processInstanceMapper, EngineTenantProvider engineTenantProvider) {
+                                      BatchMapper batchMapper,
+                                      ProcessInstanceMapper processInstanceMapper,
+                                      EngineTenantProvider engineTenantProvider) {
         this.remoteRuntimeService = remoteRuntimeService;
         this.historyService = historyService;
         this.processInstanceApiClient = processInstanceApiClient;
         this.historyApiClient = historyApiClient;
+        this.batchMapper = batchMapper;
         this.processInstanceMapper = processInstanceMapper;
         this.engineTenantProvider = engineTenantProvider;
     }
@@ -304,17 +310,29 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     }
 
     @Override
-    public void terminateByIdsAsync(ProcessInstanceBulkTerminateContext context) {
+    @Nullable
+    public BatchData terminateByIdsAsync(ProcessInstanceBulkTerminateContext context) {
         try {
-            remoteRuntimeService.deleteProcessInstancesAsync(context.getProcessInstanceIds(),
-                    null, null, context.getReason(),
-                    BooleanUtils.toBoolean(context.getSkipCustomListeners()),
-                    BooleanUtils.toBoolean(context.getSkipSubprocesses()),
-                    BooleanUtils.toBoolean(context.getSkipIoMappings()));
+            ResponseEntity<BatchDto> response = processInstanceApiClient.deleteProcessInstancesAsyncOperation(
+                    new DeleteProcessInstancesDto()
+                            .processInstanceIds(context.getProcessInstanceIds())
+                            .deleteReason(context.getReason())
+                            .skipCustomListeners(BooleanUtils.toBoolean(context.getSkipCustomListeners()))
+                            .skipSubprocesses(BooleanUtils.toBoolean(context.getSkipSubprocesses()))
+                            .skipIoMappings(BooleanUtils.toBoolean(context.getSkipIoMappings()))
+            );
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("Unable to terminate process instances by ids '{}', status code: {}",
+                        context.getProcessInstanceIds(), response.getStatusCode());
+                return null;
+            }
+            BatchDto batchDto = response.getBody();
+            return batchDto != null ? batchMapper.fromBatchDto(batchDto) : null;
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load terminate instances by ids because BPM engine not selected");
+                return null;
             }
             if (isConnectionError(rootCause)) {
                 log.error("Unable to terminate process instances because of connection error: ", e);
@@ -325,15 +343,24 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     }
 
     @Override
-    public void activateByIdsAsync(List<String> processInstancesIds) {
+    @Nullable
+    public BatchData activateByIdsAsync(List<String> processInstancesIds) {
         try {
-            processInstanceApiClient.updateSuspensionStateAsyncOperation(
+            ResponseEntity<BatchDto> response = processInstanceApiClient.updateSuspensionStateAsyncOperation(
                     new ProcessInstanceSuspensionStateAsyncDto()
                             .processInstanceIds(processInstancesIds));
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("Unable to activate process instances by ids '{}', status code: {}",
+                        processInstancesIds, response.getStatusCode());
+                return null;
+            }
+            BatchDto batchDto = response.getBody();
+            return batchDto != null ? batchMapper.fromBatchDto(batchDto) : null;
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load activate instances by ids '{}' because BPM engine not selected", processInstancesIds);
+                return null;
             }
             if (isConnectionError(rootCause)) {
                 log.error("Unable to terminate process instances because of connection error: ", e);
@@ -344,16 +371,25 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
     }
 
     @Override
-    public void suspendByIdsAsync(List<String> processInstancesIds) {
+    @Nullable
+    public BatchData suspendByIdsAsync(List<String> processInstancesIds) {
         try {
-            processInstanceApiClient.updateSuspensionStateAsyncOperation(
+            ResponseEntity<BatchDto> response = processInstanceApiClient.updateSuspensionStateAsyncOperation(
                     new ProcessInstanceSuspensionStateAsyncDto()
                             .processInstanceIds(processInstancesIds)
                             .suspended(true));
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("Unable to suspend process instances by ids '{}', status code: {}",
+                        processInstancesIds, response.getStatusCode());
+                return null;
+            }
+            BatchDto batchDto = response.getBody();
+            return batchDto != null ? batchMapper.fromBatchDto(batchDto) : null;
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof EngineNotSelectedException) {
                 log.warn("Unable to load suspend instances by ids '{}' because BPM engine not selected", processInstancesIds);
+                return null;
             }
             if (isConnectionError(rootCause)) {
                 log.error("Unable to suspend process instances because of connection error: ", e);

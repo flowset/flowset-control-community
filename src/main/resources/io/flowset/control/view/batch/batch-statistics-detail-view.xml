@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://batchStatisticsDetailView.title"
+      focusComponent="form">
+    <data>
+        <instance id="batchStatisticsDc"
+                  class="io.flowset.control.entity.batch.BatchStatisticsData">
+            <loader id="batchStatisticsDl"/>
+        </instance>
+    </data>
+    <actions>
+        <action id="closeAction" type="detail_close"/>
+    </actions>
+    <layout classNames="pt-xs gap-s" width="100%">
+        <split id="contentSplit"
+               themeNames="splitter-spacing"
+               width="100%"
+               height="100%"
+               splitterPosition="40">
+            <div>
+                <formLayout id="form" dataContainer="batchStatisticsDc">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                        <responsiveStep minWidth="30em" columns="2"/>
+                    </responsiveSteps>
+                    <textField id="idField" property="id" readOnly="true" classNames="pt-s" colspan="2"/>
+
+                    <textField id="typeField" property="type" readOnly="true"
+                               label="msg://io.flowset.control.entity.batch/BatchStatisticsData.type"
+                               classNames="pt-s" width="100%"/>
+                    <textField id="stateField"
+                               property="state"
+                               label="msg://io.flowset.control.entity.batch/BatchStatisticsData.state"
+                               readOnly="true"
+                               classNames="pt-s"
+                               width="100%"/>
+                    <textField id="jobsCreatedField" property="jobsCreated" readOnly="true"
+                               label="msg://io.flowset.control.entity.batch/BatchStatisticsData.jobsCreated"
+                               classNames="pt-s" width="100%"/>
+                    <textField id="batchJobsPerSeedField"
+                               label="msg://io.flowset.control.entity.batch/BatchStatisticsData.batchJobsPerSeed"
+                               property="batchJobsPerSeed" readOnly="true" classNames="pt-s"
+                               width="100%"/>
+                    <textField id="invocationsPerBatchJobField" property="invocationsPerBatchJob" readOnly="true"
+                               classNames="pt-s" width="100%"/>
+
+                    <dateTimePicker id="startTimeField" property="startTime" readOnly="true" classNames="pt-s"
+                                    width="100%" step="1ms"/>
+                    <dateTimePicker id="executionStartTimeField" property="executionStartTime" readOnly="true"
+                                    classNames="pt-s" width="100%" step="1ms"/>
+
+                    <textField id="seedJobDefinitionIdField" property="seedJobDefinitionId" readOnly="true"
+                               classNames="pt-s"/>
+                    <textField id="monitorJobDefinitionIdField" property="monitorJobDefinitionId" readOnly="true"
+                               classNames="pt-s"/>
+                    <textField id="batchJobDefinitionIdField" property="batchJobDefinitionId" readOnly="true"
+                               classNames="pt-s"/>
+                    <textField id="createUserIdField" property="createUserId" readOnly="true" classNames="pt-s"/>
+                </formLayout>
+            </div>
+            <vbox width="100%" minHeight="20em" themeNames="spacing-s" padding="false">
+                <fragment id="jobsFragment" class="io.flowset.control.view.batch.jobstatistics.BatchJobStatisticsFragment"/>
+            </vbox>
+        </split>
+
+        <hbox id="detailActions" width="100%">
+            <button id="closeBtn" action="closeAction"/>
+        </hbox>
+    </layout>
+</view>

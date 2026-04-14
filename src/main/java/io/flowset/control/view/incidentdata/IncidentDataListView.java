@@ -7,7 +7,6 @@ package io.flowset.control.view.incidentdata;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.GridSortOrder;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -15,12 +14,9 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder;
-import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.flowset.control.view.incidentdata.column.IncidentProcessColumnFragment;
 import io.jmix.core.DataLoadContext;
@@ -35,7 +31,6 @@ import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
@@ -53,7 +48,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
@@ -245,33 +239,12 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     }
 
     protected void initDataGridHeaderRow() {
-        HeaderRow headerRow = incidentsDataGrid.getDefaultHeaderRow();
-
-        addColumnFilter(headerRow, "activityId", this::createActivityColumnFilter);
-        addColumnFilter(headerRow, "message", this::createMessageColumnFilter);
-        addColumnFilter(headerRow, "timestamp", this::createTimestampColumnFilter);
-        addColumnFilter(headerRow, "processInstanceId", this::createProcessInstanceColumnFilter);
-        addColumnFilter(headerRow, "processDefinitionId", this::createProcessColumnFilter);
-        addColumnFilter(headerRow, "type", this::createTypeColumnFilter);
-    }
-
-    protected <T extends ContainerDataGridHeaderFilter<IncidentFilter, IncidentData>> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<IncidentData>, T> filterProvider) {
-        DataGridColumn<IncidentData> column = incidentsDataGrid.getColumnByKey(columnName);
-        T filterComponent = filterProvider.apply(column);
-        BeanUtil.autowireContext(applicationContext, filterComponent);
-        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-        HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
-        layout.setSizeFull();
-        layout.addClassNames(LumoUtility.Gap.SMALL);
-        headerCell.setComponent(filterComponent);
-
-        Element child = filterComponent.getElement().getChild(0);
-        if (child != null && child.getStyle() != null) {
-            //set styles for column header text to make a filter button always visible
-            child.getStyle().setOverflow(Style.Overflow.HIDDEN);
-            child.getStyle().set("text-overflow", "ellipsis");
-            child.getStyle().setWhiteSpace(Style.WhiteSpace.PRE_WRAP);
-        }
+        componentHelper.addColumnFilter(incidentsDataGrid, "activityId", this::createActivityColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "message", this::createMessageColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "timestamp", this::createTimestampColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "processInstanceId", this::createProcessInstanceColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "processDefinitionId", this::createProcessColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "type", this::createTypeColumnFilter);
     }
 
     protected IncidentHeaderFilter createActivityColumnFilter(DataGridColumn<IncidentData> column) {

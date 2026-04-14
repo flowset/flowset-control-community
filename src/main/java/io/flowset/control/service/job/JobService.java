@@ -6,6 +6,7 @@
 package io.flowset.control.service.job;
 
 import io.flowset.control.entity.filter.JobFilter;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
 import org.springframework.lang.Nullable;
@@ -64,8 +65,10 @@ public interface JobService {
      *
      * @param jobIds  a list of job identifiers
      * @param retries a new value of retries
+     * @return created batch or {@code null} if operation failed
      */
-    void setJobRetriesAsync(List<String> jobIds, int retries);
+    @Nullable
+    BatchData setJobRetriesAsync(List<String> jobIds, int retries);
 
     /**
      * Loads error details of the running job with the specified identifier.

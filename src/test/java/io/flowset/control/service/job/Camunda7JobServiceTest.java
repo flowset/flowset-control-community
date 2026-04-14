@@ -8,6 +8,7 @@ package io.flowset.control.service.job;
 import feign.FeignException;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.jmix.core.DataManager;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.filter.JobFilter;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
@@ -83,10 +84,12 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
         List<String> jobIds = camundaRestTestHelper.getJobIdsByProcessKey(camunda7, "testJobRetriesUpdate");
 
         //when
-        jobService.setJobRetriesAsync(jobIds, 5);
-        waitForBatchExecution();
+        BatchData batchData = jobService.setJobRetriesAsync(jobIds, 5);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
         List<JobDto> updatedJobs = camundaRestTestHelper.getJobsByIds(camunda7, jobIds);
         assertThat(updatedJobs)
                 .hasSize(2)
@@ -340,21 +343,5 @@ public class Camunda7JobServiceTest extends AbstractCamunda7IntegrationTest {
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
 
-    private void waitForBatchExecution() {
-        boolean batchExists;
-        int attempts = 0;
-        do {
-            batchExists = camundaRestTestHelper.activeBatchExits(camunda7);
-            attempts++;
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                break;
-            }
-            if (attempts > 100) { //prevent infinite loop
-                break;
-            }
-        } while (batchExists);
-    }
 }
+

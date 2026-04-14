@@ -29,8 +29,6 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
  * @param <V> the type of the data entity used by the fragment
  */
 public abstract class ProcessLinkColumnFragment<E extends Component, V> extends EntityDetailLinkFragment<E, V> {
-    @Autowired
-    protected ComponentHelper componentHelper;
 
     protected ProcessDefinitionData processDefinitionData;
 

@@ -6,6 +6,7 @@
 package io.flowset.control.service.externaltask;
 
 import io.flowset.control.entity.ExternalTaskData;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.filter.ExternalTaskFilter;
 import org.springframework.lang.Nullable;
 
@@ -53,8 +54,10 @@ public interface ExternalTaskService {
      *
      * @param externalTaskIds a list of external task instance identifiers
      * @param retries         a new value of retries
+     * @return created batch data or null if response body is empty
      */
-    void setRetriesAsync(List<String> externalTaskIds, int retries);
+    @Nullable
+    BatchData setRetriesAsync(List<String> externalTaskIds, int retries);
 
     /**
      * Loads error details for the running external task instance with the specified identifier.

@@ -6,13 +6,14 @@
 package io.flowset.control.service.job.impl;
 
 import com.google.common.base.Strings;
-import feign.FeignException;
 import feign.utils.ExceptionUtils;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.filter.JobFilter;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
+import io.flowset.control.mapper.BatchMapper;
 import io.flowset.control.mapper.JobMapper;
 import io.flowset.control.service.client.EngineRestClient;
 import io.flowset.control.service.engine.EngineTenantProvider;
@@ -39,6 +40,7 @@ import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 @Slf4j
 public class JobServiceImpl implements JobService {
     protected final JobMapper jobMapper;
+    protected final BatchMapper batchMapper;
     protected final JobApiClient jobApiClient;
     protected final JobDefinitionApiClient jobDefinitionApiClient;
     protected final HistoryApiClient historyApiClient;
@@ -46,11 +48,13 @@ public class JobServiceImpl implements JobService {
     protected final EngineTenantProvider engineTenantProvider;
 
     public JobServiceImpl(JobMapper jobMapper,
+                          BatchMapper batchMapper,
                           JobApiClient jobApiClient,
                           JobDefinitionApiClient jobDefinitionApiClient,
                           HistoryApiClient historyApiClient,
                           EngineRestClient engineRestClient, EngineTenantProvider engineTenantProvider) {
         this.jobMapper = jobMapper;
+        this.batchMapper = batchMapper;
         this.jobApiClient = jobApiClient;
         this.jobDefinitionApiClient = jobDefinitionApiClient;
         this.historyApiClient = historyApiClient;
@@ -167,7 +171,8 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void setJobRetriesAsync(List<String> jobIds, int retries) {
+    @Nullable
+    public BatchData setJobRetriesAsync(List<String> jobIds, int retries) {
         try {
             ResponseEntity<BatchDto> response = jobApiClient.setJobRetriesAsyncOperation(new SetJobRetriesDto()
                     .jobIds(jobIds)
@@ -176,8 +181,11 @@ public class JobServiceImpl implements JobService {
             if (!response.getStatusCode().is2xxSuccessful()) {
                 log.error("Error on loading update retries to {} for job with ids {}, status code {}", retries,
                         jobIds, response.getStatusCode());
+                return null;
             } else {
                 log.debug("Async update retries count for jobs {}. New value: {}", jobIds, retries);
+                BatchDto body = response.getBody();
+                return body != null ? batchMapper.fromBatchDto(body) : null;
             }
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
@@ -247,6 +255,7 @@ public class JobServiceImpl implements JobService {
         }
         if (filter != null) {
             jobQueryDto.processInstanceId(filter.getProcessInstanceId());
+            jobQueryDto.jobDefinitionId(filter.getJobDefinitionId());
         }
 
         return jobQueryDto;

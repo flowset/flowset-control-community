@@ -7,13 +7,7 @@ package io.flowset.control.test_support.camunda7;
 
 import io.flowset.control.test_support.EngineTestContainerRestHelper;
 import io.flowset.control.test_support.camunda7.dto.IdDto;
-import io.flowset.control.test_support.camunda7.dto.request.CompleteUserTaskDto;
-import io.flowset.control.test_support.camunda7.dto.request.HandleFailureDto;
-import io.flowset.control.test_support.camunda7.dto.request.SetJobRetriesDto;
-import io.flowset.control.test_support.camunda7.dto.request.StartProcessDto;
-import io.flowset.control.test_support.camunda7.dto.request.SuspendInstancesRequestDto;
-import io.flowset.control.test_support.camunda7.dto.request.SuspendProcessRequestDto;
-import io.flowset.control.test_support.camunda7.dto.request.SuspendRequestDto;
+import io.flowset.control.test_support.camunda7.dto.request.*;
 import io.flowset.control.test_support.camunda7.dto.response.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -104,6 +98,12 @@ public class CamundaRestTestHelper {
         suspendRequestDto.setIncludeProcessInstances(includeInstances);
 
         restHelper.putVoid(camunda, "/process-definition/key/" + processKey + "/suspended", suspendRequestDto);
+    }
+
+    public BatchDto suspendInstancesAsync(Camunda7Container<?> camunda, List<String> processInstanceIds) {
+        return restHelper.postOne(camunda, "/process-instance/suspended-async",
+                Map.of("processInstanceIds", processInstanceIds),
+                BatchDto.class);
     }
 
     public void suspendProcessById(Camunda7Container<?> camunda, String processKey,
@@ -363,6 +363,24 @@ public class CamundaRestTestHelper {
     public boolean activeBatchExits(Camunda7Container<?> camunda) {
         CountResultDto countResultDto = restHelper.getOne(camunda, "/batch/count", CountResultDto.class);
         return countResultDto != null && countResultDto.getCount() > 0;
+    }
+
+    public void waitForBatchExecution(Camunda7Container<?> camunda) {
+        boolean batchExists;
+        int attempts = 0;
+        do {
+            batchExists = activeBatchExits(camunda);
+            attempts++;
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                break;
+            }
+            if (attempts > 100) { //prevent infinite loop
+                break;
+            }
+        } while (batchExists);
     }
 
     public List<String> getActiveRuntimeInstancesByKey(Camunda7Container<?> camunda, String processKey) {

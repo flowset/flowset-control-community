@@ -6,6 +6,7 @@
 package io.flowset.control.service.processinstance;
 
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.entity.variable.VariableInstanceData;
@@ -96,22 +97,28 @@ public interface ProcessInstanceService {
      * Asynchronously terminates process instances with the specified context.
      *
      * @param context a context containing data like process instance identifiers
+     * @return created batch or {@code null} if operation failed
      */
-    void terminateByIdsAsync(ProcessInstanceBulkTerminateContext context);
+    @Nullable
+    BatchData terminateByIdsAsync(ProcessInstanceBulkTerminateContext context);
 
     /**
      * Activates asynchronously the process instances with the specified identifiers.
      *
      * @param processInstancesIds a list of process instance identifiers
+     * @return created batch or {@code null} if operation failed
      */
-    void activateByIdsAsync(List<String> processInstancesIds);
+    @Nullable
+    BatchData activateByIdsAsync(List<String> processInstancesIds);
 
     /**
      * Suspends asynchronously the process instances with the specified identifiers.
      *
      * @param processInstancesIds a list of process instance identifiers
+     * @return created batch or {@code null} if operation failed
      */
-    void suspendByIdsAsync(List<String> processInstancesIds);
+    @Nullable
+    BatchData suspendByIdsAsync(List<String> processInstancesIds);
 
     /**
      * Loads the total count of running instances of the process definition version with the specified identifier.

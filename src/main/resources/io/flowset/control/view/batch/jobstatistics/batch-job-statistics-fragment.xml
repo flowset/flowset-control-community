@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <data>
+        <instance id="batchStatisticsDc" class="io.flowset.control.entity.batch.BatchStatisticsData" provided="true"/>
+        <collection id="jobsDc"
+                    class="io.flowset.control.entity.job.JobData">
+            <loader id="jobsDl" readOnly="true"/>
+        </collection>
+        <instance id="jobFilterDc" class="io.flowset.control.entity.filter.JobFilter"/>
+    </data>
+    <content>
+        <vbox id="root" padding="false" height="100%" expand="jobsDataGrid">
+            <h4 id="jobsGroupTitle" text="msg://jobsGroupHeader"/>
+
+            <hbox width="100%" alignItems="END" expand="jobsStatRow" >
+                <formLayout id="jobsStatRow" width="100%" classNames="gap-s"
+                            maxColumns="4" columnSpacing="var(--lumo-space-s)" rowSpacing="var(--lumo-space-xs)"
+                            columnWidth="8em" autoResponsive="true">
+                    <formRow>
+                        <card themeNames="outlined" classNames="bg-base" width="100%">
+                            <title>
+                                <span text="msg://totalJobsCard.title" width="max-content"
+                                      classNames="text-secondary text-xs font-normal"/>
+                            </title>
+                            <subtitle>
+                                <span id="totalJobsValue" classNames="text-l font-semibold mt-s"/>
+                            </subtitle>
+                        </card>
+                        <card themeNames="outlined" classNames="bg-success-10 border-success-20" width="100%">
+                            <title>
+                                <span text="msg://completedJobsCard.title" width="max-content"
+                                      classNames="text-secondary text-xs font-normal"/>
+                            </title>
+                            <subtitle>
+                                <hbox width="100%" justifyContent="BETWEEN" classNames="items-baseline mt-s">
+                                    <span id="completedJobsValue" classNames="text-l font-semibold text-success"/>
+                                    <span id="completedJobsPercentValue" classNames="text-l font-semibold text-success"/>
+                                </hbox>
+                            </subtitle>
+                        </card>
+                        <card themeNames="outlined" classNames="bg-error-10 border-error-20" width="100%">
+                            <title>
+                                <span text="msg://failedJobsCard.title" width="max-content"
+                                      classNames="text-secondary text-xs font-normal"/>
+                            </title>
+                            <subtitle>
+                                <span id="failedJobsValue" dataContainer="batchStatisticsDc" property="failedJobs"
+                                      classNames="text-l font-semibold text-error mt-s"/>
+                            </subtitle>
+                        </card>
+
+                        <card themeNames="outlined" classNames="bg-contrast-5" width="100%">
+                            <title>
+                                <span text="msg://remainingJobsCard.title"
+                                      classNames="text-secondary text-xs font-normal" width="max-content"/>
+                            </title>
+                            <subtitle>
+                                <span id="remainingJobsValue" classNames="mt-s text-l font-semibold"/>
+                            </subtitle>
+                        </card>
+                    </formRow>
+                </formLayout>
+
+                <hbox>
+                    <simplePagination id="jobsPagination" dataLoader="jobsDl" css="width:max-content"/>
+                </hbox>
+            </hbox>
+
+            <dataGrid id="jobsDataGrid"
+                      dataContainer="jobsDc"
+                      width="100%"
+                      minHeight="16em"
+                      themeNames="compact">
+                <columns resizable="true">
+                    <column property="jobId" frozen="true">
+                        <fragmentRenderer class="io.flowset.control.view.job.column.JobIdColumnFragment">
+                            <properties>
+                                <property name="openMode" value="DIALOG"/>
+                            </properties>
+                        </fragmentRenderer>
+                    </column>
+                    <column property="createTime" key="createTime"/>
+                    <column property="exceptionMessage" sortable="false"/>
+                    <column property="retries" autoWidth="true"/>
+                </columns>
+            </dataGrid>
+        </vbox>
+    </content>
+</fragment>

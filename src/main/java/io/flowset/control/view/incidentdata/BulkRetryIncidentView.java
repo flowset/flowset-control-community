@@ -1,8 +1,11 @@
 package io.flowset.control.view.incidentdata;
 
 
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.router.Route;
+import io.flowset.control.entity.batch.BatchData;
+import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
+import io.jmix.flowui.Fragments;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textfield.TypedTextField;
@@ -15,6 +18,7 @@ import io.flowset.control.service.job.JobService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.camunda.bpm.engine.runtime.Incident;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -31,16 +35,19 @@ public class BulkRetryIncidentView extends StandardView {
     @ViewComponent
     protected TypedTextField<Integer> retriesField;
     @Autowired
-    private ExternalTaskService externalTaskService;
+    protected ExternalTaskService externalTaskService;
     @Autowired
-    private JobService jobService;
+    protected JobService jobService;
     @Autowired
-    private Notifications notifications;
-
+    protected Notifications notifications;
+    @Autowired
+    protected Fragments fragments;
+    
     @ViewComponent
-    private MessageBundle messageBundle;
+    protected MessageBundle messageBundle;
 
     protected Set<IncidentData> incidentDataSet;
+
 
     public void setIncidentDataSet(Set<IncidentData> incidentDataSet) {
         this.incidentDataSet = incidentDataSet;
@@ -63,20 +70,20 @@ public class BulkRetryIncidentView extends StandardView {
         if (retries == null) {
             return;
         }
+        BatchData externalTaskBatch = null;
         List<String> externalTaskIds = getIncidentsByType(incidentDataSet, Incident.EXTERNAL_TASK_HANDLER_TYPE);
         if (CollectionUtils.isNotEmpty(externalTaskIds)) {
-            externalTaskService.setRetriesAsync(externalTaskIds, retries);
+            externalTaskBatch = externalTaskService.setRetriesAsync(externalTaskIds, retries);
         }
 
 
         List<String> jobIds = getIncidentsByType(incidentDataSet, Incident.FAILED_JOB_HANDLER_TYPE);
+        BatchData jobBatch = null;
         if (CollectionUtils.isNotEmpty(jobIds)) {
-            jobService.setJobRetriesAsync(jobIds, retries);
+            jobBatch = jobService.setJobRetriesAsync(jobIds, retries);
         }
 
-        notifications.create(messageBundle.getMessage("retriesBulkUpdateStarted"))
-                .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
-                .show();
+        showBatchNotification(externalTaskBatch, jobBatch);
 
         close(StandardOutcome.SAVE);
     }
@@ -91,5 +98,24 @@ public class BulkRetryIncidentView extends StandardView {
                 .filter(incidentData -> incidentData.getType().equals(incidentType) && incidentData.getConfiguration() != null)
                 .map(IncidentData::getConfiguration)
                 .toList();
+    }
+
+    protected void showBatchNotification(@Nullable BatchData externalTaskBatch, @Nullable BatchData jobBatch) {
+        BatchNotificationContentFragment batchNotificationContent = fragments.create(this, BatchNotificationContentFragment.class);
+        String batchId = null;
+        if (externalTaskBatch != null && jobBatch == null) {
+            batchId = externalTaskBatch.getId();
+        } else if (externalTaskBatch == null && jobBatch != null) {
+            batchId = jobBatch.getId();
+        }
+
+        batchNotificationContent.setBatchId(batchId);
+        batchNotificationContent.setTitle(messageBundle.getMessage("retriesBulkUpdateStarted"));
+
+        Notification notification = notifications.create(batchNotificationContent.getContent())
+                .withCloseable(true)
+                .build();
+        notification.setDuration(BatchNotificationContentFragment.DEFAULT_DURATION);
+        notification.open();
     }
 }

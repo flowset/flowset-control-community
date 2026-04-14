@@ -7,11 +7,15 @@ package io.flowset.control.view.util;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
@@ -20,10 +24,15 @@ import io.jmix.flowui.UiComponents;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.grid.headerfilter.DataGridHeaderFilter;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.DialogWindow;
 import io.jmix.flowui.view.View;
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +40,7 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.function.Function;
 
 @Component
 @AllArgsConstructor
@@ -41,6 +51,7 @@ public class ComponentHelper {
     protected final Messages messages;
     protected final DatatypeFormatter datatypeFormatter;
     protected final CurrentAuthentication currentAuthentication;
+    protected final ApplicationContext applicationContext;
 
     public Span createProcessInstanceStateBadge(ProcessInstanceState state) {
         Icon icon;
@@ -198,6 +209,37 @@ public class ComponentHelper {
                         }
                     }
                 });
+    }
+
+    /**
+     * Adds a custom column filter to the specified data grid.
+     *
+     * @param dataGrid       the data grid to which the filter will be added
+     * @param columnName     the name of the column to which the filter will be applied
+     * @param filterProvider a function that creates the filter component for the specified column
+     * @param <E>            the type of the data grid items
+     * @param <T>            the type of the filter component
+     */
+    public <E, T extends DataGridHeaderFilter> void addColumnFilter(DataGrid<E> dataGrid,
+                                                                    String columnName,
+                                                                    Function<DataGridColumn<E>, T> filterProvider) {
+        HeaderRow headerRow = dataGrid.getDefaultHeaderRow();
+        DataGridColumn<E> column = dataGrid.getColumnByKey(columnName);
+        T filterComponent = filterProvider.apply(column);
+        BeanUtil.autowireContext(applicationContext, filterComponent);
+        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
+        HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
+        layout.setSizeFull();
+        layout.addClassNames(LumoUtility.Gap.SMALL);
+        headerCell.setComponent(filterComponent);
+
+        Element child = filterComponent.getElement().getChild(0);
+        if (child != null && child.getStyle() != null) {
+            // set styles for column header text to make a filter button always visible
+            child.getStyle().setOverflow(Style.Overflow.HIDDEN);
+            child.getStyle().set("text-overflow", "ellipsis");
+            child.getStyle().setWhiteSpace(Style.WhiteSpace.PRE_WRAP);
+        }
     }
 
     protected <V extends View<?>> JmixButton createToggleFullScreenButton(DialogWindow<V> dialogWindow) {

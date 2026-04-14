@@ -165,9 +165,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
                 .withAfterCloseListener(afterCloseEvent -> {
                     if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
                         reloadProcessInstances();
-                        notifications.create(messageBundle.getMessage("processInstancesMigrationStarted"))
-                                .withType(Notifications.Type.SUCCESS)
-                                .show();
                     }
                 })
                 .withViewConfigurer(view -> view.setProcessDefinitionData(processDefinitionDataDc.getItem()))

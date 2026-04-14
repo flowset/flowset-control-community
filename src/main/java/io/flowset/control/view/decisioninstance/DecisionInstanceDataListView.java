@@ -6,15 +6,10 @@
 package io.flowset.control.view.decisioninstance;
 
 import com.vaadin.flow.component.grid.GridSortOrder;
-import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
@@ -26,7 +21,6 @@ import io.flowset.control.service.decisioninstance.DecisionInstanceLoadContext;
 import io.flowset.control.service.decisioninstance.DecisionInstanceService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
-import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.flowset.control.view.decisioninstance.column.DecisionDefinitionColumnFragment;
 import io.flowset.control.view.decisioninstance.column.DecisionInstanceProcessColumnFragment;
@@ -42,13 +36,11 @@ import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Route(value = "decision-instances", layout = DefaultMainViewParent.class)
@@ -175,14 +167,12 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
     }
 
     protected void initDataGridHeaderRow() {
-        HeaderRow headerRow = decisionInstancesDataGrid.getDefaultHeaderRow();
-
-        addColumnFilter(headerRow, "decisionInstanceId", this::createIdColumnFilter);
-        addColumnFilter(headerRow, "evaluationTime", this::createEvaluateTimeColumnFilter);
-        addColumnFilter(headerRow, "decisionDefinitionId", this::createDecisionColumnFilter);
-        addColumnFilter(headerRow, "processInstanceId", this::createProcessInstanceColumnFilter);
-        addColumnFilter(headerRow, "processDefinitionId", this::createProcessColumnFilter);
-        addColumnFilter(headerRow, "activityId", this::createActivityColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesDataGrid, "decisionInstanceId", this::createIdColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesDataGrid, "evaluationTime", this::createEvaluateTimeColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesDataGrid, "decisionDefinitionId", this::createDecisionColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesDataGrid, "processInstanceId", this::createProcessInstanceColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesDataGrid, "processDefinitionId", this::createProcessColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesDataGrid, "activityId", this::createActivityColumnFilter);
     }
 
     protected DecisionInstanceIdHeaderFilter createIdColumnFilter(DataGridColumn<HistoricDecisionInstanceShortData> idColumn) {
@@ -207,26 +197,6 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
 
     protected ActivityIdHeaderFilter createActivityColumnFilter(DataGridColumn<HistoricDecisionInstanceShortData> activityIdColumn) {
         return new ActivityIdHeaderFilter(decisionInstancesDataGrid, activityIdColumn, decisionFilterDc, this::startLoadData);
-    }
-
-    protected <T extends ContainerDataGridHeaderFilter<DecisionInstanceFilter, HistoricDecisionInstanceShortData>> void addColumnFilter(HeaderRow headerRow, String columnName,
-                                                                                                                                        Function<DataGridColumn<HistoricDecisionInstanceShortData>, T> filterProvider) {
-        DataGridColumn<HistoricDecisionInstanceShortData> column = decisionInstancesDataGrid.getColumnByKey(columnName);
-        T filterComponent = filterProvider.apply(column);
-        BeanUtil.autowireContext(applicationContext, filterComponent);
-        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-        HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
-        layout.setSizeFull();
-        layout.addClassNames(LumoUtility.Gap.SMALL);
-        headerCell.setComponent(filterComponent);
-
-        Element child = filterComponent.getElement().getChild(0);
-        if (child != null && child.getStyle() != null) {
-            //set styles for column header text to make a filter button always visible
-            child.getStyle().setOverflow(Style.Overflow.HIDDEN);
-            child.getStyle().set("text-overflow", "ellipsis");
-            child.getStyle().setWhiteSpace(Style.WhiteSpace.PRE_WRAP);
-        }
     }
 
     protected void setDefaultSort() {

@@ -6,15 +6,17 @@
 package io.flowset.control.service.processinstance.impl;
 
 import feign.utils.ExceptionUtils;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.mapper.BatchMapper;
 import io.flowset.control.service.processinstance.MigrationService;
-import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.community.rest.client.api.MigrationApiClient;
 import org.camunda.community.rest.client.model.*;
 import org.camunda.community.rest.impl.RemoteRuntimeService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,11 +29,14 @@ import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 public class MigrationServiceImpl implements MigrationService {
     protected final MigrationApiClient migrationApiClient;
     protected final RemoteRuntimeService remoteRuntimeService;
+    protected final BatchMapper batchMapper;
 
     public MigrationServiceImpl(MigrationApiClient migrationApiClient,
-                                RemoteRuntimeService remoteRuntimeService) {
+                                RemoteRuntimeService remoteRuntimeService,
+                                BatchMapper batchMapper) {
         this.migrationApiClient = migrationApiClient;
         this.remoteRuntimeService = remoteRuntimeService;
+        this.batchMapper = batchMapper;
     }
 
     @Override
@@ -88,7 +93,8 @@ public class MigrationServiceImpl implements MigrationService {
     }
 
     @Override
-    public void migrateAllProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId) {
+    @Nullable
+    public BatchData migrateAllProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId) {
         MigrationPlanDto migrationPlan = createMigrationPlan(srcProcessDefinitionId, targetProcessDefinitionId);
 
         ProcessInstanceQueryDto procInstancesQuery = new ProcessInstanceQueryDto().processDefinitionId(srcProcessDefinitionId);
@@ -98,7 +104,10 @@ public class MigrationServiceImpl implements MigrationService {
         ResponseEntity<BatchDto> response = migrationApiClient.executeMigrationPlanAsync(migrationDto);
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.error("Error on starting async process instance migration: source process definition {}, target process definition {}", srcProcessDefinitionId, targetProcessDefinitionId);
+            return null;
         }
+        BatchDto batchDto = response.getBody();
+        return batchDto != null ? batchMapper.fromBatchDto(batchDto) : null;
     }
 
     protected ProcessInstance getProcessInstanceById(String processInstanceId) {

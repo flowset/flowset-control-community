@@ -6,14 +6,12 @@
 package io.flowset.control.view.processinstance;
 
 import com.vaadin.flow.component.grid.GridSortOrder;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -27,7 +25,6 @@ import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
@@ -42,7 +39,6 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 @Route(value = "bpm/process-instances", layout = DefaultMainViewParent.class)
 @ViewController("bpm_ProcessInstance.list")
@@ -135,14 +131,12 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
 
 
     protected void initDataGridHeaderRow() {
-        HeaderRow headerRow = processInstancesGrid.getDefaultHeaderRow();
-
-        addColumnFilter(headerRow, "id", this::createIdColumnFilter);
-        addColumnFilter(headerRow, "processDefinitionId", this::createProcessColumnFilter);
-        addColumnFilter(headerRow, "businessKey", this::createBusinessKeyColumnFilter);
-        addColumnFilter(headerRow, "state", this::createStateColumnFilter);
-        addColumnFilter(headerRow, "startTime", this::createStartTimeColumnFilter);
-        addColumnFilter(headerRow, "endTime", this::createEndTimeColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "id", this::createIdColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "processDefinitionId", this::createProcessColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "businessKey", this::createBusinessKeyColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "state", this::createStateColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "startTime", this::createStartTimeColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "endTime", this::createEndTimeColumnFilter);
     }
 
 
@@ -290,14 +284,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected ProcessInstanceStateHeaderFilter createStateColumnFilter(DataGridColumn<ProcessInstanceData> stateColumn) {
         return new ProcessInstanceStateHeaderFilter(processInstancesGrid, stateColumn, processInstanceFilterDc);
-    }
-
-    protected <T extends ContainerDataGridHeaderFilter<ProcessInstanceFilter, ProcessInstanceData>> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<ProcessInstanceData>, T> filterProvider) {
-        DataGridColumn<ProcessInstanceData> column = processInstancesGrid.getColumnByKey(columnName);
-        T filterComponent = filterProvider.apply(column);
-        BeanUtil.autowireContext(applicationContext, filterComponent);
-        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-        headerCell.setComponent(filterComponent);
     }
 
     @Override

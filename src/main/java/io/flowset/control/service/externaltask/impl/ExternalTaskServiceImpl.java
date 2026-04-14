@@ -5,13 +5,14 @@
 
 package io.flowset.control.service.externaltask.impl;
 
-import com.google.common.base.Strings;
 import feign.utils.ExceptionUtils;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.EngineNotSelectedException;
 import io.jmix.core.Sort;
 import io.flowset.control.entity.ExternalTaskData;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.filter.ExternalTaskFilter;
+import io.flowset.control.mapper.BatchMapper;
 import io.flowset.control.mapper.ExternalTaskMapper;
 import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.service.externaltask.ExternalTaskLoadContext;
@@ -21,7 +22,9 @@ import org.camunda.bpm.engine.externaltask.ExternalTask;
 import org.camunda.bpm.engine.externaltask.ExternalTaskQuery;
 import org.camunda.community.rest.client.api.ExternalTaskApiClient;
 import org.camunda.community.rest.client.api.HistoryApiClient;
+import org.camunda.community.rest.client.model.BatchDto;
 import org.camunda.community.rest.client.model.ExternalTaskDto;
+import org.camunda.community.rest.client.model.SetRetriesForExternalTasksDto;
 import org.camunda.community.rest.impl.RemoteExternalTaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -40,17 +43,20 @@ public class ExternalTaskServiceImpl implements ExternalTaskService {
     protected final HistoryApiClient historyApiClient;
     protected final ExternalTaskApiClient externalTaskApiClient;
     protected final ExternalTaskMapper externalTaskMapper;
+    protected final BatchMapper batchMapper;
 
     private final EngineTenantProvider engineTenantProvider;
 
     public ExternalTaskServiceImpl(RemoteExternalTaskService remoteExternalTaskService,
                                    HistoryApiClient historyApiClient,
                                    ExternalTaskApiClient externalTaskApiClient,
+                                   BatchMapper batchMapper,
                                    ExternalTaskMapper externalTaskMapper,
                                    EngineTenantProvider engineTenantProvider) {
         this.remoteExternalTaskService = remoteExternalTaskService;
         this.historyApiClient = historyApiClient;
         this.externalTaskApiClient = externalTaskApiClient;
+        this.batchMapper = batchMapper;
         this.externalTaskMapper = externalTaskMapper;
         this.engineTenantProvider = engineTenantProvider;
     }
@@ -142,10 +148,22 @@ public class ExternalTaskServiceImpl implements ExternalTaskService {
     }
 
     @Override
-    public void setRetriesAsync(List<String> externalTaskIds, int retries) {
+    @Nullable
+    public BatchData setRetriesAsync(List<String> externalTaskIds, int retries) {
         try {
-            remoteExternalTaskService.setRetriesAsync(externalTaskIds, null, retries);
+            ResponseEntity<BatchDto> response = externalTaskApiClient.setExternalTaskRetriesAsyncOperation(
+                    new SetRetriesForExternalTasksDto()
+                            .externalTaskIds(externalTaskIds)
+                            .retries(retries)
+            );
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                log.error("Error on async update retries to {} for external tasks with ids {}, status code {}", retries,
+                        externalTaskIds, response.getStatusCode());
+                return null;
+            }
             log.debug("Async update retries count for external tasks {}. New value: {}", externalTaskIds, retries);
+            BatchDto body = response.getBody();
+            return body != null ? batchMapper.fromBatchDto(body) : null;
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (isConnectionError(rootCause)) {

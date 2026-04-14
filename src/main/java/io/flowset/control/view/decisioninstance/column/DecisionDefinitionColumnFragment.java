@@ -30,8 +30,6 @@ public class DecisionDefinitionColumnFragment extends EntityDetailLinkFragment<H
 
     @ViewComponent
     protected JmixButton idBtn;
-    @Autowired
-    protected ComponentHelper componentHelper;
 
     protected DecisionDefinitionData decisionDefinitionData;
 

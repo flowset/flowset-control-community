@@ -5,6 +5,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.Facets;
+import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.facet.Timer;
 import io.jmix.flowui.view.StandardListView;
@@ -50,7 +51,11 @@ public abstract class AbstractListViewWithDelayedLoad<V> extends StandardListVie
     }
 
     private void onReadyInternal(ReadyEvent readyEvent) {
-        dataLoadTimer.start();
+        if (!UiComponentUtils.isComponentAttachedToDialog(this)) {
+            dataLoadTimer.start();
+        } else {
+            handleDataLoading(); // the timer is not started in case of dialog view
+        }
     }
 
     private void onBeforeShowInternal(BeforeShowEvent beforeShowEvent) {

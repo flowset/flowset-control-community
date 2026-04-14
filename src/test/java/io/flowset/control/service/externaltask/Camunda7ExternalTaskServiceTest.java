@@ -7,6 +7,7 @@ package io.flowset.control.service.externaltask;
 
 import feign.FeignException;
 import io.flowset.control.entity.ExternalTaskData;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.RemoteProcessEngineException;
 import io.jmix.core.DataManager;
@@ -114,10 +115,12 @@ public class Camunda7ExternalTaskServiceTest extends AbstractCamunda7Integration
         List<String> taskIds = camundaRestTestHelper.getExternalTaskIds(camunda7, instanceIds);
 
         //when
-        externalTaskService.setRetriesAsync(taskIds, 5);
-        waitForBatchExecution();
+        BatchData batchData = externalTaskService.setRetriesAsync(taskIds, 5);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
         List<ExternalTaskDto> updatedTasks = camundaRestTestHelper.getExternalTasksByIds(camunda7, taskIds);
         assertThat(updatedTasks)
                 .hasSize(2)
@@ -345,23 +348,5 @@ public class Camunda7ExternalTaskServiceTest extends AbstractCamunda7Integration
         assertThatThrownBy(() -> externalTaskService.findById(externalTaskId))
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
-
-
-    private void waitForBatchExecution() {
-        boolean batchExists;
-        int attempts = 0;
-        do {
-            batchExists = camundaRestTestHelper.activeBatchExits(camunda7);
-            attempts++;
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                break;
-            }
-            if (attempts > 100) { //prevent infinite loop
-                break;
-            }
-        } while (batchExists);
-    }
 }
+

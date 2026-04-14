@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://allBatchListView.title"
+      focusComponent="activeBatchesDataGrid">
+    <data>
+        <collection id="activeBatchesDc" class="io.flowset.control.entity.batch.BatchStatisticsData">
+            <loader id="activeBatchesDl"/>
+        </collection>
+        <instance id="activeBatchFilterDc" class="io.flowset.control.entity.filter.BatchFilter"/>
+        <collection id="completedBatchesDc" class="io.flowset.control.entity.batch.BatchData">
+            <loader id="completedBatchesDl"/>
+        </collection>
+
+        <instance id="completedBatchFilterDc" class="io.flowset.control.entity.filter.BatchFilter"/>
+    </data>
+    <facets>
+        <urlQueryParameters id="urlQueryParameters">
+            <pagination component="batchesPagination"/>
+            <pagination component="completedBatchesPagination" firstResultParam="completedFirstResult"
+                        maxResultsParam="completedMaxResults"/>
+        </urlQueryParameters>
+        <timer id="completedBatchLoadTimer" delay="1" autostart="false"/>
+    </facets>
+    <actions>
+        <action id="close" type="view_close"/>
+    </actions>
+    <layout padding="false" classNames="pt-0 gap-s">
+        <tabSheet id="tabsheet" width="100%" height="100%">
+            <tab id="activeTab" label="msg://activeTabLabel">
+                <vbox padding="false" width="100%" height="100%">
+                    <hbox id="buttonsPanel" classNames="buttons-panel">
+                        <button id="refreshBtn" action="activeBatchesDataGrid.refresh" themeNames="primary success"/>
+                        <simplePagination id="batchesPagination" dataLoader="activeBatchesDl"/>
+                    </hbox>
+
+                    <dataGrid id="activeBatchesDataGrid"
+                              dataContainer="activeBatchesDc"
+                              width="100%"
+                              minHeight="20em">
+                        <actions>
+                            <action id="refresh" type="list_refresh"/>
+                            <action id="view" type="list_edit" visible="false"/>
+                        </actions>
+                        <columns resizable="true">
+                            <column property="id" autoWidth="true">
+                                <fragmentRenderer
+                                        class="io.flowset.control.view.batch.column.BatchStatisticsIdColumnFragment">
+                                    <properties>
+                                        <property name="openMode" value="DIALOG"/>
+                                        <property name="useDialogFullScreen" value="true"/>
+                                    </properties>
+                                </fragmentRenderer>
+                            </column>
+                            <column property="type" autoWidth="true" sortable="false"/>
+                            <column property="startTime" autoWidth="true"/>
+                            <column property="state" autoWidth="true" sortable="false">
+                                <fragmentRenderer
+                                        class="io.flowset.control.view.batch.column.BatchStateColumnFragment"/>
+                            </column>
+                            <column property="failedJobs" autoWidth="true" sortable="false"/>
+                            <column property="totalJobs" autoWidth="true" sortable="false"/>
+                            <column key="progress" header="msg://allBatchListView.progress" sortable="false"
+                                    flexGrow="1">
+                                <fragmentRenderer
+                                        class="io.flowset.control.view.batch.column.BatchProgressColumnFragment"/>
+                            </column>
+                        </columns>
+                        <emptyStateComponent>
+                            <vbox id="emptyStateBox" height="100%" alignItems="CENTER" justifyContent="CENTER"
+                                  width="100%"/>
+                        </emptyStateComponent>
+                    </dataGrid>
+                </vbox>
+            </tab>
+            <tab id="completedTab" label="msg://completedTabLabel">
+                <vbox id="root" padding="false" width="100%" height="100%">
+                    <hbox id="completedBatchButtonsPanel" classNames="buttons-panel">
+                        <button id="completedBatchRefreshBtn" action="completedBatchesDataGrid.refresh"
+                                themeNames="primary success"/>
+                        <simplePagination id="completedBatchesPagination" dataLoader="completedBatchesDl"/>
+                    </hbox>
+
+                    <dataGrid id="completedBatchesDataGrid"
+                              dataContainer="completedBatchesDc"
+                              width="100%"
+                              minHeight="20em">
+                        <actions>
+                            <action id="refresh" type="list_refresh"/>
+                            <action id="view" type="list_edit" visible="false"/>
+                        </actions>
+                        <columns resizable="true">
+                            <column property="id" autoWidth="true">
+                                <fragmentRenderer
+                                        class="io.flowset.control.view.batch.column.BatchIdColumnFragment">
+                                    <properties>
+                                        <property name="openMode" value="DIALOG"/>
+                                        <property name="useDialogFullScreen" value="true"/>
+                                    </properties>
+                                </fragmentRenderer>
+                            </column>
+                            <column property="type" autoWidth="true" sortable="false"/>
+                            <column property="startTime" autoWidth="true"/>
+                            <column property="endTime" autoWidth="true"/>
+                            <column property="totalJobs" autoWidth="true" sortable="false"/>
+                        </columns>
+                        <emptyStateComponent>
+                            <vbox id="completedBatchGridEmptyStateBox" height="100%" alignItems="CENTER"
+                                  justifyContent="CENTER" width="100%"/>
+                        </emptyStateComponent>
+                    </dataGrid>
+                </vbox>
+            </tab>
+        </tabSheet>
+        <hbox id="lookupActions" visible="false" classNames="pr-m pl-m pb-m">
+            <button id="discardBtn" action="close"/>
+        </hbox>
+    </layout>
+</view>

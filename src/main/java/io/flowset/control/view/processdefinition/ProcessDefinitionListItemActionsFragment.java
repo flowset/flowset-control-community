@@ -161,13 +161,6 @@ public class ProcessDefinitionListItemActionsFragment extends Fragment<Horizonta
 
     protected void openProcessInstanceMigrationDialog() {
         dialogWindows.view(getView(), ProcessInstanceMigrationView.class)
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        notifications.create(messageBundle.getMessage("processInstancesMigrationStarted"))
-                                .withType(Notifications.Type.SUCCESS)
-                                .show();
-                    }
-                })
                 .withViewConfigurer(view -> view.setProcessDefinitionData(processDefinition))
                 .build()
                 .open();
