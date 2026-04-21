@@ -5,7 +5,6 @@
 
 package io.flowset.control.view.engineconnectionsettings;
 
-
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.Span;
@@ -18,7 +17,9 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.engine.EngineAuthState;
 import io.flowset.control.entity.engine.EnvironmentType;
+import io.flowset.control.service.engine.auth.EngineAuthStateService;
 import io.jmix.core.Messages;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
@@ -38,6 +39,7 @@ import io.flowset.control.service.engine.EngineUiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 
@@ -45,7 +47,7 @@ import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 @Route(value = "engine-connection-settings", layout = DefaultMainViewParent.class)
 @ViewController("EngineConnectionSettingsView")
 @ViewDescriptor("engine-connection-settings-view.xml")
-@DialogMode(minWidth = "30em", maxWidth = "40em")
+@DialogMode(minWidth = "32em", maxWidth = "42em")
 public class EngineConnectionSettingsView extends StandardView {
     public static final String ENGINE_WITH_TYPE_LABEL_FORMAT = "%s (%s)";
 
@@ -60,6 +62,8 @@ public class EngineConnectionSettingsView extends StandardView {
     @Autowired
     protected EngineService engineService;
     @Autowired
+    protected EngineAuthStateService engineAuthStateService;
+    @Autowired
     protected Notifications notifications;
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -72,9 +76,19 @@ public class EngineConnectionSettingsView extends StandardView {
     @ViewComponent
     protected VerticalLayout customHttpHeaderSettingsVBox;
     @ViewComponent
+    protected VerticalLayout oauth2SettingsVBox;
+    @ViewComponent
     protected TypedTextField<String> customHeaderName;
     @ViewComponent
     protected JmixPasswordField customHeaderValue;
+    @ViewComponent
+    protected TypedTextField<String> oauth2IssuerUriField;
+    @ViewComponent
+    protected TypedTextField<String> oauth2ClientIdField;
+    @ViewComponent
+    protected JmixPasswordField oauth2ClientSecretField;
+    @ViewComponent
+    protected TypedTextField<String> oauth2ScopeField;
     @ViewComponent
     protected EntityComboBox<BpmEngine> bpmEnginesComboBox;
     @Autowired
@@ -88,7 +102,11 @@ public class EngineConnectionSettingsView extends StandardView {
     @ViewComponent
     protected InstanceContainer<BpmEngine> engineDc;
     @ViewComponent
+    protected InstanceContainer<EngineAuthState> engineAuthStateDc;
+    @ViewComponent
     protected TypedTextField<EnvironmentType> environmentTypeField;
+    @ViewComponent
+    protected HorizontalLayout authStateBox;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -98,8 +116,7 @@ public class EngineConnectionSettingsView extends StandardView {
         bpmEnginesComboBox.setValue(selectedEngine);
     }
 
-
-    protected void initEngineFields(BpmEngine bpmEngine) {
+    protected void initEngineFields(@Nullable BpmEngine bpmEngine) {
         testConnectionAction.setEngine(bpmEngine);
         testConnectionAction.refreshState();
 
@@ -111,20 +128,43 @@ public class EngineConnectionSettingsView extends StandardView {
                 if (bpmEngine.getAuthType() == AuthType.HTTP_HEADER) {
                     customHttpHeaderSettingsVBox.setVisible(true);
                     basicAuthSettingsHBox.setVisible(false);
+                    oauth2SettingsVBox.setVisible(false);
                 } else if (bpmEngine.getAuthType() == AuthType.BASIC) {
                     customHttpHeaderSettingsVBox.setVisible(false);
                     basicAuthSettingsHBox.setVisible(true);
+                    oauth2SettingsVBox.setVisible(false);
+                } else if (bpmEngine.getAuthType() == AuthType.OAUTH2) {
+                    customHttpHeaderSettingsVBox.setVisible(false);
+                    basicAuthSettingsHBox.setVisible(false);
+                    oauth2SettingsVBox.setVisible(true);
+                } else {
+                    customHttpHeaderSettingsVBox.setVisible(false);
+                    basicAuthSettingsHBox.setVisible(false);
+                    oauth2SettingsVBox.setVisible(false);
                 }
             } else {
                 authenticationTypeField.setTypedValue(messageBundle.getMessage("noAuth"));
                 customHttpHeaderSettingsVBox.setVisible(false);
                 basicAuthSettingsHBox.setVisible(false);
+                oauth2SettingsVBox.setVisible(false);
             }
         } else {
             basicAuthSettingsHBox.setVisible(false);
             customHttpHeaderSettingsVBox.setVisible(false);
+            oauth2SettingsVBox.setVisible(false);
             authenticationTypeField.setTypedValue(null);
             environmentTypeField.setTypedValue(null);
+        }
+
+        refreshAuthState(bpmEngine);
+    }
+
+    protected void refreshAuthState(@Nullable BpmEngine bpmEngine) {
+        if (bpmEngine != null && BooleanUtils.isTrue(bpmEngine.getAuthEnabled()) && bpmEngine.getAuthType() == AuthType.OAUTH2) {
+            EngineAuthState authState = engineAuthStateService.findByEngineId(bpmEngine.getId());
+            engineAuthStateDc.setItem(authState);
+        } else {
+            engineAuthStateDc.setItem(null);
         }
     }
 
@@ -132,6 +172,12 @@ public class EngineConnectionSettingsView extends StandardView {
     protected void onBpmEnginesComboBoxComponentValueChange(final AbstractField.ComponentValueChangeEvent<EntityComboBox<BpmEngine>, BpmEngine> event) {
         engineDc.setItem(event.getValue());
         initEngineFields(engineDc.getItemOrNull());
+    }
+
+    @Subscribe(id = "engineAuthStateDc", target = Target.DATA_CONTAINER)
+    public void onEngineAuthStateDcItemChange(final InstanceContainer.ItemChangeEvent<EngineAuthState> event) {
+        EngineAuthState authState = event.getItem();
+        authStateBox.setVisible(authState != null && BooleanUtils.isTrue(authState.getIsLocked()));
     }
 
     @Subscribe(id = "copyBaseUrlBtn", subject = "clickListener")
@@ -162,7 +208,16 @@ public class EngineConnectionSettingsView extends StandardView {
     public void onCopyBasicAuthPasswordBtnClick(final ClickEvent<JmixButton> event) {
         String valueToCopy = basicAuthPassword.getValue();
         copyValue(event, valueToCopy, "basicAuthPasswordCopied", "basicAuthPasswordCopyFailed");
+    }
 
+    @Subscribe(id = "copyOauth2IssuerUriBtn", subject = "clickListener")
+    public void onCopyOauth2IssuerUriBtnClick(final ClickEvent<JmixButton> event) {
+        copyValue(event, oauth2IssuerUriField.getValue(), "oauth2IssuerUriCopied", "oauth2IssuerUriCopyFailed");
+    }
+
+    @Subscribe(id = "copyOauth2ClientIdBtn", subject = "clickListener")
+    public void onCopyOauth2ClientIdBtnClick(final ClickEvent<JmixButton> event) {
+        copyValue(event, oauth2ClientIdField.getValue(), "oauth2ClientIdCopied", "oauth2ClientIdCopyFailed");
     }
 
     protected void copyValue(ClickEvent<JmixButton> event, String valueToCopy, String valueCopiedMessageKey, String copyFailedMessageKey) {
@@ -212,5 +267,4 @@ public class EngineConnectionSettingsView extends StandardView {
             return horizontalLayout;
         });
     }
-
 }

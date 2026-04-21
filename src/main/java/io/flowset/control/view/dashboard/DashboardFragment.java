@@ -135,6 +135,14 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
 
     }
 
+    public void setLoading() {
+        deployedProcessesCard.setLoading();
+        processInstancesCard.setLoading();
+        userTasksCard.setLoading();
+        runningInstancesAndIncidentsCard.setLoading();
+        recentActivityCard.setLoading();
+    }
+
     protected void updateDashboardHeader() {
         BpmEngine selectedEngine = selectedEngineDc.getItemOrNull();
         if (selectedEngine != null) {

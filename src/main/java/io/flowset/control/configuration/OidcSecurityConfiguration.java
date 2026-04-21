@@ -4,13 +4,22 @@ import com.vaadin.flow.spring.security.VaadinSavedRequestAwareAuthenticationSucc
 import io.jmix.core.JmixOrder;
 import io.jmix.oidc.userinfo.JmixOidcUserService;
 import io.jmix.securityflowui.security.FlowuiVaadinWebSecurity;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+
+import java.util.List;
 
 /**
  * Security configuration for OpenID Connect (OIDC) authentication mode.
@@ -33,21 +42,22 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 @EnableWebSecurity
 @Order(JmixOrder.HIGHEST_PRECEDENCE + 100)
 @ConditionalOnProperty(name = "flowset.control.security.login-mode", havingValue = "oidc")
+@EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class OidcSecurityConfiguration extends FlowuiVaadinWebSecurity {
 
     protected final JmixOidcUserService jmixOidcUserService;
-    protected final ClientRegistrationRepository clientRegistrationRepository;
+    protected final ObjectProvider<ClientRegistrationRepository> registrationRepositoryObjectProvider;
 
     /**
      * Creates a new OIDC security configuration.
      *
      * @param jmixOidcUserService          the service used to load user information from the OIDC provider
-     * @param clientRegistrationRepository the client registration repository used for OIDC logout handling
+     * @param registrationRepositoryObjectProvider the client registration repository used for OIDC logout handling
      */
     public OidcSecurityConfiguration(JmixOidcUserService jmixOidcUserService,
-                                     ClientRegistrationRepository clientRegistrationRepository) {
+                                     ObjectProvider<ClientRegistrationRepository> registrationRepositoryObjectProvider) {
         this.jmixOidcUserService = jmixOidcUserService;
-        this.clientRegistrationRepository = clientRegistrationRepository;
+        this.registrationRepositoryObjectProvider = registrationRepositoryObjectProvider;
     }
 
 
@@ -67,9 +77,20 @@ public class OidcSecurityConfiguration extends FlowuiVaadinWebSecurity {
         );
 
         OidcClientInitiatedLogoutSuccessHandler oidcLogoutHandler =
-                new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
+                new OidcClientInitiatedLogoutSuccessHandler(registrationRepositoryObjectProvider.getObject());
         oidcLogoutHandler.setPostLogoutRedirectUri("{baseUrl}/login");
 
         http.logout(logout -> logout.logoutSuccessHandler(oidcLogoutHandler));
+    }
+
+    @Bean("control_ClientRegistrationRepository")
+    ClientRegistrationRepository inMemoryClientRegistrationRepository(OAuth2ClientProperties properties) {
+        List<ClientRegistration> registrations = new OAuth2ClientPropertiesMapper(properties)
+                .asClientRegistrations()
+                .values()
+                .stream()
+                .toList();
+
+        return new InMemoryClientRegistrationRepository(registrations);
     }
 }
