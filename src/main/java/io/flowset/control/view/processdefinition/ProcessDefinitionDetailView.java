@@ -45,6 +45,7 @@ import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.uicomponent.viewer.handler.BusinessRuleTaskOverlayClickHandler;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.flowset.control.view.event.TitleUpdateEvent;
+import io.flowset.control.view.processdefinition.event.ProcessInstancesRefreshEvent;
 import io.flowset.control.view.processdefinition.event.ReloadSelectedProcess;
 import io.flowset.control.view.processdefinition.event.ResetActivityEvent;
 import io.flowset.uikit.component.bpmnviewer.ViewerMode;
@@ -124,6 +125,9 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected ProcessDefinitionService processDefinitionService;
     @Autowired
     protected ActivityService activityService;
+
+    @ViewComponent
+    protected CollectionContainer<ProcessActivityStatistics> activityStatisticsDc;
 
     @ViewComponent
     protected ProcessInstancesFragment processInstancesFragment;
@@ -291,6 +295,17 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         processInstanceDataDl.load();
     }
 
+    @EventListener
+    public void handleProcessInstanceRefresh(ProcessInstancesRefreshEvent event) {
+        processInstanceDataDl.load();
+        updateCurrentVersionInstancesCount(processInstanceFilterDc.getItem());
+
+        if (event.isTerminate()) {
+            updateAllRunningInstancesCount();
+            updateActivityStatistics();
+        }
+    }
+
     protected void initViewer(String bpmnXml) {
         viewerFragment.initViewer(bpmnXml);
         viewerFragment.showCalledProcessOverlays();
@@ -299,12 +314,13 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
                         callActivityOverlayClickEvent.getCallActivity(),
                         UiComponentUtils.isComponentAttachedToDialog(this)));
         viewerFragment.showDecisionLinkOverlays();
-        viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent ->
-                businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
-                        businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
-                        UiComponentUtils.isComponentAttachedToDialog(this)));
+        viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent -> {
+            businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
+                    businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
+                    UiComponentUtils.isComponentAttachedToDialog(this));
+        });
         viewerFragment.addImportCompleteListener(this::handleImportComplete);
-        showStatistics();
+        updateActivityStatistics();
     }
 
     protected void handleImportComplete(XmlImportCompleteEvent event) {
@@ -323,9 +339,12 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         updateDecisionsTabCaption(decisions.size());
     }
 
-    protected void showStatistics() {
+    protected void updateActivityStatistics() {
+        clearPreviousStatistics();
+
         List<ProcessActivityStatistics> processStatistics = activityService.getStatisticsByProcessId(getEditedEntity().getProcessDefinitionId());
 
+        activityStatisticsDc.setItems(processStatistics);
         List<String> activeElements = new ArrayList<>();
         processStatistics.forEach(activityStatistics -> {
             Optional<Integer> totalIncidentCount = CollectionUtils.emptyIfNull(activityStatistics.getIncidents())
@@ -345,6 +364,15 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         viewerFragment.setMode(ViewerMode.INTERACTIVE);
         viewerFragment.setActiveElements(activeElements);
         viewerFragment.addElementClickListener(this::handleDiagramElementClick);
+    }
+
+    protected void clearPreviousStatistics() {
+        List<ProcessActivityStatistics> items = activityStatisticsDc.getItems();
+        if (CollectionUtils.isNotEmpty(items)) {
+            items.forEach(activityStatistics -> {
+                viewerFragment.removeActivityStatistics(activityStatistics.getActivityId());
+            });
+        }
     }
 
     protected void handleDiagramElementClick(ElementClickEvent elementClickEvent) {

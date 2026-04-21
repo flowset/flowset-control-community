@@ -148,8 +148,9 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
 
     @Subscribe("processInstancesGrid.bulkTerminate")
     public void onProcessInstancesGridBulkTerminate(final ActionPerformedEvent event) {
+        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(ProcessInstanceData::getInstanceId).toList();
         dialogWindows.view(this, BulkTerminateProcessInstanceView.class)
-                .withViewConfigurer(view -> view.setProcessInstances(processInstancesGrid.getSelectedItems()))
+                .withViewConfigurer(view -> view.setProcessInstanceIds(instancesIds))
                 .withAfterCloseListener(closeEvent -> {
                     if (closeEvent.closedWith(StandardOutcome.SAVE)) {
                         startLoadData();
