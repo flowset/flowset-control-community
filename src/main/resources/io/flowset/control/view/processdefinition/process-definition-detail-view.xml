@@ -66,11 +66,11 @@
                         </tab>
                         <tab id="calledProcessesTab" label="msg://calledProcessesTab.defaultLabel">
                             <fragment id="calledProcessesFragment"
-                                      class="io.flowset.control.view.processdefinition.CalledProcessesTabFragment"/>
+                                      class="io.flowset.control.view.processdefinition.detail.CalledProcessesTabFragment"/>
                         </tab>
                         <tab id="decisionsTab" label="msg://decisionsTab.defaultLabel">
                             <fragment id="decisionsFragment"
-                                      class="io.flowset.control.view.processdefinition.CalledDecisionsTabFragment"/>
+                                      class="io.flowset.control.view.processdefinition.detail.CalledDecisionsTabFragment"/>
                         </tab>
                     </tabSheet>
                 </div>
