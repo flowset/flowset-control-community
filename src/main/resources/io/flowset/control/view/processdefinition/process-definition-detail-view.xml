@@ -14,6 +14,10 @@
                     class="io.flowset.control.entity.processinstance.RuntimeProcessInstanceData">
             <loader id="processInstanceDataDl"/>
         </collection>
+        <collection id="calledProcessesDc"
+                    class="io.flowset.control.entity.processdefinition.CalledProcessReferenceData"/>
+        <collection id="decisionsDc"
+                    class="io.flowset.control.entity.decisiondefinition.DecisionReferenceData"/>
         <instance id="processInstanceFilterDc" class="io.flowset.control.entity.filter.ProcessInstanceFilter">
             <loader id="processInstanceFilterDl"/>
             <fetchPlan extends="_base"/>
@@ -59,6 +63,14 @@
                         <tab id="bpmnXmlTab" label="msg://bpmnXmlTab" enabled="true">
                             <codeEditor mode="XML" readOnly="true" id="bpmnXmlEditor" width="100%" height="100%"
                                         css="padding:0"/>
+                        </tab>
+                        <tab id="calledProcessesTab" label="msg://calledProcessesTab.defaultLabel">
+                            <fragment id="calledProcessesFragment"
+                                      class="io.flowset.control.view.processdefinition.detail.CalledProcessesTabFragment"/>
+                        </tab>
+                        <tab id="decisionsTab" label="msg://decisionsTab.defaultLabel">
+                            <fragment id="decisionsFragment"
+                                      class="io.flowset.control.view.processdefinition.detail.CalledDecisionsTabFragment"/>
                         </tab>
                     </tabSheet>
                 </div>
