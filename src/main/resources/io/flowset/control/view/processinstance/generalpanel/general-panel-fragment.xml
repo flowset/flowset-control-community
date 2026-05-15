@@ -31,15 +31,15 @@
         <flexLayout classNames="process-instance-slide-panel">
             <flexLayout id="instanceDetailsPanel" width="min-content" height="100%" classNames="bordered-container">
                 <vbox id="upperPanel" themeNames="spacing-s" visible="false" classNames="process-instance-properties-panel">
-                    <h4 text="msg://instanceInformation"/>
+                    <h4 id="instanceInformationHeader" text="msg://instanceInformation"/>
                     <formLayout id="processInstanceInfoGroupBox" dataContainer="processInstanceDataDc" width="100%">
                         <responsiveSteps>
                             <responsiveStep minWidth="0" columns="1"/>
                         </responsiveSteps>
-                        <textField property="id" readOnly="true" width="auto"/>
-                        <dateTimePicker property="startTime" readOnly="true" width="auto" step="1ms"/>
+                        <textField id="idField" property="id" readOnly="true" width="auto"/>
+                        <dateTimePicker id="startTimeField" property="startTime" readOnly="true" width="auto" step="1ms"/>
                         <dateTimePicker id="endTimeField" property="endTime" readOnly="true" width="auto" step="1ms"/>
-                        <textField property="businessKey" readOnly="true" width="auto"/>
+                        <textField id="businessKeyField" property="businessKey" readOnly="true" width="auto"/>
                         <textField id="processDefinitionField" label="msg://io.flowset.control.view.processinstance/processDefinition" readOnly="true" width="auto" >
                             <suffix>
                                 <button id="openProcessDefinitionEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessDefinition"/>
@@ -58,11 +58,11 @@
                                         title="msg://io.flowset.control.view.processinstance/openProcessInstance"/>
                             </suffix>
                         </textField>
-                        <textArea id="deleteReason" property="deleteReason" readOnly="true" maxHeight="5em" width="auto"/>
+                        <textArea id="deleteReasonField" property="deleteReason" readOnly="true" maxHeight="5em" width="auto"/>
                         <checkbox id="externallyTerminatedField" property="externallyTerminated" readOnly="true"/>
                     </formLayout>
                 </vbox>
-                <vbox themeNames="spacing-xs" classNames="shadow-s p-s instance-details-actions-panel">
+                <vbox id="actionsPanel" themeNames="spacing-xs" classNames="shadow-s p-s instance-details-actions-panel">
                     <button id="infoBtn" icon="INFO_CIRCLE" title="msg://viewProcessInstanceDetails" classNames="bordered-button"/>
                     <vbox themeNames="spacing-xs" id="runtimeInstanceActions" padding="false">
                         <button id="refreshBtn" action="refreshAction" classNames="bordered-button"/>

@@ -16,6 +16,9 @@
         <vbox id="root" width="100%" height="100%" padding="false">
             <dataGrid id="calledProcessesGrid" width="100%" height="100%" themeNames="compact"
                       dataContainer="calledProcessesDc">
+                <actions>
+                    <action id="view" type="list_edit" visible="false"/>
+                </actions>
                 <columns resizable="true">
                     <column property="calledElement" autoWidth="true" flexGrow="1">
                         <fragmentRenderer

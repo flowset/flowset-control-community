@@ -5,6 +5,8 @@
 
 package io.flowset.control.test_support;
 
+import io.flowset.control.test_support.engine.HasRunningEngineData;
+import io.flowset.control.test_support.engine.external.ExternalEngine;
 import io.flowset.control.test_support.testcontainers.EngineContainer;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
@@ -15,7 +17,7 @@ import org.springframework.web.client.RestClient;
 import java.util.List;
 
 /**
- * Provides common methods to invoke REST API of {@link EngineContainer}.
+ * Provides common methods to invoke REST API of {@link EngineContainer} or {@link ExternalEngine}.
  */
 @Component("control_EngineTestContainerRestHelper")
 public class EngineTestContainerRestHelper {
@@ -34,7 +36,7 @@ public class EngineTestContainerRestHelper {
      * @param <V>             a type of list item
      * @return found items
      */
-    public <V> List<V> getList(EngineContainer<?> engineContainer, String endpoint, Class<V> itemClass) {
+    public <V> List<V> getList(HasRunningEngineData engineContainer, String endpoint, Class<V> itemClass) {
         String restBaseUrl = engineContainer.getRestBaseUrl();
         ResolvableType resolvableType = ResolvableType.forClassWithGenerics(List.class, itemClass);
 
@@ -54,7 +56,7 @@ public class EngineTestContainerRestHelper {
      * @param <V>             a type of item
      * @return found item
      */
-    public <V> V getOne(EngineContainer<?> engineContainer, String endpoint, Class<V> responseType) {
+    public <V> V getOne(HasRunningEngineData engineContainer, String endpoint, Class<V> responseType) {
         String restBaseUrl = engineContainer.getRestBaseUrl();
 
         return restClient.get()
@@ -74,7 +76,7 @@ public class EngineTestContainerRestHelper {
      * @param <V>             a response type
      * @return response with specified type
      */
-    public <V> V postOne(EngineContainer<?> engineContainer, String endpoint, Object body, Class<V> responseType) {
+    public <V> V postOne(HasRunningEngineData engineContainer, String endpoint, Object body, Class<V> responseType) {
         String restBaseUrl = engineContainer.getRestBaseUrl();
 
         return restClient.post()
@@ -95,7 +97,7 @@ public class EngineTestContainerRestHelper {
      * @param <V>             list item type
      * @return loaded list of items
      */
-    public <V> List<V> postList(EngineContainer<?> engineContainer, String endpoint, Object body, Class<V> itemClass) {
+    public <V> List<V> postList(HasRunningEngineData engineContainer, String endpoint, Object body, Class<V> itemClass) {
         String restBaseUrl = engineContainer.getRestBaseUrl();
         ResolvableType resolvableType = ResolvableType.forClassWithGenerics(List.class, itemClass);
 
@@ -114,7 +116,7 @@ public class EngineTestContainerRestHelper {
      * @param endpoint        the endpoint after {@link EngineContainer#getRestBaseUrl()} to which the request should be sent
      * @param body            request body
      */
-    public void postVoid(EngineContainer<?> engineContainer, String endpoint, Object body) {
+    public void postVoid(HasRunningEngineData engineContainer, String endpoint, Object body) {
         String restBaseUrl = engineContainer.getRestBaseUrl();
 
         restClient.post()
@@ -131,7 +133,7 @@ public class EngineTestContainerRestHelper {
      * @param engineContainer BPM engine container to which the request should be sent
      * @param endpoint        the endpoint after {@link EngineContainer#getRestBaseUrl()} to which the request should be sent
      */
-    public void delete(EngineContainer<?> engineContainer, String endpoint) {
+    public void delete(HasRunningEngineData engineContainer, String endpoint) {
         String restBaseUrl = engineContainer.getRestBaseUrl();
 
         restClient.delete()
@@ -148,7 +150,7 @@ public class EngineTestContainerRestHelper {
      * @param endpoint        the endpoint after {@link EngineContainer#getRestBaseUrl()} to which the request should be sent
      * @param body            request body
      */
-    public void putVoid(EngineContainer<?> engineContainer, String endpoint, Object body) {
+    public void putVoid(HasRunningEngineData engineContainer, String endpoint, Object body) {
         String restBaseUrl = engineContainer.getRestBaseUrl();
 
         restClient.put()
@@ -159,7 +161,7 @@ public class EngineTestContainerRestHelper {
                 .toBodilessEntity();
     }
 
-    private void addAuthHeader(HttpHeaders httpHeaders, EngineContainer<?> container) {
+    private void addAuthHeader(HttpHeaders httpHeaders, HasRunningEngineData container) {
         if (container.isBasicAuthEnabled()) {
             httpHeaders.setBasicAuth(container.getBasicAuthUsername(), container.getBasicAuthPassword());
         } else if (container.isHeaderAuthEnabled()) {

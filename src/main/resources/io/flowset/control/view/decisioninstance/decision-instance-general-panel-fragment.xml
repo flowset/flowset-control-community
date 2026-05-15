@@ -24,7 +24,7 @@
                         <textField id="decisionInstanceIdTextField" property="decisionInstanceId" readOnly="true">
                             <suffix>
                                 <button id="copyDecisionInstanceId"
-                                        icon="COPY_O"
+                                        icon="COPY_O" action="copyDecisionInstanceIdAction"
                                         themeNames="tertiary-inline"/>
                             </suffix>
                         </textField>

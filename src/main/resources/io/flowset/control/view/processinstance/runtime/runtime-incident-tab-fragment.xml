@@ -15,8 +15,8 @@
     </data>
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
-            <hbox classNames="buttons-panel" padding="false">
-                <button action="runtimeIncidentsGrid.retry" themeNames="small"/>
+            <hbox id="runtimeIncidentsGridActionsPanel" classNames="buttons-panel" padding="false">
+                <button id="runtimeIncidentRetryBtn" action="runtimeIncidentsGrid.retry" themeNames="small"/>
                 <simplePagination id="incidentsPagination" dataLoader="runtimeIncidentsDl"/>
             </hbox>
             <dataGrid id="runtimeIncidentsGrid" width="100%" height="100%" themeNames="compact"
@@ -24,8 +24,8 @@
                 <actions>
                     <action id="view"
                             text="msg:///actions.View"
-                            icon="EYE"
-                            type="list_itemTracking"/>
+                            icon="EYE" visible="false"
+                            type="list_edit"/>
                     <action id="retry"
                             text="msg:///actions.Retry"
                             icon="ROTATE_LEFT"

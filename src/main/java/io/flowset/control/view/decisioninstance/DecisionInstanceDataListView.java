@@ -43,7 +43,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Route(value = "decision-instances", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/decision-instances", layout = DefaultMainViewParent.class)
 @ViewController(id = "DecisionInstanceData.list")
 @ViewDescriptor(path = "decision-instance-data-list-view.xml")
 @LookupComponent("decisionInstancesDataGrid")

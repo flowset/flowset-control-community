@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Set;
 
-@Route(value = "bpmn/deployments", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/deployments", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_Deployment.list")
 @ViewDescriptor(path = "deployment-list-view.xml")
 public class DeploymentListView extends AbstractListViewWithDelayedLoad<DeploymentData> {

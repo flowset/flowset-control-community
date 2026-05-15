@@ -79,9 +79,9 @@
                         <span id="appliedFiltersCount" themeNames="badge contrast primary small" text="0"
                               classNames="user-tasks-filter-count-badge" visible="false"/>
                     </div>
-                    <button action="tasksDataGrid.refresh" themeNames="primary success"/>
-                    <button action="tasksDataGrid.completeTask"/>
-                    <button action="tasksDataGrid.reassignTask"/>
+                    <button id="refreshBtn" action="tasksDataGrid.refresh" themeNames="primary success"/>
+                    <button id="completeTaskBtn" action="tasksDataGrid.completeTask"/>
+                    <button id="reassignTaskBtn" action="tasksDataGrid.reassignTask"/>
                     <simplePagination id="tasksPagination" dataLoader="tasksDl"/>
                 </hbox>
                 <dataGrid id="tasksDataGrid"

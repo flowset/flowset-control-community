@@ -228,6 +228,7 @@ public class MainView extends StandardMainView {
 
     protected void initDashboard(HasComponents container) {
         DashboardFragment dashboardFragment = fragments.create(this, DashboardFragment.class);
+        dashboardFragment.setId("dashboardFragment");
         container.add(dashboardFragment);
     }
 

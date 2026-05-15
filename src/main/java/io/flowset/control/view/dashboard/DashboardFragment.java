@@ -145,8 +145,8 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
         }
     }
 
-    @Subscribe(id = "createBpmEnginBtn", subject = "clickListener")
-    public void onCreateBpmEnginBtnClick(final ClickEvent<JmixButton> event) {
+    @Subscribe(id = "createBpmEngineBtn", subject = "clickListener")
+    public void onCreateBpmEngineBtnClick(final ClickEvent<JmixButton> event) {
         dialogWindows.detail(getCurrentView(), BpmEngine.class)
                 .newEntity()
                 .withAfterCloseListener(closeEvent -> {

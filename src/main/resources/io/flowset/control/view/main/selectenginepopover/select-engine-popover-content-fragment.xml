@@ -36,8 +36,8 @@
                         <hr/>
                     </vbox>
                 </vbox>
-                <vbox spacing="false" padding="false" classNames="p-xs pt-s">
-                    <button id="createBpmEnginBtn" themeNames="tertiary-inline small" icon="PLUS"
+                <vbox id="createBpmEngineBox" spacing="false" padding="false" classNames="p-xs pt-s">
+                    <button id="createBpmEngineBtn" themeNames="tertiary-inline small" icon="PLUS"
                             classNames="mt-0 text-s"
                             text="msg://createBpmEnginBtn.text"/>
                     <hr/>

@@ -239,6 +239,7 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
                 }
             }
         }
+        valueComponent.setId("variableValueField");
         valueForm.addFormItem(valueComponent, messageBundle.getMessage("variableInstanceDataEdit.value"));
     }
 

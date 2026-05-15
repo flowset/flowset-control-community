@@ -43,7 +43,7 @@
             </dataGrid>
         </vbox>
         <hbox id="lookupActions" classNames="buttons-panel" justifyContent="END">
-            <button id="startProcessBtn" action="completeTasksAction"/>
+            <button id="completeTaskBtn" action="completeTasksAction"/>
             <button id="cancelBtn" action="cancelAction"/>
         </hbox>
     </layout>

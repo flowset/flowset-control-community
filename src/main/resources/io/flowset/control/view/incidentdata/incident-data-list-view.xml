@@ -25,8 +25,8 @@
     </actions>
     <layout>
         <hbox id="buttonsPanel" classNames="buttons-panel" alignItems="BASELINE">
-            <button action="incidentsDataGrid.refresh" themeNames="success primary"/>
-            <button action="incidentsDataGrid.bulkRetry"/>
+            <button id="refreshBtn" action="incidentsDataGrid.refresh" themeNames="success primary"/>
+            <button id="bulkRetryBtn" action="incidentsDataGrid.bulkRetry"/>
             <simplePagination id="pagination" dataLoader="incidentsDl"/>
         </hbox>
         <dataGrid id="incidentsDataGrid" classNames="incidents-data-grid"

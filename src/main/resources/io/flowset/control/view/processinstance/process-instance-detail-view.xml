@@ -24,7 +24,7 @@
         <hbox id="box" width="100%" spacing="false">
             <split id="rootBox" orientation="VERTICAL" splitterPosition="50" themeNames="splitter-spacing" width="100%">
                 <hbox id="diagramBox" height="auto" classNames="process-instance-details-diagram-box">
-                    <fragment id="diagramFragment" class="io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment"/>
+                    <fragment id="viewerFragment" class="io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment"/>
                     <vbox visible="false" id="emptyDiagramBox" padding="false" width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
                         <h3 text="msg://diagramNotFound" classNames="text-secondary"/>
                     </vbox>
@@ -39,7 +39,7 @@
                     </tabSheet>
                 </div>
             </split>
-            <fragment class="io.flowset.control.view.processinstance.generalpanel.GeneralPanelFragment"/>
+            <fragment id="generalPanel" class="io.flowset.control.view.processinstance.generalpanel.GeneralPanelFragment"/>
         </hbox>
         <hbox id="windowActions" width="100%" justifyContent="START"
               classNames="sticky-buttons-bottom-panel pl-s pr-s pb-s pt-s">
