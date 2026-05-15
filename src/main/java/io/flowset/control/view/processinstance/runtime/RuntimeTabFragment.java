@@ -294,7 +294,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         dialogs.createOptionDialog()
                 .withHeader(messageBundle.getMessage("removeProcessVariableTaskDialog.header"))
                 .withText(messageBundle.getMessage("removeProcessVariableTaskDialog.text"))
-                .withActions(new DialogAction(DialogAction.Type.YES)
+                .withActions(new DialogAction(DialogAction.Type.OK)
                                 .withIcon(VaadinIcon.TRASH.create())
                                 .withText(messages.getMessage("actions.Remove"))
                                 .withVariant(ActionVariant.PRIMARY)

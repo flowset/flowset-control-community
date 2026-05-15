@@ -38,7 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route(value = "bpmn/decision-definitions", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/decision-definitions", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_DecisionDefinition.list")
 @ViewDescriptor("decision-definition-list-view.xml")
 public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<DecisionDefinitionData> {

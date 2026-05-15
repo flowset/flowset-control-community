@@ -25,6 +25,7 @@ import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -88,6 +89,9 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
             reassignAction.setVisible(false);
             completeAction.setVisible(false);
         } else {
+            boolean suspended = BooleanUtils.isTrue(getEditedEntity().getSuspended());
+            completeAction.setVisible(!suspended);
+            reassignAction.setVisible(!suspended);
             startTimeField.setVisible(false);
             endTimeField.setVisible(false);
         }

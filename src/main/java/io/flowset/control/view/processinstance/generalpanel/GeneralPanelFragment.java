@@ -76,7 +76,7 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     @ViewComponent
     protected DateTimePicker endTimeField;
     @ViewComponent
-    protected JmixTextArea deleteReason;
+    protected JmixTextArea deleteReasonField;
 
     @ViewComponent
     protected JmixButton openSuperProcessInstanceEditorBtn;
@@ -105,7 +105,7 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
 
         boolean hasEndTime = processInstanceData.getEndTime() != null;
         endTimeField.setVisible(hasEndTime);
-        deleteReason.setVisible(hasEndTime);
+        deleteReasonField.setVisible(hasEndTime);
         externallyTerminatedField.setVisible(hasEndTime);
 
         initActionButtons();

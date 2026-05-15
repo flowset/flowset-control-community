@@ -5,6 +5,7 @@
 
 package io.flowset.control.test_support;
 
+import io.flowset.control.test_support.property.ControlEngineTestingProperties;
 import io.jmix.core.UnconstrainedDataManager;
 import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
@@ -27,7 +28,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.lifecycle.Startable;
 import org.testcontainers.utility.DockerImageName;
 
 import java.lang.reflect.Field;

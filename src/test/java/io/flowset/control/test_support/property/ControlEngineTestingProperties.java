@@ -1,10 +1,12 @@
 /*
- * Copyright (c) Haulmont 2025. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
-package io.flowset.control.test_support;
+package io.flowset.control.test_support.property;
 
+import io.flowset.control.test_support.EnabledOnBasicAuthentication;
+import io.flowset.control.test_support.EnabledOnEngine;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.context.annotation.Profile;

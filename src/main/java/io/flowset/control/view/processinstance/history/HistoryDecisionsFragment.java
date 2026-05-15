@@ -15,18 +15,23 @@ import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.service.decisioninstance.DecisionInstanceLoadContext;
 import io.flowset.control.service.decisioninstance.DecisionInstanceService;
+import io.flowset.control.view.decisioninstance.DecisionInstanceDetailView;
 import io.flowset.control.view.decisioninstance.column.DecisionDefinitionColumnFragment;
 import io.flowset.control.view.processinstance.event.DecisionCountUpdateEvent;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
+import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiEventPublisher;
+import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.Install;
+import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.Supply;
 import io.jmix.flowui.view.Target;
 import io.jmix.flowui.view.ViewComponent;
@@ -35,6 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @FragmentDescriptor("history-decisions-fragment.xml")
 @RequiredArgsConstructor
@@ -49,11 +56,15 @@ public class HistoryDecisionsFragment extends Fragment<VerticalLayout> implement
     protected Fragments fragments;
     @Autowired
     protected UiEventPublisher uiEventPublisher;
+    @Autowired
+    protected DialogWindows dialogWindows;
 
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
     @ViewComponent
     protected CollectionLoader<HistoricDecisionInstanceShortData> historyDecisionsDl;
+    @ViewComponent
+    protected DataGrid<HistoricDecisionInstanceShortData> historyTasksGrid;
 
     protected DecisionInstanceFilter filter;
     protected boolean initialized;
@@ -70,6 +81,20 @@ public class HistoryDecisionsFragment extends Fragment<VerticalLayout> implement
             historyDecisionsDl.load();
             this.initialized = true;
         }
+    }
+
+    @Subscribe("historyTasksGrid.view")
+    public void onViewAction(final ActionPerformedEvent event) {
+        HistoricDecisionInstanceShortData decision = historyTasksGrid.getSingleSelectedItem();
+        if (decision == null) {
+            return;
+        }
+        HistoricDecisionInstanceShortData fullDecision = decisionInstanceService.getById(decision.getDecisionInstanceId());
+        HistoricDecisionInstanceShortData entity = fullDecision != null ? fullDecision : decision;
+        dialogWindows.detail(getCurrentView(), HistoricDecisionInstanceShortData.class)
+                .withViewClass(DecisionInstanceDetailView.class)
+                .editEntity(entity)
+                .open();
     }
 
     @Install(to = "historyDecisionsDl", target = Target.DATA_LOADER)

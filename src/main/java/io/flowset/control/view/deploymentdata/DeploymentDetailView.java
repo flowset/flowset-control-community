@@ -66,7 +66,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-@Route(value = "bpm/deployment/:id", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/deployments/:id", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_Deployment.detail")
 @ViewDescriptor(path = "deployment-detail-view.xml")
 @EditedEntityContainer("deploymentDataDc")

@@ -35,7 +35,7 @@
                   columnReorderingAllowed="true">
             <actions>
                 <action id="refreshAction" type="list_refresh"/>
-                <action id="viewAction" type="list_edit" text="msg:///actions.View"/>
+                <action id="viewAction" type="list_edit" visible="false" text="msg:///actions.View"/>
             </actions>
             <columns resizable="true">
                 <column property="decisionInstanceId" sortable="false">
