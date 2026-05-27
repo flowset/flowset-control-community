@@ -7,6 +7,7 @@ package io.flowset.control.test_support.testcontainers;
 
 import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.test_support.engine.HasRunningEngineData;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -15,7 +16,8 @@ import org.testcontainers.utility.DockerImageName;
  *
  * @param <SELF>
  */
-public abstract class EngineContainer<SELF extends EngineContainer<SELF>> extends GenericContainer<SELF> {
+public abstract class EngineContainer<SELF extends EngineContainer<SELF>> extends GenericContainer<SELF>
+        implements HasRunningEngineData {
 
     protected AuthType authType;
 

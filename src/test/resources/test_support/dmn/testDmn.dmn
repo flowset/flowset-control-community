@@ -8,7 +8,7 @@
     <decisionTable id="decisionTable_03vnnub">
       <input id="input1" label="Amount" biodi:width="192">
         <inputExpression id="input_b187d" typeRef="number">
-          <text></text>
+          <text>1</text>
         </inputExpression>
       </input>
       <output id="output_1937d" label="Check Result" name="result" typeRef="string"/>

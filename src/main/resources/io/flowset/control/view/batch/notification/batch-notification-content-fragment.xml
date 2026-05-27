@@ -8,7 +8,7 @@
     <content>
         <vbox id="root" padding="false" alignItems="CENTER">
             <span id="titleText" classNames="text-l font-semibold"/>
-            <hbox padding="false" themeNames="spacing-s" justifyContent="BETWEEN" alignItems="BASELINE">
+            <hbox id="batchMessageBox" padding="false" themeNames="spacing-s" justifyContent="BETWEEN" alignItems="BASELINE">
                 <span id="messageText" text="msg://batchNotificationDescription"/>
                 <button id="openBatchBtn" text="msg://openBatchBtn.text" themeNames="tertiary-inline"/>
             </hbox>

@@ -155,6 +155,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected Renderer<IncidentData> incidentsDataGridActionsRenderer() {
         return new ComponentRenderer<>(incidentData -> {
             HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
+            layout.setId("incidentActionsBox");
             layout.addClassNames(LumoUtility.Padding.Top.XSMALL, LumoUtility.Padding.Bottom.XSMALL);
             layout.setWidth("min-content");
 
@@ -278,6 +279,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
         }
 
         JmixButton retryBtn = uiComponents.create(JmixButton.class);
+        retryBtn.setId("retryIncidentBtn");
         retryBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         retryBtn.addClassNames("data-grid-column-action");
         retryBtn.setTitle(messages.getMessage("actions.Retry"));

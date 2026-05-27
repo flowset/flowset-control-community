@@ -22,8 +22,8 @@
                 <actions>
                     <action id="view"
                             text="msg:///actions.View"
-                            icon="EYE"
-                            type="list_itemTracking"/>
+                            icon="EYE" visible="false"
+                            type="list_edit"/>
                 </actions>
                 <columns resizable="true">
                     <column property="incidentId">

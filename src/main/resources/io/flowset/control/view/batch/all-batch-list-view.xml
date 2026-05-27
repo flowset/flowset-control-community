@@ -44,7 +44,11 @@
                               minHeight="20em">
                         <actions>
                             <action id="refresh" type="list_refresh"/>
-                            <action id="view" type="list_edit" visible="false"/>
+                            <action id="view" type="list_edit" visible="false">
+                                <properties>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
+                            </action>
                         </actions>
                         <columns resizable="true">
                             <column property="id" autoWidth="true">
@@ -91,7 +95,11 @@
                               minHeight="20em">
                         <actions>
                             <action id="refresh" type="list_refresh"/>
-                            <action id="view" type="list_edit" visible="false"/>
+                            <action id="view" type="list_edit" visible="false">
+                                <properties>
+                                    <property name="openMode" value="DIALOG"/>
+                                </properties>
+                            </action>
                         </actions>
                         <columns resizable="true">
                             <column property="id" autoWidth="true">

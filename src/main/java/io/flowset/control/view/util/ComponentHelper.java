@@ -76,6 +76,7 @@ public class ComponentHelper {
         }
 
         Span span = uiComponents.create(Span.class);
+        span.setId("processInstanceStateBadge");
         span.getElement().getThemeList().add("badge pill " + stateTheme);
 
         Span text = uiComponents.create(Span.class);

@@ -361,9 +361,11 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
             activeElements.add(activityStatistics.getActivityId());
         });
 
-        viewerFragment.setMode(ViewerMode.INTERACTIVE);
-        viewerFragment.setActiveElements(activeElements);
-        viewerFragment.addElementClickListener(this::handleDiagramElementClick);
+        if (CollectionUtils.isNotEmpty(activeElements)) {
+            viewerFragment.setMode(ViewerMode.INTERACTIVE);
+            viewerFragment.setActiveElements(activeElements);
+            viewerFragment.addElementClickListener(this::handleDiagramElementClick);
+        }
     }
 
     protected void clearPreviousStatistics() {

@@ -74,6 +74,7 @@ public class DecisionInstanceGeneralPanelFragment extends Fragment<FlexLayout> {
     @Subscribe(target = Target.HOST_CONTROLLER)
     public void onHostInit(final View.InitEvent event) {
         copyDecisionInstanceIdAction.setTarget(decisionInstanceIdTextField);
+        copyDecisionInstanceIdAction.setText("");
     }
 
     @Subscribe(target = Target.HOST_CONTROLLER)

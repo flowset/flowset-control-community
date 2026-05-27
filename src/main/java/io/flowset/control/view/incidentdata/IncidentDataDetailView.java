@@ -49,7 +49,7 @@ import java.util.Optional;
 
 import static io.flowset.control.util.ExceptionUtils.isNotFoundError;
 
-@Route(value = "bpm/incident/:id", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/incidents/:id", layout = DefaultMainViewParent.class)
 @ViewController("IncidentData.detail")
 @ViewDescriptor("incident-data-detail-view.xml")
 @EditedEntityContainer("incidentDataDc")

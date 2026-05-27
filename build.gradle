@@ -134,6 +134,7 @@ dependencies {
 
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'io.jmix.masquerade:jmix-masquerade'
 }
 
 configurations.implementation {
@@ -142,7 +143,17 @@ configurations.implementation {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform() {
+        jvmArgs = ['-Xmx1024m']
+
+        if (project.hasProperty("uiTests")) {
+            includeTags("uiTest")
+            excludeTags("integrationTest")
+        } else if(project.hasProperty("integrationTests")) {
+            excludeTags("uiTest")
+            includeTags("integrationTest")
+        }
+    }
     systemProperties(System.getProperties())
 }
 

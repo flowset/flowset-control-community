@@ -201,12 +201,15 @@ public class EngineConnectionSettingsView extends StandardView {
     protected Renderer<BpmEngine> bpmEnginesComboBoxRenderer() {
         return new ComponentRenderer<>(bpmEngine -> {
             HorizontalLayout horizontalLayout = uiComponents.create(HorizontalLayout.class);
+            horizontalLayout.setId("bpmEngineItemBox");
             horizontalLayout.setPadding(false);
             horizontalLayout.addClassNames(LumoUtility.Gap.SMALL);
 
             Span name = new Span(ENGINE_WITH_TYPE_LABEL_FORMAT.formatted(bpmEngine.getName(), messages.getMessage(bpmEngine.getType())));
+            name.setId("engineNameLabel");
 
             Span url = new Span(bpmEngine.getBaseUrl());
+            url.setId("engineUrlLabel");
             url.addClassNames(LumoUtility.TextColor.TERTIARY);
             horizontalLayout.add(name, url);
             return horizontalLayout;

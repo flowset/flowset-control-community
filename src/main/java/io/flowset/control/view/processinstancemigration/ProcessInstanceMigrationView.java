@@ -189,7 +189,7 @@ public class ProcessInstanceMigrationView extends StandardView {
     protected void showBatchNotification(@Nullable BatchData batchData) {
         BatchNotificationContentFragment batchNotificationContent = fragments.create(this, BatchNotificationContentFragment.class);
         batchNotificationContent.setBatchId(batchData != null ? batchData.getId() : null);
-        batchNotificationContent.setTitle(messages.getMessage("io.flowset.control.view.processinstance/bulkActivateProcessInstancesStarted"));
+        batchNotificationContent.setTitle(messages.getMessage("io.flowset.control.view.processdefinition/processInstancesMigrationStarted"));
 
         Notification notification = notifications.create(batchNotificationContent.getContent())
                 .withCloseable(true)

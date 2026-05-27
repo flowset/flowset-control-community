@@ -7,6 +7,7 @@ package io.flowset.control.test_support;
 
 import io.jmix.core.session.SessionData;
 import io.flowset.control.FlowsetControlApplication;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,7 @@ import static io.flowset.control.entity.engine.BpmEngine.SELECTED_ENGINE_ATTRIBU
  */
 @ActiveProfiles("test")
 @SpringBootTest(classes = {FlowsetControlApplication.class, FlowsetControlTestConfiguration.class})
+@Tag("integrationTest")
 public abstract class AbstractIntegrationTest {
 
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.3")
