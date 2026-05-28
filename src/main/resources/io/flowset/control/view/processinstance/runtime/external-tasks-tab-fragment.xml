@@ -28,17 +28,10 @@
                     <action id="retry"
                             text="msg:///actions.Retry"
                             icon="ROTATE_LEFT"
-                            type="list_itemTracking"/>
+                            type="control_retryGridExternalTask"/>
                 </actions>
                 <columns resizable="true" sortable="false">
-                    <column property="externalTaskId" frozen="true">
-                        <fragmentRenderer
-                                class="io.flowset.control.view.externaltask.column.ExternalTaskIdColumnFragment">
-                            <properties>
-                                <property name="openMode" value="DIALOG"/>
-                            </properties>
-                        </fragmentRenderer>
-                    </column>
+                    <column property="externalTaskId" frozen="true"/>
                     <column property="activityId"/>
                     <column property="topicName" autoWidth="true"/>
                     <column property="retries" autoWidth="true"/>

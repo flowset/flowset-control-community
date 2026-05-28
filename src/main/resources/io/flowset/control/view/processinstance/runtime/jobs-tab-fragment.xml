@@ -32,22 +32,18 @@
                     <action id="retry"
                             text="msg:///actions.Retry"
                             icon="ROTATE_LEFT"
-                            type="list_itemTracking"/>
+                            type="control_retryGridJob"/>
                     <action id="activate"
-                            icon="PLAY" type="list_itemTracking"
+                            icon="PLAY" type="control_activateGridJob"
                             text="msg:///actions.Activate"/>
                     <action id="suspend"
-                            icon="PAUSE" type="list_itemTracking"
+                            icon="PAUSE" type="control_suspendGridJob"
                             text="msg:///actions.Suspend"/>
                 </actions>
                 <columns resizable="true">
                     <column property="jobId">
                         <fragmentRenderer
-                                class="io.flowset.control.view.job.column.JobIdColumnFragment">
-                            <properties>
-                                <property name="openMode" value="DIALOG"/>
-                            </properties>
-                        </fragmentRenderer>
+                                class="io.flowset.control.view.job.column.JobIdColumnFragment"/>
                     </column>
                     <column property="failedActivityId" sortable="false">
                         <fragmentRenderer

@@ -54,8 +54,14 @@ public class ExternalTaskDataDetailDialog extends DialogWindow<ExternalTaskDataD
     @TestComponent(path = "processDefinitionIdField")
     private TextField processDefinitionIdField;
 
+    @TestComponent(path = "viewProcessBtn")
+    private Button viewProcessBtn;
+
     @TestComponent(path = "processInstanceIdField")
     private TextField processInstanceIdField;
+
+    @TestComponent(path = "viewProcessInstanceBtn")
+    private Button viewProcessInstanceBtn;
 
     @TestComponent(path = "errorMessageField")
     private TextArea errorMessageField;

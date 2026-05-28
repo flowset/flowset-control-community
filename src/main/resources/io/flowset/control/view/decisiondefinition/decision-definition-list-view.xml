@@ -63,7 +63,7 @@
                   columnReorderingAllowed="true">
             <actions>
                 <action id="refresh" type="list_refresh"/>
-                <action id="deploy" icon="ROCKET" text="msg://decisionDefinitionList.uploadDmnXml"/>
+                <action id="deploy" type="control_deployDecisionDefinition" icon="ROCKET" text="msg://decisionDefinitionList.uploadDmnXml"/>
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">

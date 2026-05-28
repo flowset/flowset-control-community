@@ -3,6 +3,7 @@
       title="msg://instanceTerminateReasonView.title">
     <actions>
         <action id="close" type="view_close" text="msg:///actions.Close"/>
+        <action id="viewInstanceAction" type="control_viewProcessInstance" icon="SEARCH"/>
     </actions>
     <data>
         <instance id="processInstanceDc" class="io.flowset.control.entity.processinstance.ProcessInstanceData"/>
@@ -15,7 +16,8 @@
         <formLayout dataContainer="processInstanceDc" width="100%">
             <textField property="instanceId" readOnly="true" classNames="pt-s">
                 <suffix>
-                    <button id="viewInstanceBtn" icon="SEARCH" themeNames="tertiary-inline" classNames="text-secondary"/>
+                    <button id="viewInstanceBtn" themeNames="tertiary-inline" classNames="text-secondary"
+                            action="viewInstanceAction"/>
                 </suffix>
             </textField>
             <textField property="businessKey" readOnly="true" classNames="pt-s"/>

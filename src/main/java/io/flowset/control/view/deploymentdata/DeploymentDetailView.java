@@ -29,7 +29,6 @@ import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.tabsheet.JmixTabSheet;
-import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.download.Downloader;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.kit.component.codeeditor.CodeEditorMode;
@@ -37,7 +36,6 @@ import io.jmix.flowui.kit.component.codeeditor.JmixCodeEditor;
 import io.jmix.flowui.kit.component.grid.JmixGrid;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
-import io.flowset.control.action.CopyComponentValueToClipboardAction;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.entity.deployment.DeploymentProcessInstancesInfo;
 import io.flowset.control.entity.deployment.DeploymentResource;
@@ -111,13 +109,6 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
     private DataGrid<DeploymentResource> resourcesDataGrid;
     @ViewComponent
     private Span deploymentResourcesLabel;
-    @ViewComponent
-    private CopyComponentValueToClipboardAction copyToClipboardAction;
-    @ViewComponent
-    private TypedTextField<String> nameTextField;
-    @ViewComponent
-    private TypedTextField<String> deploymentIdTextField;
-
     private String viewTabLabel;
     private String sourceTabLabel;
     private String runningInstancesTabLabel;
@@ -134,18 +125,6 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
         deploymentResourcesLabel.addClassNames(LumoUtility.FontWeight.SEMIBOLD);
 
         addClassName(LumoUtility.Padding.Bottom.SMALL);
-    }
-
-    @Subscribe(id = "copyDeploymentId", subject = "clickListener")
-    public void onCopyDeploymentIdClick(final ClickEvent<JmixButton> event) {
-        copyToClipboardAction.setTarget(deploymentIdTextField);
-        copyToClipboardAction.actionPerform(event.getSource());
-    }
-
-    @Subscribe(id = "copyName", subject = "clickListener")
-    public void onCopyNameClick(final ClickEvent<JmixButton> event) {
-        copyToClipboardAction.setTarget(nameTextField);
-        copyToClipboardAction.actionPerform(event.getSource());
     }
 
     @Subscribe(id = "downloadResourceButton", subject = "clickListener")

@@ -13,12 +13,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.processinstance.BulkActivateRuntimeProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkSuspendRuntimeProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkTerminateRuntimeProcessInstanceAction;
 import io.flowset.control.view.processdefinition.event.ProcessInstancesRefreshEvent;
-import io.flowset.control.view.processinstance.BulkActivateProcessInstanceView;
-import io.flowset.control.view.processinstance.BulkSuspendProcessInstanceView;
-import io.flowset.control.view.processinstance.BulkTerminateProcessInstanceView;
 import io.jmix.core.DataLoadContext;
-import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -40,7 +39,6 @@ import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.view.processdefinition.event.ResetActivityEvent;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -54,17 +52,11 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     @Autowired
     protected ApplicationContext applicationContext;
     @Autowired
-    protected Notifications notifications;
-    @Autowired
-    protected Messages messages;
-    @Autowired
     protected ViewNavigators viewNavigators;
     @Autowired
     protected ProcessInstanceService processInstanceService;
     @Autowired
     protected Fragments fragments;
-    @Autowired
-    protected DialogWindows dialogWindows;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -86,6 +78,12 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     protected Div selectedActivityContainer;
     @ViewComponent
     protected InstanceContainer<ProcessInstanceFilter> processInstanceFilterDc;
+    @ViewComponent("processInstancesGrid.bulkActivate")
+    protected BulkActivateRuntimeProcessInstanceAction bulkActivate;
+    @ViewComponent("processInstancesGrid.bulkSuspend")
+    protected BulkSuspendRuntimeProcessInstanceAction bulkSuspend;
+    @ViewComponent("processInstancesGrid.bulkTerminate")
+    protected BulkTerminateRuntimeProcessInstanceAction bulkTerminate;
 
     @Subscribe
     public void onReady(ReadyEvent event) {
@@ -94,6 +92,16 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
                     applicationContext.getBean(PaginationDataLoaderImpl.class, container.getLoader());
             processInstancesPagination.setPaginationLoader(paginationLoader);
         }
+        setupBulkActions();
+    }
+
+    protected void setupBulkActions() {
+        bulkActivate.setAfterSaveHandler(
+                () -> uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false)));
+        bulkSuspend.setAfterSaveHandler(
+                () -> uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false)));
+        bulkTerminate.setAfterSaveHandler(
+                () -> uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, true)));
     }
 
     @Install(to = "processInstancesPagination", subject = "totalCountDelegate")
@@ -115,73 +123,9 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
         return processInstanceData.getId();
     }
 
-    @Subscribe("processInstancesGrid.bulkTerminate")
-    public void onProcessInstancesGridBulkTerminate(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(RuntimeProcessInstanceData::getInstanceId).toList();
-        dialogWindows.view(getCurrentView(), BulkTerminateProcessInstanceView.class)
-                .withViewConfigurer(view -> view.setProcessInstanceIds(instancesIds))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, true));
-                    }
-                })
-                .open();
-    }
-
-    @Subscribe("processInstancesGrid.bulkActivate")
-    public void onProcessInstancesGridBulkActivate(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(RuntimeProcessInstanceData::getInstanceId).toList();
-
-        dialogWindows.view(getCurrentView(), BulkActivateProcessInstanceView.class)
-                .withViewConfigurer(bulkActivateProcessInstanceView -> {
-                    bulkActivateProcessInstanceView.setInstancesIds(instancesIds);
-                })
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false));
-                    }
-                })
-                .open();
-
-    }
-
-    @Subscribe("processInstancesGrid.bulkSuspend")
-    public void onProcessInstancesGridBulkSuspend(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(RuntimeProcessInstanceData::getInstanceId).toList();
-
-        dialogWindows.view(getCurrentView(), BulkSuspendProcessInstanceView.class)
-                .withViewConfigurer(view -> view.setInstancesIds(instancesIds))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false));
-                    }
-                })
-                .open();
-
-    }
-
     @Subscribe("processInstancesGrid.refresh")
     public void onProcessInstancesGridRefresh(final ActionPerformedEvent event) {
         uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false));
-    }
-
-    @Install(to = "processInstancesGrid.bulkActivate", subject = "enabledRule")
-    protected boolean processInstancesGridBulkActivateEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean suspendedInstanceSelected = processInstancesGrid.getSelectedItems().stream().anyMatch(processInstanceData ->
-                BooleanUtils.isTrue(processInstanceData.getSuspended()));
-
-        return selectedNotEmpty && suspendedInstanceSelected;
-    }
-
-    @Install(to = "processInstancesGrid.bulkSuspend", subject = "enabledRule")
-    protected boolean processInstancesGridBulkSuspendEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean activeInstanceSelected = processInstancesGrid.getSelectedItems().stream().anyMatch(processInstanceData ->
-                BooleanUtils.isNotTrue(processInstanceData.getSuspended())
-        );
-
-        return selectedNotEmpty && activeInstanceSelected;
     }
 
     protected void openProcessInstanceDetailView(RuntimeProcessInstanceData selectedInstance) {

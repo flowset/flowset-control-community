@@ -5,30 +5,23 @@
 
 package io.flowset.control.view.usertaskdata;
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ViewProcessDefinitionAction;
+import io.flowset.control.action.ViewProcessInstanceAction;
+import io.flowset.control.action.usertask.CompleteUserTaskAction;
+import io.flowset.control.action.usertask.ReassignUserTaskAction;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.view.alltasks.AllTasksView;
-import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
-import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
-import io.flowset.control.view.taskcomplete.TaskCompleteView;
-import io.flowset.control.view.taskreassign.TaskReassignView;
 import io.jmix.core.LoadContext;
-import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.kit.action.ActionPerformedEvent;
-import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
 import java.util.Date;
 
 @Route(value = "bpm/user-task/:id", layout = DefaultMainViewParent.class)
@@ -56,17 +49,18 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
     protected TypedTextField<String> processDefinitionIdField;
     @ViewComponent
     protected TypedTextField<String> processInstanceIdField;
-    @Autowired
-    protected DialogWindows dialogWindows;
     @ViewComponent
-    protected BaseAction reassignAction;
+    protected ReassignUserTaskAction reassignAction;
     @ViewComponent
-    protected BaseAction completeAction;
+    protected CompleteUserTaskAction completeAction;
     @ViewComponent
     protected JmixButton viewProcessInstance;
     @ViewComponent
     protected JmixButton viewProcessDefinition;
-
+    @ViewComponent
+    protected ViewProcessInstanceAction viewProcessInstanceAction;
+    @ViewComponent
+    protected ViewProcessDefinitionAction viewProcessDefinitionAction;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -79,6 +73,10 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
+        reassignAction.setUserTask(getEditedEntity());
+        reassignAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
+        completeAction.setUserTask(getEditedEntity());
+        completeAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
 
         Date endTime = getEditedEntity().getEndTime();
         if (endTime != null) {
@@ -96,8 +94,8 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
             endTimeField.setVisible(false);
         }
 
-        viewProcessInstance.setVisible(getEditedEntity().getProcessInstanceId() != null);
-        viewProcessDefinition.setVisible(getEditedEntity().getProcessDefinitionId() != null);
+        viewProcessInstanceAction.setEntityId(getEditedEntity().getProcessInstanceId());
+        viewProcessDefinitionAction.setEntityId(getEditedEntity().getProcessDefinitionId());
     }
 
     @Install(to = "userTaskDataDl", target = Target.DATA_LOADER)
@@ -106,39 +104,4 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
         return userTaskService.findTaskById(taskId);
     }
 
-    @Subscribe(id = "viewProcessInstance", subject = "clickListener")
-    public void onViewProcessInstanceClick(final ClickEvent<JmixButton> event) {
-        RouterLink routerLink = new RouterLink(ProcessInstanceDetailView.class, new RouteParameters("id", getEditedEntity().getProcessInstanceId()));
-        getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
-    }
-
-    @Subscribe(id = "viewProcessDefinition", subject = "clickListener")
-    public void onViewProcessDefinitionClick(final ClickEvent<JmixButton> event) {
-        RouterLink routerLink = new RouterLink(ProcessDefinitionDetailView.class, new RouteParameters("id", getEditedEntity().getProcessDefinitionId()));
-        getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
-    }
-
-    @Subscribe("reassignAction")
-    public void onReassignAction(final ActionPerformedEvent event) {
-        dialogWindows.view(this, TaskReassignView.class)
-                .withViewConfigurer(taskReassignView -> taskReassignView.setTaskDataList(Collections.singletonList(getEditedEntity())))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        close(StandardOutcome.SAVE);
-                    }
-                })
-                .open();
-    }
-
-    @Subscribe("completeAction")
-    public void onCompleteAction(final ActionPerformedEvent event) {
-        dialogWindows.view(this, TaskCompleteView.class)
-                .withViewConfigurer(taskCompleteView -> taskCompleteView.setUserTask(getEditedEntity()))
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        close(StandardOutcome.SAVE);
-                    }
-                })
-                .open();
-    }
 }

@@ -12,14 +12,13 @@ import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.RouteParameters;
+import io.flowset.control.action.ViewProcessDefinitionAction;
+import io.flowset.control.action.ViewProcessInstanceAction;
+import io.flowset.control.action.processinstance.ActivateProcessInstanceAction;
+import io.flowset.control.action.processinstance.MigrateProcessInstanceAction;
+import io.flowset.control.action.processinstance.SuspendProcessInstanceAction;
+import io.flowset.control.action.processinstance.TerminateProcessInstanceAction;
 import io.flowset.control.view.util.ComponentHelper;
-import io.jmix.core.Messages;
-import io.jmix.core.Metadata;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.Dialogs;
-import io.jmix.flowui.Notifications;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.fragment.Fragment;
@@ -28,16 +27,9 @@ import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
-import io.flowset.control.service.processdefinition.ProcessDefinitionService;
-import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.flowset.control.view.processinstance.ActivateProcessInstanceView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
-import io.flowset.control.view.processinstance.SuspendProcessInstanceView;
-import io.flowset.control.view.processinstancemigration.ProcessInstanceMigrationView;
-import io.flowset.control.view.processinstanceterminate.ProcessInstanceTerminateView;
 import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -49,27 +41,10 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
 
-    @Autowired
-    protected Dialogs dialogs;
-    @Autowired
-    protected Notifications notifications;
-    @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected Metadata metadata;
     @ViewComponent
     protected MessageBundle messageBundle;
     @Autowired
-    protected DialogWindows dialogWindows;
-    @Autowired
-    protected Messages messages;
-    @Autowired
     protected ComponentHelper componentHelper;
-
-    @Autowired
-    protected ProcessInstanceService processInstanceService;
-    @Autowired
-    protected ProcessDefinitionService processDefinitionService;
 
     @ViewComponent
     protected TextField processDefinitionField;
@@ -87,9 +62,19 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     @ViewComponent
     protected JmixButton infoBtn;
     @ViewComponent
-    protected Button suspendBtn;
+    protected ActivateProcessInstanceAction activateAction;
     @ViewComponent
-    protected Button activateBtn;
+    protected SuspendProcessInstanceAction suspendAction;
+    @ViewComponent
+    protected TerminateProcessInstanceAction terminateAction;
+    @ViewComponent
+    protected MigrateProcessInstanceAction migrateAction;
+    @ViewComponent
+    protected ViewProcessDefinitionAction viewProcessDefinitionAction;
+    @ViewComponent
+    protected ViewProcessInstanceAction viewSuperProcessInstanceAction;
+    @ViewComponent
+    protected ViewProcessInstanceAction viewRootProcessInstanceAction;
     @ViewComponent
     protected VerticalLayout runtimeInstanceActions;
     @ViewComponent
@@ -100,6 +85,7 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
         ProcessInstanceData processInstanceData = processInstanceDataDc.getItem();
 
         initProcessDefinitionField(processInstanceData);
+        viewProcessDefinitionAction.setEntityId(processInstanceData.getProcessDefinitionId());
 
         initParentProcessInstanceFields(processInstanceData);
 
@@ -109,6 +95,18 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
         externallyTerminatedField.setVisible(hasEndTime);
 
         initActionButtons();
+    }
+
+    protected void setupActions() {
+        ProcessInstanceData item = processInstanceDataDc.getItem();
+        activateAction.setProcessInstanceData(item);
+        activateAction.setAfterSaveHandler(this::reopenProcessInstanceDetailsView);
+        suspendAction.setProcessInstanceData(item);
+        suspendAction.setAfterSaveHandler(this::reopenProcessInstanceDetailsView);
+        terminateAction.setProcessInstanceData(item);
+        terminateAction.setAfterSaveHandler(this::reopenProcessInstanceDetailsView);
+        migrateAction.setProcessInstanceData(item);
+        migrateAction.setAfterSaveHandler(this::reopenProcessInstanceDetailsView);
     }
 
     protected void initProcessDefinitionField(ProcessInstanceData processInstanceData) {
@@ -123,23 +121,27 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
 
     protected void initParentProcessInstanceFields(ProcessInstanceData processInstanceData) {
         String superProcessInstanceId = processInstanceData.getSuperProcessInstanceId();
+        viewSuperProcessInstanceAction.setEntityId(superProcessInstanceId);
 
         openSuperProcessInstanceEditorBtn.setVisible(superProcessInstanceId != null &&
                 !Strings.CI.equals(processInstanceData.getInstanceId(), superProcessInstanceId));
 
         String rootInstanceId = processInstanceData.getRootProcessInstanceId();
+        viewRootProcessInstanceAction.setEntityId(rootInstanceId);
         openRootProcessInstanceEditorBtn.setVisible(rootInstanceId != null &&
                 !Strings.CI.equals(processInstanceData.getInstanceId(), rootInstanceId));
     }
 
     protected void initActionButtons() {
+        setupActions();
+
         ProcessInstanceData item = processInstanceDataDc.getItem();
         if (item.getState() == ProcessInstanceState.COMPLETED) {
             runtimeInstanceActions.setVisible(false);
         } else {
-            boolean suspended = Boolean.TRUE.equals(processInstanceDataDc.getItem().getSuspended());
-            activateBtn.setVisible(suspended);
-            suspendBtn.setVisible(!suspended);
+            boolean suspended = Boolean.TRUE.equals(item.getSuspended());
+            activateAction.setVisible(suspended);
+            suspendAction.setVisible(!suspended);
         }
     }
 
@@ -147,124 +149,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     public void onRefreshAction(final ActionPerformedEvent event) {
         reopenProcessInstanceDetailsView();
     }
-
-    @Subscribe("activateAction")
-    public void onActivateAction(final ActionPerformedEvent event) {
-        ProcessInstanceData processInstanceData = processInstanceDataDc.getItem();
-
-        DialogWindow<ActivateProcessInstanceView> dialogWindow = dialogWindows.view(getCurrentView(), ActivateProcessInstanceView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        reopenProcessInstanceDetailsView();
-                    }
-                })
-                .build();
-
-        ActivateProcessInstanceView activateProcessInstanceView = dialogWindow.getView();
-        activateProcessInstanceView.setProcessInstanceData(processInstanceData);
-
-        dialogWindow.open();
-    }
-
-    @Subscribe("openProcessDefinitionEditorBtn")
-    public void openProcessDefinitionEditor(ClickEvent<Button> event) {
-        ProcessDefinitionData processDefinitionData = processDefinitionService.getById(processInstanceDataDc.getItem().getProcessDefinitionId());
-        if (processDefinitionData != null) {
-            viewNavigators.detailView(getCurrentView(), ProcessDefinitionData.class)
-                    .withRouteParameters(new RouteParameters("id", processDefinitionData.getId()))
-                    .withBackwardNavigation(true)
-                    .navigate();
-        } else {
-            notifications.create(messageBundle.getMessage(("processDoesNotExist")))
-                    .withType(Notifications.Type.WARNING)
-                    .show();
-        }
-    }
-
-    @Subscribe(id = "openSuperProcessInstanceEditorBtn", subject = "clickListener")
-    public void onOpenSuperProcessInstanceEditorBtnClick(final ClickEvent<JmixButton> event) {
-        String superProcessInstanceId = processInstanceDataDc.getItem().getSuperProcessInstanceId();
-        if (superProcessInstanceId == null) {
-            return;
-        }
-        viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
-                .withRouteParameters(new RouteParameters("id", superProcessInstanceId))
-                .withBackwardNavigation(true)
-                .navigate();
-    }
-
-    @Subscribe(id = "openRootProcessInstanceEditorBtn", subject = "clickListener")
-    public void onOpenRootProcessInstanceEditorBtnClick(final ClickEvent<JmixButton> event) {
-        String rootProcessInstanceId = processInstanceDataDc.getItem().getRootProcessInstanceId();
-        if (rootProcessInstanceId == null) {
-            return;
-        }
-        viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
-                .withRouteParameters(new RouteParameters("id", rootProcessInstanceId))
-                .withBackwardNavigation(true)
-                .navigate();
-    }
-
-
-    @Subscribe("suspendAction")
-    public void onSuspendAction(final ActionPerformedEvent event) {
-        DialogWindow<SuspendProcessInstanceView> dialogWindow = dialogWindows.view(getCurrentView(), SuspendProcessInstanceView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        reopenProcessInstanceDetailsView();
-                    }
-                })
-                .build();
-
-        SuspendProcessInstanceView suspendProcessInstanceView = dialogWindow.getView();
-        suspendProcessInstanceView.setProcessInstanceData(processInstanceDataDc.getItem());
-
-        dialogWindow.open();
-    }
-
-    @Subscribe("terminateAction")
-    public void onTerminateAction(final ActionPerformedEvent event) {
-        DialogWindow<ProcessInstanceTerminateView> dialog = dialogWindows.view(getCurrentView(), ProcessInstanceTerminateView.class)
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        notifications.create(messageBundle.getMessage("processInstanceTerminated"))
-                                .withType(Notifications.Type.SUCCESS)
-                                .show();
-                        reopenProcessInstanceDetailsView();
-                    }
-                })
-                .build();
-
-        dialog.getView().setProcessInstanceData(processInstanceDataDc.getItem());
-        dialog.open();
-    }
-
-    @Subscribe("migrateAction")
-    public void onMigrateAction(final ActionPerformedEvent event) {
-        ProcessDefinitionData processDefinitionData = metadata.create(ProcessDefinitionData.class);
-        ProcessInstanceData processInstanceData = processInstanceDataDc.getItem();
-        processDefinitionData.setId(processInstanceData.getProcessDefinitionId());
-        processDefinitionData.setKey(processInstanceData.getProcessDefinitionKey());
-        processDefinitionData.setVersion(processInstanceData.getProcessDefinitionVersion());
-
-        DialogWindow<ProcessInstanceMigrationView> dialog =
-                dialogWindows.view(getCurrentView(), ProcessInstanceMigrationView.class)
-                        .withAfterCloseListener(afterCloseEvent -> {
-                            if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                                notifications.create(messageBundle.getMessage("processInstanceMigrated"))
-                                        .withType(Notifications.Type.SUCCESS)
-                                        .show();
-
-                                reopenProcessInstanceDetailsView();
-                            }
-                        })
-                        .build();
-
-        dialog.getView().setProcessDefinitionData(processDefinitionData);
-        dialog.getView().setProcessInstanceData(processInstanceData);
-        dialog.open();
-    }
-
 
     @Subscribe("infoBtn")
     protected void onInfoButtonClickBtnClick(ClickEvent<Button> event) {

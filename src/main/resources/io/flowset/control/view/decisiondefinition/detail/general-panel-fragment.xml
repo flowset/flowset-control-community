@@ -20,6 +20,7 @@
                 <property name="text" value=""/>
             </properties>
         </action>
+        <action id="viewDeploymentAction" type="control_viewDeployment" icon="SEARCH"/>
     </actions>
     <content>
         <flexLayout classNames="decision-slide-panel">
@@ -47,14 +48,14 @@
                             </suffix>
                         </textField>
 
-                        <details opened="true" themeNames="reverse small" summaryText="msg://io.flowset.control.view.decisiondefinition/deploymentGroup"
+                        <details id="deploymentGroup" opened="true" themeNames="reverse small" summaryText="msg://io.flowset.control.view.decisiondefinition/deploymentGroup"
                                  width="100%"
                                  classNames="pt-s">
                             <vbox padding="false" width="100%" themeNames="spacing-xs">
                                 <textField id="deploymentIdField" readOnly="true" width="100%"
                                            label="msg://io.flowset.control.view.decisiondefinition/deploymentId">
                                     <suffix>
-                                        <button id="viewDeployment" icon="SEARCH" themeNames="tertiary-inline"/>
+                                        <button id="viewDeployment" themeNames="tertiary-inline" action="viewDeploymentAction"/>
                                     </suffix>
                                 </textField>
 

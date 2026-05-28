@@ -1,8 +1,9 @@
 package io.flowset.control.view.processinstanceterminate;
 
 
-import com.vaadin.flow.router.Route;
 import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
+import io.jmix.core.Messages;
+import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 
-@Route(value = "process-instance-terminate-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "ProcessInstanceTerminateView")
 @ViewDescriptor(path = "process-instance-terminate-view.xml")
 public class ProcessInstanceTerminateView extends StandardView {
@@ -29,6 +29,11 @@ public class ProcessInstanceTerminateView extends StandardView {
     protected JmixCheckbox skipCustomListenersField;
     @ViewComponent
     protected JmixCheckbox skipSubprocessesField;
+    @Autowired
+    protected Notifications notifications;
+
+    @Autowired
+    protected Messages messages;
 
     protected ProcessInstanceData processInstanceData;
 
@@ -54,7 +59,9 @@ public class ProcessInstanceTerminateView extends StandardView {
                 .setSkipSubprocesses(skipSubprocessesField.getValue());
 
         processInstanceService.terminateByIdsAsync(context);
-
+        notifications.create(messages.getMessage("io.flowset.control.view.processinstance.generalpanel/processInstanceTerminated"))
+                .withType(Notifications.Type.SUCCESS)
+                .show();
         close(StandardOutcome.SAVE);
     }
 

@@ -10,6 +10,7 @@ import io.flowset.control.entity.activity.ActivityShortData;
 import io.flowset.control.entity.activity.HistoricActivityInstanceData;
 import io.flowset.control.entity.activity.ProcessActivityStatistics;
 import io.flowset.control.entity.filter.ActivityFilter;
+import io.flowset.control.security.SecuredEntityLoad;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public interface ActivityService {
      * @param processInstanceId a process instance identifier
      * @return found running activities
      */
+    @SecuredEntityLoad(entityClass = ActivityShortData.class)
     List<ActivityShortData> findRunningActivities(String processInstanceId);
 
     /**
@@ -32,6 +34,7 @@ public interface ActivityService {
      * @param processInstanceId a process instance identifier
      * @return found finished activities
      */
+    @SecuredEntityLoad(entityClass = ActivityShortData.class)
     List<ActivityShortData> findFinishedActivities(String processInstanceId);
 
     /**
@@ -40,6 +43,7 @@ public interface ActivityService {
      * @param processInstanceId a process instance identifier
      * @return a list of activity instances tree items
      */
+    @SecuredEntityLoad(entityClass = ActivityInstanceTreeItem.class)
     List<ActivityInstanceTreeItem> getActivityInstancesTree(String processInstanceId);
 
     /**
@@ -49,6 +53,7 @@ public interface ActivityService {
      * @return found historic activity instances
      * @see ActivityLoadContext
      */
+    @SecuredEntityLoad(entityClass = HistoricActivityInstanceData.class)
     List<HistoricActivityInstanceData> findAllHistoryActivities(ActivityLoadContext loadContext);
 
     /**
@@ -57,6 +62,7 @@ public interface ActivityService {
      * @param filter an activity filter instance
      * @return count of activity instances
      */
+    @SecuredEntityLoad(entityClass = HistoricActivityInstanceData.class)
     long getHistoryActivitiesCount(@Nullable ActivityFilter filter);
 
     /**
@@ -66,6 +72,7 @@ public interface ActivityService {
      * @return found instance or null if instance not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = HistoricActivityInstanceData.class)
     HistoricActivityInstanceData findById(String activityInstanceId);
 
     /**
@@ -74,5 +81,6 @@ public interface ActivityService {
      * @param processDefinitionId an id of the process definition for which the statistics should be loaded
      * @return found process statistics
      */
+    @SecuredEntityLoad(entityClass = ProcessActivityStatistics.class)
     List<ProcessActivityStatistics> getStatisticsByProcessId(String processDefinitionId);
 }

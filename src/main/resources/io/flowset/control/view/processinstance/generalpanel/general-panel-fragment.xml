@@ -10,21 +10,24 @@
     </data>
 
     <actions>
-        <action id="terminateAction"
+        <action id="terminateAction" type="control_terminateProcessInstance"
                 icon="DOT_CIRCLE"
                 description="msg://terminateProcessInstance"/>
-        <action id="migrateAction"
+        <action id="migrateAction" type="control_migrateProcessInstance"
                 icon="FORWARD"
                 description="msg://migrateProcessInstance"/>
         <action id="refreshAction"
                 icon="REFRESH"
                 description="msg://reloadProcessInstanceDetails"/>
-        <action id="activateAction"
+        <action id="activateAction" type="control_activateProcessInstance"
                 icon="PLAY"
                 description="msg://activateProcessInstance"/>
-        <action id="suspendAction"
+        <action id="suspendAction" type="control_suspendProcessInstance"
                 icon="PAUSE"
                 description="msg://suspendProcessInstance"/>
+        <action id="viewProcessDefinitionAction" type="control_viewProcessDefinition"/>
+        <action id="viewSuperProcessInstanceAction" type="control_viewProcessInstance"/>
+        <action id="viewRootProcessInstanceAction" type="control_viewProcessInstance"/>
     </actions>
 
     <content>
@@ -42,19 +45,19 @@
                         <textField id="businessKeyField" property="businessKey" readOnly="true" width="auto"/>
                         <textField id="processDefinitionField" label="msg://io.flowset.control.view.processinstance/processDefinition" readOnly="true" width="auto" >
                             <suffix>
-                                <button id="openProcessDefinitionEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessDefinition"/>
+                                <button id="openProcessDefinitionEditorBtn" action="viewProcessDefinitionAction" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessDefinition"/>
                             </suffix>
                         </textField>
                         <textField id="rootProcessInstanceIdField"  readOnly="true" width="auto"
                                    dataContainer="processInstanceDataDc" property="rootProcessInstanceId">
                             <suffix>
-                                <button id="openRootProcessInstanceEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessInstance"/>
+                                <button id="openRootProcessInstanceEditorBtn" action="viewRootProcessInstanceAction" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessInstance"/>
                             </suffix>
                         </textField>
                         <textField id="superProcessInstanceIdField"
                                    dataContainer="processInstanceDataDc" property="superProcessInstanceId" readOnly="true" width="auto">
                             <suffix>
-                                <button id="openSuperProcessInstanceEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline"
+                                <button id="openSuperProcessInstanceEditorBtn" action="viewSuperProcessInstanceAction" icon="SEARCH" themeNames="icon tertiary-inline"
                                         title="msg://io.flowset.control.view.processinstance/openProcessInstance"/>
                             </suffix>
                         </textField>

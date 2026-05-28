@@ -8,6 +8,9 @@ package io.flowset.control.service.externaltask;
 import io.flowset.control.entity.ExternalTaskData;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.filter.ExternalTaskFilter;
+import io.flowset.control.security.SecuredEntityLoad;
+import io.flowset.control.security.SecuredEntityOperation;
+import io.flowset.control.security.SpecificPermissions;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -22,6 +25,7 @@ public interface ExternalTaskService {
      * @param loadContext a context to load external task instances
      * @return found running external tasks
      */
+    @SecuredEntityLoad(entityClass = ExternalTaskData.class)
     List<ExternalTaskData> findRunningTasks(ExternalTaskLoadContext loadContext);
 
     /**
@@ -31,6 +35,7 @@ public interface ExternalTaskService {
      * @return external task instance or null
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = ExternalTaskData.class)
     ExternalTaskData findById(String externalTaskId);
 
     /**
@@ -39,6 +44,7 @@ public interface ExternalTaskService {
      * @param filter an external task filter instance
      * @return count of external task instances
      */
+    @SecuredEntityLoad(entityClass = ExternalTaskData.class)
     long getRunningTasksCount(@Nullable ExternalTaskFilter filter);
 
     /**
@@ -47,6 +53,7 @@ public interface ExternalTaskService {
      * @param externalTaskId an external task instance identifier
      * @param retries        a new value of retries
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.EXTERNAL_TASK_RETRY)
     void setRetries(String externalTaskId, int retries);
 
     /**
@@ -57,6 +64,7 @@ public interface ExternalTaskService {
      * @return created batch data or null if response body is empty
      */
     @Nullable
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.EXTERNAL_TASK_RETRY)
     BatchData setRetriesAsync(List<String> externalTaskIds, int retries);
 
     /**
@@ -65,5 +73,6 @@ public interface ExternalTaskService {
      * @param externalTaskId an identifier of running external task instance
      * @return error details
      */
+    @SecuredEntityLoad(entityClass = ExternalTaskData.class)
     String getErrorDetails(String externalTaskId);
 }

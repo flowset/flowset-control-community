@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.popover.Popover;
+import io.flowset.control.action.engine.CreateBpmEngineAction;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.service.engine.EngineUiService;
 import io.flowset.control.view.bpmengine.BpmEngineDetailView;
@@ -26,6 +27,7 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.Install;
 import io.jmix.flowui.view.StandardOutcome;
 import io.jmix.flowui.view.Subscribe;
@@ -59,6 +61,10 @@ public class SelectEnginePopoverContentFragment extends Fragment<VerticalLayout>
     protected VerticalLayout emptyEnginesBox;
     @ViewComponent
     protected JmixListBox<BpmEngine> engineListBox;
+    @ViewComponent
+    protected CreateBpmEngineAction createBpmEngineAction;
+    @ViewComponent
+    protected VerticalLayout createBpmEngineBox;
 
     protected Popover popover;
     protected InstanceContainer<BpmEngine> selectedEngineDc;
@@ -74,6 +80,8 @@ public class SelectEnginePopoverContentFragment extends Fragment<VerticalLayout>
     public void init() {
         refreshValues();
         setSelectedEngine(selectedEngineDc.getItemOrNull());
+        createBpmEngineAction.refreshState();
+        createBpmEngineBox.setVisible(createBpmEngineAction.isEnabled());
     }
 
     protected void refreshValues() {
@@ -102,8 +110,8 @@ public class SelectEnginePopoverContentFragment extends Fragment<VerticalLayout>
         }
     }
 
-    @Subscribe(id = "createBpmEngineBtn", subject = "clickListener")
-    public void onCreateBpmEngineBtnClick(final ClickEvent<JmixButton> event) {
+    @Subscribe("createBpmEngineAction")
+    public void onCreateBpmEngineAction(final ActionPerformedEvent event) {
         popover.close();
         dialogWindows.detail(getCurrentView(), BpmEngine.class)
                 .newEntity()
@@ -125,8 +133,8 @@ public class SelectEnginePopoverContentFragment extends Fragment<VerticalLayout>
         }
     }
 
-    @Subscribe(id = "advancedModeBtn", subject = "clickListener")
-    public void onAdvancedModeBtnClick(final ClickEvent<JmixButton> event) {
+    @Subscribe("openEngineConnectionSettingsAction")
+    public void onOpenEngineConnectionSettingsAction(final ActionPerformedEvent event) {
         popover.close();
         dialogWindows.view(getCurrentView(), EngineConnectionSettingsView.class)
                 .open();

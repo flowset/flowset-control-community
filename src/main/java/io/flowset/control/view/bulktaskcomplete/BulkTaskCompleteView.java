@@ -8,7 +8,6 @@ package io.flowset.control.view.bulktaskcomplete;
 
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.entity.variable.ObjectTypeInfo;
@@ -28,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collection;
 import java.util.Objects;
 
-@Route(value = "bulk-task-complete", layout = DefaultMainViewParent.class)
 @ViewController("BulkTaskCompleteView")
 @ViewDescriptor("bulk-task-complete-view.xml")
 @DialogMode(width = "50em")

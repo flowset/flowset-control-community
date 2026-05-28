@@ -18,9 +18,9 @@
         <action id="copyIdAction" type="control_copyComponentValueToClipboard"/>
         <action id="copyErrorAction" type="control_copyComponentValueToClipboard"/>
         <action id="copyErrorDetailsAction" type="control_copyComponentValueToClipboard"/>
-        <action id="retryAction" text="msg:///actions.Retry" icon="ROTATE_LEFT" visible="false"/>
-        <action id="viewProcessAction" icon="SEARCH"/>
-        <action id="viewProcessInstanceAction" icon="SEARCH"/>
+        <action id="retryAction" type="control_retryExternalTask" text="msg:///actions.Retry" icon="ROTATE_LEFT"/>
+        <action id="viewProcessAction" type="control_viewProcessDefinition" icon="SEARCH"/>
+        <action id="viewProcessInstanceAction" type="control_viewProcessInstance" icon="SEARCH"/>
     </actions>
     <layout classNames="overflow-hidden" expand="infoBox">
         <split id="infoBox" themeNames="splitter-spacing" width="100%">

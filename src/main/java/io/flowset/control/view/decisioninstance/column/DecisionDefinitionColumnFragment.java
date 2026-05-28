@@ -63,4 +63,14 @@ public class DecisionDefinitionColumnFragment extends EntityDetailLinkFragment<H
                     .navigate();
         }
     }
+
+    @Override
+    protected Class<?> getTargetEntityClass() {
+        return DecisionDefinitionData.class;
+    }
+
+    @Override
+    protected boolean isItemReadPermitted() {
+        return true;
+    }
 }

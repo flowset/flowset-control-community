@@ -34,9 +34,11 @@ import io.flowset.control.entity.dashboard.IncidentStatistics;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processdefinition.CalledProcessReferenceData;
+import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisiondefinition.DecisionReferenceData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
+import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
@@ -95,6 +97,8 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected UiEventPublisher uiEventPublisher;
     @Autowired
     protected Metadata metadata;
+    @Autowired
+    protected SecuritySupport securitySupport;
     @Autowired
     protected CallActivityOverlayClickHandler callActivityClickHandler;
     @Autowired
@@ -171,7 +175,7 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
 
         updateAllRunningInstancesCount();
 
-        viewerFragment.showStatisticsButton(true);
+        viewerFragment.showStatisticsButton(securitySupport.isEntityViewPermitted(ProcessActivityStatistics.class));
     }
 
     @Subscribe
@@ -308,17 +312,20 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
 
     protected void initViewer(String bpmnXml) {
         viewerFragment.initViewer(bpmnXml);
-        viewerFragment.showCalledProcessOverlays();
-        viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent ->
-                callActivityClickHandler.handleProcessNavigation(processDefinitionDataDc.getItem(),
-                        callActivityOverlayClickEvent.getCallActivity(),
-                        UiComponentUtils.isComponentAttachedToDialog(this)));
-        viewerFragment.showDecisionLinkOverlays();
-        viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent -> {
-            businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
-                    businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
-                    UiComponentUtils.isComponentAttachedToDialog(this));
-        });
+        if (securitySupport.isEntityViewPermitted(ProcessDefinitionData.class)) {
+            viewerFragment.showCalledProcessOverlays();
+            viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent ->
+                    callActivityClickHandler.handleProcessNavigation(processDefinitionDataDc.getItem(),
+                            callActivityOverlayClickEvent.getCallActivity(),
+                            UiComponentUtils.isComponentAttachedToDialog(this)));
+        }
+        if (securitySupport.isEntityViewPermitted(DecisionDefinitionData.class)) {
+            viewerFragment.showDecisionLinkOverlays();
+            viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent ->
+                    businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
+                            businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
+                            UiComponentUtils.isComponentAttachedToDialog(this)));
+        }
         viewerFragment.addImportCompleteListener(this::handleImportComplete);
         updateActivityStatistics();
     }

@@ -12,11 +12,12 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.incident.RetryIncidentGridAction;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
-import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.*;
+import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.UiEventPublisher;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -29,8 +30,6 @@ import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.incident.IncidentLoadContext;
 import io.flowset.control.service.incident.IncidentService;
-import io.flowset.control.view.incidentdata.RetryExternalTaskView;
-import io.flowset.control.view.incidentdata.RetryJobView;
 import io.flowset.control.view.processinstance.event.IncidentCountUpdateEvent;
 import io.flowset.control.view.processinstance.event.IncidentUpdateEvent;
 import io.flowset.control.view.util.ComponentHelper;
@@ -51,14 +50,6 @@ public class RuntimeIncidentsTabFragment extends Fragment<VerticalLayout> {
     @Autowired
     protected DialogWindows dialogWindows;
     @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected Dialogs dialogs;
-    @Autowired
-    protected Messages messages;
-    @Autowired
-    protected Notifications notifications;
-    @Autowired
     protected ComponentHelper componentHelper;
     @Autowired
     protected IncidentService incidentService;
@@ -69,6 +60,8 @@ public class RuntimeIncidentsTabFragment extends Fragment<VerticalLayout> {
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
     @ViewComponent
     protected DataGrid<IncidentData> runtimeIncidentsGrid;
+    @ViewComponent("runtimeIncidentsGrid.retry")
+    protected RetryIncidentGridAction retryAction;
 
     protected IncidentFilter filter;
     protected String selectedActivityId;
@@ -95,6 +88,11 @@ public class RuntimeIncidentsTabFragment extends Fragment<VerticalLayout> {
         }
     }
 
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        retryAction.setAfterSaveHandler(this::reloadIncidents);
+    }
+
     @Subscribe("runtimeIncidentsGrid.view")
     public void onViewAction(final ActionPerformedEvent event) {
         IncidentData incidentData = runtimeIncidentsGrid.getSingleSelectedItem();
@@ -111,51 +109,6 @@ public class RuntimeIncidentsTabFragment extends Fragment<VerticalLayout> {
                 .build()
                 .open();
     }
-
-    @Install(to = "runtimeIncidentsGrid.retry", subject = "enabledRule")
-    protected boolean runtimeIncidentsGridRetryEnabledRule() {
-        IncidentData selectedItem = runtimeIncidentsGrid.getSingleSelectedItem();
-        return selectedItem != null && selectedItem.getConfiguration() != null &&
-                (selectedItem.isJobFailed() || selectedItem.isExternalTaskFailed());
-    }
-
-
-    @Subscribe("runtimeIncidentsGrid.retry")
-    public void onRetryAction(final ActionPerformedEvent event) {
-        IncidentData incident = runtimeIncidentsGrid.getSingleSelectedItem();
-        if (incident == null || incident.getConfiguration() == null) {
-            return;
-        }
-
-        if (incident.isExternalTaskFailed()) {
-            DialogWindow<RetryExternalTaskView> dialogWindow = dialogWindows.view(getCurrentView(), RetryExternalTaskView.class)
-                    .withAfterCloseListener(afterClose -> {
-                        if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                            reloadIncidents();
-                        }
-                    })
-                    .build();
-
-            RetryExternalTaskView retryExternalTaskView = dialogWindow.getView();
-            retryExternalTaskView.setExternalTaskId(incident.getConfiguration());
-
-            dialogWindow.open();
-        } else if (incident.isJobFailed()) {
-            DialogWindow<RetryJobView> dialogWindow = dialogWindows.view(getCurrentView(), RetryJobView.class)
-                    .withAfterCloseListener(afterClose -> {
-                        if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                            reloadIncidents();
-                        }
-                    })
-                    .build();
-
-            RetryJobView retryJobView = dialogWindow.getView();
-            retryJobView.setJobId(incident.getConfiguration());
-
-            dialogWindow.open();
-        }
-    }
-
 
     @Install(to = "runtimeIncidentsGrid.timestamp", subject = "partNameGenerator")
     protected String runtimeIncidentsGridTimestampPartNameGenerator(final IncidentData incidentData) {

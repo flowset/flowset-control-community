@@ -46,6 +46,7 @@ import io.flowset.control.service.decisioninstance.DecisionInstanceService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
+import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.flowset.control.view.decisioninstance.DecisionInstanceDetailView;
 import io.flowset.control.view.event.TitleUpdateEvent;
@@ -91,6 +92,8 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     protected ActivityService activityService;
     @Autowired
     protected ComponentHelper componentHelper;
+    @Autowired
+    protected SecuritySupport securitySupport;
     @Autowired
     protected CallActivityOverlayClickHandler callActivityClickHandler;
     @Autowired
@@ -265,14 +268,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
                 viewerFragment.setElementColor(new SetElementColorCmd(activityId, "#000000", "var(--bpmn-history-activity-color)"));
             }
 
-            String decisionInstanceId = findDecisionInstanceByActivity(activityId);
-            if (!Strings.isNullOrEmpty(activityId)) {
-                String tooltipMessage = messages.formatMessage(
-                        "", "viewer.openDecisionInstanceOverlay.tooltipMessage", decisionInstanceId);
-                viewerFragment.showDecisionInstanceLinkOverlay(new ShowDecisionInstanceLinkOverlayCmd(activityId,
-                        decisionInstanceId, tooltipMessage));
-            }
-
+            showCalledDecisionOverlay(activityId);
             addCalledInstance(activityData, calledInstancesByActivityId);
         }
 
@@ -312,6 +308,9 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     }
 
     protected void showCalledInstanceOverlays(Map<String, List<String>> calledInstances) {
+        if (!securitySupport.isEntityViewPermitted(ProcessInstanceData.class)) {
+            return;
+        }
         calledInstances.forEach((activityId, calledInstanceIds) -> {
             ShowCalledInstanceOverlayCmd showCalledInstanceOverlayCmd = new ShowCalledInstanceOverlayCmd();
             showCalledInstanceOverlayCmd.setElementId(activityId);
@@ -319,6 +318,17 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
 
             viewerFragment.showCalledInstance(showCalledInstanceOverlayCmd);
         });
+    }
+
+    protected void showCalledDecisionOverlay(String activityId) {
+        if (!Strings.isNullOrEmpty(activityId)
+                && securitySupport.isEntityViewPermitted(HistoricDecisionInstanceShortData.class)) {
+            String decisionInstanceId = findDecisionInstanceByActivity(activityId);
+            String tooltipMessage = messages.formatMessage(
+                    "", "viewer.openDecisionInstanceOverlay.tooltipMessage", decisionInstanceId);
+            viewerFragment.showDecisionInstanceLinkOverlay(new ShowDecisionInstanceLinkOverlayCmd(activityId,
+                    decisionInstanceId, tooltipMessage));
+        }
     }
 
     protected void sendUpdateViewTitleEvent() {
@@ -380,7 +390,8 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     }
 
     private void handleDecisionInstanceLinkOverlayClicked(String decisionInstanceId) {
-        if (!Strings.isNullOrEmpty(decisionInstanceId)) {
+        if (!Strings.isNullOrEmpty(decisionInstanceId)
+                && securitySupport.isEntityViewPermitted(HistoricDecisionInstanceShortData.class)) {
             viewNavigators.detailView(this, HistoricDecisionInstanceShortData.class)
                     .withViewClass(DecisionInstanceDetailView.class)
                     .withRouteParameters(new RouteParameters("id", decisionInstanceId))

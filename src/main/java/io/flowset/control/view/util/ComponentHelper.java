@@ -17,13 +17,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
+import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.UiComponents;
-import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
-import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
 import io.jmix.flowui.component.grid.headerfilter.DataGridHeaderFilter;
@@ -32,6 +32,7 @@ import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.DialogWindow;
 import io.jmix.flowui.view.View;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,7 @@ import java.util.function.Function;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class ComponentHelper {
     public static final String FULL_SCREEN_DIALOG_CLASS_NAME = "full-screen-dialog";
 
@@ -196,7 +198,7 @@ public class ComponentHelper {
      * Adds a full-screen toggle button to the dialog window's header.
      *
      * @param dialogWindow a dialog window
-     * @param <V> a type of view opened in the dialog window
+     * @param <V>          a type of view opened in the dialog window
      */
     public <V extends View<?>> void addFullScreenButton(DialogWindow<V> dialogWindow) {
         dialogWindow.getElement().getComponent()
@@ -228,18 +230,30 @@ public class ComponentHelper {
         DataGridColumn<E> column = dataGrid.getColumnByKey(columnName);
         T filterComponent = filterProvider.apply(column);
         BeanUtil.autowireContext(applicationContext, filterComponent);
-        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-        HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
-        layout.setSizeFull();
-        layout.addClassNames(LumoUtility.Gap.SMALL);
-        headerCell.setComponent(filterComponent);
+        HeaderRow.HeaderCell headerCell = findCell(headerRow, column);
+        if (headerCell != null) {
+            HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
+            layout.setSizeFull();
+            layout.addClassNames(LumoUtility.Gap.SMALL);
+            headerCell.setComponent(filterComponent);
 
-        Element child = filterComponent.getElement().getChild(0);
-        if (child != null && child.getStyle() != null) {
-            // set styles for column header text to make a filter button always visible
-            child.getStyle().setOverflow(Style.Overflow.HIDDEN);
-            child.getStyle().set("text-overflow", "ellipsis");
-            child.getStyle().setWhiteSpace(Style.WhiteSpace.PRE_WRAP);
+            Element child = filterComponent.getElement().getChild(0);
+            if (child != null && child.getStyle() != null) {
+                // set styles for column header text to make a filter button always visible
+                child.getStyle().setOverflow(Style.Overflow.HIDDEN);
+                child.getStyle().set("text-overflow", "ellipsis");
+                child.getStyle().setWhiteSpace(Style.WhiteSpace.PRE_WRAP);
+            }
+        }
+    }
+
+    @Nullable
+    protected <E> HeaderRow.HeaderCell findCell(HeaderRow headerRow, DataGridColumn<E> column) {
+        try {
+            return headerRow.getCell(column);
+        } catch (IllegalArgumentException e) {
+            log.debug("Failed to find header cell for column: {}", column.getId());
+            return null;
         }
     }
 

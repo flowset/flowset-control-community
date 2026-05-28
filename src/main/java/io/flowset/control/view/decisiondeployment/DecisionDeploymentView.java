@@ -17,6 +17,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.security.SecuritySupport;
+import io.flowset.control.security.accesscontext.decisiondefinition.DecisionDefinitionDeployAccessContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.Fragments;
@@ -86,6 +88,8 @@ public class DecisionDeploymentView extends AbstractResourceDeploymentView {
     protected Fragments fragments;
     @Autowired
     protected DecisionDefinitionService decisionDefinitionService;
+    @Autowired
+    protected SecuritySupport securitySupport;
 
     @ViewComponent
     protected VerticalLayout previewVBox;
@@ -122,6 +126,7 @@ public class DecisionDeploymentView extends AbstractResourceDeploymentView {
         initEmptyPreviewStyles();
         initDecisionInfoHBoxStyles();
         initDeploymentErrorsButton();
+        updateActions();
     }
 
     @Subscribe(id = "okBtn", subject = "clickListener")
@@ -297,6 +302,10 @@ public class DecisionDeploymentView extends AbstractResourceDeploymentView {
 
         decisionIdLabel.setVisible(!multipleDecisionDefinitions);
         decisionLabel.setVisible(!multipleDecisionDefinitions);
+    }
+
+    protected void updateActions() {
+        okBtn.setVisible(securitySupport.isActionPermitted(new DecisionDefinitionDeployAccessContext()));
     }
 
     protected String getDecisionDefinitionsString() {

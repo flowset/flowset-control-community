@@ -10,9 +10,15 @@ import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Span;
 import io.jmix.flowui.component.main.JmixListMenu;
 import io.jmix.flowui.kit.component.main.ListMenu;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.Nullable;
+
+import java.util.List;
 
 /**
  * Side menu component.
@@ -37,6 +43,23 @@ public class ControlListMenu extends JmixListMenu {
                 addMenuItem(menuItem);
             }
         }
+    }
+
+    @Override
+    public void addMenuItem(MenuItem menuItem) {
+        if (menuItem instanceof GroupLabelMenuItem groupLabelMenuItem) {
+            List<String> relatedMenuItems = groupLabelMenuItem.getChildrenItems();
+            if (CollectionUtils.isNotEmpty(relatedMenuItems)) {
+                for (String relatedMenuItem : relatedMenuItems) {
+                    if (registrations.containsKey(relatedMenuItem)) {
+                        addMenuItemBefore(menuItem, relatedMenuItem);
+                        return;
+                    }
+                }
+            }
+            return;
+        }
+        super.addMenuItem(menuItem);
     }
 
     /**
@@ -78,15 +101,25 @@ public class ControlListMenu extends JmixListMenu {
     protected MenuItem getExistingMenu(String menuId) {
         MenuItem existingMenuItem = getMenuItem(menuId);
         if (existingMenuItem == null) {
-            log.warn("Menu item  not found by id '{}'", menuId);
+            log.debug("Menu item  not found by id '{}'", menuId);
         }
 
         return existingMenuItem;
     }
 
+    @Getter
+    @Setter
+    @Accessors(chain = true)
     public static class GroupLabelMenuItem extends ListMenu.MenuItem {
+        protected List<String> childrenItems;
+
         public GroupLabelMenuItem(String id) {
             super(id);
+        }
+
+        public GroupLabelMenuItem withChildrenItems(String... menuItems) {
+            childrenItems = List.of(menuItems);
+            return this;
         }
     }
 }

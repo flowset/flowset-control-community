@@ -12,6 +12,9 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.processinstance.BulkActivateProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkSuspendProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkTerminateProcessInstanceAction;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -29,13 +32,10 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder;
-import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.view.processinstance.filter.*;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,9 +56,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
 
     @Autowired
     protected ProcessInstanceService processInstanceService;
-    @Autowired
-    protected ProcessDefinitionService processDefinitionService;
-
     @ViewComponent
     protected CollectionContainer<ProcessInstanceData> processInstancesDc;
 
@@ -72,14 +69,12 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     protected CollectionLoader<ProcessInstanceData> processInstancesDl;
     @Autowired
     protected Metadata metadata;
-    @Autowired
-    protected ApplicationContext applicationContext;
-    @Autowired
-    protected Dialogs dialogs;
-    @Autowired
-    protected Notifications notifications;
-    @Autowired
-    protected DialogWindows dialogWindows;
+    @ViewComponent("processInstancesGrid.bulkActivate")
+    protected BulkActivateProcessInstanceAction bulkActivate;
+    @ViewComponent("processInstancesGrid.bulkSuspend")
+    protected BulkSuspendProcessInstanceAction bulkSuspend;
+    @ViewComponent("processInstancesGrid.bulkTerminate")
+    protected BulkTerminateProcessInstanceAction bulkTerminate;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
     @ViewComponent
@@ -93,42 +88,19 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         setDefaultSort();
         urlQueryParameters.registerBinder(new ProcessInstanceListQueryParamBinder(modeButtonsGroup, processInstanceFilterDc,
                 this::startLoadData, processInstancesGrid));
+        setupBulkActions();
+    }
+
+    protected void setupBulkActions() {
+        bulkActivate.setAfterSaveHandler(this::startLoadData);
+        bulkSuspend.setAfterSaveHandler(this::startLoadData);
+        bulkTerminate.setAfterSaveHandler(this::startLoadData);
     }
 
     protected void setDefaultSort() {
         List<GridSortOrder<ProcessInstanceData>> gridSortOrders = Collections.singletonList(new GridSortOrder<>(processInstancesGrid.getColumnByKey("startTime"), SortDirection.DESCENDING));
         processInstancesGrid.sort(gridSortOrders);
     }
-
-    @Install(to = "processInstancesGrid.bulkActivate", subject = "enabledRule")
-    protected boolean processInstancesGridBulkActivateEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean suspendedInstanceSelected = processInstancesGrid.getSelectedItems().stream().anyMatch(processInstanceData ->
-                BooleanUtils.isTrue(processInstanceData.getSuspended()) && BooleanUtils.isNotTrue(processInstanceData.getComplete()));
-        boolean notCompletedSelected = processInstancesGrid.getSelectedItems().stream().noneMatch(processInstanceData -> BooleanUtils.isTrue(processInstanceData.getComplete()));
-
-        return selectedNotEmpty && suspendedInstanceSelected && notCompletedSelected;
-    }
-
-    @Install(to = "processInstancesGrid.bulkTerminate", subject = "enabledRule")
-    protected boolean processInstancesGridBulkTerminateEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean notCompletedSelected = processInstancesGrid.getSelectedItems().stream().noneMatch(processInstanceData -> BooleanUtils.isTrue(processInstanceData.getFinished()));
-
-        return selectedNotEmpty && notCompletedSelected;
-    }
-
-    @Install(to = "processInstancesGrid.bulkSuspend", subject = "enabledRule")
-    protected boolean processInstancesGridBulkSuspendEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean activeInstanceSelected = processInstancesGrid.getSelectedItems().stream().anyMatch(processInstanceData ->
-                BooleanUtils.isNotTrue(processInstanceData.getSuspended()) && BooleanUtils.isNotTrue(processInstanceData.getFinished())
-        );
-
-        boolean notCompletedSelected = processInstancesGrid.getSelectedItems().stream().noneMatch(processInstanceData -> BooleanUtils.isTrue(processInstanceData.getFinished()));
-        return selectedNotEmpty && activeInstanceSelected && notCompletedSelected;
-    }
-
 
     protected void initDataGridHeaderRow() {
         componentHelper.addColumnFilter(processInstancesGrid, "id", this::createIdColumnFilter);
@@ -137,58 +109,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         componentHelper.addColumnFilter(processInstancesGrid, "state", this::createStateColumnFilter);
         componentHelper.addColumnFilter(processInstancesGrid, "startTime", this::createStartTimeColumnFilter);
         componentHelper.addColumnFilter(processInstancesGrid, "endTime", this::createEndTimeColumnFilter);
-    }
-
-
-    @Subscribe("processInstancesGrid.bulkTerminate")
-    public void onProcessInstancesGridBulkTerminate(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(ProcessInstanceData::getInstanceId).toList();
-        dialogWindows.view(this, BulkTerminateProcessInstanceView.class)
-                .withViewConfigurer(view -> view.setProcessInstanceIds(instancesIds))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .build()
-                .open();
-    }
-
-
-    @Subscribe("processInstancesGrid.bulkActivate")
-    public void onProcessInstancesGridBulkActivate(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(ProcessInstanceData::getInstanceId).toList();
-
-        DialogWindow<BulkActivateProcessInstanceView> dialogWindow = dialogWindows.view(this, BulkActivateProcessInstanceView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .build();
-
-        BulkActivateProcessInstanceView bulkActivateProcessInstanceView = dialogWindow.getView();
-        bulkActivateProcessInstanceView.setInstancesIds(instancesIds);
-
-        dialogWindow.open();
-    }
-
-    @Subscribe("processInstancesGrid.bulkSuspend")
-    public void onProcessInstancesGridBulkSuspend(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(ProcessInstanceData::getInstanceId).toList();
-
-        DialogWindow<BulkSuspendProcessInstanceView> dialogWindow = dialogWindows.view(this, BulkSuspendProcessInstanceView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .build();
-
-        BulkSuspendProcessInstanceView bulkSuspendProcessInstanceView = dialogWindow.getView();
-        bulkSuspendProcessInstanceView.setInstancesIds(instancesIds);
-
-        dialogWindow.open();
     }
 
 

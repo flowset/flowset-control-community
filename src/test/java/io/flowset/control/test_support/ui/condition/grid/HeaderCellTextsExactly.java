@@ -24,7 +24,7 @@ public class HeaderCellTextsExactly extends WebElementCondition {
     private final List<String> expected;
 
     public HeaderCellTextsExactly(List<String> expected) {
-        super("non-empty header cell texts (in order) = " + expected);
+        super("header cell texts (in order) = " + expected);
         this.expected = expected;
     }
 

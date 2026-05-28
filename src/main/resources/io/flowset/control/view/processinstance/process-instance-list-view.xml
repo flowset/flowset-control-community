@@ -37,9 +37,9 @@
                   minHeight="20em">
             <actions>
                 <action id="refresh" type="list_refresh"/>
-                <action id="bulkTerminate" type="list_itemTracking" text="msg:///actions.Terminate" icon="DOT_CIRCLE"/>
-                <action id="bulkActivate" type="list_itemTracking" text="msg:///actions.Activate" icon="PLAY"/>
-                <action id="bulkSuspend" type="list_itemTracking" text="msg:///actions.Suspend" icon="PAUSE"/>
+                <action id="bulkTerminate" type="control_bulkTerminateProcessInstance" icon="DOT_CIRCLE"/>
+                <action id="bulkActivate" type="control_bulkActivateProcessInstance" icon="PLAY"/>
+                <action id="bulkSuspend" type="control_bulkSuspendProcessInstance" icon="PAUSE"/>
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">

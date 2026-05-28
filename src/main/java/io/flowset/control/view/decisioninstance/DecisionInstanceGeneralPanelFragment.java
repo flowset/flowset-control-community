@@ -11,16 +11,15 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.RouteParameters;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
+import io.flowset.control.action.ViewDecisionDefinitionAction;
+import io.flowset.control.action.ViewProcessDefinitionAction;
+import io.flowset.control.action.ViewProcessInstanceAction;
 import io.flowset.control.entity.activity.HistoricActivityInstanceData;
-import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -29,13 +28,8 @@ import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
-
 @FragmentDescriptor("decision-instance-general-panel-fragment.xml")
 public class DecisionInstanceGeneralPanelFragment extends Fragment<FlexLayout> {
-
-    @Autowired
-    protected ViewNavigators viewNavigators;
 
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -57,9 +51,11 @@ public class DecisionInstanceGeneralPanelFragment extends Fragment<FlexLayout> {
     protected JmixButton infoBtn;
 
     @ViewComponent
-    protected JmixButton openProcessDefinitionEditorBtn;
+    protected ViewDecisionDefinitionAction viewDecisionDefinitionAction;
     @ViewComponent
-    protected JmixButton openProcessInstanceEditorBtn;
+    protected ViewProcessDefinitionAction viewProcessDefinitionAction;
+    @ViewComponent
+    protected ViewProcessInstanceAction viewProcessInstanceAction;
 
     @ViewComponent
     protected TypedTextField<String> decisionInstanceIdTextField;
@@ -81,34 +77,11 @@ public class DecisionInstanceGeneralPanelFragment extends Fragment<FlexLayout> {
     public void onHostBeforeShow(View.BeforeShowEvent event) {
         HistoricDecisionInstanceShortData decisionInstanceData = decisionInstanceDc.getItem();
 
-        openProcessDefinitionEditorBtn.setVisible(decisionInstanceData.getProcessDefinitionId() != null);
-        openProcessInstanceEditorBtn.setVisible(decisionInstanceData.getProcessInstanceId() != null);
+        viewDecisionDefinitionAction.setEntityId(decisionInstanceData.getDecisionDefinitionId());
+        viewProcessDefinitionAction.setEntityId(decisionInstanceData.getProcessDefinitionId());
+        viewProcessInstanceAction.setEntityId(decisionInstanceData.getProcessInstanceId());
 
         initAdditionalFields();
-    }
-
-    @Subscribe(id = "openDecisionDefinitionEditorBtn", subject = "clickListener")
-    public void onOpenDecisionDefinitionEditorBtnClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(getCurrentView(), DecisionDefinitionData.class)
-                .withRouteParameters(new RouteParameters("id", decisionInstanceDc.getItem().getDecisionDefinitionId()))
-                .withBackwardNavigation(true)
-                .navigate();
-    }
-
-    @Subscribe(id = "openProcessInstanceEditorBtn", subject = "clickListener")
-    public void onOpenProcessInstanceEditorBtnClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
-                .withRouteParameters(new RouteParameters("id", decisionInstanceDc.getItem().getProcessInstanceId()))
-                .withBackwardNavigation(true)
-                .navigate();
-    }
-
-    @Subscribe("openProcessDefinitionEditorBtn")
-    public void openProcessDefinitionEditor(ClickEvent<Button> event) {
-        viewNavigators.detailView(getCurrentView(), ProcessDefinitionData.class)
-                .withRouteParameters(new RouteParameters("id", decisionInstanceDc.getItem().getProcessDefinitionId()))
-                .withBackwardNavigation(true)
-                .navigate();
     }
 
     @Subscribe("infoBtn")

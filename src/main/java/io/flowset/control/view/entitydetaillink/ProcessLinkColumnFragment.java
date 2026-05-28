@@ -31,13 +31,22 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public abstract class ProcessLinkColumnFragment<E extends Component, V> extends EntityDetailLinkFragment<E, V> {
 
     protected ProcessDefinitionData processDefinitionData;
+    protected String processDefinitionId;
 
     public void setProcessDefinitionData(ProcessDefinitionData processDefinitionData) {
         this.processDefinitionData = processDefinitionData;
     }
 
+    public void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
+
     @Subscribe
     public void onAttachEvent(final AttachEvent event) {
+        refreshLinkButton();
+    }
+
+    protected void refreshLinkButton() {
         JmixButton linkButton = findLinkButton();
         if (linkButton != null) {
             String processDefinitionId = getProcessDefinitionId();
@@ -62,13 +71,23 @@ public abstract class ProcessLinkColumnFragment<E extends Component, V> extends 
     @Nullable
     protected String getProcessLabel() {
         if (processDefinitionData == null) {
-            return null;
+            return processDefinitionId;
         }
         return componentHelper.getProcessLabel(processDefinitionData);
     }
 
     @Nullable
     protected String getProcessDefinitionId() {
-        return processDefinitionData != null ? processDefinitionData.getId() : null;
+        return processDefinitionData != null ? processDefinitionData.getId() : processDefinitionId;
+    }
+
+    @Override
+    protected Class<?> getTargetEntityClass() {
+        return ProcessDefinitionData.class;
+    }
+
+    @Override
+    protected boolean isItemReadPermitted() {
+        return true;
     }
 }

@@ -8,6 +8,7 @@ package io.flowset.control.service.batch;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.batch.BatchStatisticsData;
 import io.flowset.control.entity.filter.BatchFilter;
+import io.flowset.control.security.SecuredEntityLoad;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public interface BatchService {
      * @param loadContext a context to load batch statistics
      * @return a list of batch statistics
      */
+    @SecuredEntityLoad(entityClass = BatchStatisticsData.class)
     List<BatchStatisticsData> findAllBatchStatistics(BatchLoadContext loadContext);
 
     /**
@@ -32,6 +34,7 @@ public interface BatchService {
      * @return found batch statistics or {@code null} if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = BatchStatisticsData.class)
     BatchStatisticsData findBatchStatisticsById(String batchId);
 
     /**
@@ -42,6 +45,7 @@ public interface BatchService {
      * @return found batch data or {@code null} if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = BatchData.class)
     BatchData getById(String batchId);
 
     /**
@@ -51,6 +55,7 @@ public interface BatchService {
      * @return found historic batch or {@code null} if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = BatchData.class)
     BatchData findHistoricBatchById(String batchId);
 
     /**
@@ -59,6 +64,7 @@ public interface BatchService {
      * @param filter a batch filter instance
      * @return count of batch statistics
      */
+    @SecuredEntityLoad(entityClass = BatchStatisticsData.class)
     long getBatchStatisticsCount(@Nullable BatchFilter filter);
 
     /**
@@ -67,6 +73,7 @@ public interface BatchService {
      * @param loadContext a context to load historic batches
      * @return a list of historic batches
      */
+    @SecuredEntityLoad(entityClass = BatchData.class)
     List<BatchData> findAllHistoricBatches(BatchLoadContext loadContext);
 
     /**
@@ -75,6 +82,6 @@ public interface BatchService {
      * @param filter a historic batch filter instance
      * @return count of historic batches
      */
+    @SecuredEntityLoad(entityClass = BatchData.class)
     long getHistoricBatchCount(@Nullable BatchFilter filter);
-
 }

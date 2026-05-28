@@ -8,6 +8,9 @@ package io.flowset.control.service.usertask;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.entity.filter.UserTaskFilter;
 import io.flowset.control.entity.variable.VariableInstanceData;
+import io.flowset.control.security.SecuredEntityLoad;
+import io.flowset.control.security.SecuredEntityOperation;
+import io.flowset.control.security.SpecificPermissions;
 import org.springframework.lang.Nullable;
 
 import java.util.Collection;
@@ -24,6 +27,7 @@ public interface UserTaskService {
      * @param loadContext a context to load user tasks
      * @return a list of active user tasks
      */
+    @SecuredEntityLoad(entityClass = UserTaskData.class)
     List<UserTaskData> findRuntimeTasks(UserTaskLoadContext loadContext);
 
     /**
@@ -32,6 +36,7 @@ public interface UserTaskService {
      * @param filter user tasks filter
      * @return count of user tasks
      */
+    @SecuredEntityLoad(entityClass = UserTaskData.class)
     long getRuntimeTasksCount(@Nullable UserTaskFilter filter);
 
     /**
@@ -40,6 +45,7 @@ public interface UserTaskService {
      * @param loadContext a context to load user tasks
      * @return a list of user tasks
      */
+    @SecuredEntityLoad(entityClass = UserTaskData.class)
     List<UserTaskData> findHistoricTasks(UserTaskLoadContext loadContext);
 
     /**
@@ -48,6 +54,7 @@ public interface UserTaskService {
      * @param filter user tasks filter
      * @return count of user tasks
      */
+    @SecuredEntityLoad(entityClass = UserTaskData.class)
     long getHistoryTasksCount(@Nullable UserTaskFilter filter);
 
     /**
@@ -56,6 +63,7 @@ public interface UserTaskService {
      * @param taskId      a user task identifier
      * @param newAssignee new assignee username
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.USER_TASK_REASSIGN)
     void setAssignee(String taskId, String newAssignee);
 
     /**
@@ -64,6 +72,7 @@ public interface UserTaskService {
      * @param taskId            a user task identifier
      * @param variableInstances process variable values
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.USER_TASK_COMPLETE)
     void completeTaskById(String taskId, Collection<VariableInstanceData> variableInstances);
 
     /**
@@ -73,5 +82,6 @@ public interface UserTaskService {
      * @return found user task or null if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = UserTaskData.class)
     UserTaskData findTaskById(String taskId);
 }

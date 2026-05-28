@@ -29,7 +29,7 @@
                     <action id="retry"
                             text="msg:///actions.Retry"
                             icon="ROTATE_LEFT"
-                            type="list_itemTracking"/>
+                            type="control_retryGridIncident"/>
                 </actions>
                 <columns resizable="true">
                     <column property="incidentId" frozen="true">

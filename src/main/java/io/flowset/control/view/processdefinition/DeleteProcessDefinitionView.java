@@ -8,7 +8,6 @@ package io.flowset.control.view.processdefinition;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.exception.RemoteProcessEngineException;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
@@ -21,7 +20,6 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "bpm/deleteprocessdefinition", layout = DefaultMainViewParent.class)
 @ViewController("bpm_DeleteProcessDefinition")
 @ViewDescriptor("delete-process-definition-view.xml")
 @DialogMode(width = "35em")

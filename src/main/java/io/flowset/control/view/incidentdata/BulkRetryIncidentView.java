@@ -2,7 +2,6 @@ package io.flowset.control.view.incidentdata;
 
 
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.router.Route;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
 import io.jmix.flowui.Fragments;
@@ -23,7 +22,6 @@ import org.springframework.lang.Nullable;
 import java.util.List;
 import java.util.Set;
 
-@Route(value = "bulk-retry-incident-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "BulkRetryIncidentView")
 @ViewDescriptor(path = "bulk-retry-incident-view.xml")
 public class BulkRetryIncidentView extends StandardView {

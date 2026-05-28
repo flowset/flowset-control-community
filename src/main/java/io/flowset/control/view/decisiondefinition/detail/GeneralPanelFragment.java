@@ -10,13 +10,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouteParameters;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
+import io.flowset.control.action.deployment.ViewDeploymentAction;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.service.deployment.DeploymentService;
-import io.flowset.control.view.deploymentdata.DeploymentDetailView;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
@@ -26,12 +24,8 @@ import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
-
 @FragmentDescriptor("general-panel-fragment.xml")
 public class GeneralPanelFragment extends Fragment<FlexLayout> {
-    @Autowired
-    protected ViewNavigators viewNavigators;
     @ViewComponent
     protected MessageBundle messageBundle;
     @Autowired
@@ -59,6 +53,8 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected CopyComponentValueToClipboardAction copyIdAction;
     @ViewComponent
     protected CopyComponentValueToClipboardAction copyKeyAction;
+    @ViewComponent
+    protected ViewDeploymentAction viewDeploymentAction;
 
     @Subscribe(target = Target.HOST_CONTROLLER)
     public void onHostBeforeShow(View.BeforeShowEvent event) {
@@ -89,17 +85,11 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
 
     }
 
-    @Subscribe(id = "viewDeployment", subject = "clickListener")
-    public void onViewDeploymentClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(getCurrentView(), DeploymentData.class)
-                .withViewClass(DeploymentDetailView.class)
-                .withRouteParameters(new RouteParameters("id", decisionDefinitionDc.getItem().getDeploymentId()))
-                .withBackwardNavigation(true)
-                .navigate();
-    }
-
     protected void initDeploymentData() {
-        DeploymentData deployment = deploymentService.findById(decisionDefinitionDc.getItem().getDeploymentId());
+        String deploymentId = decisionDefinitionDc.getItem().getDeploymentId();
+        viewDeploymentAction.setDeploymentId(deploymentId);
+
+        DeploymentData deployment = deploymentService.findById(deploymentId);
         if (deployment != null) {
             deploymentIdField.setTypedValue(deployment.getDeploymentId());
             deploymentSourceField.setTypedValue(deployment.getSource());

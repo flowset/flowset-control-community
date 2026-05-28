@@ -16,7 +16,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.engine.EnvironmentType;
 import io.jmix.core.Messages;
@@ -42,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 
 @Slf4j
-@Route(value = "engine-connection-settings", layout = DefaultMainViewParent.class)
 @ViewController("EngineConnectionSettingsView")
 @ViewDescriptor("engine-connection-settings-view.xml")
 @DialogMode(minWidth = "30em", maxWidth = "40em")

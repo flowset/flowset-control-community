@@ -24,6 +24,12 @@
         </action>
         <action id="refreshAction" icon="REFRESH"
                 description="msg:///actions.Refresh"/>
+        <action id="startProcessAction" type="control_startProcessDefinition"/>
+        <action id="suspendAction" type="control_suspendProcessDefinition"/>
+        <action id="activateAction" type="control_activateProcessDefinition"/>
+        <action id="migrateAction" type="control_migrateProcessDefinition"/>
+        <action id="deleteAction" type="control_deleteProcessDefinition"/>
+        <action id="viewDeploymentAction" type="control_viewDeployment" icon="SEARCH"/>
     </actions>
     <content>
         <flexLayout classNames="process-slide-panel">
@@ -52,14 +58,14 @@
                         </textField>
                         <checkbox id="startableInTaskListField" property="startableInTaskList" readOnly="true"/>
                         <textArea id="descriptionField" property="description" readOnly="true"/>
-                        <details opened="true" themeNames="reverse small" summaryText="msg://io.flowset.control.view.processdefinition/deploymentGroup"
+                        <details id="deploymentGroup" opened="true" themeNames="reverse small" summaryText="msg://io.flowset.control.view.processdefinition/deploymentGroup"
                                  width="100%"
                                  classNames="pt-s">
                             <vbox padding="false" width="100%" themeNames="spacing-xs">
                                 <textField id="deploymentIdField" readOnly="true" width="100%"
                                            label="msg://io.flowset.control.view.processdefinition/deploymentId">
                                     <suffix>
-                                        <button id="viewDeployment" icon="SEARCH" themeNames="tertiary-inline"/>
+                                        <button id="viewDeployment" themeNames="tertiary-inline" action="viewDeploymentAction"/>
                                     </suffix>
                                 </textField>
 
@@ -76,15 +82,15 @@
                     <button id="refreshBtn" action="refreshAction" classNames="bordered-button" themeNames="small"/>
                     <vbox themeNames="spacing-xs" id="runtimeInstanceActions" padding="false">
                         <button id="startProcessBtn" icon="PLAY_CIRCLE" title="msg://startProcessBtn.title" themeNames="small"
-                                classNames="bordered-button"/>
+                                classNames="bordered-button" action="startProcessAction"/>
                         <button id="activateBtn" icon="PLAY" title="msg://activateBtn.title" themeNames="small"
-                                classNames="bordered-button"/>
+                                classNames="bordered-button" action="activateAction"/>
                         <button id="suspendBtn" icon="PAUSE" title="msg://suspendBtn.title" themeNames="small"
-                                classNames="bordered-button"/>
+                                classNames="bordered-button" action="suspendAction"/>
                         <button id="migrateBtn" icon="FORWARD" title="msg://migrateBtn.title" themeNames="small"
-                                classNames="bordered-button"/>
+                                classNames="bordered-button" action="migrateAction"/>
                         <button id="deleteBtn" icon="TRASH" title="msg://deleteBtn.title" themeNames="small error"
-                                classNames="bordered-button"/>
+                                classNames="bordered-button" action="deleteAction"/>
                     </vbox>
                 </vbox>
             </flexLayout>

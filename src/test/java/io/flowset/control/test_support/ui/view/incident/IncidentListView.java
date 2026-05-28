@@ -30,6 +30,8 @@ import static io.jmix.masquerade.Masquerade.$j;
 public class IncidentListView extends View<IncidentListView> {
 
     public static final By ID_BUTTON_BY = byPath("root", "idBtn");
+    public static final By PROCESS_INSTANCE_BUTTON_BY = byPath("root", "idBtn");
+    public static final By PROCESS_BUTTON_BY = byPath("root", "idBtn");
     public static final By INLINE_RETRY_BUTTON_BY = byPath("incidentActionsBox", "retryIncidentBtn");
 
     public static final int CHECKBOX_COLUMN_INDEX = 0;

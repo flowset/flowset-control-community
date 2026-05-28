@@ -460,4 +460,132 @@ public class JobsTabActionsUiTest extends AbstractCamunda7UiTest {
                 .getIdField()
                 .shouldHave(value(jobId));
     }
+
+    @Test
+    @DisplayName("Retry action on Job detail dialog: retries updated in data grid after confirmation")
+    void givenExistingFailedJob_whenRetryConfirmedOnDetailDialog_thenJobRetriesUpdatedInDataGrid() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testFailedJobIncident.bpmn")
+                .startByKey("testFailedJobIncident")
+                .waitJobsExecution();
+        String instanceId = dataManager.getStartedInstances("testFailedJobIncident").get(0);
+        String jobId = dataManager.getJobsByKey("testFailedJobIncident").get(0);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        JobsTabFragment jobsTab = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .openRuntimeJobsTab();
+
+        jobsTab.getRowByJobId(jobId)
+                .getCellByIndex(JOB_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ID_BUTTON_BY)
+                .click();
+
+        JobDataDetailDialog detailDialog = $j(JobDataDetailDialog.class)
+                .exists()
+                .displayed();
+        detailDialog.getRetryBtn().click();
+
+        RetryJobDialog dialog = $j(RetryJobDialog.class)
+                .exists()
+                .displayed();
+        dialog.getRetriesField().setValue("5");
+        dialog.getRetryBtn().click();
+
+        // then
+        jobsTab.getRowByJobId(jobId)
+                .getCellByIndex(RETRIES_COLUMN_INDEX)
+                .getCellContent()
+                .shouldHave(text("5"));
+    }
+
+    @Test
+    @DisplayName("Suspend action on Job detail dialog: state updated in data grid after confirmation")
+    void givenExistingActiveJob_whenSuspendConfirmedOnDetailDialog_thenJobSuspendedInDataGrid() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testFailedJobIncident.bpmn")
+                .startByKey("testFailedJobIncident")
+                .waitJobsExecution();
+        String instanceId = dataManager.getStartedInstances("testFailedJobIncident").get(0);
+        String jobId = dataManager.getJobsByKey("testFailedJobIncident").get(0);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        JobsTabFragment jobsTab = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .openRuntimeJobsTab();
+
+        jobsTab.getRowByJobId(jobId)
+                .getCellByIndex(JOB_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ID_BUTTON_BY)
+                .click();
+
+        JobDataDetailDialog detailDialog = $j(JobDataDetailDialog.class)
+                .exists()
+                .displayed();
+        detailDialog.getSuspendBtn().click();
+
+        $j(SuspendJobDialog.class)
+                .exists()
+                .displayed()
+                .getSuspendBtn()
+                .click();
+
+        // then
+        jobsTab.getRowByJobId(jobId)
+                .getCellByIndex(STATE_COLUMN_INDEX)
+                .getCellContent()
+                .shouldHave(text("Suspended"));
+    }
+
+    @Test
+    @DisplayName("Activate action on Job detail dialog: state updated in data grid after confirmation")
+    void givenExistingSuspendedJob_whenActivateConfirmedOnDetailDialog_thenJobActivatedInDataGrid() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testFailedJobIncident.bpmn")
+                .startByKey("testFailedJobIncident")
+                .waitJobsExecution();
+        String instanceId = dataManager.getStartedInstances("testFailedJobIncident").get(0);
+        String jobId = dataManager.getJobsByKey("testFailedJobIncident").get(0);
+        camundaRestTestHelper.suspendJobById(camunda7, jobId);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        JobsTabFragment jobsTab = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .openRuntimeJobsTab();
+
+        jobsTab.getRowByJobId(jobId)
+                .getCellByIndex(JOB_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ID_BUTTON_BY)
+                .click();
+
+        JobDataDetailDialog detailDialog = $j(JobDataDetailDialog.class)
+                .exists()
+                .displayed();
+        detailDialog.getActivateBtn().click();
+
+        $j(ActivateJobDialog.class)
+                .exists()
+                .displayed()
+                .getActivateBtn()
+                .click();
+
+        // then
+        jobsTab.getRowByJobId(jobId)
+                .getCellByIndex(STATE_COLUMN_INDEX)
+                .getCellContent()
+                .shouldHave(text("Active"));
+    }
+
 }

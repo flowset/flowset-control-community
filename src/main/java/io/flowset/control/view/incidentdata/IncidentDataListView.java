@@ -16,6 +16,8 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.incident.BulkRetryIncidentAction;
+import io.flowset.control.action.incident.RetryIncidentAction;
 import io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.flowset.control.view.incidentdata.column.IncidentProcessColumnFragment;
@@ -42,14 +44,12 @@ import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.incidentdata.filter.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 
 import java.util.*;
-
-import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @Slf4j
 @Route(value = "bpm/incidents", layout = DefaultMainViewParent.class)
@@ -76,7 +76,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
     @Autowired
-    private DialogWindows dialogWindows;
+    protected Actions actions;
     @Autowired
     protected IncidentService incidentService;
     @Autowired
@@ -90,15 +90,19 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected CollectionLoader<IncidentData> incidentsDl;
     @ViewComponent
     protected DataGrid<IncidentData> incidentsDataGrid;
+    @ViewComponent("incidentsDataGrid.bulkRetry")
+    protected BulkRetryIncidentAction bulkRetryAction;
+
+    @Autowired
+    protected Fragments fragments;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
-    @Autowired
-    private Fragments fragments;
 
     @Subscribe
     public void onInit(final InitEvent event) {
         initFilter();
         initDataGridHeaderRow();
+        bulkRetryAction.setAfterSaveHandler(this::startLoadData);
         urlQueryParameters.registerBinder(new IncidentListQueryParamBinder(incidentsDataGrid, this::startLoadData));
     }
 
@@ -159,7 +163,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
             layout.addClassNames(LumoUtility.Padding.Top.XSMALL, LumoUtility.Padding.Bottom.XSMALL);
             layout.setWidth("min-content");
 
-            if (StringUtils.equals(incidentData.getIncidentId(), incidentData.getCauseIncidentId())) {
+            if (Strings.CS.equals(incidentData.getIncidentId(), incidentData.getCauseIncidentId())) {
                 JmixButton retryBtn = createRetryIncidentButton(incidentData);
                 if (retryBtn != null) {
                     layout.add(retryBtn);
@@ -173,23 +177,6 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     @Install(to = "incidentsDataGrid.processInstanceId", subject = "tooltipGenerator")
     protected String incidentsDataGridProcessInstanceIdTooltipGenerator(final IncidentData incidentData) {
         return incidentData.getProcessInstanceId();
-    }
-
-    @Subscribe("incidentsDataGrid.bulkRetry")
-    public void onIncidentsDataGridBulkRetry(final ActionPerformedEvent event) {
-        Set<IncidentData> selectedItems = incidentsDataGrid.getSelectedItems();
-        if (selectedItems.isEmpty()) {
-            return;
-        }
-
-        dialogWindows.view(this, BulkRetryIncidentView.class)
-                .withViewConfigurer(bulkRetryIncidentView -> bulkRetryIncidentView.setIncidentDataSet(selectedItems))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .open();
     }
 
     @Install(to = "incidentsDataGrid.message", subject = "tooltipGenerator")
@@ -278,43 +265,20 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
             return null;
         }
 
+        RetryIncidentAction retryAction = actions.create(RetryIncidentAction.ID);
+        retryAction.setIncidentData(incident);
+        retryAction.setAfterSaveHandler(this::startLoadData);
+        retryAction.setText("");
+
         JmixButton retryBtn = uiComponents.create(JmixButton.class);
         retryBtn.setId("retryIncidentBtn");
         retryBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         retryBtn.addClassNames("data-grid-column-action");
         retryBtn.setTitle(messages.getMessage("actions.Retry"));
         retryBtn.setIcon(VaadinIcon.ROTATE_LEFT.create());
-        retryBtn.addClickListener(event -> {
-            if (incident.isJobFailed()) {
-                openRetryJobView(incident);
-            } else if (incident.isExternalTaskFailed()) {
-                openRetryExternalTaskView(incident);
-            }
-        });
+        retryBtn.setAction(retryAction, false);
 
         return retryBtn;
-    }
-
-    protected void openRetryJobView(IncidentData incidentData) {
-        dialogWindows.view(getCurrentView(), RetryJobView.class)
-                .withViewConfigurer(view -> view.setJobId(incidentData.getConfiguration()))
-                .withAfterCloseListener(afterClose -> {
-                    if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .open();
-    }
-
-    protected void openRetryExternalTaskView(IncidentData incidentData) {
-        dialogWindows.view(this, RetryExternalTaskView.class)
-                .withViewConfigurer(view -> view.setExternalTaskId(incidentData.getConfiguration()))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .open();
     }
 
     protected void setDefaultSort() {

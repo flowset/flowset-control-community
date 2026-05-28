@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://io.jmix.securityflowui.view.resourcepolicy/specificResourcePolicyModelDetailView.title"
+      messagesGroup="io.jmix.securityflowui.view.resourcepolicy"
+      extends="io/jmix/securityflowui/view/resourcepolicy/specific-resource-policy-model-detail-view.xml">
+    <layout/>
+</view>

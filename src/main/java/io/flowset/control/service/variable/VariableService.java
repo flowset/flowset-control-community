@@ -8,6 +8,9 @@ package io.flowset.control.service.variable;
 import io.flowset.control.entity.filter.VariableFilter;
 import io.flowset.control.entity.variable.HistoricVariableInstanceData;
 import io.flowset.control.entity.variable.VariableInstanceData;
+import io.flowset.control.security.SecuredEntityLoad;
+import io.flowset.control.security.SecuredEntityOperation;
+import io.jmix.core.security.EntityOp;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
@@ -26,6 +29,7 @@ public interface VariableService {
      * @param loadContext a context to load process variable instances
      * @return a list of variable instances
      */
+    @SecuredEntityLoad(entityClass = VariableInstanceData.class)
     List<VariableInstanceData> findRuntimeVariables(VariableLoadContext loadContext);
 
     /**
@@ -35,6 +39,7 @@ public interface VariableService {
      * @param variableInstanceId identifier of the process variable instance
      * @return found process variable instance
      */
+    @SecuredEntityLoad(entityClass = VariableInstanceData.class)
     VariableInstanceData findRuntimeVariableById(String variableInstanceId);
 
     /**
@@ -44,6 +49,7 @@ public interface VariableService {
      * @param variableInstanceId identifier of the process variable instance
      * @return resource containing binary data of the variable instance
      */
+    @SecuredEntityLoad(entityClass = VariableInstanceData.class)
     Resource getVariableInstanceBinary(String variableInstanceId);
 
     /**
@@ -52,6 +58,7 @@ public interface VariableService {
      * @param loadContext a context to load variable instances
      * @return a list of process variable instances
      */
+    @SecuredEntityLoad(entityClass = HistoricVariableInstanceData.class)
     List<HistoricVariableInstanceData> findHistoricVariables(VariableLoadContext loadContext);
 
     /**
@@ -60,6 +67,7 @@ public interface VariableService {
      * @param filter variable instance filter
      * @return a count of variable instances
      */
+    @SecuredEntityLoad(entityClass = VariableInstanceData.class)
     long getRuntimeVariablesCount(@Nullable VariableFilter filter);
 
     /**
@@ -68,6 +76,7 @@ public interface VariableService {
      * @param filter variable instance filter
      * @return a count of process variable instances
      */
+    @SecuredEntityLoad(entityClass = HistoricVariableInstanceData.class)
     long getHistoricVariablesCount(@Nullable VariableFilter filter);
 
     /**
@@ -75,6 +84,7 @@ public interface VariableService {
      *
      * @param variableInstanceData variable instance data containing new value
      */
+    @SecuredEntityOperation(entityClass = VariableInstanceData.class, entityOp = EntityOp.UPDATE)
     void updateVariableLocal(VariableInstanceData variableInstanceData);
 
     /**
@@ -83,6 +93,7 @@ public interface VariableService {
      * @param variableInstanceId variable instance identifier
      * @return found process variable instance
      */
+    @SecuredEntityLoad(entityClass = HistoricVariableInstanceData.class)
     HistoricVariableInstanceData findHistoricVariableById(String variableInstanceId);
 
     /**
@@ -90,6 +101,7 @@ public interface VariableService {
      *
      * @param variableInstanceData process variable instance to be removed
      */
+    @SecuredEntityOperation(entityClass = VariableInstanceData.class, entityOp = EntityOp.DELETE)
     void removeVariableLocal(VariableInstanceData variableInstanceData);
 
     /**
@@ -99,7 +111,9 @@ public interface VariableService {
      * @param executionId   identifier of the process execution context
      * @param variableItems set of process variable instances to be removed
      */
+    @SecuredEntityOperation(entityClass = VariableInstanceData.class, entityOp = EntityOp.DELETE)
     void removeVariablesLocal(String executionId, Set<VariableInstanceData> variableItems);
+
     /**
      * Updates the binary value of the specified process variable instance
      * with the provided file data.
@@ -107,5 +121,6 @@ public interface VariableService {
      * @param variableInstanceData process variable instance to update
      * @param data                 file containing new binary value
      */
+    @SecuredEntityOperation(entityClass = VariableInstanceData.class, entityOp = EntityOp.UPDATE)
     void updateVariableBinary(VariableInstanceData variableInstanceData, File data);
 }

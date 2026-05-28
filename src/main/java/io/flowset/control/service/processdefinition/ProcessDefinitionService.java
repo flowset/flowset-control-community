@@ -7,6 +7,10 @@ package io.flowset.control.service.processdefinition;
 
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.security.SecuredEntityLoad;
+import io.flowset.control.security.SecuredEntityOperation;
+import io.flowset.control.security.SpecificPermissions;
+import io.jmix.core.security.EntityOp;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -21,6 +25,7 @@ public interface ProcessDefinitionService {
      *
      * @return a list of deployed process definitions
      */
+    @SecuredEntityLoad(entityClass = ProcessDefinitionData.class)
     List<ProcessDefinitionData> findLatestVersions();
 
     /**
@@ -29,6 +34,7 @@ public interface ProcessDefinitionService {
      * @param context a context to load process definitions
      * @return a list of deployed process definition versions
      */
+    @SecuredEntityLoad(entityClass = ProcessDefinitionData.class)
     List<ProcessDefinitionData> findAll(ProcessDefinitionLoadContext context);
 
     /**
@@ -37,6 +43,7 @@ public interface ProcessDefinitionService {
      * @param filter a process definition filter
      * @return count of deployed process definitions
      */
+    @SecuredEntityLoad(entityClass = ProcessDefinitionData.class)
     long getCount(@Nullable ProcessDefinitionFilter filter);
 
     /**
@@ -45,6 +52,7 @@ public interface ProcessDefinitionService {
      * @param processDefinitionKey a process key
      * @return a list of deployed process definition versions
      */
+    @SecuredEntityLoad(entityClass = ProcessDefinitionData.class)
     List<ProcessDefinitionData> findAllByKey(String processDefinitionKey);
 
     /**
@@ -54,6 +62,7 @@ public interface ProcessDefinitionService {
      * @return found process definition or null if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = ProcessDefinitionData.class)
     ProcessDefinitionData getById(String processDefinitionId);
 
     /**
@@ -62,6 +71,7 @@ public interface ProcessDefinitionService {
      * @param processDefinitionId a process definition identifier
      * @return a process content in the BPMN 2.0 XML format
      */
+    @SecuredEntityLoad(entityClass = ProcessDefinitionData.class)
     String getBpmnXml(String processDefinitionId);
 
     /**
@@ -71,6 +81,7 @@ public interface ProcessDefinitionService {
      * @param processDefinitionId      a process definition identifier
      * @param activateBelongsInstances whether activate all process instances related to the specified process definition
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_DEFINITION_ACTIVATE)
     void activateById(String processDefinitionId, boolean activateBelongsInstances);
 
     /**
@@ -80,6 +91,7 @@ public interface ProcessDefinitionService {
      * @param processDefinitionKey     a process definition key
      * @param activateBelongsInstances whether activate all process instances related to the all process definitions with key
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_DEFINITION_ACTIVATE)
     void activateAllVersionsByKey(String processDefinitionKey, boolean activateBelongsInstances);
 
     /**
@@ -89,6 +101,7 @@ public interface ProcessDefinitionService {
      * @param processDefinitionId     a process definition identifier
      * @param suspendBelongsInstances whether suspend all process instances related to the specified process definition
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_DEFINITION_SUSPEND)
     void suspendById(String processDefinitionId, boolean suspendBelongsInstances);
 
     /**
@@ -98,6 +111,7 @@ public interface ProcessDefinitionService {
      * @param processDefinitionKey    a process definition key
      * @param suspendBelongsInstances whether suspend all process instances related to the all process definitions with key
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_DEFINITION_SUSPEND)
     void suspendAllVersionsByKey(String processDefinitionKey, boolean suspendBelongsInstances);
 
     /**
@@ -107,6 +121,7 @@ public interface ProcessDefinitionService {
      * @param processDefinitionKey      a process definition key
      * @param deleteAllRelatedInstances whether delete all process instances related to the all process definitions with key
      */
+    @SecuredEntityOperation(entityClass = ProcessDefinitionData.class, entityOp = EntityOp.DELETE)
     void deleteAllVersionsByKey(String processDefinitionKey, boolean deleteAllRelatedInstances);
 
     /**
@@ -116,5 +131,6 @@ public interface ProcessDefinitionService {
      * @param processDefinitionId       a process definition identifier
      * @param deleteAllRelatedInstances whether delete all process instances related to the specified process definition
      */
+    @SecuredEntityOperation(entityClass = ProcessDefinitionData.class, entityOp = EntityOp.DELETE)
     void deleteById(String processDefinitionId, boolean deleteAllRelatedInstances);
 }

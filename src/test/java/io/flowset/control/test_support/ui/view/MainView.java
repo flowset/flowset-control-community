@@ -41,7 +41,7 @@ import static io.jmix.masquerade.Masquerade.$j;
 @TestView
 public class MainView extends View<MainView> {
 
-    @TestComponent
+    @TestComponent(path = "menu")
     private ListMenu listMenu;
 
     @TestComponent(path = "engineStatusRootBox")
