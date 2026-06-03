@@ -5,9 +5,13 @@
             <loader id="bpmEnginesDl"/>
         </collection>
     </data>
+    <actions>
+        <action id="markAsDefaultAction" type="control_markAsDefaultEngine"/>
+    </actions>
     <content>
         <hbox id="bpmEngineActionsBox" padding="false" themeNames="spacing-s" width="min-content" classNames="pt-s pb-s">
-            <button id="markAsDefaultBtn" title="msg:///actions.MarkAsDefault" themeNames="tertiary-inline" visible="false"/>
+            <button id="markAsDefaultBtn" title="msg:///actions.MarkAsDefault" themeNames="tertiary-inline" visible="false"
+                    action="markAsDefaultAction"/>
         </hbox>
     </content>
 </fragment>

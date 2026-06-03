@@ -10,6 +10,9 @@
                   class="io.flowset.control.entity.EngineConnectionCheckResult"/>
         <instance id="selectedEngineDc" provided="true" class="io.flowset.control.entity.engine.BpmEngine"/>
     </data>
+    <actions>
+        <action id="createBpmEngineAction" type="control_createBpmEngine" icon="PLUS" text="msg:///actions.Add"/>
+    </actions>
     <content>
         <vbox id="dashboardRootBox" width="100%" height="100%" padding="false"
               classNames="sm:dashboard-padding md:dashboard-padding lg:dashboard-padding xl:dashboard-padding xxl:dashboard-padding">
@@ -55,8 +58,8 @@
                           classNames="bordered-card p-l bg-base">
                         <h4 text="msg://noEngines" classNames="text-secondary mx-auto"/>
                         <h5 text="msg://addFirstEngine" classNames="text-tertiary mx-auto"/>
-                        <button id="createBpmEngineBtn" themeNames="primary" icon="PLUS" text="msg:///actions.Add"
-                                classNames="mx-auto"/>
+                        <button id="createBpmEngineBtn" themeNames="primary" classNames="mx-auto"
+                                action="createBpmEngineAction"/>
                     </vbox>
                 </hbox>
             </div>

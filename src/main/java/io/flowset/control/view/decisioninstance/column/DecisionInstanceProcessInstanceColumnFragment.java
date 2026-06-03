@@ -10,10 +10,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.RouteParameters;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.view.entitydetaillink.EntityDetailLinkFragment;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.fragment.FragmentDescriptor;
-import io.jmix.flowui.fragmentrenderer.FragmentRenderer;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.Subscribe;
@@ -24,7 +24,7 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @FragmentDescriptor("decision-instance-process-instance-column-fragment.xml")
 @RendererItemContainer("decisionInstanceDc")
-public class DecisionInstanceProcessInstanceColumnFragment extends FragmentRenderer<HorizontalLayout, HistoricDecisionInstanceShortData> {
+public class DecisionInstanceProcessInstanceColumnFragment extends EntityDetailLinkFragment<HorizontalLayout, HistoricDecisionInstanceShortData> {
     @ViewComponent
     protected JmixButton processInstanceBtn;
     @Autowired
@@ -45,4 +45,15 @@ public class DecisionInstanceProcessInstanceColumnFragment extends FragmentRende
                 .withBackwardNavigation(true)
                 .navigate();
     }
+
+    @Override
+    protected Class<?> getTargetEntityClass() {
+        return ProcessInstanceData.class;
+    }
+
+    @Override
+    protected boolean isItemReadPermitted() {
+        return true;
+    }
+
 }

@@ -74,8 +74,6 @@ dependencies {
     implementation 'io.jmix.flowui:jmix-flowui-starter'
     implementation 'io.jmix.flowui:jmix-flowui-data-starter'
     implementation 'io.jmix.flowui:jmix-flowui-themes'
-    implementation 'io.jmix.datatools:jmix-datatools-starter'
-    implementation 'io.jmix.datatools:jmix-datatools-flowui-starter'
     implementation 'io.jmix.charts:jmix-charts-flowui-starter'
     implementation 'io.jmix.oidc:jmix-oidc-starter'
     implementation 'io.jmix.multitenancy:jmix-multitenancy-starter'
@@ -152,6 +150,14 @@ test {
         } else if(project.hasProperty("integrationTests")) {
             excludeTags("uiTest")
             includeTags("integrationTest")
+        }
+
+        if (project.hasProperty("includeTags")) {
+            includeTags(project.property("includeTags").toString())
+        }
+
+        if (project.hasProperty("excludeTags")) {
+            excludeTags(project.property("excludeTags").toString())
         }
     }
     systemProperties(System.getProperties())

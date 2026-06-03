@@ -144,12 +144,14 @@ public class AboutProductView extends StandardView {
 
         UiComponentUtils.copyToClipboard(productValue)
                 .then(successResult -> notifications.create(
-                                        messages.getMessage(CopyComponentValueToClipboardAction.class, "copyComponentValueAction.copied"))
+                                        messages.getMessage(CopyComponentValueToClipboardAction.class,
+                                                "copyComponentValueAction.copied"))
                                 .withPosition(Notification.Position.TOP_END)
                                 .withThemeVariant(NotificationVariant.LUMO_SUCCESS)
                                 .show(),
                         errorResult -> notifications.create(
-                                        messages.getMessage(CopyComponentValueToClipboardAction.class, "copyComponentValueAction.copyFailed"))
+                                        messages.getMessage(CopyComponentValueToClipboardAction.class,
+                                                "copyComponentValueAction.copyFailed"))
                                 .withPosition(Notification.Position.TOP_END)
                                 .withThemeVariant(NotificationVariant.LUMO_ERROR)
                                 .show());

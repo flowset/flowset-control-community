@@ -23,6 +23,6 @@
 }
 
 :host([disabled][theme~='link']) {
-    --vaadin-button-text-color: var(--lumo-body-text-color);
+    color: var(--lumo-body-text-color);
     font-weight: normal !important;
 }

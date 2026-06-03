@@ -35,7 +35,7 @@
                   dataContainer="incidentsDc">
             <actions>
                 <action id="refresh" type="list_refresh"/>
-                <action id="bulkRetry" type="list_itemTracking" icon="ROTATE_LEFT" text="msg:///actions.Retry"/>
+                <action id="bulkRetry" type="control_bulkRetryIncident" icon="ROTATE_LEFT" text="msg:///actions.Retry"/>
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">

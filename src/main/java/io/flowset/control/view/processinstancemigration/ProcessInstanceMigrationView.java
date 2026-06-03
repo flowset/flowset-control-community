@@ -13,7 +13,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
@@ -34,7 +33,6 @@ import org.springframework.lang.Nullable;
 
 import java.util.List;
 
-@Route(value = "bpm/processinstancemigration", layout = DefaultMainViewParent.class)
 @ViewController(ProcessInstanceMigrationView.ID)
 @ViewDescriptor("process-instance-migration-view.xml")
 public class ProcessInstanceMigrationView extends StandardView {

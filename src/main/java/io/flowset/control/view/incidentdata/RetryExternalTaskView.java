@@ -1,7 +1,6 @@
 package io.flowset.control.view.incidentdata;
 
 
-import com.vaadin.flow.router.Route;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textfield.TypedTextField;
@@ -11,7 +10,6 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "retry-external-task-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "RetryExternalTaskView")
 @ViewDescriptor(path = "retry-external-task-view.xml")
 public class RetryExternalTaskView extends StandardView {

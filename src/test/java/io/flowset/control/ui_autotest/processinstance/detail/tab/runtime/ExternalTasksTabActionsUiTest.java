@@ -337,4 +337,47 @@ public class ExternalTasksTabActionsUiTest extends AbstractCamunda7UiTest {
         externalTasksTab.openTasksGridContextMenu()
                 .shouldHave(visibleItems("Retry"));
     }
+
+    @Test
+    @DisplayName("Retry action on External task detail dialog: updates retries in data grid after confirmation")
+    void givenExistingFailedExternalTask_whenRetryConfirmedOnDetailDialog_thenExternalTaskRetriesUpdatedInDataGrid() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testFailedExternalTask.bpmn")
+                .startByKey("testFailedExternalTask")
+                .failExternalTasksByKey("testFailedExternalTask");
+        String instanceId = dataManager.getStartedInstances("testFailedExternalTask").get(0);
+        String externalTaskId = dataManager.getExternalTasksByKey("testFailedExternalTask").get(0);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        ExternalTasksTabFragment externalTasksTab = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .openRuntimeExternalTasksTab();
+
+        externalTasksTab.getRowByExternalTaskId(externalTaskId)
+                .getCellByIndex(EXTERNAL_TASK_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ID_BUTTON_BY)
+                .click();
+
+        ExternalTaskDataDetailDialog detailDialog = $j(ExternalTaskDataDetailDialog.class)
+                .exists()
+                .displayed();
+        detailDialog.getRetryBtn().click();
+
+        RetryExternalTaskDialog dialog = $j(RetryExternalTaskDialog.class)
+                .exists()
+                .displayed();
+        dialog.getRetriesField().setValue("5");
+        dialog.getRetryBtn().click();
+
+        // then
+        externalTasksTab.getRowByExternalTaskId(externalTaskId)
+                .getCellByIndex(RETRIES_COLUMN_INDEX)
+                .getCellContent()
+                .shouldHave(text("5"));
+    }
+
 }

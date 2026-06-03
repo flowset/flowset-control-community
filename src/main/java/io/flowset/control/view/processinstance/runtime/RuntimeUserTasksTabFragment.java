@@ -10,6 +10,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import io.flowset.control.action.usertask.BulkReassignTaskAction;
 import io.flowset.control.view.processinstance.event.UserTaskUpdateEvent;
 import io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment;
 import io.jmix.core.DataLoadContext;
@@ -29,13 +30,10 @@ import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.usertask.UserTaskLoadContext;
 import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.view.processinstance.event.UserTaskCountUpdateEvent;
-import io.flowset.control.view.taskreassign.TaskReassignView;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Set;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
@@ -59,6 +57,8 @@ public class RuntimeUserTasksTabFragment extends Fragment<VerticalLayout> {
 
     @ViewComponent
     protected DataGrid<UserTaskData> runtimeUserTasksGrid;
+    @ViewComponent("runtimeUserTasksGrid.reassign")
+    protected BulkReassignTaskAction reassignAction;
 
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
@@ -88,6 +88,11 @@ public class RuntimeUserTasksTabFragment extends Fragment<VerticalLayout> {
         }
     }
 
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        reassignAction.setAfterSaveHandler(runtimeUserTasksDl::load);
+    }
+
     @Subscribe("runtimeUserTasksGrid.view")
     public void onViewAction(final ActionPerformedEvent event) {
         UserTaskData userTaskData = runtimeUserTasksGrid.getSingleSelectedItem();
@@ -96,29 +101,6 @@ public class RuntimeUserTasksTabFragment extends Fragment<VerticalLayout> {
         }
         dialogWindows.detail(getCurrentView(), UserTaskData.class)
                 .editEntity(userTaskData)
-                .build()
-                .open();
-    }
-
-    @Install(to = "runtimeUserTasksGrid.reassign", subject = "enabledRule")
-    protected boolean runtimeUserTasksGridReassignEnabledRule() {
-        UserTaskData selectedTask = runtimeUserTasksGrid.getSingleSelectedItem();
-        return selectedTask != null && BooleanUtils.isNotTrue(selectedTask.getSuspended());
-    }
-
-    @Subscribe("runtimeUserTasksGrid.reassign")
-    public void onReassignAction(final ActionPerformedEvent event) {
-        Set<UserTaskData> userTasks = runtimeUserTasksGrid.getSelectedItems();
-        if (userTasks.isEmpty()) {
-            return;
-        }
-        dialogWindows.view(getCurrentView(), TaskReassignView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        runtimeUserTasksDl.load();
-                    }
-                })
-                .withViewConfigurer(taskReassignView -> taskReassignView.setTaskDataList(userTasks))
                 .build()
                 .open();
     }

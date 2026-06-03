@@ -7,6 +7,7 @@ package io.flowset.control.test_support.ui.condition;
 
 import com.codeborne.selenide.WebElementCondition;
 import io.flowset.control.test_support.ui.condition.grid.*;
+import io.flowset.control.test_support.ui.condition.menu.MenuItemsExactly;
 import io.flowset.control.test_support.ui.condition.pagination.TotalCount;
 import io.flowset.control.test_support.ui.condition.pagination.TotalCountHidden;
 import io.flowset.control.test_support.ui.condition.pagination.TotalCountUnknown;
@@ -181,6 +182,17 @@ public class ControlCondition {
     public static WebElementCondition bodyCellElementTextsExactly(int columnIndex, By selector,
                                                                   List<String> expected) {
         return new BodyCellElementTextsExactly(columnIndex, selector, expected);
+    }
+
+    /**
+     * Asserts the menu element contains exactly the specified labels in DOM order.
+     * All visible items (group headers and leaf items) must match — no more, no fewer.
+     *
+     * @param labels expected labels in DOM order
+     * @return instance of condition
+     */
+    public static WebElementCondition menuItemsExactly(List<String> labels) {
+        return new MenuItemsExactly(labels);
     }
 
     /**

@@ -74,12 +74,12 @@
                   selectionMode="MULTI">
             <actions>
                 <action id="refresh" type="list_refresh"/>
-                <action id="deploy" icon="ROCKET" text="msg://processDefinitionList.uploadBpmnXml"/>
-                <action id="bulkRemove" type="list_itemTracking" text="msg://processDefinitionList.remove" icon="TRASH"
+                <action id="deploy" type="control_deployProcessDefinition" icon="ROCKET" text="msg://processDefinitionList.uploadBpmnXml"/>
+                <action id="bulkRemove" type="control_bulkDeleteProcessDefinition" text="msg://processDefinitionList.remove" icon="TRASH"
                         actionVariant="DANGER"/>
-                <action id="bulkActivate" type="list_itemTracking" text="msg://processDefinitionList.activate"
+                <action id="bulkActivate" type="control_bulkActivateProcessDefinition" text="msg://processDefinitionList.activate"
                         icon="PLAY"/>
-                <action id="bulkSuspend" type="list_itemTracking" text="msg://processDefinitionList.suspend"
+                <action id="bulkSuspend" type="control_bulkSuspendProcessDefinition" text="msg://processDefinitionList.suspend"
                         icon="PAUSE"/>
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
@@ -93,7 +93,7 @@
                             class="io.flowset.control.view.processdefinition.column.ProcessKeyColumnFragment"/>
                 </column>
                 <column property="version" autoWidth="true" flexGrow="1"/>
-                <column key="status" header="msg://processDefinitionList.status" autoWidth="true" sortable="false"
+                <column property="suspended" header="msg://processDefinitionList.status" autoWidth="true" sortable="false"
                         flexGrow="1"/>
                 <column key="actions" sortable="false" editable="false" autoWidth="true" flexGrow="0"/>
             </columns>

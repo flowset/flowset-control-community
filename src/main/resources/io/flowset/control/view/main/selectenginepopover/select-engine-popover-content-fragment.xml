@@ -6,6 +6,11 @@
         </collection>
         <instance id="selectedEngineDc" class="io.flowset.control.entity.engine.BpmEngine"/>
     </data>
+    <actions>
+        <action id="createBpmEngineAction" type="control_createBpmEngine" icon="PLUS" text="msg://createBpmEnginBtn.text"/>
+        <action id="openEngineConnectionSettingsAction" type="control_openEngineConnectionSettings"
+                text="msg://advancedModeBtn.text"/>
+    </actions>
     <content>
         <vbox expand="rootBox" id="root" alignItems="START" spacing="false" padding="false"
               classNames="pt-xs engine-popover-content">
@@ -37,12 +42,11 @@
                     </vbox>
                 </vbox>
                 <vbox id="createBpmEngineBox" spacing="false" padding="false" classNames="p-xs pt-s">
-                    <button id="createBpmEngineBtn" themeNames="tertiary-inline small" icon="PLUS"
-                            classNames="mt-0 text-s"
-                            text="msg://createBpmEnginBtn.text"/>
+                    <button id="createBpmEngineBtn" themeNames="tertiary-inline small" classNames="mt-0 text-s"
+                            action="createBpmEngineAction"/>
                     <hr/>
                 </vbox>
-                <button id="advancedModeBtn" text="msg://advancedModeBtn.text" classNames="ml-auto mb-xs mr-s text-s"
+                <button id="advancedModeBtn" classNames="ml-auto mb-xs mr-s text-s" action="openEngineConnectionSettingsAction"
                         themeNames="tertiary-inline"/>
             </vbox>
         </vbox>

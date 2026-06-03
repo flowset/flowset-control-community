@@ -92,9 +92,9 @@
                         <action id="refresh"
                                 type="list_refresh"/>
                         <action id="completeTask" text="msg://completeTask" icon="CHECK"
-                                type="list_itemTracking"/>
-                        <action id="reassignTask" text="msg://reassignTask" icon="RETWEET"
-                                type="list_itemTracking"/>
+                                type="control_bulkCompleteUserTask"/>
+                        <action id="reassignTask" icon="RETWEET"
+                                type="control_bulkReassignUserTask"/>
                         <action id="view" type="list_edit" visible="false">
                             <properties>
                                 <property name="openMode" value="DIALOG"/>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      messagesGroup="io.jmix.securityflowui.view.roleassignment"
+      extends="io/jmix/securityflowui/view/roleassignment/role-assignment-view.xml">
+    <layout>
+        <flexLayout id="contentBox">
+            <vbox id="resourceRolesWrapper">
+                <h4 visible="false"/>
+            </vbox>
+            <vbox id="rowLevelRolesWrapper" visible="false"/>
+        </flexLayout>
+    </layout>
+</view>

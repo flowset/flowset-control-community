@@ -48,5 +48,8 @@ public class ResourceRoleNameColumnFragment extends EntityDetailLinkFragment<Hor
                 .navigate();
     }
 
-
+    @Override
+    protected Class<?> getTargetEntityClass() {
+        return ResourceRoleModel.class;
+    }
 }

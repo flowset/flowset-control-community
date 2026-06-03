@@ -7,26 +7,20 @@ package io.flowset.control.view.externaltask;
 
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
+import io.flowset.control.action.externaltask.RetryExternalTaskAction;
+import io.flowset.control.action.ViewProcessDefinitionAction;
+import io.flowset.control.action.ViewProcessInstanceAction;
 import io.jmix.core.LoadContext;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
-import io.flowset.control.view.incidentdata.RetryExternalTaskView;
-import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
-import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.control.view.util.ComponentHelper;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.codeeditor.CodeEditor;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.kit.action.ActionPerformedEvent;
-import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
@@ -37,7 +31,7 @@ import org.springframework.lang.Nullable;
 
 import java.util.Objects;
 
-@Route(value = "external-tasks/:id", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/external-tasks/:id", layout = DefaultMainViewParent.class)
 @ViewController("ExternalTaskData.detail")
 @ViewDescriptor("external-task-data-detail-view.xml")
 @EditedEntityContainer("externalTaskDataDc")
@@ -50,10 +44,6 @@ public class ExternalTaskDataDetailView extends StandardDetailView<ExternalTaskD
     protected ProcessDefinitionService processDefinitionService;
     @Autowired
     protected ComponentHelper componentHelper;
-    @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected DialogWindows dialogWindows;
 
     @ViewComponent
     protected InstanceLoader<ExternalTaskData> externalTaskDataDl;
@@ -78,7 +68,11 @@ public class ExternalTaskDataDetailView extends StandardDetailView<ExternalTaskD
     @ViewComponent
     protected HorizontalLayout detailActions;
     @ViewComponent
-    protected BaseAction retryAction;
+    protected RetryExternalTaskAction retryAction;
+    @ViewComponent
+    protected ViewProcessDefinitionAction viewProcessAction;
+    @ViewComponent
+    protected ViewProcessInstanceAction viewProcessInstanceAction;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -92,10 +86,8 @@ public class ExternalTaskDataDetailView extends StandardDetailView<ExternalTaskD
 
         String errorDetails = externalTaskService.getErrorDetails(getEditedEntity().getExternalTaskId());
         errorDetailsField.setValue(errorDetails);
-
-        if (getEditedEntity().getRetries() != null && getEditedEntity().getRetries() == 0) {
-            retryAction.setVisible(true);
-        }
+        retryAction.setExternalTaskData(getEditedEntity());
+        retryAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
 
         initProcessFields();
 
@@ -103,52 +95,17 @@ public class ExternalTaskDataDetailView extends StandardDetailView<ExternalTaskD
         detailActions.setJustifyContentMode(openedInDialog ? FlexComponent.JustifyContentMode.END : FlexComponent.JustifyContentMode.START);
     }
 
-    @Subscribe("retryAction")
-    public void onRetryAction(final ActionPerformedEvent event) {
-        dialogWindows.view(this, RetryExternalTaskView.class)
-                .withViewConfigurer(retryExternalTaskView -> retryExternalTaskView.setExternalTaskId(getEditedEntity().getExternalTaskId()))
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        close(StandardOutcome.SAVE);
-                    }
-                })
-                .open();
-    }
-
-    @Subscribe("viewProcessAction")
-    public void onViewProcess(final ActionPerformedEvent event) {
-        openView(ProcessDefinitionDetailView.class, new RouteParameters("id", getEditedEntity().getProcessDefinitionId()));
-    }
-
-    @Subscribe("viewProcessInstanceAction")
-    public void onViewProcessInstance(final ActionPerformedEvent event) {
-        openView(ProcessInstanceDetailView.class, new RouteParameters("id", getEditedEntity().getProcessInstanceId()));
-    }
-
     @Install(to = "externalTaskDataDl", target = Target.DATA_LOADER)
     protected ExternalTaskData externalTaskDataDlLoadDelegate(final LoadContext<ExternalTaskData> loadContext) {
         return externalTaskService.findById(Objects.requireNonNull(loadContext.getId()).toString());
-    }
-
-    protected void openView(Class<? extends StandardView> viewClass, RouteParameters routeParameters) {
-        boolean isOpenedInDialog = UiComponentUtils.isComponentAttachedToDialog(this);
-        if (!isOpenedInDialog) {
-            viewNavigators.view(this, viewClass)
-                    .withRouteParameters(routeParameters)
-                    .withBackwardNavigation(false)
-                    .navigate();
-        } else {
-            RouterLink routerLink = new RouterLink(viewClass, routeParameters);
-            getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
-        }
     }
 
     protected void initProcessFields() {
         String processLabel = getProcessLabel(getEditedEntity());
         processDefinitionIdField.setTypedValue(processLabel != null ? processLabel : getEditedEntity().getProcessDefinitionId());
 
-        viewProcessBtn.setVisible(getEditedEntity().getProcessDefinitionId() != null);
-        viewProcessInstanceBtn.setVisible(getEditedEntity().getProcessInstanceId() != null);
+        viewProcessAction.setEntityId(getEditedEntity().getProcessDefinitionId());
+        viewProcessInstanceAction.setEntityId(getEditedEntity().getProcessInstanceId());
     }
 
     @Nullable

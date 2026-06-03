@@ -21,24 +21,24 @@ public class ProcessVariableMapper {
     Metadata metadata;
 
     public VariableInstanceData fromProcessKeyValueModel(Map.Entry<String, Object> stringObjectEntry) {
-        var variableInstance = metadata.create(VariableInstanceData.class);
+        VariableInstanceData variableInstance = metadata.create(VariableInstanceData.class);
         variableInstance.setName(stringObjectEntry.getKey());
         variableInstance.setValue(stringObjectEntry.getValue());
         return variableInstance;
     }
 
     public VariableInstanceData fromVariableDto(Map.Entry<String, VariableValueDto> dto) {
-        var variableInstance = metadata.create(VariableInstanceData.class);
+        VariableInstanceData variableInstance = metadata.create(VariableInstanceData.class);
         variableInstance.setName(dto.getKey());
         variableInstance.setValue(dto.getValue().getValue());
         variableInstance.setType(dto.getValue().getType());
         Map<String, Object> valueInfoMap = dto.getValue().getValueInfo();
-        if(valueInfoMap != null && !valueInfoMap.isEmpty()) {
+        if (valueInfoMap != null && !valueInfoMap.isEmpty()) {
             VariableValueInfo variableValueInfo = metadata.create(VariableValueInfo.class);
-            if(valueInfoMap.containsKey("object")) {
+            if (valueInfoMap.containsKey("object")) {
                 ObjectTypeInfo objectTypeInfo = metadata.create(ObjectTypeInfo.class);
-                objectTypeInfo.setObjectTypeName((String) ((Map)valueInfoMap.get("object")).get("objectTypeName"));
-                objectTypeInfo.setSerializationDataFormat((String) ((Map)valueInfoMap.get("object")).get("serializationDataFormat"));
+                objectTypeInfo.setObjectTypeName((String) ((Map) valueInfoMap.get("object")).get("objectTypeName"));
+                objectTypeInfo.setSerializationDataFormat((String) ((Map) valueInfoMap.get("object")).get("serializationDataFormat"));
             }
             variableValueInfo.setEncoding((String) valueInfoMap.get("encoding"));
             variableValueInfo.setFilename((String) valueInfoMap.get("filename"));

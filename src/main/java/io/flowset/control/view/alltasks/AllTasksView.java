@@ -19,6 +19,8 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.usertask.BulkCompleteUserTaskAction;
+import io.flowset.control.action.usertask.BulkReassignTaskAction;
 import io.flowset.control.facet.urlqueryparameters.AllUserTaskListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.flowset.control.view.usertaskdata.column.UserTaskIdColumnFragment;
@@ -26,7 +28,6 @@ import io.flowset.control.view.usertaskdata.column.UserTaskProcessColumnFragment
 import io.jmix.core.*;
 import io.jmix.core.entity.EntityValues;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.SupportsTypedValue;
@@ -52,10 +53,7 @@ import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.usertask.UserTaskLoadContext;
 import io.flowset.control.service.usertask.UserTaskService;
-import io.flowset.control.view.bulktaskcomplete.BulkTaskCompleteView;
-import io.flowset.control.view.taskreassign.TaskReassignView;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
@@ -79,10 +77,6 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     @Autowired
     protected UserTaskService userTaskService;
 
-    @Autowired
-    protected DialogWindows dialogWindows;
-
-
     @ViewComponent
     protected CollectionContainer<UserTaskData> tasksDc;
     @ViewComponent
@@ -99,6 +93,10 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     protected JmixComboBox<ProcessDefinitionData> processDefinitionLookup;
     @ViewComponent
     protected DataGrid<UserTaskData> tasksDataGrid;
+    @ViewComponent("tasksDataGrid.completeTask")
+    protected BulkCompleteUserTaskAction completeTaskAction;
+    @ViewComponent("tasksDataGrid.reassignTask")
+    protected BulkReassignTaskAction reassignTaskAction;
 
     @ViewComponent
     protected FlexLayout filterContainer;
@@ -140,6 +138,7 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
         initFilter();
+        initActions();
 
         setDefaultSort();
 
@@ -156,6 +155,11 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         queryParamBinder = new AllUserTaskListQueryParamBinder(userTaskFilterDc, this::startLoadData,
                 processDefinitionService, filterFormLayout);
         urlQueryParameters.registerBinder(queryParamBinder);
+    }
+
+    protected void initActions() {
+        completeTaskAction.setAfterSaveHandler(this::startLoadData);
+        reassignTaskAction.setAfterSaveHandler(this::startLoadData);
     }
 
     @Install(to = "processDefinitionLookup", subject = "itemsFetchCallback")
@@ -184,47 +188,6 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
             userTaskFilterDc.getItem().setProcessDefinitionKey(key);
             startLoadData();
         }
-    }
-
-    @Install(to = "tasksDataGrid.completeTask", subject = "enabledRule")
-    protected boolean tasksDataGridCompleteTaskEnabledRule() {
-        Set<UserTaskData> selectedItems = tasksDataGrid.getSelectedItems();
-        boolean suspendedTaskSelected = selectedItems.stream().anyMatch(userTaskData -> BooleanUtils.isTrue(userTaskData.getSuspended()));
-        return !selectedItems.isEmpty() && !suspendedTaskSelected;
-    }
-
-    @Install(to = "tasksDataGrid.reassignTask", subject = "enabledRule")
-    protected boolean tasksDataGridReassignTaskEnabledRule() {
-        Set<UserTaskData> selectedItems = tasksDataGrid.getSelectedItems();
-        boolean suspendedTaskSelected = selectedItems.stream().anyMatch(userTaskData -> BooleanUtils.isTrue(userTaskData.getSuspended()));
-        return !selectedItems.isEmpty() && !suspendedTaskSelected;
-    }
-
-    @Subscribe("tasksDataGrid.reassignTask")
-    protected void onTasksDataGridReassignTaskActionPerformed(ActionPerformedEvent event) {
-        dialogWindows.view(this, TaskReassignView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .withViewConfigurer(taskReassignView -> taskReassignView.setTaskDataList(tasksDataGrid.getSelectedItems()))
-                .build()
-                .open();
-    }
-
-    @Subscribe("tasksDataGrid.completeTask")
-    public void onTasksDataGridCompleteTask(final ActionPerformedEvent event) {
-        dialogWindows.view(this, BulkTaskCompleteView.class)
-                .withViewConfigurer(bulkTaskCompleteView -> bulkTaskCompleteView.setUserTasks(tasksDataGrid.getSelectedItems()))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .build()
-                .open();
-
     }
 
     @Subscribe("applyFilter")

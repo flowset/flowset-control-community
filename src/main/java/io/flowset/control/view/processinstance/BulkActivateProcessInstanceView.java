@@ -1,7 +1,6 @@
 package io.flowset.control.view.processinstance;
 
 
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.notification.Notification;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
@@ -15,7 +14,6 @@ import org.springframework.lang.Nullable;
 
 import java.util.List;
 
-@Route(value = "bulk-activate-process-instance-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "BulkActivateProcessInstanceView")
 @ViewDescriptor(path = "bulk-activate-process-instance-view.xml")
 public class BulkActivateProcessInstanceView extends StandardView {

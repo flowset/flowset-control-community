@@ -11,11 +11,15 @@
 
     <actions>
         <action id="copyDecisionInstanceIdAction" type="control_copyComponentValueToClipboard"/>
+        <action id="viewDecisionDefinitionAction" type="control_viewDecisionDefinition"/>
+        <action id="viewProcessDefinitionAction" type="control_viewProcessDefinition"/>
+        <action id="viewProcessInstanceAction" type="control_viewProcessInstance"/>
     </actions>
     <content>
         <flexLayout classNames="decision-instance-slide-panel">
             <flexLayout id="instanceDetailsPanel" width="min-content" height="100%" classNames="bordered-container">
-                <vbox id="upperPanel" themeNames="spacing-s" visible="false" classNames="decision-instance-properties-panel">
+                <vbox id="upperPanel" themeNames="spacing-s" visible="false"
+                      classNames="decision-instance-properties-panel">
                     <h4 text="msg://instanceInformation"/>
                     <formLayout id="decisionInstanceInfoGroupBox" dataContainer="decisionInstanceDc" width="100%">
                         <responsiveSteps>
@@ -29,25 +33,31 @@
                             </suffix>
                         </textField>
                         <dateTimePicker property="evaluationTime" readOnly="true" width="auto" step="1ms"/>
-                        <textField id="decisionDefinitionField" label="msg://decisionDefinition" readOnly="true" width="auto" property="decisionDefinitionId">
+                        <textField id="decisionDefinitionField" label="msg://decisionDefinition" readOnly="true"
+                                   width="auto" property="decisionDefinitionId">
                             <suffix>
-                                <button id="openDecisionDefinitionEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline"
+                                <button id="openDecisionDefinitionEditorBtn" action="viewDecisionDefinitionAction"
+                                        icon="SEARCH"
+                                        themeNames="icon tertiary-inline"
                                         title="msg://openDecisionDefinition"/>
                             </suffix>
                         </textField>
 
                         <textField id="processInstanceField" property="processInstanceId"
-                                   readOnly="true" width="auto" >
+                                   readOnly="true" width="auto">
                             <suffix>
-                                <button id="openProcessInstanceEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline"
+                                <button id="openProcessInstanceEditorBtn" action="viewProcessInstanceAction"
+                                        icon="SEARCH" themeNames="icon tertiary-inline"
                                         title="msg://openProcessInstance"/>
                             </suffix>
                         </textField>
                         <textField id="processBusinessKeyTextField" label="msg://processBusinessKey" readOnly="true"/>
                         <textField id="processDefinitionField" property="processDefinitionId"
-                                   readOnly="true" width="auto" >
+                                   readOnly="true" width="auto">
                             <suffix>
-                                <button id="openProcessDefinitionEditorBtn" icon="SEARCH" themeNames="icon tertiary-inline" title="msg://io.flowset.control.view.processinstance/openProcessDefinition"/>
+                                <button id="openProcessDefinitionEditorBtn" action="viewProcessDefinitionAction"
+                                        icon="SEARCH" themeNames="icon tertiary-inline"
+                                        title="msg://io.flowset.control.view.processinstance/openProcessDefinition"/>
                             </suffix>
                         </textField>
                         <textField property="activityId" readOnly="true" width="auto"/>
@@ -56,7 +66,8 @@
                     </formLayout>
                 </vbox>
                 <vbox themeNames="spacing-xs" classNames="shadow-s p-s decision-instance-details-actions-panel">
-                    <button id="infoBtn" icon="INFO_CIRCLE" title="msg://viewDecisionInstanceDetails" classNames="bordered-button"/>
+                    <button id="infoBtn" icon="INFO_CIRCLE" title="msg://viewDecisionInstanceDetails"
+                            classNames="bordered-button"/>
                 </vbox>
             </flexLayout>
         </flexLayout>

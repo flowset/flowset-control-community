@@ -12,12 +12,9 @@ import io.flowset.control.facet.urlqueryparameters.DecisionDefinitionListQueryPa
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
-import io.flowset.control.view.decisiondeployment.DecisionDeploymentView;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.Fragments;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
@@ -49,11 +46,6 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
     protected Metadata metadata;
     @Autowired
     protected DecisionDefinitionService decisionDefinitionService;
-    @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected Fragments fragments;
-
     @ViewComponent
     protected InstanceContainer<DecisionDefinitionFilter> decisionDefinitionFilterDc;
     @ViewComponent
@@ -112,13 +104,6 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
         if (event.isFromClient()) {
             startLoadData();
         }
-    }
-
-    @Subscribe("decisionDefinitionsGrid.deploy")
-    protected void onDecisionDefinitionsGridDeploy(final ActionPerformedEvent event) {
-        viewNavigators.view(this, DecisionDeploymentView.class)
-                .withBackwardNavigation(true)
-                .navigate();
     }
 
     protected void initFilter() {

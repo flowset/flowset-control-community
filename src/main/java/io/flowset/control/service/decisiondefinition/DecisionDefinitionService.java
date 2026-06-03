@@ -2,6 +2,7 @@ package io.flowset.control.service.decisiondefinition;
 
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.filter.DecisionDefinitionFilter;
+import io.flowset.control.security.SecuredEntityLoad;
 import org.springframework.lang.Nullable;
 
 import java.util.Collection;
@@ -17,6 +18,7 @@ public interface DecisionDefinitionService {
      *
      * @return a list of deployed decision definitions
      */
+    @SecuredEntityLoad(entityClass = DecisionDefinitionData.class)
     List<DecisionDefinitionData> findLatestVersions();
 
     /**
@@ -25,6 +27,7 @@ public interface DecisionDefinitionService {
      * @param context a context to load decision definitions
      * @return a list of deployed decision definition versions
      */
+    @SecuredEntityLoad(entityClass = DecisionDefinitionData.class)
     List<DecisionDefinitionData> findAll(DecisionDefinitionLoadContext context);
 
     /**
@@ -33,6 +36,7 @@ public interface DecisionDefinitionService {
      * @param filter a decision definition filter
      * @return count of deployed decision definitions
      */
+    @SecuredEntityLoad(entityClass = DecisionDefinitionData.class)
     long getCount(@Nullable DecisionDefinitionFilter filter);
 
     /**
@@ -41,6 +45,7 @@ public interface DecisionDefinitionService {
      * @param decisionDefinitionKey a decision key
      * @return a list of deployed decision definition versions
      */
+    @SecuredEntityLoad(entityClass = DecisionDefinitionData.class)
     List<DecisionDefinitionData> findAllByKey(String decisionDefinitionKey);
 
     /**
@@ -50,6 +55,7 @@ public interface DecisionDefinitionService {
      * @return found decision definition or null if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = DecisionDefinitionData.class)
     DecisionDefinitionData getById(String decisionDefinitionId);
 
     /**
@@ -58,6 +64,7 @@ public interface DecisionDefinitionService {
      * @param decisionDefinitionId a decision definition identifier
      * @return a decision definition content in the DMN XML format
      */
+    @SecuredEntityLoad(entityClass = DecisionDefinitionData.class)
     String getDmnXml(String decisionDefinitionId);
 
     /**
@@ -66,6 +73,6 @@ public interface DecisionDefinitionService {
      * @param ids a list of decision definition ids
      * @return found decision definitions
      */
+    @SecuredEntityLoad(entityClass = DecisionDefinitionData.class)
     List<DecisionDefinitionData> findAllByIds(Collection<String> ids);
 }
-

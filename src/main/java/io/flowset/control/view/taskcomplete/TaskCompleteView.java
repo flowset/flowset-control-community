@@ -6,7 +6,6 @@
 package io.flowset.control.view.taskcomplete;
 
 
-import com.vaadin.flow.router.Route;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.entity.variable.ObjectTypeInfo;
 import io.flowset.control.entity.variable.VariableInstanceData;
@@ -25,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
-@Route(value = "task-complete", layout = DefaultMainViewParent.class)
 @ViewController(id = "TaskCompleteView")
 @ViewDescriptor(path = "task-complete-view.xml")
 @DialogMode(width = "50em")

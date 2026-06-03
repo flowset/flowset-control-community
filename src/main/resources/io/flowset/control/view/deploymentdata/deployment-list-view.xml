@@ -64,8 +64,8 @@
                   selectionMode="MULTI">
             <actions>
                 <action id="refresh" type="list_refresh"/>
-                <action id="bulkRemove" type="list_itemTracking" icon="TRASH"
-                        text="msg://deploymentDataList.remove" actionVariant="DANGER"/>
+                <action id="bulkRemove" type="control_bulkDeleteDeployment" icon="TRASH"
+                        actionVariant="DANGER"/>
                 <action id="view" type="list_edit" visible="false"/>
             </actions>
             <columns resizable="true">

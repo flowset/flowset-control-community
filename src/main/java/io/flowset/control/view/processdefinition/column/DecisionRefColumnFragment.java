@@ -5,13 +5,12 @@
 
 package io.flowset.control.view.processdefinition.column;
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import io.flowset.control.action.decisiondefinition.DecisionTablePreviewAction;
+import io.flowset.control.action.decisiondefinition.ViewCalledDecisionAction;
 import io.flowset.control.entity.decisiondefinition.DecisionReferenceData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
-import io.flowset.control.uicomponent.viewer.handler.BusinessRuleTaskOverlayClickHandler;
-import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.FragmentRenderer;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
@@ -19,20 +18,21 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @FragmentDescriptor("decision-ref-column-fragment.xml")
 @RendererItemContainer("decisionReferenceDc")
 public class DecisionRefColumnFragment extends FragmentRenderer<HorizontalLayout, DecisionReferenceData> {
 
-    @Autowired
-    protected BusinessRuleTaskOverlayClickHandler businessRuleTaskClickHandler;
     @ViewComponent
     protected JmixButton keyBtn;
     @ViewComponent
     protected JmixButton previewBtn;
     @ViewComponent
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
+    @ViewComponent
+    protected ViewCalledDecisionAction keyAction;
+    @ViewComponent
+    protected DecisionTablePreviewAction previewAction;
 
     @Subscribe
     public void onReady(final ReadyEvent event) {
@@ -44,20 +44,10 @@ public class DecisionRefColumnFragment extends FragmentRenderer<HorizontalLayout
         super.setItem(item);
 
         keyBtn.setText(item.getDecisionRef());
-    }
-
-    @Subscribe(id = "keyBtn", subject = "clickListener")
-    public void onKeyBtnClick(final ClickEvent<JmixButton> event) {
-        businessRuleTaskClickHandler.handleDecisionNavigation(
-                processDefinitionDataDc.getItem(),
-                item,
-                UiComponentUtils.isComponentAttachedToDialog(this));
-    }
-
-    @Subscribe(id = "previewBtn", subject = "clickListener")
-    public void onPreviewBtnClick(final ClickEvent<JmixButton> event) {
-        businessRuleTaskClickHandler.handleDecisionPreview(
-                processDefinitionDataDc.getItem(),
-                item);
+        ProcessDefinitionData processDefinition = processDefinitionDataDc.getItem();
+        keyAction.setProcessDefinitionData(processDefinition);
+        keyAction.setDecisionReference(item);
+        previewAction.setProcessDefinitionData(processDefinition);
+        previewAction.setDecisionReference(item);
     }
 }

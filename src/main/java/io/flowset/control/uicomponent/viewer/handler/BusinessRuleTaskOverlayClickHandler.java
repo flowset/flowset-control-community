@@ -10,6 +10,7 @@ import com.vaadin.flow.router.RouterLink;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.filter.DecisionDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.view.decisiondefinition.DecisionDefinitionDiagramView;
@@ -40,6 +41,7 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public class BusinessRuleTaskOverlayClickHandler {
 
     protected final DecisionDefinitionService decisionDefinitionService;
+    protected final SecuritySupport securitySupport;
     protected final Metadata metadata;
     protected final Notifications notifications;
     protected final ViewNavigators viewNavigators;
@@ -56,6 +58,9 @@ public class BusinessRuleTaskOverlayClickHandler {
     public void handleDecisionNavigation(ProcessDefinitionData parentProcess,
                                          BusinessRuleTaskData businessRuleTaskData,
                                          boolean fromDialog) {
+        if (!securitySupport.isEntityViewPermitted(DecisionDefinitionData.class)) {
+            return;
+        }
         DecisionDefinitionData decisionDefinition = findDecisionDefinition(businessRuleTaskData, parentProcess);
         if (decisionDefinition != null) {
             View<?> currentView = getCurrentView();
@@ -80,6 +85,9 @@ public class BusinessRuleTaskOverlayClickHandler {
      */
     public void handleDecisionPreview(ProcessDefinitionData parentProcess,
                                       BusinessRuleTaskData businessRuleTaskData) {
+        if (!securitySupport.isEntityViewPermitted(DecisionDefinitionData.class)) {
+            return;
+        }
         DecisionDefinitionData decisionDefinition = findDecisionDefinition(businessRuleTaskData, parentProcess);
         if (decisionDefinition != null) {
             dialogWindows.view(getCurrentView(), DecisionDefinitionDiagramView.class)

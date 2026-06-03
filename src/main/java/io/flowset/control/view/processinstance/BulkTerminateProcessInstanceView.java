@@ -9,10 +9,8 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.batch.BatchData;
-import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
@@ -23,10 +21,8 @@ import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 
-import java.util.Collection;
 import java.util.List;
 
-@Route(value = "bpm/bulkterminateprocessinstance", layout = DefaultMainViewParent.class)
 @ViewController("bpm_BulkTerminateProcessInstance")
 @ViewDescriptor("bulk-terminate-process-instance-view.xml")
 @DialogMode(width = "42em")

@@ -18,8 +18,11 @@
     </facets>
     <actions>
         <action id="closeAction" type="detail_close" text="msg:///actions.Close"/>
-        <action id="reassignAction" icon="RETWEET" text="msg:///actions.Reassign" actionVariant="PRIMARY"/>
-        <action id="completeAction" icon="CHECK" text="msg:///actions.Complete"/>
+        <action id="reassignAction" type="control_reassignUserTask" icon="RETWEET" text="msg:///actions.Reassign"
+                actionVariant="PRIMARY"/>
+        <action id="completeAction" type="control_completeUserTask" icon="CHECK" text="msg:///actions.Complete"/>
+        <action id="viewProcessInstanceAction" type="control_viewProcessInstance" icon="SEARCH"/>
+        <action id="viewProcessDefinitionAction" type="control_viewProcessDefinition" icon="SEARCH"/>
     </actions>
     <layout>
         <formLayout id="form" dataContainer="userTaskDataDc" width="auto">
@@ -29,12 +32,14 @@
             <textField id="priorityField" property="priority" readOnly="true"/>
             <textField id="processInstanceIdField" property="processInstanceId" readOnly="true">
                 <suffix>
-                    <button id="viewProcessInstance" icon="SEARCH" themeNames="tertiary-inline"/>
+                    <button id="viewProcessInstance" action="viewProcessInstanceAction" icon="SEARCH"
+                            themeNames="tertiary-inline"/>
                 </suffix>
             </textField>
             <textField id="processDefinitionIdField" property="processDefinitionId" readOnly="true">
                 <suffix>
-                    <button id="viewProcessDefinition" icon="SEARCH" themeNames="tertiary-inline"/>
+                    <button id="viewProcessDefinition" action="viewProcessDefinitionAction" icon="SEARCH"
+                            themeNames="tertiary-inline"/>
                 </suffix>
             </textField>
             <dateTimePicker id="startTimeField" property="startTime" readOnly="true" step="1ms"/>

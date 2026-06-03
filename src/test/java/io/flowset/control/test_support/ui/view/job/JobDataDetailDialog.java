@@ -78,4 +78,7 @@ public class JobDataDetailDialog extends DialogWindow<JobDataDetailDialog> {
 
     @TestComponent(path = "copyStacktrace")
     private Button copyStacktraceBtn;
+
+    @TestComponent(path = "closeAction")
+    private Button closeBtn;
 }

@@ -9,7 +9,6 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.jmix.core.Messages;
@@ -17,7 +16,6 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "bpm/suspendprocessdefinition", layout = DefaultMainViewParent.class)
 @ViewController("bpm_SuspendProcessDefinition")
 @ViewDescriptor("suspend-process-definition-view.xml")
 @DialogMode(width = "35em")

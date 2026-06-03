@@ -19,11 +19,11 @@
         <action id="copyIdAction" type="control_copyComponentValueToClipboard"/>
         <action id="copyExceptionAction" type="control_copyComponentValueToClipboard"/>
         <action id="copyErrorAction" type="control_copyComponentValueToClipboard"/>
-        <action id="retryAction" text="msg:///actions.Retry" icon="ROTATE_LEFT" visible="false"/>
-        <action id="activateAction" text="msg:///actions.Activate" icon="PLAY" visible="false"/>
-        <action id="suspendAction" text="msg:///actions.Suspend" icon="PAUSE" visible="false"/>
-        <action id="viewProcessAction" icon="SEARCH"/>
-        <action id="viewProcessInstanceAction" icon="SEARCH"/>
+        <action id="retryAction" type="control_retryJob" text="msg:///actions.Retry" icon="ROTATE_LEFT"/>
+        <action id="activateAction" type="control_activateJob" text="msg:///actions.Activate" icon="PLAY"/>
+        <action id="suspendAction" type="control_suspendJob" text="msg:///actions.Suspend" icon="PAUSE"/>
+        <action id="viewProcessAction" type="control_viewProcessDefinition" icon="SEARCH"/>
+        <action id="viewProcessInstanceAction" type="control_viewProcessInstance" icon="SEARCH"/>
     </actions>
     <layout classNames="overflow-hidden">
         <split themeNames="splitter-spacing" width="100%">

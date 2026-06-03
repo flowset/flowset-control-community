@@ -23,9 +23,8 @@
                       dataContainer="runtimeUserTasksDc">
                 <actions>
                     <action id="reassign"
-                            text="msg://reassignTask"
                             icon="RETWEET"
-                            type="list_itemTracking"/>
+                            type="control_bulkReassignUserTask"/>
                     <action id="view"
                             text="msg:///actions.View"
                             icon="EYE" visible="false"

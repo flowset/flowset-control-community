@@ -1,16 +1,12 @@
 package io.flowset.control.view.processinstance.terminatereason;
 
 
-import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.DataManager;
@@ -18,16 +14,15 @@ import io.jmix.core.LoadContext;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
-import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
+import io.flowset.control.action.ViewProcessInstanceAction;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.incident.IncidentLoadContext;
 import io.flowset.control.service.incident.IncidentService;
-import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.control.view.util.ComponentHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,7 +30,6 @@ import java.util.List;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
-@Route(value = "instance-terminate-reason-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "InstanceTerminateReasonView")
 @ViewDescriptor(path = "instance-terminate-reason-view.xml")
 @DialogMode(width = "65em")
@@ -56,6 +50,8 @@ public class InstanceTerminateReasonView extends StandardView {
     protected CollectionLoader<HistoricIncidentData> incidentsDl;
     @ViewComponent
     protected DataGrid<HistoricIncidentData> incidentsGrid;
+    @ViewComponent
+    protected ViewProcessInstanceAction viewInstanceAction;
 
     protected IncidentFilter filter;
 
@@ -65,11 +61,12 @@ public class InstanceTerminateReasonView extends StandardView {
 
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
+        ProcessInstanceData processInstance = processInstanceDc.getItem();
         filter = dataManager.create(IncidentFilter.class);
-        filter.setProcessInstanceId(processInstanceDc.getItem().getInstanceId());
+        filter.setProcessInstanceId(processInstance.getInstanceId());
+        viewInstanceAction.setEntityId(processInstance.getInstanceId());
         incidentsDl.load();
     }
-
 
     @Subscribe("incidentsGrid.view")
     public void onViewAction(final ActionPerformedEvent event) {
@@ -134,12 +131,5 @@ public class InstanceTerminateReasonView extends StandardView {
     @Subscribe("incidentsGrid")
     public void onHistoryTasksGridGridSort(final SortEvent<DataGrid<HistoricIncidentData>, GridSortOrder<DataGrid<HistoricIncidentData>>> event) {
         incidentsDl.load();
-    }
-
-    @Subscribe(id = "viewInstanceBtn", subject = "clickListener")
-    public void onViewInstanceBtnClick(final ClickEvent<JmixButton> event) {
-        RouterLink routerLink = new RouterLink(ProcessInstanceDetailView.class, new RouteParameters("id",
-                processInstanceDc.getItem().getInstanceId()));
-        getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
     }
 }

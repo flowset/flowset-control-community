@@ -1,7 +1,5 @@
 package io.flowset.control.view.incidentdata;
 
-
-import com.vaadin.flow.router.Route;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textfield.TypedTextField;
@@ -11,7 +9,6 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.service.job.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "retry-job-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "RetryJobView")
 @ViewDescriptor(path = "retry-job-view.xml")
 public class RetryJobView extends StandardView {

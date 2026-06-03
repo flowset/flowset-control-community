@@ -9,6 +9,7 @@ import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.dto.ActivityIncidentData;
+import io.flowset.control.security.SecuredEntityLoad;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public interface IncidentService {
      * @param processInstanceId a process instance identifier
      * @return open incidents
      */
+    @SecuredEntityLoad(entityClass = IncidentData.class)
     List<ActivityIncidentData> findRuntimeIncidents(String processInstanceId);
 
     /**
@@ -32,6 +34,7 @@ public interface IncidentService {
      * @param loadContext a context to load open incidents
      * @return a list of open incidents
      */
+    @SecuredEntityLoad(entityClass = IncidentData.class)
     List<IncidentData> findRuntimeIncidents(IncidentLoadContext loadContext);
 
     /**
@@ -41,6 +44,7 @@ public interface IncidentService {
      * @return found open incident or null if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = IncidentData.class)
     IncidentData findRuntimeIncidentById(String incidentId);
 
     /**
@@ -49,6 +53,7 @@ public interface IncidentService {
      * @param filter an incident filter instance
      * @return count of open incidents
      */
+    @SecuredEntityLoad(entityClass = IncidentData.class)
     long getRuntimeIncidentCount(@Nullable IncidentFilter filter);
 
     /**
@@ -57,6 +62,7 @@ public interface IncidentService {
      * @param loadContext a context to load incidents from history
      * @return a list of found incidents
      */
+    @SecuredEntityLoad(entityClass = HistoricIncidentData.class)
     List<HistoricIncidentData> findHistoricIncidents(IncidentLoadContext loadContext);
 
     /**
@@ -65,6 +71,7 @@ public interface IncidentService {
      * @param filter an incident filter instance
      * @return count of found incidents
      */
+    @SecuredEntityLoad(entityClass = HistoricIncidentData.class)
     long getHistoricIncidentCount(@Nullable IncidentFilter filter);
 
     /**
@@ -74,5 +81,6 @@ public interface IncidentService {
      * @return found incident or null if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = HistoricIncidentData.class)
     HistoricIncidentData findHistoricIncidentById(String id);
 }

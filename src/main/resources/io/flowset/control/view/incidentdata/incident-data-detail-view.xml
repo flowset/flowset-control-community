@@ -28,8 +28,16 @@
                 <property name="text" value=""/>
             </properties>
         </action>
-        <action id="openJobAction" icon="SEARCH" description="msg://openJobAction.text"/>
-        <action id="openExternalTaskAction" icon="SEARCH" description="msg://openExternalTask.text"/>
+        <action id="viewJobAction" type="control_viewIncidentJob" icon="SEARCH"
+                description="msg://openJobAction.text"/>
+        <action id="viewExternalTaskAction" type="control_viewIncidentExternalTask" icon="SEARCH"
+                description="msg://openExternalTask.text"/>
+        <action id="viewProcessAction" type="control_viewProcessDefinition"/>
+        <action id="viewProcessInstanceAction" type="control_viewProcessInstance"/>
+        <action id="viewCauseIncidentAction" type="control_viewIncident"/>
+        <action id="viewRootCauseIncidentAction" type="control_viewIncident"/>
+        <action id="retryAction" type="control_retryIncident"/>
+        <action id="viewStacktraceAction" type="control_viewIncidentStacktrace"/>
     </actions>
     <layout expand="form">
         <formLayout id="form" dataContainer="incidentDataDc">
@@ -59,7 +67,7 @@
                               minHeight="6em" classNames="vertical-resize"
                               label="msg://io.flowset.control.entity.incident/IncidentData.message" readOnly="true">
                         <suffix>
-                            <button id="viewStacktraceBtn" themeNames="tertiary-inline" icon="CODE"/>
+                            <button id="viewStacktraceBtn" themeNames="tertiary-inline" icon="CODE" action="viewStacktraceAction"/>
                         </suffix>
                     </textArea>
 
@@ -78,14 +86,16 @@
                                label="msg://io.flowset.control.entity.incident/IncidentData.processInstanceId"
                                width="100%">
                         <suffix>
-                            <button id="viewProcessInstanceBtn" icon="SEARCH" themeNames="tertiary-inline"/>
+                            <button id="viewProcessInstanceBtn" icon="SEARCH" themeNames="tertiary-inline"
+                                    action="viewProcessInstanceAction"/>
                         </suffix>
                     </textField>
                     <textField id="processDefinitionIdField"
                                label="msg://io.flowset.control.entity.incident/IncidentData.processDefinitionId"
                                readOnly="true" width="100%">
                         <suffix>
-                            <button id="viewProcessBtn" icon="SEARCH" themeNames="tertiary-inline"/>
+                            <button id="viewProcessBtn" icon="SEARCH" themeNames="tertiary-inline"
+                                    action="viewProcessAction"/>
                         </suffix>
                     </textField>
                     <textField id="activityIdField" property="activityId"
@@ -104,7 +114,8 @@
                                label="msg://io.flowset.control.entity.incident/IncidentData.causeIncidentId"
                                classNames="pt-s">
                         <suffix>
-                            <button id="viewCauseIncidentBtn" icon="SEARCH" themeNames="tertiary-inline"/>
+                            <button id="viewCauseIncidentBtn" icon="SEARCH" themeNames="tertiary-inline"
+                                    action="viewCauseIncidentAction"/>
                         </suffix>
                     </textField>
                     <textField id="rootCauseIncidentIdField" readOnly="true"
@@ -112,14 +123,15 @@
                                width="100%"
                                classNames="pt-s">
                         <suffix>
-                            <button id="viewRootCauseIncidentBtn" icon="SEARCH" themeNames="tertiary-inline"/>
+                            <button id="viewRootCauseIncidentBtn" icon="SEARCH" themeNames="tertiary-inline"
+                                    action="viewRootCauseIncidentAction"/>
                         </suffix>
                     </textField>
                 </vbox>
             </vbox>
         </formLayout>
         <hbox id="detailActions" width="100%">
-            <button id="retryBtn" icon="ROTATE_LEFT" themeNames="primary" text="msg:///actions.Retry"/>
+            <button id="retryBtn" icon="ROTATE_LEFT" themeNames="primary" action="retryAction"/>
             <button id="closeBtn" action="closeAction"/>
         </hbox>
     </layout>

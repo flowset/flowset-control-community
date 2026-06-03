@@ -10,12 +10,19 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouteParameters;
-import io.jmix.core.Messages;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.Notifications;
+import io.flowset.control.action.CopyComponentValueToClipboardAction;
+import io.flowset.control.action.deployment.ViewDeploymentAction;
+import io.flowset.control.action.processdefinition.ActivateProcessDefinitionAction;
+import io.flowset.control.action.processdefinition.DeleteProcessDefinitionAction;
+import io.flowset.control.action.processdefinition.MigrateProcessDefinitionAction;
+import io.flowset.control.action.processdefinition.StartProcessDefinitionAction;
+import io.flowset.control.action.processdefinition.SuspendProcessDefinitionAction;
+import io.flowset.control.entity.deployment.DeploymentData;
+import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.service.deployment.DeploymentService;
+import io.flowset.control.view.processdefinition.event.ReloadSelectedProcess;
 import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
@@ -27,20 +34,10 @@ import io.jmix.flowui.model.DataLoader;
 import io.jmix.flowui.model.HasLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.MessageBundle;
-import io.jmix.flowui.view.StandardOutcome;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.Target;
 import io.jmix.flowui.view.View;
 import io.jmix.flowui.view.ViewComponent;
-import io.flowset.control.action.CopyComponentValueToClipboardAction;
-import io.flowset.control.entity.deployment.DeploymentData;
-import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
-import io.flowset.control.entity.processinstance.ProcessInstanceData;
-import io.flowset.control.service.deployment.DeploymentService;
-import io.flowset.control.view.deploymentdata.DeploymentDetailView;
-import io.flowset.control.view.processdefinition.event.ReloadSelectedProcess;
-import io.flowset.control.view.processinstancemigration.ProcessInstanceMigrationView;
-import io.flowset.control.view.startprocess.StartProcessWithVariableView;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
@@ -55,17 +52,9 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected JmixButton infoBtn;
     @ViewComponent
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
-    @ViewComponent
-    protected JmixButton activateBtn;
-    @ViewComponent
-    protected JmixButton suspendBtn;
 
-    @Autowired
-    protected ViewNavigators viewNavigators;
     @ViewComponent
     protected TypedTextField<String> keyField;
-    @Autowired
-    protected Notifications notifications;
     @ViewComponent
     protected TypedTextField<String> idField;
     @ViewComponent
@@ -79,12 +68,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     @ViewComponent
     protected TypedDateTimePicker<Comparable> deploymentTimeField;
     @ViewComponent
-    protected JmixButton startProcessBtn;
-    @Autowired
-    protected DialogWindows dialogWindows;
-    @Autowired
-    protected Messages messages;
-    @ViewComponent
     protected CollectionContainer<ProcessInstanceData> processInstanceDataDc;
     @ViewComponent
     protected CopyComponentValueToClipboardAction copyIdAction;
@@ -93,9 +76,22 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     @Autowired
     protected UiEventPublisher uiEventPublisher;
 
+    @ViewComponent
+    protected StartProcessDefinitionAction startProcessAction;
+    @ViewComponent
+    protected SuspendProcessDefinitionAction suspendAction;
+    @ViewComponent
+    protected ActivateProcessDefinitionAction activateAction;
+    @ViewComponent
+    protected MigrateProcessDefinitionAction migrateAction;
+    @ViewComponent
+    protected DeleteProcessDefinitionAction deleteAction;
+    @ViewComponent
+    protected ViewDeploymentAction viewDeploymentAction;
+
     @Subscribe(target = Target.HOST_CONTROLLER)
     public void onHostBeforeShow(View.BeforeShowEvent event) {
-        initActionButtons();
+        initActions();
 
         copyIdAction.setTarget(idField);
         copyKeyAction.setTarget(keyField);
@@ -104,7 +100,7 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     }
 
     public void refresh() {
-        initActionButtons();
+        initActions();
         initDeploymentData();
     }
 
@@ -132,85 +128,27 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
         reloadProcessDefinition();
     }
 
-    @Subscribe(id = "viewDeployment", subject = "clickListener")
-    public void onViewDeploymentClick(final ClickEvent<JmixButton> event) {
-        viewNavigators.detailView(getCurrentView(), DeploymentData.class)
-                .withViewClass(DeploymentDetailView.class)
-                .withRouteParameters(new RouteParameters("id", processDefinitionDataDc.getItem().getDeploymentId()))
-                .withBackwardNavigation(true)
-                .navigate();
-    }
+    protected void initActions() {
+        ProcessDefinitionData item = processDefinitionDataDc.getItem();
 
-    @Subscribe(id = "startProcessBtn", subject = "clickListener")
-    public void onStartProcessBtnClick(final ClickEvent<JmixButton> event) {
-        dialogWindows.detail(getCurrentView(), ProcessDefinitionData.class)
-                .withViewClass(StartProcessWithVariableView.class)
-                .editEntity(processDefinitionDataDc.getItem())
-                .withAfterCloseListener(e -> {
-                    if (e.closedWith(StandardOutcome.SAVE)) {
-                        reloadProcessDefinition();
-                        notifications.create(messages.formatMessage(ProcessDefinitionDetailView.class, "startProcess.success",
-                                        e.getView().getEditedEntity().getProcessDefinitionId()))
-                                .withType(Notifications.Type.SUCCESS)
-                                .build()
-                                .open();
-                    }
-                })
-                .open();
-    }
+        startProcessAction.setProcessDefinitionData(item);
+        startProcessAction.setAfterSaveHandler(this::reloadProcessDefinition);
 
-    @Subscribe(id = "migrateBtn", subject = "clickListener")
-    protected void onMigrateBtnClick(final ClickEvent<JmixButton> event) {
-        dialogWindows.view(getCurrentView(), ProcessInstanceMigrationView.class)
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        reloadProcessInstances();
-                    }
-                })
-                .withViewConfigurer(view -> view.setProcessDefinitionData(processDefinitionDataDc.getItem()))
-                .build()
-                .open();
-    }
+        suspendAction.setProcessDefinitionId(item.getId());
+        suspendAction.setProcessDefinitionData(item);
+        suspendAction.setAfterSaveHandler(this::reloadProcessDefinition);
 
-    @Subscribe(id = "suspendBtn", subject = "clickListener")
-    protected void onSuspendBtnClick(final ClickEvent<JmixButton> event) {
-        dialogWindows.view(getCurrentView(), SuspendProcessDefinitionView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        reloadProcessDefinition();
-                        initActionButtons();
-                    }
-                })
-                .withViewConfigurer(view -> view.setProcessDefinitionId(processDefinitionDataDc.getItem().getId()))
-                .build()
-                .open();
-    }
+        activateAction.setProcessDefinitionId(item.getId());
+        activateAction.setProcessDefinitionData(item);
+        activateAction.setAfterSaveHandler(this::reloadProcessDefinition);
 
-    @Subscribe(id = "deleteBtn", subject = "clickListener")
-    protected void onDeleteBtnClick(final ClickEvent<JmixButton> event) {
-        dialogWindows.view(getCurrentView(), DeleteProcessDefinitionView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        getCurrentView().close(REMOVE_PROCESS_DEFINITION_CLOSE_ACTION);
-                    }
-                })
-                .withViewConfigurer(view -> view.setProcessDefinitionId(processDefinitionDataDc.getItem().getId()))
-                .build()
-                .open();
-    }
+        migrateAction.setProcessDefinitionData(item);
+        migrateAction.setAfterSaveHandler(this::reloadProcessInstances);
 
-    @Subscribe(id = "activateBtn", subject = "clickListener")
-    protected void onActivateBtnClick(final ClickEvent<JmixButton> event) {
-        dialogWindows.view(getCurrentView(), ActivateProcessDefinitionView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        reloadProcessDefinition();
-                        initActionButtons();
-                    }
-                })
-                .withViewConfigurer(view -> view.setProcessDefinitionId(processDefinitionDataDc.getItem().getId()))
-                .build()
-                .open();
+        deleteAction.setProcessDefinitionId(item.getId());
+        deleteAction.setAfterSaveHandler(() -> getCurrentView().close(REMOVE_PROCESS_DEFINITION_CLOSE_ACTION));
+
+        viewDeploymentAction.setDeploymentId(item.getDeploymentId());
     }
 
     protected void reloadProcessInstances() {
@@ -230,15 +168,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
             deploymentTimeField.setTypedValue(deployment.getDeploymentTime());
         }
     }
-
-    protected void initActionButtons() {
-        ProcessDefinitionData item = processDefinitionDataDc.getItem();
-        boolean suspended = Boolean.TRUE.equals(item.getSuspended());
-        activateBtn.setVisible(suspended);
-        suspendBtn.setVisible(!suspended);
-        startProcessBtn.setVisible(!suspended);
-    }
-
 
     protected void reloadProcessDefinition() {
         uiEventPublisher.publishEventForCurrentUI(new ReloadSelectedProcess(this));

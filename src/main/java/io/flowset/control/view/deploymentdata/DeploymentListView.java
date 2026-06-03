@@ -6,13 +6,12 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.deployment.BulkDeleteDeploymentAction;
 import io.flowset.control.facet.urlqueryparameters.DeploymentListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.Fragments;
 import io.jmix.flowui.component.ComponentContainer;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -29,7 +28,6 @@ import io.flowset.control.service.deployment.DeploymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Set;
 
 @Route(value = "bpm/deployments", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_Deployment.list")
@@ -51,12 +49,10 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     protected JmixFormLayout filterFormLayout;
     @ViewComponent
     protected HorizontalLayout filterPanel;
-    @Autowired
-    protected Fragments fragments;
     @ViewComponent
     protected DataGrid<DeploymentData> deploymentsDataGrid;
-    @Autowired
-    protected DialogWindows dialogWindows;
+    @ViewComponent("deploymentsDataGrid.bulkRemove")
+    protected BulkDeleteDeploymentAction bulkRemove;
     private DeploymentListQueryParamBinder queryParamBinder;
 
     @Subscribe
@@ -69,6 +65,7 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         urlQueryParameters.registerBinder(queryParamBinder);
 
         addFilterValueChangeListeners(filterFormLayout);
+        bulkRemove.setAfterSaveHandler(this::startLoadData);
     }
 
     @Subscribe("applyFilter")
@@ -113,38 +110,6 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         }
 
         return loadItemsWithStateHandling(() -> deploymentService.findAll(context));
-    }
-
-    @Subscribe("deploymentsDataGrid.bulkRemove")
-    protected void onDeploymentsDataGridBulkRemove(final ActionPerformedEvent event) {
-        Set<DeploymentData> selectedItems = deploymentsDataGrid.getSelectedItems();
-        if (selectedItems.isEmpty()) {
-            return;
-        }
-
-        if (selectedItems.size() == 1) {
-            dialogWindows.view(this, DeleteDeploymentView.class)
-                    .withAfterCloseListener(closeEvent -> {
-                        if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                            startLoadData();
-                        }
-                    })
-                    .withViewConfigurer(view -> view.setDeploymentId(
-                            deploymentsDataGrid.getSingleSelectedItem().getId()))
-                    .build()
-                    .open();
-            return;
-        }
-
-        dialogWindows.view(this, BulkDeleteDeploymentView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .withViewConfigurer(view -> view.setDeployments(selectedItems))
-                .build()
-                .open();
     }
 
     @Override

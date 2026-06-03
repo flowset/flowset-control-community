@@ -5,53 +5,35 @@
 
 <fragment xmlns="http://jmix.io/schema/flowui/fragment">
     <data>
-        <collection id="processDefinitionsDc" class="io.flowset.control.entity.processdefinition.ProcessDefinitionData" provided="true"/>
+        <collection id="processDefinitionsDc" class="io.flowset.control.entity.processdefinition.ProcessDefinitionData"
+                    provided="true"/>
     </data>
+    <actions>
+        <action id="startProcessAction" type="control_startProcessDefinition"/>
+        <action id="activateAction" type="control_activateProcessDefinition"/>
+        <action id="deleteAction" type="control_deleteProcessDefinition" icon="TRASH"
+                text="msg:///actions.Remove" actionVariant="DANGER"/>
+        <action id="migrateAction" type="control_migrateProcessDefinition" icon="FORWARD"
+                text="msg:///actions.Migrate"/>
+        <action id="suspendAction" type="control_suspendProcessDefinition" icon="PAUSE"
+                text="msg:///actions.Suspend"/>
+    </actions>
 
     <content>
         <hbox minWidth="min-content" themeNames="spacing-xs" justifyContent="END" alignItems="BASELINE">
-            <button id="startProcessBtn" themeNames="tertiary-inline" icon="PLAY_CIRCLE" classNames="data-grid-column-action"
-                    title="msg://processDefinitionList.start" visible="false"/>
+            <button id="startProcessBtn" themeNames="tertiary-inline" icon="PLAY_CIRCLE"
+                    classNames="data-grid-column-action"
+                    title="msg://processDefinitionList.start" action="startProcessAction"/>
             <button id="activateBtn" themeNames="tertiary-inline" icon="PLAY" classNames="data-grid-column-action"
-                    title="msg://processDefinitionList.activate" visible="false"/>
-            <dropdownButton id="activeProcessActions" visible="false" dropdownIndicatorVisible="false" classNames="data-grid-column-action"
+                    title="msg://processDefinitionList.activate" action="activateAction"/>
+            <dropdownButton id="processActions" dropdownIndicatorVisible="false"
+                            overlayClass="process-actions-dropdown-overlay"
+                            classNames="data-grid-column-action process-actions-dropdown"
                             themeNames="tertiary-inline" icon="ELLIPSIS_DOTS_V">
                 <items>
-                    <componentItem id="delete">
-                        <hbox alignItems="CENTER" justifyContent="START" classNames="text-error">
-                            <icon icon="TRASH" size="1em"/>
-                            <span text="msg://processDefinitionList.remove"/>
-                        </hbox>
-                    </componentItem>
-                    <componentItem id="migrate">
-                        <hbox alignItems="CENTER" justifyContent="START">
-                            <icon icon="FORWARD" size="1em" />
-                            <span text="msg://processDefinitionList.migrate"/>
-                        </hbox>
-                    </componentItem>
-                    <componentItem id="suspend">
-                        <hbox alignItems="CENTER" justifyContent="START">
-                            <icon icon="PAUSE" size="1em" />
-                            <span text="msg://processDefinitionList.suspend"/>
-                        </hbox>
-                    </componentItem>
-                </items>
-            </dropdownButton>
-            <dropdownButton id="suspendedProcessActions" visible="false" dropdownIndicatorVisible="false" classNames="data-grid-column-action"
-                            themeNames="tertiary-inline" icon="ELLIPSIS_DOTS_V">
-                <items>
-                    <componentItem id="delete" >
-                        <hbox alignItems="CENTER" justifyContent="START" classNames="text-error">
-                            <icon icon="TRASH" size="1em"/>
-                            <span text="msg://processDefinitionList.remove"/>
-                        </hbox>
-                    </componentItem>
-                    <componentItem id="migrate">
-                        <hbox alignItems="CENTER" justifyContent="START">
-                            <icon icon="FORWARD" size="1em" />
-                            <span text="msg://processDefinitionList.migrate"/>
-                        </hbox>
-                    </componentItem>
+                    <actionItem id="deleteItem" ref="deleteAction"/>
+                    <actionItem id="migrateItem" ref="migrateAction"/>
+                    <actionItem id="suspendItem" ref="suspendAction"/>
                 </items>
             </dropdownButton>
         </hbox>
