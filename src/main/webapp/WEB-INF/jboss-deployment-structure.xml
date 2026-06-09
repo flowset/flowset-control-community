@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    WildFly 39 deployment descriptor: module isolation for Flowset Control Community.
+
+    Prevents WildFly from injecting its own JPA/Hibernate, RESTEasy, JSF, and
+    SLF4J into the deployment classpath. All module names have been verified
+    against the actual module.xml files in WildFly 39.0.1.Final.
+
+    Note: beans.xml (bean-discovery-mode="none") handles CDI bean-archive
+    scanning for WEB-INF/classes. The weld subsystem exclusion below prevents
+    Weld from activating at all, handling lib JARs with their own beans.xml.
+-->
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.3">
+    <deployment>
+        <exclusions>
+
+            <!-- ── JPA / ORM ──────────────────────────────────────────────────
+                 WildFly uses Hibernate ORM as its JPA provider.
+                 Flowset uses EclipseLink via jmix-eclipselink-starter.
+                 Module name in WildFly 39: org.hibernate (not orm.core)        -->
+            <module name="org.hibernate"/>
+            <module name="org.hibernate.validator"/>
+            <module name="org.jboss.as.jpa"/>
+
+            <!-- ── JAX-RS / RESTEasy ──────────────────────────────────────────
+                 Spring MVC handles all REST. Prevent RESTEasy auto-activation.
+                 All names verified from WildFly 39 module.xml files.           -->
+            <module name="org.jboss.resteasy.resteasy-jaxrs"/>
+            <module name="org.jboss.resteasy.resteasy-cdi"/>
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
+            <module name="org.jboss.resteasy.resteasy-atom-provider"/>
+
+            <!-- ── JSF ────────────────────────────────────────────────────────
+                 Vaadin FlowUI does not use JSF.                                -->
+            <module name="org.jboss.as.jsf"/>
+            <module name="org.jboss.as.jsf-injection"/>
+
+            <!-- ── SLF4J / Logging ───────────────────────────────────────────
+                 WildFly auto-injects org.slf4j.impl (slf4j-jboss-logmanager)
+                 into every deployment. Spring Boot bundles Logback + slf4j-api
+                 in WEB-INF/lib and expects Logback to be the SLF4J backend.
+                 When WildFly's slf4j-jboss-logmanager wins the classloader
+                 race, Spring Boot's LogbackLoggingSystem throws:
+                   "LoggerFactory is not a Logback LoggerContext"
+                 Excluding these modules forces the deployment to use its own
+                 SLF4J + Logback from WEB-INF/lib exclusively.                 -->
+            <module name="org.slf4j"/>
+            <module name="org.slf4j.impl"/>
+
+        </exclusions>
+
+        <!--
+            Excluded subsystems:
+
+            jpa         — Prevents WildFly from auto-detecting persistence.xml
+                          and creating its own EntityManagerFactory. EclipseLink
+                          is managed entirely by Spring Boot.
+
+            weld        — Prevents WildFly's CDI/Weld container from scanning
+                          this deployment. Spring Boot manages its own IoC
+                          (ApplicationContext) and does not use CDI. Without this
+                          exclusion, Weld scans hibernate-validator-cdi-*.jar
+                          (bundled in WEB-INF/lib), which has its own
+                          META-INF/beans.xml and activates a ValidationInterceptor
+                          that requires @Default Validator — a CDI bean not
+                          present in a pure Spring context.
+
+            batch-jberet — JBoss Batch subsystem looks up a CDI BeanManager at
+                           startup. With weld excluded there is no BeanManager,
+                           causing "missing dependency: beanmanager". This
+                           application does not use JBoss Batch; excluding the
+                           subsystem prevents the spurious dependency failure.
+
+            jsf         — Excluding org.jboss.as.jsf / org.jboss.as.jsf-injection
+                          modules (above) removes them from the deployment
+                          classloader, but the JSF subsystem still registers
+                          Mojarra's ConfigureListener (jakarta.faces.impl 4.0.13)
+                          as a ServletContextListener. ConfigureListener calls
+                          Util.getCdiBeanManager() on init, which throws
+                          "CDI is not available" because Weld is excluded.
+                          Vaadin FlowUI does not use JSF; excluding the
+                          subsystem prevents Mojarra from being registered at all.
+        -->
+        <exclude-subsystems>
+            <subsystem name="jpa"/>
+            <subsystem name="weld"/>
+            <subsystem name="batch-jberet"/>
+            <subsystem name="jsf"/>
+        </exclude-subsystems>
+
+    </deployment>
+</jboss-deployment-structure>
