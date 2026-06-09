@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.event.EventListener;
@@ -30,10 +32,21 @@ import javax.sql.DataSource;
 @PWA(name = "Flowset Control", shortName = "Flowset Control", iconPath = "icons/logo.png")
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class FlowsetControlApplication implements AppShellConfigurator {
+public class FlowsetControlApplication
+        extends SpringBootServletInitializer
+        implements AppShellConfigurator {
 
     @Autowired
     private Environment environment;
+
+    /**
+     * Entry point for WAR deployment (WildFly / external servlet container).
+     * Standard {@link #main} entry point remains fully functional for JAR/Docker.
+     */
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(FlowsetControlApplication.class);
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(FlowsetControlApplication.class, args);

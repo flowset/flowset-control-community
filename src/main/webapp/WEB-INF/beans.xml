@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    CDI beans descriptor — discovery disabled for WildFly deployment.
+
+    Spring Boot manages its own IoC container (ApplicationContext). This
+    application does NOT use CDI/Weld. Without this file WildFly's Weld
+    container scans the entire WAR classpath and tries to activate CDI
+    extensions bundled inside Spring/Hibernate JARs (e.g., hibernate-validator-cdi),
+    causing unsatisfied-dependency failures at startup.
+
+    Setting bean-discovery-mode="none" tells Weld to skip CDI scanning
+    entirely for this deployment, letting Spring Boot take full control.
+
+    Jakarta EE 10 / CDI 4.0 schema (WildFly 39+).
+-->
+<beans xmlns="https://jakarta.ee/xml/ns/jakartaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+           https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
+       version="4.0"
+       bean-discovery-mode="none">
+</beans>

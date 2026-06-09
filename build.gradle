@@ -17,6 +17,7 @@ plugins {
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.vaadin'
+apply plugin: 'war'
 
 jmix {
     bomVersion = '2.7.3'
@@ -126,6 +127,8 @@ dependencies {
     runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
+    runtimeOnly 'org.eclipse.persistence:org.eclipse.persistence.oracle'
+
     // test: Spring
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -141,6 +144,10 @@ dependencies {
 
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:oracle-free'
+    testImplementation 'org.testcontainers:mysql'
+    testImplementation 'org.testcontainers:mariadb'
+    testImplementation 'io.jmix.masquerade:jmix-masquerade'
 }
 
 configurations.implementation {
@@ -216,4 +223,71 @@ spotbugsTest {
     onlyIf {
         project.hasProperty('spotbugsEnabled')
     }
+}
+
+// ---------------------------------------------------------------------------
+// WAR artifact for WildFly deployment
+// Build with: ./gradlew -Pvaadin.productionMode=true bootWar
+// Output:     build/libs/flowset-control-community.war
+// ---------------------------------------------------------------------------
+bootWar {
+    archiveFileName = "flowset-control-community-${version}.war"
+
+    doLast {
+        def warFile = archiveFile.get().asFile
+        def tmpFile = new File(warFile.parentFile, warFile.name + ".stripped")
+        ant.zip(destfile: tmpFile.absolutePath) {
+            zipfileset(src: warFile.absolutePath) {
+                exclude(name: "org/springframework/boot/loader/**")
+
+                exclude(name: "META-INF/services/java.nio.file.spi.FileSystemProvider")
+
+                exclude(name: "WEB-INF/lib/tomcat-embed-*.jar")
+                exclude(name: "WEB-INF/lib/spring-boot-starter-tomcat-*.jar")
+            }
+        }
+        warFile.delete()
+        tmpFile.renameTo(warFile)
+        logger.lifecycle("Stripped Spring Boot Loader and embedded Tomcat from WAR (WildFly deployment).")
+    }
+}
+
+// ---------------------------------------------------------------------------
+// EclipseLink Static Weaving  (optional, advanced)
+//
+// Dynamic weaving is disabled in application-wildfly.properties because JBoss
+// Modules' classloader is incompatible with EclipseLink's instrumentation.
+// If you need static weaving for full lazy-loading support, do the following:
+//
+//   1. Create src/main/resources/META-INF/persistence.xml listing your entity
+//      packages (required by the EclipseLink weaver CLI tool).
+//   2. Uncomment the task below.
+//   3. Set eclipselink.weaving=static in application-wildfly.properties.
+//   4. Run: ./gradlew -Pvaadin.productionMode=true -PstaticWeave=true bootWar
+//
+// The task is guarded by the 'staticWeave' Gradle property so it does NOT
+// affect normal bootRun / bootJar / Docker builds.
+// ---------------------------------------------------------------------------
+if (project.hasProperty('staticWeave')) {
+    task eclipseLinkStaticWeave(dependsOn: 'compileJava') {
+        description = 'Runs EclipseLink static weaving on compiled entity classes.'
+        group = 'build'
+
+        doLast {
+            ant.taskdef(
+                name: 'weave',
+                classname: 'org.eclipse.persistence.tools.weaving.jpa.StaticWeaveAntTask',
+                classpath: configurations.runtimeClasspath.asPath
+            )
+            ant.weave(
+                source: layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath,
+                target: layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath,
+                persistenceinfo: layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath,
+                loglevel: 'INFO'
+            ) {}
+        }
+    }
+    classes.dependsOn eclipseLinkStaticWeave
+
+    logger.lifecycle('EclipseLink static weaving ENABLED (staticWeave property detected).')
 }
