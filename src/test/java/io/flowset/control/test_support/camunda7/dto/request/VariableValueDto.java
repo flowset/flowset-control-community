@@ -5,16 +5,34 @@
 
 package io.flowset.control.test_support.camunda7.dto.request;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@Accessors(chain = true)
 public class VariableValueDto {
     private String type;
     private Object value;
+    private ValueInfo valueInfo;
+
+    public VariableValueDto(String type, Object value) {
+        this.type = type;
+        this.value = value;
+    }
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class ValueInfo {
+        private String objectTypeName;
+        private String serializationDataFormat;
+
+        private String filename;
+        private String mimetype;
+        private String encoding;
+    }
 }

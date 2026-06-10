@@ -5,6 +5,7 @@
 
 package io.flowset.control.test_support.ui.view.variable;
 
+import com.codeborne.selenide.SelenideElement;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
@@ -13,6 +14,7 @@ import io.jmix.masquerade.component.TextField;
 import io.jmix.masquerade.sys.DialogWindow;
 import lombok.Getter;
 
+import static com.codeborne.selenide.Selenide.$;
 import static io.jmix.masquerade.JSelectors.byChained;
 import static io.jmix.masquerade.JSelectors.byUiTestId;
 import static io.jmix.masquerade.Masquerade.$j;
@@ -31,6 +33,12 @@ public class VariableInstanceDataDetailDialog extends DialogWindow<VariableInsta
     @TestComponent(path = "typeComboBox")
     private ComboBox typeComboBox;
 
+    @TestComponent(path = "objectTypeInfoField")
+    private TextField objectTypeInfoField;
+
+    @TestComponent(path = "serializationDataFormatField")
+    private TextField serializationDataFormatField;
+
     @TestComponent(path = "saveBtn")
     private Button saveBtn;
 
@@ -46,5 +54,12 @@ public class VariableInstanceDataDetailDialog extends DialogWindow<VariableInsta
      */
     public <T> T getValueComponentAs(Class<T> wrapperClass) {
         return $j(wrapperClass, byChained(getBy(), byUiTestId("valueForm"), byUiTestId("variableValueField")));
+    }
+
+    /**
+     * @return value component element
+     */
+    public SelenideElement getValueComponentElement() {
+        return $(byChained(getBy(), byUiTestId("valueForm"), byUiTestId("variableValueField")));
     }
 }

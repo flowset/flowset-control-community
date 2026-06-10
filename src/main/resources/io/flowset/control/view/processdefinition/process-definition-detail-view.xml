@@ -38,7 +38,7 @@
                                   classNames="pt-0"/>
                         <textField id="versionTagField" property="versionTag" dataContainer="processDefinitionDataDc" readOnly="true" label="msg://io.flowset.control.entity.processdefinition/ProcessDefinitionData.versionTag"
                                    classNames="pt-0"/>
-                        <vbox themeNames="spacing-xs" padding="false" width="auto" classNames="ml-auto p-xs">
+                        <vbox id="allRunningInstancesGroup" themeNames="spacing-xs" padding="false" width="auto" classNames="ml-auto p-xs">
                             <hbox padding="false" classNames="text-s" alignItems="CENTER"
                                   themeNames="spacing-xs">
                                 <icon icon="BOLT" classNames="text-s text-secondary icon-s" size="1em"/>

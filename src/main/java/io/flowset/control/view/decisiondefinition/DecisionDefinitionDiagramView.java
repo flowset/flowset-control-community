@@ -5,13 +5,11 @@
 
 package io.flowset.control.view.decisiondefinition;
 
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.DefaultMainViewParent;
 import io.jmix.flowui.view.DialogMode;
 import io.jmix.flowui.view.StandardView;
 import io.jmix.flowui.view.Subscribe;
@@ -20,7 +18,6 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "decision-definition-diagram", layout = DefaultMainViewParent.class)
 @ViewController("DecisionDefinitionDiagramView")
 @ViewDescriptor("decision-definition-diagram-view.xml")
 @DialogMode(width = "90%", height = "90%", minWidth = "40em", minHeight = "25em")

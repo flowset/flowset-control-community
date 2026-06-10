@@ -9,8 +9,17 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
-public class LazyTabContent extends Div {
+/**
+ * A root component for the tab content that lazily loads its content when it is attached to the UI.
+ */
+public class LazyTabContent extends Div implements ApplicationContextAware, InitializingBean {
+    protected ApplicationContext applicationContext;
+
     protected SerializableSupplier<? extends Component> supplier;
 
     public LazyTabContent(SerializableSupplier<? extends Component> supplier) {
@@ -31,5 +40,15 @@ public class LazyTabContent extends Div {
         if (getElement().getChildCount() == 0) {
             add(this.supplier.get());
         }
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

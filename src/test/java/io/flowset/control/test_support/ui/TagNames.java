@@ -22,4 +22,5 @@ public class TagNames {
     public static final By NOTIFICATION_CARD = tagName("vaadin-notification-card");
     public static final By VAADIN_TAB = By.tagName("vaadin-tab");
     public static final By VAADIN_BUTTON = By.tagName("vaadin-button");
+    public static final By JMIX_UPLOAD_BUTTON = By.tagName("jmix-upload-button");
 }

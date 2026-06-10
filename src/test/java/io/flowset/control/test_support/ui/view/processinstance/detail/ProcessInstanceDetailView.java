@@ -17,6 +17,7 @@ import lombok.Getter;
 import static io.jmix.masquerade.JConditions.SELECTED;
 import static io.jmix.masquerade.JConditions.VISIBLE;
 import static io.jmix.masquerade.Masquerade.$j;
+import static org.openqa.selenium.By.cssSelector;
 
 /**
  * Wrapper for the Process instance detail view.
@@ -39,223 +40,217 @@ public class ProcessInstanceDetailView extends View<ProcessInstanceDetailView> {
     private Button closeButton;
 
     /**
-     * Opens Runtime tab -> Variables tab.
-     * @return content of the opened Variables tab
+     * Opens Runtime tab.
+     *
+     * @return content of the opened Runtime tab
      */
-    public RuntimeVariablesTabFragment openRuntimeVariablesTab() {
+    public RuntimeTabFragment openRuntimeTab() {
         tabs.getTabById("runtimeTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(RuntimeVariablesTabFragment.class, "runtimeTabRoot")
+        return $j(RuntimeTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
+                .exists()
+                .shouldBe(VISIBLE);
+    }
+
+    /**
+     * Opens History tab.
+     *
+     * @return content of the opened History tab
+     */
+    public HistoryTabFragment openHistoryTab() {
+        tabs.getTabById("historyTab")
+                .select()
+                .shouldBe(VISIBLE)
+                .shouldBe(SELECTED);
+
+        return $j(HistoryTabFragment.class, cssSelector("div[role='tabpanel'][tab='historyTab']"))
+                .exists()
+                .shouldBe(VISIBLE);
+    }
+
+    /**
+     * Opens Runtime tab -> Variables tab.
+     *
+     * @return content of the opened Variables tab
+     */
+    public RuntimeVariablesTabFragment openRuntimeVariablesTab() {
+        openRuntimeTab();
+
+        return $j(RuntimeVariablesTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens Runtime tab -> User Tasks tab.
+     *
      * @return content of the opened User Tasks tab
      */
     public RuntimeUserTasksTabFragment openRuntimeUserTasksTab() {
-        tabs.getTabById("runtimeTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        RuntimeTabFragment runtimeTabFragment = openRuntimeTab();
 
-        $j(TabSheet.class, "runtimeTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        runtimeTabFragment.getTabsheet()
                 .getTabById("userTasksTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(RuntimeUserTasksTabFragment.class, "runtimeTabRoot")
+        return $j(RuntimeUserTasksTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens Runtime tab -> Jobs tab.
+     *
      * @return content of the opened Jobs tab
      */
     public JobsTabFragment openRuntimeJobsTab() {
-        tabs.getTabById("runtimeTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        RuntimeTabFragment runtimeTabFragment = openRuntimeTab();
 
-        $j(TabSheet.class, "runtimeTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        runtimeTabFragment.getTabsheet()
                 .getTabById("jobsTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(JobsTabFragment.class, "runtimeTabRoot")
+        return $j(JobsTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens Runtime tab -> External Tasks tab.
+     *
      * @return content of the opened External Tasks tab
      */
     public ExternalTasksTabFragment openRuntimeExternalTasksTab() {
-        tabs.getTabById("runtimeTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        RuntimeTabFragment runtimeTabFragment = openRuntimeTab();
 
-        $j(TabSheet.class, "runtimeTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        runtimeTabFragment.getTabsheet()
                 .getTabById("externalTasksTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(ExternalTasksTabFragment.class, "runtimeTabRoot")
+        return $j(ExternalTasksTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens History tab -> Activities tab.
+     *
      * @return content of the opened Activities tab
      */
     public HistoryActivitiesTabFragment openHistoryActivitiesTab() {
-        tabs.getTabById("historyTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        HistoryTabFragment historyTab = openHistoryTab();
 
-        $j(TabSheet.class, "historyTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        historyTab.getTabsheet()
                 .getTabById("historicActivityInstancesTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(HistoryActivitiesTabFragment.class, "historyTabsheet")
+        return $j(HistoryActivitiesTabFragment.class, "historyTabFragmentHistoryTabsheet")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens History tab -> Decisions tab.
+     *
      * @return content of the opened Decisions tab
      */
     public HistoryDecisionsTabFragment openHistoryDecisionsTab() {
-        tabs.getTabById("historyTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        HistoryTabFragment historyTab = openHistoryTab();
 
-        $j(TabSheet.class, "historyTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        historyTab.getTabsheet()
                 .getTabById("historyDecisionsTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(HistoryDecisionsTabFragment.class, "historyTabsheet")
+        return $j(HistoryDecisionsTabFragment.class, "historyTabFragmentHistoryTabsheet")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens History tab -> Incidents tab.
+     *
      * @return content of the opened Incidents tab
      */
     public HistoryIncidentsTabFragment openHistoryIncidentsTab() {
-        tabs.getTabById("historyTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        HistoryTabFragment historyTab = openHistoryTab();
 
-        $j(TabSheet.class, "historyTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        historyTab.getTabsheet()
                 .getTabById("historyIncidentsTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(HistoryIncidentsTabFragment.class, "historyTabsheet")
+        return $j(HistoryIncidentsTabFragment.class, "historyTabFragmentHistoryTabsheet")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens History tab -> Variables tab.
+     *
      * @return content of the opened Variables tab
      */
     public HistoryVariablesTabFragment openHistoryVariablesTab() {
-        tabs.getTabById("historyTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        HistoryTabFragment historyTab = openHistoryTab();
 
-        $j(TabSheet.class, "historyTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        historyTab.getTabsheet()
                 .getTabById("historyVariablesTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(HistoryVariablesTabFragment.class, "historyTabsheet")
+        return $j(HistoryVariablesTabFragment.class, "historyTabFragmentHistoryTabsheet")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens History tab -> User Tasks tab.
+     *
      * @return content of the opened User Tasks tab
      */
     public HistoryUserTasksTabFragment openHistoryUserTasksTab() {
-        tabs.getTabById("historyTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        HistoryTabFragment historyTab = openHistoryTab();
 
-        $j(TabSheet.class, "historyTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        historyTab.getTabsheet()
                 .getTabById("historyTasksTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(HistoryUserTasksTabFragment.class, "historyTabsheet")
+        return $j(HistoryUserTasksTabFragment.class, "historyTabFragmentHistoryTabsheet")
                 .exists()
                 .shouldBe(VISIBLE);
     }
 
     /**
      * Opens Runtime tab -> Incidents tab.
+     *
      * @return content of the opened Incidents tab
      */
     public RuntimeIncidentsTabFragment openRuntimeIncidentsTab() {
-        tabs.getTabById("runtimeTab")
-                .select()
-                .shouldBe(VISIBLE)
-                .shouldBe(SELECTED);
+        RuntimeTabFragment runtimeTabFragment = openRuntimeTab();
 
-        $j(TabSheet.class, "runtimeTabsheet")
-                .exists()
-                .shouldBe(VISIBLE)
+        runtimeTabFragment.getTabsheet()
                 .getTabById("incidentsTab")
                 .select()
                 .shouldBe(VISIBLE)
                 .shouldBe(SELECTED);
 
-        return $j(RuntimeIncidentsTabFragment.class, "runtimeTabRoot")
+        return $j(RuntimeIncidentsTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
                 .exists()
                 .shouldBe(VISIBLE);
     }

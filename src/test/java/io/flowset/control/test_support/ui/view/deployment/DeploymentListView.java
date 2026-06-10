@@ -7,6 +7,7 @@ package io.flowset.control.test_support.ui.view.deployment;
 
 import io.flowset.control.test_support.ui.UiTestSupport;
 import io.flowset.control.test_support.ui.component.GridContextMenu;
+import io.flowset.control.test_support.ui.component.SimplePagination;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
@@ -58,6 +59,9 @@ public class DeploymentListView extends View<DeploymentListView> {
 
     @TestComponent(path = "bulkRemoveBtn")
     private Button bulkRemoveBtn;
+
+    @TestComponent(path = "pagination")
+    private SimplePagination pagination;
 
     @TestComponent(path = "deploymentsDataGrid")
     private DataGrid deploymentsDataGrid;

@@ -26,8 +26,8 @@
             />
         </formLayout>
 
-        <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
-            <h4 text="msg://incidentsHeader.text"/>
+        <vbox id="incidentsGroup" height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
+            <h4 id="incidentsHeader" text="msg://incidentsHeader.text"/>
             <hbox classNames="buttons-panel" padding="false">
                 <simplePagination id="incidentsPagination" dataLoader="incidentsDl"/>
             </hbox>

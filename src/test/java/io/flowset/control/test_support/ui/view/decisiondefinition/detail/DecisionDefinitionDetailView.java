@@ -8,7 +8,10 @@ package io.flowset.control.test_support.ui.view.decisiondefinition.detail;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.CodeEditor;
+import io.jmix.masquerade.component.ComboBox;
 import io.jmix.masquerade.component.TabSheet;
+import io.jmix.masquerade.component.Unknown;
 import io.jmix.masquerade.sys.View;
 import lombok.Getter;
 
@@ -29,6 +32,15 @@ public class DecisionDefinitionDetailView extends View<DecisionDefinitionDetailV
 
     @TestComponent(path = "tabSheet")
     private TabSheet tabs;
+
+    @TestComponent(path = "versionComboBox")
+    private ComboBox versionComboBox;
+
+    @TestComponent(path = "dmnXmlEditor")
+    private CodeEditor dmnXmlEditor;
+
+    @TestComponent(path = "diagramBox")
+    private Unknown diagramBox;
 
     @TestComponent(path = "closeButton")
     private Button closeButton;

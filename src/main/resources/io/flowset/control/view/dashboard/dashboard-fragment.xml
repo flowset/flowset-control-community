@@ -57,7 +57,7 @@
                     <vbox width="auto" height="auto" alignItems="BASELINE" justifyContent="CENTER"
                           classNames="bordered-card p-l bg-base">
                         <h4 text="msg://noEngines" classNames="text-secondary mx-auto"/>
-                        <h5 text="msg://addFirstEngine" classNames="text-tertiary mx-auto"/>
+                        <h5 id="setupFirstConnectionText" text="msg://addFirstEngine" classNames="text-tertiary mx-auto"/>
                         <button id="createBpmEngineBtn" themeNames="primary" classNames="mx-auto"
                                 action="createBpmEngineAction"/>
                     </vbox>

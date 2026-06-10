@@ -9,7 +9,6 @@ package io.flowset.control.view.incidentsstatistics;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
-import com.vaadin.flow.router.Route;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -19,7 +18,6 @@ import io.jmix.flowui.view.*;
 import java.util.Collections;
 import java.util.List;
 
-@Route(value = "incidents-statistics", layout = DefaultMainViewParent.class)
 @ViewController("IncidentsStatisticsView")
 @ViewDescriptor("incidents-statistics-view.xml")
 @DialogMode(width = "37em", maxHeight = "30em")

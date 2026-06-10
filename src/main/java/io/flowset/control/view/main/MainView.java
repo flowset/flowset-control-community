@@ -239,6 +239,7 @@ public class MainView extends StandardMainView {
         boolean engineStatusFragmentExists = header.getChildren().anyMatch(component -> component instanceof EngineStatusBadgeFragment);
         if (!engineStatusFragmentExists) {
             this.engineStatusFragment = fragments.create(this, EngineStatusBadgeFragment.class);
+            this.engineStatusFragment.setId("engineStatusFragment");
             header.add(engineStatusFragment);
         }
     }

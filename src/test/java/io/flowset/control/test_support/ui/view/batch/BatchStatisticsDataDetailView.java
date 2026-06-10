@@ -5,13 +5,19 @@
 
 package io.flowset.control.test_support.ui.view.batch;
 
+import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.sys.View;
+import lombok.Getter;
 
 /**
  * Wrapper for the Batch statistics detail view opened by route.
  * Source view: {@link io.flowset.control.view.batch.BatchStatisticsDetailView}
  */
+@Getter
 @TestView(id = "BatchStatisticsData.detail")
 public class BatchStatisticsDataDetailView extends View<BatchStatisticsDataDetailView> {
+
+    @TestComponent(path = "statisticsBox")
+    private BatchJobsFragment jobsFragment;
 }

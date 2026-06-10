@@ -22,18 +22,18 @@
     </data>
     <layout expand="box" padding="false" spacing="false">
         <hbox id="box" width="100%" spacing="false">
-            <split id="rootBox" orientation="VERTICAL" splitterPosition="50" themeNames="splitter-spacing" width="100%">
+            <split id="rootSplitBox" orientation="VERTICAL" splitterPosition="50" themeNames="splitter-spacing" width="100%">
                 <hbox id="diagramBox" height="auto" classNames="process-instance-details-diagram-box">
                     <fragment id="viewerFragment" class="io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment"/>
                     <vbox visible="false" id="emptyDiagramBox" padding="false" width="100%" height="100%" alignItems="CENTER" justifyContent="CENTER">
                         <h3 text="msg://diagramNotFound" classNames="text-secondary"/>
                     </vbox>
                 </hbox>
-                <div classNames="p-xs">
+                <div id="tabsBox" classNames="p-xs">
                     <tabSheet id="relatedEntitiesTabSheet" height="100%" width="100%" minHeight="30em">
                         <tab id="runtimeTab" label="msg://runtimeTabCaption">
-                            <vbox width="100%" height="100%" padding="false">
-                                <fragment class="io.flowset.control.view.processinstance.runtime.RuntimeTabFragment"/>
+                            <vbox id="runtimeTabContent" width="100%" height="100%" padding="false">
+                                <fragment id="runtimeTabFragment" class="io.flowset.control.view.processinstance.runtime.RuntimeTabFragment"/>
                             </vbox>
                         </tab>
                     </tabSheet>

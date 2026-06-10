@@ -44,7 +44,7 @@ public class MainView extends View<MainView> {
     @TestComponent(path = "menu")
     private ListMenu listMenu;
 
-    @TestComponent(path = "engineStatusRootBox")
+    @TestComponent(path = "engineStatusFragmentEngineStatusRootBox")
     private EngineStatusBadgeFragment engineStatusBadge;
 
     @TestComponent(path = "dashboardFragmentDashboardRootBox")

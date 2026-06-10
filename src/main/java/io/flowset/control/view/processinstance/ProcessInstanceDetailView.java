@@ -132,8 +132,13 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
         historyTab.setId(HISTORY_TAB_ID);
         historyTab.setLabel(messageBundle.getMessage("historyTabCaption"));
         historyTab.addComponentAsFirst(VaadinIcon.TIME_BACKWARD.create());
-        relatedEntitiesTabSheet.add(historyTab,
-                new LazyTabContent(() -> fragments.create(this, HistoryTabFragment.class)), HISTORY_TAB_IDX);
+        LazyTabContent historyTabContent = componentHelper.createLazyTabContent(() -> {
+            HistoryTabFragment historyTabFragment = fragments.create(this, HistoryTabFragment.class);
+            historyTabFragment.setId("historyTabFragment");
+            return historyTabFragment;
+        });
+        historyTabContent.setId("historyTabContent");
+        relatedEntitiesTabSheet.add(historyTab, historyTabContent, HISTORY_TAB_IDX);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")

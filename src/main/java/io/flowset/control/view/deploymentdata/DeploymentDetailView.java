@@ -161,11 +161,11 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
             showBpmn(deploymentResourceData);
         } else if (DMN_PATTERN.matcher(resourceName).matches()) {
             showDmn(deploymentResourceData);
-        }  else if (FORM_PATTERN.matcher(resourceName).matches()) {
+        } else if (FORM_PATTERN.matcher(resourceName).matches()) {
             showForm(deploymentResourceData);
-        }  else if (IMAGE_PATTERN.matcher(resourceName).matches()) {
+        } else if (IMAGE_PATTERN.matcher(resourceName).matches()) {
             showImage(deploymentResourceData);
-        }  else if (HTML_PATTERN.matcher(resourceName).matches()) {
+        } else if (HTML_PATTERN.matcher(resourceName).matches()) {
             showHtml(deploymentResourceData);
         } else {
             showUnsupportedResource(deploymentResourceData);
@@ -208,7 +208,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
         String textContent = getTextContent(deploymentResourceData);
 
-        createTab(resourceTabSheet, VaadinIcon.EYE.create(), sourceTabLabel,
+        createTab(resourceTabSheet, "viewTab", VaadinIcon.EYE.create(), sourceTabLabel,
                 createCodeEditor(textContent, CodeEditorMode.TEXT));
     }
 
@@ -218,8 +218,10 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
         byte[] byteArrayContent = getByteArrayContent(deploymentResourceData);
         String textContent = getTextContent(deploymentResourceData);
 
-        createTab(resourceTabSheet, VaadinIcon.EYE.create(), viewTabLabel, createHtmlViewer(byteArrayContent));
-        createTab(resourceTabSheet, VaadinIcon.FILE_CODE.create(), sourceTabLabel,
+        createTab(resourceTabSheet, "viewTab",
+                VaadinIcon.EYE.create(), viewTabLabel, createHtmlViewer(byteArrayContent));
+        createTab(resourceTabSheet, "contentTab",
+                VaadinIcon.FILE_CODE.create(), sourceTabLabel,
                 createCodeEditor(textContent, CodeEditorMode.HTML));
     }
 
@@ -243,7 +245,8 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
         byte[] byteArrayContent = getByteArrayContent(deploymentResourceData);
 
-        createTab(resourceTabSheet, VaadinIcon.PICTURE.create(), viewTabLabel, createImageViewer(
+        createTab(resourceTabSheet, "viewTab",
+                VaadinIcon.PICTURE.create(), viewTabLabel, createImageViewer(
                 deploymentResourceData.getFilename(), byteArrayContent));
     }
 
@@ -263,8 +266,8 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
         String textContent = getTextContent(deploymentResourceData);
 
-        createTab(resourceTabSheet, VaadinIcon.EYE.create(), viewTabLabel, createFormViewer(textContent));
-        createTab(resourceTabSheet, VaadinIcon.FILE_CODE.create(), sourceTabLabel,
+        createTab(resourceTabSheet, "viewTab", VaadinIcon.EYE.create(), viewTabLabel, createFormViewer(textContent));
+        createTab(resourceTabSheet, "contentTab", VaadinIcon.FILE_CODE.create(), sourceTabLabel,
                 createCodeEditor(textContent, CodeEditorMode.XML));
     }
 
@@ -273,8 +276,8 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
         String textContent = getTextContent(deploymentResourceData);
 
-        createTab(resourceTabSheet, VaadinIcon.SITEMAP.create(), viewTabLabel, createDmnViewer(textContent));
-        createTab(resourceTabSheet, VaadinIcon.FILE_CODE.create(), sourceTabLabel,
+        createTab(resourceTabSheet, "viewTab", VaadinIcon.SITEMAP.create(), viewTabLabel, createDmnViewer(textContent));
+        createTab(resourceTabSheet, "contentTab", VaadinIcon.FILE_CODE.create(), sourceTabLabel,
                 createCodeEditor(textContent, CodeEditorMode.XML));
     }
 
@@ -283,15 +286,18 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
         String textContent = getTextContent(deploymentResourceData);
 
-        createTab(resourceTabSheet, VaadinIcon.SITEMAP.create(), viewTabLabel, createBpmnViewer(textContent));
-        createTab(resourceTabSheet, VaadinIcon.FILE_CODE.create(), sourceTabLabel,
+        createTab(resourceTabSheet, "viewTab", VaadinIcon.SITEMAP.create(), viewTabLabel, createBpmnViewer(textContent));
+        createTab(resourceTabSheet, "contentTab", VaadinIcon.FILE_CODE.create(), sourceTabLabel,
                 createCodeEditor(textContent, CodeEditorMode.XML));
-        createTab(resourceTabSheet, VaadinIcon.HOURGLASS.create(), runningInstancesTabLabel,
+
+        createTab(resourceTabSheet, "runningInstancesTab", VaadinIcon.HOURGLASS.create(), runningInstancesTabLabel,
                 createProcessDefinitionViewer());
     }
 
-    private void createTab(JmixTabSheet parent, Icon icon, String tabLabel, Component tabComponent) {
+    private void createTab(JmixTabSheet parent, String tabId,
+                           Icon icon, String tabLabel, Component tabComponent) {
         Tab tab = uiComponents.create(Tab.class);
+        tab.setId(tabId);
         tab.setLabel(tabLabel);
         tab.addComponentAsFirst(icon);
         parent.add(tab, tabComponent);
@@ -319,6 +325,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
         });
 
         JmixGrid<DeploymentProcessInstancesInfo> grid = uiComponents.create(JmixGrid.class);
+        grid.setId("processGrid");
         grid.setWidth("100%");
         grid.setHeight("100%");
 
@@ -360,6 +367,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
     private Component createBpmnViewer(String xmlData) {
         BpmnViewerFragment bpmnViewerFragment = fragments.create(this, BpmnViewerFragment.class);
+        bpmnViewerFragment.setId("viewerFragment");
         bpmnViewerFragment.initViewer(xmlData);
 
         return bpmnViewerFragment;
@@ -367,6 +375,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
     private Component createDmnViewer(String xmlData) {
         DmnViewerFragment dmnViewerFragment = fragments.create(this, DmnViewerFragment.class);
+        dmnViewerFragment.setId("dmnViewerFragment");
         dmnViewerFragment.initViewer();
         dmnViewerFragment.setDmnXml(xmlData);
 
@@ -375,6 +384,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
     private Component createFormViewer(String jsonData) {
         FormViewerFragment formViewerFragment = fragments.create(this, FormViewerFragment.class);
+        formViewerFragment.setId("formViewerFragment");
         formViewerFragment.initViewer(jsonData);
 
         return formViewerFragment;
@@ -382,6 +392,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
 
     private Component createCodeEditor(String codeEditorData, CodeEditorMode codeEditorMode) {
         JmixCodeEditor codeEditor = uiComponents.create(JmixCodeEditor.class);
+        codeEditor.setId("contentCodeEditor");
         codeEditor.setMode(codeEditorMode);
         codeEditor.getStyle().set("padding", "0");
         codeEditor.setWidth("100%");

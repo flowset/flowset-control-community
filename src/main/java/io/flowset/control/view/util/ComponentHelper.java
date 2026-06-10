@@ -16,10 +16,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.flowset.control.view.processinstance.LazyTabContent;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.core.security.CurrentAuthentication;
@@ -245,6 +247,19 @@ public class ComponentHelper {
                 child.getStyle().setWhiteSpace(Style.WhiteSpace.PRE_WRAP);
             }
         }
+    }
+
+    /**
+     * Creates a new {@link LazyTabContent} instance with autowired application context.
+     *
+     * @param supplier tab content provider
+     * @return instance of tab content
+     */
+    public LazyTabContent createLazyTabContent(SerializableSupplier<? extends com.vaadin.flow.component.Component> supplier) {
+        LazyTabContent tabContent = new LazyTabContent(supplier);
+        BeanUtil.autowireContext(applicationContext, tabContent);
+
+        return tabContent;
     }
 
     @Nullable

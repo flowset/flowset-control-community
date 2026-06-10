@@ -5,6 +5,7 @@
 
 package io.flowset.control.test_support.ui.view.processinstance.detail.tab;
 
+import io.flowset.control.test_support.ui.component.SimplePagination;
 import io.flowset.control.test_support.ui.component.GridContextMenu;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.component.DataGrid;
@@ -35,6 +36,9 @@ public class HistoryActivitiesTabFragment extends Composite<HistoryActivitiesTab
 
     @TestComponent(path = "historicActivityInstancesGrid")
     private DataGrid historicActivityInstancesGrid;
+
+    @TestComponent(path = "historicActivityInstancesPagination")
+    private SimplePagination pagination;
 
     /**
      * Finds the row in the grid for an activity related to the specified activity identifier.

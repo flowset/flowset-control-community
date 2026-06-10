@@ -42,8 +42,8 @@ public class BpmEngineListActionsFragment extends FragmentRenderer<HorizontalLay
 
         if (BooleanUtils.isNotTrue(item.getIsDefault())) {
             markAsDefaultBtn.setVisible(true);
-            markAsDefaultAction.setEngine(item);
-            markAsDefaultAction.setAfterSaveHandler(bpmEnginesDl::load);
         }
+        markAsDefaultAction.setEngine(item);
+        markAsDefaultAction.setAfterSaveHandler(bpmEnginesDl::load);
     }
 }

@@ -63,7 +63,7 @@
                     <textField id="createUserIdField" property="createUserId" readOnly="true" classNames="pt-s"/>
                 </formLayout>
             </div>
-            <vbox width="100%" minHeight="20em" themeNames="spacing-s" padding="false">
+            <vbox id="statisticsBox" width="100%" minHeight="20em" themeNames="spacing-s" padding="false">
                 <fragment id="jobsFragment" class="io.flowset.control.view.batch.jobstatistics.BatchJobStatisticsFragment"/>
             </vbox>
         </split>

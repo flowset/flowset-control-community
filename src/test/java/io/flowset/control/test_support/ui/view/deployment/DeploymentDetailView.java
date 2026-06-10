@@ -14,6 +14,8 @@ import lombok.Getter;
 
 import static com.codeborne.selenide.Condition.*;
 import static io.flowset.control.test_support.ui.UiTestSupport.getRowByCellContent;
+import static io.jmix.masquerade.JConditions.SELECTED;
+import static io.jmix.masquerade.JConditions.VISIBLE;
 
 /**
  * Wrapper for the Deployment detail view.
@@ -42,6 +44,9 @@ public class DeploymentDetailView extends View<DeploymentDetailView> {
 
     @TestComponent(path = "resourceTabSheet")
     private TabSheet resourceTabSheet;
+
+    @TestComponent(path = "contentCodeEditor")
+    private CodeEditor contentCodeEditor;
 
     @TestComponent(path = "downloadResourceButton")
     private Button downloadResourceButton;
@@ -75,6 +80,19 @@ public class DeploymentDetailView extends View<DeploymentDetailView> {
                 .$$(TagNames.VAADIN_TAB)
                 .findBy(text("Running instances"))
                 .click();
+        return this;
+    }
+
+    /**
+     * Selects the "Content" tab in the tab sheet for the selected resource.
+     *
+     * @return current view
+     */
+    public DeploymentDetailView selectContentTab() {
+        resourceTabSheet.getTabById("contentTab")
+                .select()
+                .shouldBe(VISIBLE)
+                .shouldBe(SELECTED);
         return this;
     }
 

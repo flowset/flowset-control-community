@@ -10,8 +10,10 @@ import io.flowset.control.test_support.ui.component.GridContextMenu;
 import io.flowset.control.test_support.ui.view.decisiondefinition.detail.DecisionDefinitionDetailView;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
+import io.jmix.masquerade.component.Checkbox;
 import io.jmix.masquerade.component.Button;
 import io.jmix.masquerade.component.DataGrid;
+import io.jmix.masquerade.component.TextField;
 import io.jmix.masquerade.sys.View;
 import lombok.Getter;
 import org.openqa.selenium.By;
@@ -43,6 +45,21 @@ public class DecisionDefinitionListView extends View<DecisionDefinitionListView>
 
     @TestComponent(path = "decisionDefinitionsGrid")
     private DataGrid decisionDefinitionsGrid;
+
+    @TestComponent(path = "nameField")
+    private TextField nameField;
+
+    @TestComponent(path = "keyField")
+    private TextField keyField;
+
+    @TestComponent(path = "lastVersionOnlyCb")
+    private Checkbox lastVersionOnlyCheckbox;
+
+    @TestComponent(path = "applyFilterBtn")
+    private Button applyFilterBtn;
+
+    @TestComponent(path = "clearBtn")
+    private Button clearBtn;
 
     /**
      * Waits until the data is loaded in the data grid.

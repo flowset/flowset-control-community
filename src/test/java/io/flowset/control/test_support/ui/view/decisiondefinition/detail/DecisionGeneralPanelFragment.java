@@ -7,6 +7,7 @@ package io.flowset.control.test_support.ui.view.decisiondefinition.detail;
 
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.Details;
 import io.jmix.masquerade.component.TextField;
 import io.jmix.masquerade.sys.Composite;
 import lombok.Getter;
@@ -41,4 +42,7 @@ public class DecisionGeneralPanelFragment extends Composite<DecisionGeneralPanel
 
     @TestComponent(path = "generalPanelDeploymentIdField")
     private TextField deploymentIdField;
+
+    @TestComponent(path = "generalPanelDeploymentGroup")
+    private Details deploymentGroup;
 }

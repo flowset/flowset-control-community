@@ -8,6 +8,7 @@ package io.flowset.control.test_support.ui.view.processdefinition.detail;
 import io.flowset.control.test_support.ui.component.BpmnViewerFragment;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
+import io.jmix.masquerade.component.CodeEditor;
 import io.jmix.masquerade.component.ComboBox;
 import io.jmix.masquerade.component.TabSheet;
 import io.jmix.masquerade.component.Unknown;
@@ -26,6 +27,9 @@ import static io.jmix.masquerade.Masquerade.$j;
 @TestView(id = "bpm_ProcessDefinition.detail")
 public class ProcessDefinitionDetailView extends View<ProcessDefinitionDetailView> {
 
+    @TestComponent(path = "allRunningInstancesGroup")
+    private Unknown allRunningInstancesGroup;
+
     @TestComponent(path = "allVersionsInstancesCountSpan")
     private Unknown allVersionsInstancesCountValue;
 
@@ -40,6 +44,9 @@ public class ProcessDefinitionDetailView extends View<ProcessDefinitionDetailVie
 
     @TestComponent(path = "versionComboBox")
     private ComboBox versionComboBox;
+
+    @TestComponent(path = "bpmnXmlEditor")
+    private CodeEditor bpmnXmlEditor;
 
 
     /**

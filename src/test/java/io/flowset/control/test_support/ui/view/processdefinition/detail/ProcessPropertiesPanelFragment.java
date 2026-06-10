@@ -35,6 +35,9 @@ public class ProcessPropertiesPanelFragment extends Composite<ProcessPropertiesP
     @TestComponent(path = "generalPanelDescriptionField")
     private TextArea descriptionField;
 
+    @TestComponent(path = "generalPanelDeploymentGroup")
+    private Unknown deploymentGroup;
+
     @TestComponent(path = "generalPanelDeploymentIdField")
     private TextField deploymentIdField;
 

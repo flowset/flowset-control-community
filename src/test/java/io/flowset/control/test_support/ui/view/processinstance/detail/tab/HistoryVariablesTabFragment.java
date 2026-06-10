@@ -6,6 +6,7 @@
 package io.flowset.control.test_support.ui.view.processinstance.detail.tab;
 
 import io.flowset.control.test_support.ui.component.GridContextMenu;
+import io.flowset.control.test_support.ui.component.SimplePagination;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.component.DataGrid;
 import io.jmix.masquerade.sys.Composite;
@@ -33,6 +34,9 @@ public class HistoryVariablesTabFragment extends Composite<HistoryVariablesTabFr
 
     @TestComponent(path = "historicVariableInstancesGrid")
     private DataGrid historicVariableInstancesGrid;
+
+    @TestComponent(path = "historicVariableInstancesPagination")
+    private SimplePagination pagination;
 
     /**
      * Finds the row in the grid for a variable related to the specified variable name.

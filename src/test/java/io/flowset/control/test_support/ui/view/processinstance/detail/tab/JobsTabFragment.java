@@ -6,6 +6,7 @@
 package io.flowset.control.test_support.ui.view.processinstance.detail.tab;
 
 import io.flowset.control.test_support.ui.component.GridContextMenu;
+import io.flowset.control.test_support.ui.component.SimplePagination;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.component.Button;
 import io.jmix.masquerade.component.DataGrid;
@@ -45,6 +46,9 @@ public class JobsTabFragment extends Composite<JobsTabFragment> {
 
     @TestComponent(path = "runtimeJobsGrid")
     private DataGrid runtimeJobsGrid;
+
+    @TestComponent(path = "jobsPagination")
+    private SimplePagination pagination;
 
     /**
      * Finds the row for a job related to the specified failed activity in the grid.

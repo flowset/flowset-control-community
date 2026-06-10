@@ -6,6 +6,7 @@
 package io.flowset.control.test_support.ui.view.processinstance.detail.tab;
 
 import io.flowset.control.test_support.ui.component.GridContextMenu;
+import io.flowset.control.test_support.ui.component.SimplePagination;
 import io.flowset.control.test_support.ui.view.usertask.UserTaskDataDetailDialog;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.component.DataGrid;
@@ -38,6 +39,9 @@ public class HistoryUserTasksTabFragment extends Composite<HistoryUserTasksTabFr
 
     @TestComponent(path = "historyTasksGrid")
     private DataGrid historyTasksGrid;
+
+    @TestComponent(path = "userTasksPagination")
+    private SimplePagination pagination;
 
 
     /**

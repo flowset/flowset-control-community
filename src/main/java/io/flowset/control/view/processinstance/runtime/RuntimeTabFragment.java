@@ -16,6 +16,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -42,14 +43,12 @@ import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import io.flowset.control.entity.variable.ObjectTypeInfo;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.entity.variable.VariableValueInfo;
-import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.JobService;
 import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.service.variable.VariableLoadContext;
 import io.flowset.control.service.variable.VariableService;
-import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
 import io.flowset.control.view.processvariable.VariableInstanceDataDetail;
 import org.apache.commons.lang3.StringUtils;
@@ -97,6 +96,8 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     private Dialogs dialogs;
     @Autowired
     private Messages messages;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
 
     @ViewComponent
@@ -150,7 +151,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
 
     protected void initIncidentsTab() {
         Tab incidentsTab = createTab(INCIDENTS_TAB_ID, "incidentsTabCaption", VaadinIcon.WARNING);
-        runtimeTabsheet.add(incidentsTab, new LazyTabContent(this::createIncidentsFragment), INCIDENTS_TAB_IDX);
+        runtimeTabsheet.add(incidentsTab, componentHelper.createLazyTabContent(this::createIncidentsFragment), INCIDENTS_TAB_IDX);
     }
 
     @Subscribe("runtimeTabsheet")
@@ -435,19 +436,22 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initUserTasksTab() {
         Tab userTasksTab = createTab(USER_TASKS_TAB_ID, "tasksTabCaption", VaadinIcon.USER_CARD);
-        runtimeTabsheet.add(userTasksTab, new LazyTabContent(this::createUserTasksFragment), USER_TASKS_TAB_IDX);
+        runtimeTabsheet.add(userTasksTab, componentHelper.createLazyTabContent(this::createUserTasksFragment),
+                USER_TASKS_TAB_IDX);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initJobsTab() {
         Tab jobsTab = createTab(JOBS_TAB_ID, "jobsTabCaption", VaadinIcon.COGS);
-        runtimeTabsheet.add(jobsTab, new LazyTabContent(() -> fragments.create(getParentController(), JobsTabFragment.class)), JOBS_TAB_IDX);
+        runtimeTabsheet.add(jobsTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), JobsTabFragment.class)), JOBS_TAB_IDX);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initExternalTasksTab() {
         Tab externalTasksTab = createTab(EXTERNAL_TASKS_TAB_ID, "externalTasksTabCaption", VaadinIcon.CLUSTER);
-        runtimeTabsheet.add(externalTasksTab, new LazyTabContent(() -> fragments.create(getParentController(), ExternalTasksTabFragment.class)), EXTERNAL_TASKS_TAB_IDX);
+        runtimeTabsheet.add(externalTasksTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), ExternalTasksTabFragment.class)), EXTERNAL_TASKS_TAB_IDX);
     }
 
     protected void updateUserTasksTabCaption(long userTasksCount) {

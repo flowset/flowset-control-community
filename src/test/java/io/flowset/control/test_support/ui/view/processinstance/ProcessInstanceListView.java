@@ -34,6 +34,7 @@ public class ProcessInstanceListView extends View<ProcessInstanceListView> {
 
     public static final By ID_BUTTON_BY = byPath("root", "idBtn");
     public static final By PROCESS_BUTTON_BY = byPath("root", "idBtn");
+    public static final By VIEW_TERMINATE_REASON_BUTTON_BY = byPath("root", "viewTerminateReasonBtn");
 
     public static final int ID_COLUMN_INDEX = 1;
     public static final int PROCESS_COLUMN_INDEX = 2;

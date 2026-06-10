@@ -31,10 +31,10 @@ public class EngineStatusBadgeFragment extends Composite<EngineStatusBadgeFragme
     public static final By POPOVER_CONTENT_BY = byChained(ENGINE_POPOVER_BY,
             className("engine-popover-content"));
 
-    @TestComponent(path = "connectionStatusText")
+    @TestComponent(path = "engineStatusFragmentConnectionStatusText")
     private Unknown connectionStatusText;
 
-    @TestComponent(path = "viewEngineConfigBtn")
+    @TestComponent(path = "engineStatusFragmentViewEngineConfigBtn")
     private Button viewEngineConfigBtn;
 
     public SelectEnginePopoverContent openSelectEnginePopover() {
