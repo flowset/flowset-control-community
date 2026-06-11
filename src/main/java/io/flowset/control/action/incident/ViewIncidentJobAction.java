@@ -27,7 +27,6 @@ public class ViewIncidentJobAction extends SecuredBaseAction implements Executab
 
     public static final String ID = "control_viewIncidentJob";
 
-    protected SecuritySupport securitySupport;
     protected boolean visibleByActionUiPermission;
     protected JobService jobService;
     protected DialogWindows dialogWindows;
@@ -46,7 +45,6 @@ public class ViewIncidentJobAction extends SecuredBaseAction implements Executab
 
     @Autowired
     public void setSecuritySupport(SecuritySupport securitySupport) {
-        this.securitySupport = securitySupport;
         visibleByActionUiPermission = securitySupport.isEntityViewPermitted(JobData.class);
     }
 

@@ -25,7 +25,6 @@ public class ActivateProcessInstanceAction extends SecuredBaseAction implements 
     public static final String ID = "control_activateProcessInstance";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected ProcessInstanceData processInstanceData;
     protected Runnable afterSaveHandler;
@@ -55,7 +54,6 @@ public class ActivateProcessInstanceAction extends SecuredBaseAction implements 
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.description = messages.getMessage("actions.Activate");
     }
 

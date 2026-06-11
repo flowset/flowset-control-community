@@ -26,7 +26,6 @@ public class ActivateProcessDefinitionAction extends SecuredBaseAction implement
     public static final String ID = "control_activateProcessDefinition";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected String processDefinitionId;
     protected ProcessDefinitionData processDefinitionData;
@@ -57,7 +56,6 @@ public class ActivateProcessDefinitionAction extends SecuredBaseAction implement
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.description = messages.getMessage("actions.Activate");
     }
 

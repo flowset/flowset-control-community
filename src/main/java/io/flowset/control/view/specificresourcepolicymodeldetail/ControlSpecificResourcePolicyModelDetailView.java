@@ -59,6 +59,7 @@ public class ControlSpecificResourcePolicyModelDetailView extends SpecificResour
                 case "engine" -> entityClass = BpmEngine.class;
                 case "processInstance" -> entityClass = ProcessInstanceData.class;
                 case "decisionDefinition" -> entityClass = DecisionDefinitionData.class;
+                default -> {}
             }
 
             if (entityClass != null) {

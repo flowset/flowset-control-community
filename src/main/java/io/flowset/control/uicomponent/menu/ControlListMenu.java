@@ -121,5 +121,16 @@ public class ControlListMenu extends JmixListMenu {
             childrenItems = List.of(menuItems);
             return this;
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            // no fields to test
+            return super.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
     }
 }

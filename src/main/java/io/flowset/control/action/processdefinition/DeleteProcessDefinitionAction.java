@@ -25,7 +25,6 @@ public class DeleteProcessDefinitionAction extends SecuredBaseAction implements 
     public static final String ID = "control_deleteProcessDefinition";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected String processDefinitionId;
     protected Runnable afterSaveHandler;
@@ -52,7 +51,6 @@ public class DeleteProcessDefinitionAction extends SecuredBaseAction implements 
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.description = messages.getMessage("actions.Remove");
     }
 

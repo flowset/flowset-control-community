@@ -26,7 +26,6 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public abstract class ViewEntityDetailAction extends SecuredBaseAction {
 
     protected ViewNavigators viewNavigators;
-    protected SecuritySupport securitySupport;
     protected final Class<?> entityClass;
 
     protected String entityId;
@@ -52,8 +51,6 @@ public abstract class ViewEntityDetailAction extends SecuredBaseAction {
 
     @Autowired
     public void setSecuritySupport(SecuritySupport securitySupport) {
-        this.securitySupport = securitySupport;
-
         visibleByActionUiPermission = securitySupport.isEntityViewPermitted(entityClass);
     }
 

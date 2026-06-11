@@ -25,7 +25,6 @@ public class SuspendProcessInstanceAction extends SecuredBaseAction implements E
     public static final String ID = "control_suspendProcessInstance";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected ProcessInstanceData processInstanceData;
     protected Runnable afterSaveHandler;
@@ -55,7 +54,6 @@ public class SuspendProcessInstanceAction extends SecuredBaseAction implements E
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.description = messages.getMessage("actions.Suspend");
     }
 

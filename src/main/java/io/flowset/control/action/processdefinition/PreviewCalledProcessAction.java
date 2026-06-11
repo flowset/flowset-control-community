@@ -20,7 +20,6 @@ public class PreviewCalledProcessAction extends SecuredBaseAction implements Exe
 
     public static final String ID = "control_previewCalledProcess";
 
-    protected SecuritySupport securitySupport;
     protected CallActivityOverlayClickHandler callActivityClickHandler;
 
     protected ProcessDefinitionData processDefinitionData;
@@ -38,7 +37,6 @@ public class PreviewCalledProcessAction extends SecuredBaseAction implements Exe
 
     @Autowired
     public void setSecuritySupport(SecuritySupport securitySupport) {
-        this.securitySupport = securitySupport;
         visibleByActionUiPermission = securitySupport.isEntityViewPermitted(ProcessDefinitionData.class);
     }
 

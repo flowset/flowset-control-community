@@ -27,7 +27,6 @@ public class ViewIncidentExternalTaskAction extends SecuredBaseAction implements
 
     public static final String ID = "control_viewIncidentExternalTask";
 
-    protected SecuritySupport securitySupport;
     protected boolean visibleByActionUiPermission;
     protected ExternalTaskService externalTaskService;
     protected DialogWindows dialogWindows;
@@ -46,7 +45,6 @@ public class ViewIncidentExternalTaskAction extends SecuredBaseAction implements
 
     @Autowired
     public void setSecuritySupport(SecuritySupport securitySupport) {
-        this.securitySupport = securitySupport;
         visibleByActionUiPermission = securitySupport.isEntityViewPermitted(ExternalTaskData.class);
     }
 

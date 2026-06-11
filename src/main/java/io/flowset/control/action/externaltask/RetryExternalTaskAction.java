@@ -26,7 +26,6 @@ public class RetryExternalTaskAction extends SecuredBaseAction implements Execut
     public static final String ID = "control_retryExternalTask";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected ExternalTaskData externalTaskData;
     protected Runnable afterSaveHandler;
@@ -56,7 +55,6 @@ public class RetryExternalTaskAction extends SecuredBaseAction implements Execut
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.text = messages.getMessage("actions.Retry");
     }
 

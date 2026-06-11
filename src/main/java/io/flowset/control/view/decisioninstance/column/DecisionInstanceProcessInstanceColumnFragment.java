@@ -27,8 +27,6 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public class DecisionInstanceProcessInstanceColumnFragment extends EntityDetailLinkFragment<HorizontalLayout, HistoricDecisionInstanceShortData> {
     @ViewComponent
     protected JmixButton processInstanceBtn;
-    @Autowired
-    protected ViewNavigators viewNavigators;
 
     @Override
     public void setItem(HistoricDecisionInstanceShortData item) {

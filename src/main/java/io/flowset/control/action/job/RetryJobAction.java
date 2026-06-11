@@ -25,7 +25,6 @@ public class RetryJobAction extends SecuredBaseAction implements ExecutableActio
     public static final String ID = "control_retryJob";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected JobData jobData;
     protected Runnable afterSaveHandler;
@@ -54,7 +53,6 @@ public class RetryJobAction extends SecuredBaseAction implements ExecutableActio
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.text = messages.getMessage("actions.Retry");
     }
 

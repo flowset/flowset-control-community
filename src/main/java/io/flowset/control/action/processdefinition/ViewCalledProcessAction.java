@@ -20,7 +20,6 @@ public class ViewCalledProcessAction extends SecuredBaseAction {
 
     public static final String ID = "control_viewCalledProcess";
 
-    protected SecuritySupport securitySupport;
     protected CallActivityOverlayClickHandler callActivityClickHandler;
 
     protected ProcessDefinitionData processDefinitionData;
@@ -38,7 +37,6 @@ public class ViewCalledProcessAction extends SecuredBaseAction {
 
     @Autowired
     public void setSecuritySupport(SecuritySupport securitySupport) {
-        this.securitySupport = securitySupport;
         visibleByActionUiPermission = securitySupport.isEntityViewPermitted(ProcessDefinitionData.class);
     }
 

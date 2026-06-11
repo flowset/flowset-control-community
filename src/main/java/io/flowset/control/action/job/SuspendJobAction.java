@@ -27,7 +27,6 @@ public class SuspendJobAction extends SecuredBaseAction implements ExecutableAct
     public static final String ID = "control_suspendJob";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected JobData jobData;
     protected Runnable afterSaveHandler;
@@ -57,7 +56,6 @@ public class SuspendJobAction extends SecuredBaseAction implements ExecutableAct
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.text = messages.getMessage("actions.Suspend");
     }
 

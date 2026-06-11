@@ -26,8 +26,6 @@ public class TerminateProcessInstanceAction extends SecuredBaseAction implements
     public static final String ID = "control_terminateProcessInstance";
 
     protected DialogWindows dialogWindows;
-    protected Notifications notifications;
-    protected Messages messages;
 
     protected ProcessInstanceData processInstanceData;
     protected Runnable afterSaveHandler;
@@ -54,15 +52,9 @@ public class TerminateProcessInstanceAction extends SecuredBaseAction implements
     public void setDialogWindows(DialogWindows dialogWindows) {
         this.dialogWindows = dialogWindows;
     }
-
-    @Autowired
-    public void setNotifications(Notifications notifications) {
-        this.notifications = notifications;
-    }
-
+    
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.description = messages.getMessage("actions.Terminate");
     }
 

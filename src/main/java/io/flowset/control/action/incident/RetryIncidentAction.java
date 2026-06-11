@@ -26,7 +26,6 @@ public class RetryIncidentAction extends SecuredBaseAction implements Executable
     public static final String ID = "control_retryIncident";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected IncidentData incidentData;
     protected Runnable afterSaveHandler;
@@ -56,7 +55,6 @@ public class RetryIncidentAction extends SecuredBaseAction implements Executable
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.text = messages.getMessage("actions.Retry");
     }
 

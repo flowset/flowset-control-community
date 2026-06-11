@@ -26,7 +26,6 @@ public class SuspendProcessDefinitionAction extends SecuredBaseAction implements
     public static final String ID = "control_suspendProcessDefinition";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected String processDefinitionId;
     protected ProcessDefinitionData processDefinitionData;
@@ -57,7 +56,6 @@ public class SuspendProcessDefinitionAction extends SecuredBaseAction implements
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.description = messages.getMessage("actions.Suspend");
     }
 

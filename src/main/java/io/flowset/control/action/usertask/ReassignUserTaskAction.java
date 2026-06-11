@@ -27,7 +27,6 @@ public class ReassignUserTaskAction extends SecuredBaseAction implements Executa
     public static final String ID = "control_reassignUserTask";
 
     protected DialogWindows dialogWindows;
-    protected Messages messages;
 
     protected UserTaskData userTask;
     protected Runnable afterSaveHandler;
@@ -57,7 +56,6 @@ public class ReassignUserTaskAction extends SecuredBaseAction implements Executa
 
     @Autowired
     public void setMessages(Messages messages) {
-        this.messages = messages;
         this.text = messages.getMessage("actions.Reassign");
     }
 
