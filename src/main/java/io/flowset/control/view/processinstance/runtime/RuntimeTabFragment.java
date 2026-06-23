@@ -128,9 +128,10 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     public void onHostBeforeShow(View.BeforeShowEvent event) {
         ProcessInstanceData item = processInstanceDataDc.getItem();
         if (item.getState() != ProcessInstanceState.COMPLETED) {
-            setVariablesDefaultSort();
             this.variableFilter = metadata.create(VariableFilter.class);
             this.variableFilter.setProcessInstanceId(item.getInstanceId());
+
+            setVariablesDefaultSort();
 
             updateVariablesTabCaption(VARIABLES_TAB_IDX);
             initUserTasksTab();
