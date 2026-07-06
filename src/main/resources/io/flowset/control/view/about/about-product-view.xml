@@ -34,6 +34,17 @@
                     <div id="externalLinksRootDiv" classNames="bordered-container" width="100%">
                         <vbox id="externalLinksBox"/>
                     </div>
+                    <div classNames="bordered-container" width="100%">
+                        <vbox width="100%" themeNames="spacing-s">
+                            <h3 text="msg://analyticsHeader.text"/>
+                            <span text="msg://analyticsDescription.text" classNames="text-secondary"/>
+                            <checkbox id="analyticsEnabledCheckbox" label="msg://analyticsToggle.label"/>
+                            <anchor id="analyticsPrivacyPolicyLink"
+                                    href="https://flowset.io/privacy-policy"
+                                    text="msg://analyticsPrivacyPolicy.text"
+                                    target="BLANK"/>
+                        </vbox>
+                    </div>
                 </vbox>
                 <div classNames="bordered-container col-span-2" height="100%">
                     <vbox id="productsBox" width="100%" height="100%" themeNames="spacing-s"/>

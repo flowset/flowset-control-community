@@ -3,6 +3,7 @@ package io.flowset.control.view.about;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Hr;
@@ -18,9 +19,13 @@ import io.jmix.flowui.Fragments;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.UiComponentUtils;
+import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
+import io.flowset.control.service.analytics.AmplitudeEventType;
+import io.flowset.control.service.analytics.AnalyticsService;
+import io.flowset.control.service.analytics.AnalyticsSettingsManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
@@ -67,8 +72,14 @@ public class AboutProductView extends StandardView {
     protected VerticalLayout externalLinksBox;
     @ViewComponent
     protected VerticalLayout productsBox;
+    @ViewComponent
+    protected JmixCheckbox analyticsEnabledCheckbox;
     @Autowired
     private UiComponents uiComponents;
+    @Autowired
+    protected AnalyticsSettingsManager analyticsSettingsManager;
+    @Autowired
+    protected AnalyticsService analyticsService;
 
     @Subscribe
     protected void onBeforeShow(final BeforeShowEvent event) {
@@ -76,11 +87,32 @@ public class AboutProductView extends StandardView {
         versionText.setText(buildProperties.getVersion());
         buildText.setText(buildProperties.get("buildType"));
 
+        // Programmatic set (isFromClient == false) does not trigger a save.
+        analyticsEnabledCheckbox.setValue(analyticsSettingsManager.isEnabled());
+
         AboutProductMetadata contentMetadata = loadContentMetadata();
         if (contentMetadata != null) {
             initExternalLinks(contentMetadata.getExternalLinks());
             initProducts(contentMetadata.getProducts());
         }
+    }
+
+    @Subscribe("analyticsEnabledCheckbox")
+    protected void onAnalyticsEnabledCheckboxValueChange(
+            final AbstractField.ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
+        if (!event.isFromClient()) {
+            return;
+        }
+        boolean enabled = Boolean.TRUE.equals(event.getValue());
+        // Log the opt-out event while analytics is still enabled, otherwise logEvent would early-return.
+        if (!enabled) {
+            analyticsService.logEvent(AmplitudeEventType.CONTROL_DISABLE_ANALYTICS);
+        }
+        analyticsSettingsManager.setEnabled(enabled);
+        notifications.create(messages.getMessage(getClass(), "analyticsSaved.text"))
+                .withPosition(Notification.Position.TOP_END)
+                .withThemeVariant(NotificationVariant.LUMO_SUCCESS)
+                .show();
     }
 
     protected void initProducts(List<AboutProductMetadata.Product> products) {
