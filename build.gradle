@@ -181,29 +181,6 @@ vaadin {
     optimizeBundle = false
 }
 
-// Amplitude analytics key is injected at build time and is empty by default.
-// Pass it via -Pamplitude.key=... or the AMPLITUDE_KEY environment variable (e.g. from CI secrets).
-// ReplaceTokens is used (not expand) so Spring's ${...} placeholders in application.properties stay intact.
-def amplitudeKey = (project.findProperty('amplitude.key') ?: System.getenv('AMPLITUDE_KEY') ?: '').toString()
-
-processResources {
-    inputs.property('amplitudeKey', amplitudeKey)
-    filesMatching('application.properties') {
-        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: ['amplitude.key': amplitudeKey])
-    }
-}
-
-project.afterEvaluate {
-    def bootBuildInfoTask = (BuildInfo) tasks.named('bootBuildInfo').orNull //Jmix plugin adds this task
-    if (bootBuildInfoTask != null) {
-        bootBuildInfoTask.properties({
-            additional = [
-                    'buildType': project.findProperty('buildType') ?: 'sources'
-            ]
-        })
-    }
-}
-
 spotbugs {
     ignoreFailures = false
     omitVisitors = ['FindDoubleCheck']
