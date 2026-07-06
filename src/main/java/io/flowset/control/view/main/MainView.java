@@ -27,6 +27,8 @@ import io.flowset.control.entity.EngineConnectionCheckResult;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.event.UserEngineSelectEvent;
 import io.flowset.control.property.EngineConnectionCheckProperties;
+import io.flowset.control.service.analytics.AmplitudeEventType;
+import io.flowset.control.service.analytics.AnalyticsService;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.EngineUiService;
 import io.flowset.control.uicomponent.menu.ControlListMenu;
@@ -53,6 +55,8 @@ public class MainView extends StandardMainView {
 
     @Autowired
     protected Fragments fragments;
+    @Autowired
+    protected AnalyticsService analyticsService;
     @ViewComponent
     protected InstanceContainer<EngineConnectionCheckResult> engineConnectionStatusDc;
     @Autowired
@@ -205,6 +209,8 @@ public class MainView extends StandardMainView {
         Component initialLayout = getInitialLayout();
         if (initialLayout instanceof HasComponents container) {
             initialLayout.addAttachListener(attachEvent -> {
+                // The initial layout is (re)attached whenever the user navigates to the dashboard.
+                analyticsService.logEvent(AmplitudeEventType.CONTROL_OPEN_DASHBOARD_VIEW);
                 if (container.getElement().getChildCount() == 0) {
                     initDashboard(container);
                 } else {
