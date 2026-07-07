@@ -181,6 +181,17 @@ vaadin {
     optimizeBundle = false
 }
 
+project.afterEvaluate {
+    def bootBuildInfoTask = (BuildInfo) tasks.named('bootBuildInfo').orNull //Jmix plugin adds this task
+    if (bootBuildInfoTask != null) {
+        bootBuildInfoTask.properties({
+            additional = [
+                    'buildType': project.findProperty('buildType') ?: 'sources'
+            ]
+        })
+    }
+}
+
 spotbugs {
     ignoreFailures = false
     omitVisitors = ['FindDoubleCheck']

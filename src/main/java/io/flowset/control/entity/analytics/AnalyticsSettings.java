@@ -6,6 +6,7 @@
 package io.flowset.control.entity.analytics;
 
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @JmixEntity
 @Table(name = "CONTROL_ANALYTICS_SETTINGS")
 @Entity
+@SystemLevel
 public class AnalyticsSettings {
 
     @JmixGeneratedValue

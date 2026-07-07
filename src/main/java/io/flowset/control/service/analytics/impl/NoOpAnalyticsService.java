@@ -20,7 +20,7 @@ import java.util.Map;
  * with no key configured nothing is sent and nothing is logged.
  */
 @Service("control_AnalyticsService")
-@ConditionalOnExpression("'${amplitude.key:}'.trim().isEmpty()")
+@ConditionalOnExpression("'${flowset.control.analytics.key:}'.trim().isEmpty()")
 public class NoOpAnalyticsService implements AnalyticsService {
 
     @Override

@@ -3,8 +3,8 @@ package io.flowset.control.service.analytics.impl;
 import com.amplitude.Amplitude;
 import com.amplitude.Event;
 import com.vaadin.flow.server.VaadinRequest;
+import io.flowset.control.property.AnalyticsProperties;
 import io.flowset.control.service.analytics.AmplitudeEventType;
-import io.flowset.control.service.analytics.AmplitudeProperties;
 import io.flowset.control.service.analytics.AnalyticsService;
 import io.flowset.control.service.analytics.AnalyticsSettingsManager;
 import io.jmix.core.security.CurrentAuthentication;
@@ -19,29 +19,29 @@ import java.util.Map;
 
 @Slf4j
 @Service("control_AnalyticsService")
-@ConditionalOnExpression("!'${amplitude.key:}'.trim().isEmpty()")
+@ConditionalOnExpression("!'${flowset.control.analytics.key:}'.trim().isEmpty()")
 public class AmplitudeServiceImpl implements AnalyticsService {
     public static final String PRODUCT = "flowset";
     public static final String LICENSE_TYPE = "community";
 
     protected final CurrentAuthentication currentAuthentication;
-    protected final AmplitudeProperties amplitudeProperties;
+    protected final AnalyticsProperties analyticsProperties;
     protected final AnalyticsSettingsManager analyticsSettingsManager;
     protected final BuildProperties buildProperties;
 
     protected Amplitude client;
 
-    public AmplitudeServiceImpl(AmplitudeProperties amplitudeProperties,
+    public AmplitudeServiceImpl(AnalyticsProperties analyticsProperties,
                                 AnalyticsSettingsManager analyticsSettingsManager,
                                 BuildProperties buildProperties,
                                 CurrentAuthentication currentAuthentication) {
-        this.amplitudeProperties = amplitudeProperties;
+        this.analyticsProperties = analyticsProperties;
         this.analyticsSettingsManager = analyticsSettingsManager;
         this.currentAuthentication = currentAuthentication;
         this.buildProperties = buildProperties;
 
         client = Amplitude.getInstance();
-        client.init(amplitudeProperties.getKey());
+        client.init(analyticsProperties.getKey());
     }
 
     @Override
@@ -73,6 +73,7 @@ public class AmplitudeServiceImpl implements AnalyticsService {
             JSONObject properties = new JSONObject();
             // Use put (not append): append wraps values into JSON arrays, breaking Amplitude property filtering.
             properties.put("app_version", buildProperties.getVersion());
+            properties.put("app_build_type", buildProperties.get("buildType"));
             properties.put("app_language", resolveLanguage());
             properties.put("license_type", LICENSE_TYPE);
             properties.put("product", PRODUCT);
