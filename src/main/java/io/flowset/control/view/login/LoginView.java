@@ -12,7 +12,11 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.service.analytics.AmplitudeEventType;
+import io.flowset.control.service.analytics.AnalyticsService;
 import io.jmix.core.CoreProperties;
+import io.jmix.core.DataManager;
 import io.jmix.core.MessageTools;
 import io.jmix.core.security.AccessDeniedException;
 import io.jmix.flowui.component.loginform.JmixLoginForm;
@@ -32,6 +36,7 @@ import org.springframework.security.authentication.LockedException;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -47,6 +52,12 @@ public class LoginView extends StandardView implements LocaleChangeObserver {
 
     @Autowired
     protected LoginViewSupport loginViewSupport;
+
+    @Autowired
+    protected AnalyticsService analyticsService;
+
+    @Autowired
+    protected DataManager dataManager;
 
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -97,9 +108,32 @@ public class LoginView extends StandardView implements LocaleChangeObserver {
                             .withLocale(login.getSelectedLocale())
                             .withRememberMe(login.isRememberMe())
             );
+            reportLogin();
         } catch (final BadCredentialsException | DisabledException | LockedException | AccessDeniedException e) {
             log.warn("Login failed for user '{}': {}", event.getUsername(), e.toString());
             event.getSource().setError(true);
+        }
+    }
+
+    /**
+     * Sends the login event with the only project statistic collected: the number of connected engines.
+     * If the count cannot be obtained, the event is still sent without the metric.
+     */
+    protected void reportLogin() {
+        Long enginesCount = tryCountEngines();
+        if (enginesCount != null) {
+            analyticsService.logEvent(AmplitudeEventType.CONTROL_LOGIN, Map.of("engines_count", enginesCount));
+        } else {
+            analyticsService.logEvent(AmplitudeEventType.CONTROL_LOGIN);
+        }
+    }
+
+    protected Long tryCountEngines() {
+        try {
+            return (long) dataManager.load(BpmEngine.class).all().list().size();
+        } catch (Exception e) {
+            log.debug("Unable to count connected engines for analytics", e);
+            return null;
         }
     }
 
