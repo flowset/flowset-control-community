@@ -3,7 +3,6 @@ package io.flowset.control.service.analytics.impl;
 import com.amplitude.Amplitude;
 import com.amplitude.Event;
 import com.vaadin.flow.server.VaadinRequest;
-import io.flowset.control.property.AnalyticsProperties;
 import io.flowset.control.service.analytics.AmplitudeEventType;
 import io.flowset.control.service.analytics.AnalyticsService;
 import io.flowset.control.service.analytics.AnalyticsSettingsManager;
@@ -11,7 +10,6 @@ import io.jmix.core.security.CurrentAuthentication;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.stereotype.Service;
 
@@ -19,29 +17,33 @@ import java.util.Map;
 
 @Slf4j
 @Service("control_AnalyticsService")
-@ConditionalOnExpression("!'${flowset.control.analytics.key:}'.trim().isEmpty()")
 public class AmplitudeServiceImpl implements AnalyticsService {
     public static final String PRODUCT = "flowset";
     public static final String LICENSE_TYPE = "community";
 
+    // Build-info property that carries the Amplitude API key, injected at build time (see build.gradle).
+    protected static final String ANALYTICS_KEY = "analyticsKey";
+    protected static final String BUILD_TYPE = "buildType";
+
     protected final CurrentAuthentication currentAuthentication;
-    protected final AnalyticsProperties analyticsProperties;
     protected final AnalyticsSettingsManager analyticsSettingsManager;
     protected final BuildProperties buildProperties;
 
+    // Null when no key is configured (e.g. the default open-source build): analytics is then a no-op.
     protected Amplitude client;
 
-    public AmplitudeServiceImpl(AnalyticsProperties analyticsProperties,
-                                AnalyticsSettingsManager analyticsSettingsManager,
+    public AmplitudeServiceImpl(AnalyticsSettingsManager analyticsSettingsManager,
                                 BuildProperties buildProperties,
                                 CurrentAuthentication currentAuthentication) {
-        this.analyticsProperties = analyticsProperties;
         this.analyticsSettingsManager = analyticsSettingsManager;
         this.currentAuthentication = currentAuthentication;
         this.buildProperties = buildProperties;
 
-        client = Amplitude.getInstance();
-        client.init(analyticsProperties.getKey());
+        String apiKey = buildProperties.get(ANALYTICS_KEY);
+        if (apiKey != null && !apiKey.isBlank()) {
+            client = Amplitude.getInstance();
+            client.init(apiKey);
+        }
     }
 
     @Override
@@ -51,6 +53,10 @@ public class AmplitudeServiceImpl implements AnalyticsService {
 
     @Override
     public void logEvent(AmplitudeEventType eventType, Map<String, ?> eventProperties) {
+        // No key configured -> nothing is sent (and nothing is logged).
+        if (client == null) {
+            return;
+        }
         // Respect the runtime toggle (About page); disabled by the administrator -> nothing is sent.
         if (!analyticsSettingsManager.isEnabled()) {
             return;
@@ -73,7 +79,7 @@ public class AmplitudeServiceImpl implements AnalyticsService {
             JSONObject properties = new JSONObject();
             // Use put (not append): append wraps values into JSON arrays, breaking Amplitude property filtering.
             properties.put("app_version", buildProperties.getVersion());
-            properties.put("app_build_type", buildProperties.get("buildType"));
+            properties.put("app_build_type", buildProperties.get(BUILD_TYPE));
             properties.put("app_language", resolveLanguage());
             properties.put("license_type", LICENSE_TYPE);
             properties.put("product", PRODUCT);
@@ -85,8 +91,6 @@ public class AmplitudeServiceImpl implements AnalyticsService {
 
             event.eventProperties = properties;
 
-            // This bean is only active when a non-empty key is configured (see @ConditionalOnExpression),
-            // so the event is always sent; the no-key case is handled by NoOpAnalyticsService.
             client.logEvent(event);
         } catch (Exception e) {
             log.debug("Failed to log analytics event '{}'", eventType.getId(), e);
@@ -122,6 +126,9 @@ public class AmplitudeServiceImpl implements AnalyticsService {
      */
     @PreDestroy
     public void shutdown() {
+        if (client == null) {
+            return;
+        }
         try {
             client.flushEvents();
             client.shutdown();
