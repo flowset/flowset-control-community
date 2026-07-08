@@ -22,14 +22,7 @@ public class AnalyticsProperties {
      */
     private final boolean enabled;
 
-    /**
-     * Amplitude API key. Empty by default; when empty, analytics is a no-op (nothing is sent).
-     */
-    private final String key;
-
-    public AnalyticsProperties(@DefaultValue("true") boolean enabled,
-                               @DefaultValue("") String key) {
+    public AnalyticsProperties(@DefaultValue("true") boolean enabled) {
         this.enabled = enabled;
-        this.key = key;
     }
 }
