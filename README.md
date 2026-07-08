@@ -94,6 +94,12 @@ You must have the following installed:
    ```
 The application is now running at http://localhost:8081 in the browser.
 
+> **Note:** `bootRun` activates the `dev` Spring profile, which prefills the login form with the
+> default `admin/admin` credentials for convenience. Production builds (`bootJar`) do not activate
+> this profile, so the login form is empty. When starting the app directly from the IDE (running the
+> `Application` main class instead of `bootRun`), add `dev` to the active profiles of the run
+> configuration to get the same behavior.
+
 ## Usage <a name="usage"></a>
 Flowset Control Community requires authenticated access. An administrative user with the credentials `admin/admin` is provided 
 from the start. To add more users, see the [Configuring Users](#configuring-users) section.
