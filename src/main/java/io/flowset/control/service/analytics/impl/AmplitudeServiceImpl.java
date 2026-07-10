@@ -19,7 +19,7 @@ import java.util.Map;
 @Service("control_AnalyticsService")
 public class AmplitudeServiceImpl implements AnalyticsService {
     public static final String PRODUCT = "flowset";
-    public static final String LICENSE_TYPE = "community";
+    public static final String EDITION_COMMUNITY = "community";
 
     // Build-info property that carries the Amplitude API key, injected at build time (see build.gradle).
     protected static final String ANALYTICS_KEY = "analyticsKey";
@@ -81,7 +81,7 @@ public class AmplitudeServiceImpl implements AnalyticsService {
             properties.put("app_version", buildProperties.getVersion());
             properties.put("app_build_type", buildProperties.get(BUILD_TYPE));
             properties.put("app_language", resolveLanguage());
-            properties.put("license_type", LICENSE_TYPE);
+            properties.put("app_edition", EDITION_COMMUNITY);
             properties.put("product", PRODUCT);
 
             // Additional non-personal properties (e.g. dashboard size metrics).
