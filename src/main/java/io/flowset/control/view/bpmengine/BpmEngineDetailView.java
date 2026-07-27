@@ -70,7 +70,7 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     @ViewComponent
     protected JmixComboBox<EnvironmentType> environmentTypeField;
     @ViewComponent
-    private Span dateTimeField;
+    private TypedTextField<String> dateTimeField;
     @ViewComponent
     private VerticalLayout dateTimeBox;
 
@@ -184,7 +184,7 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
 
             dateTimeBox.setVisible(engineTime != null);
             if(engineTime != null) {
-                dateTimeField.setText(engineTime);
+                dateTimeField.setTypedValue(engineTime);
             }
         }
     }
