@@ -80,6 +80,10 @@
                                 <div id="authBox" width="100%"/>
                             </vbox>
                         </vbox>
+                        <vbox id="dateTimeBox" padding="false" width="100%" themeNames="spacing-xs" visible="false">
+                            <span text="msg://engineTime.title"/>
+                            <span id="dateTimeField"/>
+                        </vbox>
                     </vbox>
 <!--                </tab>
             </tabSheet>-->
