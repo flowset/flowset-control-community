@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -22,7 +25,7 @@ public class EngineTimeBean {
 
     private final EngineService engineService;
 
-    @Value("${flowset.control.engine.offset-lifetime-in-millis:1000}")
+    @Value("${flowset.control.engine.offset-lifetime-in-millis:10000}")
     private Long offsetLifetimeInMillis;
 
     public void actualizeAllRegistered(Consumer<BpmEngine> actualizationAction) {
@@ -53,30 +56,27 @@ public class EngineTimeBean {
             actualizationAction.accept(engine);
 
             skipMap.replace(engineId, true, false);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             unregisterEngine(engineId);
         }
     }
 
     public <T> ResponseEntity<T> registerEngineTime(UUID engineId, Supplier<ResponseEntity<T>> requestBody) {
-        long beforeTime = System.currentTimeMillis();
-
         try {
+            long requestTime = System.currentTimeMillis();
             ResponseEntity<T> responseEntity = requestBody.get();
+            long retrieveTime = System.currentTimeMillis();
 
-            long currentTime = System.currentTimeMillis();
-            long currentRtt = currentTime - beforeTime;
-
+            long rtt = (retrieveTime - requestTime);
             long engineServerDate = responseEntity.getHeaders().getDate();
-
             offsets.put(engineId, new OffsetRecord(
-                    engineServerDate + (currentRtt / 2) - currentTime,
-                    currentRtt,
-                    currentTime,
+                    computeOffset(engineServerDate, rtt, retrieveTime),
+                    rtt,
+                    retrieveTime,
                     offsetLifetimeInMillis
             ));
             return responseEntity;
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             unregisterEngine(engineId);
             throw e;
         }
@@ -101,10 +101,25 @@ public class EngineTimeBean {
 
     public Long getEngineTime(UUID engineId) {
         if (offsets.containsKey(engineId)) {
-            return offsets.get(engineId).offset + System.currentTimeMillis();
+            return offsets.get(engineId).offset() + System.currentTimeMillis();
         }
 
         return null;
+    }
+
+    /**
+     * Compute server offset.
+     *
+     * @param engineServerDate server system date from header (truncated to seconds)
+     * @param rttInMs          computed rtt in ms
+     * @param retrieveTimeInMs retrieveTime in ms
+     * @return server offset
+     */
+    protected long computeOffset(long engineServerDate, long rttInMs, long retrieveTimeInMs) {
+        long truncatedRetrieveTimeInMs = Instant.ofEpochMilli(retrieveTimeInMs).truncatedTo(ChronoUnit.SECONDS).toEpochMilli();
+        long truncatedRtt = Duration.ofMillis(rttInMs).truncatedTo(ChronoUnit.SECONDS).toMillis();
+
+        return engineServerDate + (truncatedRtt / 2) - truncatedRetrieveTimeInMs;
     }
 
     private record OffsetRecord(long offset, long lastRtt, long recordedTime, long lifetimeInMillis) {

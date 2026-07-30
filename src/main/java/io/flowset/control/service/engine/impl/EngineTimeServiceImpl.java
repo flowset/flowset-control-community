@@ -38,17 +38,20 @@ public class EngineTimeServiceImpl implements EngineTimeService {
 
     @Override
     public String getEngineTimeDefaultFormat(UUID engineId) {
-        Long engineTime = getEngineTime(engineId);
+        try {
+            Long engineTime = getEngineTime(engineId);
+            if (engineTime != null) {
+                OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(
+                        Instant.ofEpochMilli(engineTime),
+                        ZoneId.systemDefault()
+                );
+                return offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            }
 
-        if(engineTime != null) {
-            OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(
-                    Instant.ofEpochMilli(engineTime),
-                    ZoneId.systemDefault()
-            );
-            return offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            return null;
+        } catch (RuntimeException e) {
+            return null;
         }
-
-        return null;
     }
 
     @Nullable
