@@ -64,6 +64,20 @@ public class EngineTimeServiceImpl implements EngineTimeService {
         return engineTimeBean.getEngineTime(engineId);
     }
 
+    @Nullable
+    @Override
+    public Long getEngineOffset(UUID engineId) {
+        try {
+            if (!engineTimeBean.isActual(engineId)) {
+                actualizeEngineTime(engineId);
+            }
+
+            return engineTimeBean.getEngineOffset(engineId);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
 
     @Override
     public void unregisterEngine(UUID engineId) {

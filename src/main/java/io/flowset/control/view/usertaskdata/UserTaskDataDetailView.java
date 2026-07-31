@@ -22,6 +22,7 @@ import io.jmix.flowui.view.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
 
 @Route(value = "bpm/user-task/:id", layout = DefaultMainViewParent.class)
@@ -78,7 +79,7 @@ public class UserTaskDataDetailView extends StandardDetailView<UserTaskData> {
         completeAction.setUserTask(getEditedEntity());
         completeAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
 
-        Date endTime = getEditedEntity().getEndTime();
+        OffsetDateTime endTime = getEditedEntity().getEndTime();
         if (endTime != null) {
             delegationStateField.setVisible(false);
             createTimeField.setVisible(false);

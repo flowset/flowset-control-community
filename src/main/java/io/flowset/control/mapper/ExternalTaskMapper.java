@@ -16,6 +16,7 @@ import org.springframework.lang.Nullable;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Date;
 
 @Mapper(componentModel = "spring")
@@ -40,5 +41,13 @@ public abstract class ExternalTaskMapper {
         }
         Instant instant = value.toInstant();
         return Date.from(instant);
+    }
+
+    OffsetDateTime map(Date value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value.toInstant().atOffset(ZoneOffset.UTC);
     }
 }

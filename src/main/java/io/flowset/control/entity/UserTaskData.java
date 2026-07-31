@@ -7,14 +7,11 @@ package io.flowset.control.entity;
 
 import io.jmix.core.MetadataTools;
 import io.jmix.core.entity.annotation.JmixId;
-import io.jmix.core.metamodel.annotation.DependsOnProperties;
-import io.jmix.core.metamodel.annotation.InstanceName;
-import io.jmix.core.metamodel.annotation.JmixEntity;
-import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.*;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @JmixEntity(name = "bpm_UserTaskData")
 public class UserTaskData {
@@ -57,26 +54,32 @@ public class UserTaskData {
 
     protected Boolean suspended;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date startTime;
+    protected OffsetDateTime startTime;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date createTime;
+    protected OffsetDateTime createTime;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date dueDate;
+    protected OffsetDateTime dueDate;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date followUpDate;
+    protected OffsetDateTime followUpDate;
 
     protected String tenantId;
 
     protected String delegationState;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date lastUpdateDate;
+    protected OffsetDateTime lastUpdateDate;
 
-    protected Date endTime;
+    @PropertyDatatype(value = "engineOffsetDateTime")
+    protected OffsetDateTime endTime;
 
     protected String executionId;
 
@@ -88,31 +91,32 @@ public class UserTaskData {
 
     protected Long duration;
 
-    protected Date removalTime;
+    @PropertyDatatype(value = "engineOffsetDateTime")
+    protected OffsetDateTime removalTime;
 
     protected String rootProcessInstanceId;
 
-    public Date getCreateTime() {
+    public OffsetDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(OffsetDateTime createTime) {
         this.createTime = createTime;
     }
 
-    public Date getStartTime() {
+    public OffsetDateTime getStartTime() {
         return startTime;
     }
 
-    public Date getDueDate() {
+    public OffsetDateTime getDueDate() {
         return dueDate;
     }
 
-    public Date getFollowUpDate() {
+    public OffsetDateTime getFollowUpDate() {
         return followUpDate;
     }
 
-    public Date getLastUpdateDate() {
+    public OffsetDateTime getLastUpdateDate() {
         return lastUpdateDate;
     }
 
@@ -260,19 +264,19 @@ public class UserTaskData {
         this.suspended = suspended;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(OffsetDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(OffsetDateTime dueDate) {
         this.dueDate = dueDate;
     }
 
-    public void setFollowUpDate(Date followUpDate) {
+    public void setFollowUpDate(OffsetDateTime followUpDate) {
         this.followUpDate = followUpDate;
     }
 
-    public void setLastUpdateDate(Date lastUpdateDate) {
+    public void setLastUpdateDate(OffsetDateTime lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
     }
 
@@ -292,11 +296,11 @@ public class UserTaskData {
         this.delegationState = delegationState;
     }
 
-    public Date getEndTime() {
+    public OffsetDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(OffsetDateTime endTime) {
         this.endTime = endTime;
     }
 
@@ -340,11 +344,11 @@ public class UserTaskData {
         this.duration = duration;
     }
 
-    public Date getRemovalTime() {
+    public OffsetDateTime getRemovalTime() {
         return removalTime;
     }
 
-    public void setRemovalTime(Date removalTime) {
+    public void setRemovalTime(OffsetDateTime removalTime) {
         this.removalTime = removalTime;
     }
 

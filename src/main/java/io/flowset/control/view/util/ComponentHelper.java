@@ -19,8 +19,11 @@ import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
+import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.flowset.control.service.engine.EngineService;
+import io.flowset.control.service.engine.EngineTimeService;
 import io.flowset.control.view.processinstance.LazyTabContent;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
@@ -41,6 +44,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.function.Function;
@@ -92,16 +98,84 @@ public class ComponentHelper {
     public Span createDateSpan(@Nullable OffsetDateTime date) {
         Span span = uiComponents.create(Span.class);
 
-        TimeZone timeZone = currentAuthentication.getTimeZone();
         if (date != null) {
-            LocalDateTime timestamp = date
-                    .atZoneSameInstant(timeZone.toZoneId())
-                    .toLocalDateTime();
-            String formattedDate = datatypeFormatter.formatLocalDateTime(timestamp);
-            span.setText(formattedDate);
+            String formattedDateTime = formatCurrentEngineOffsetDateTime(date);
+            span.setText(formattedDateTime);
         }
 
         return span;
+    }
+
+    public String formatOffsetDateTime(@Nullable OffsetDateTime date, TimeZone timeZone) {
+        if (date == null) {
+            return null;
+        }
+
+        LocalDateTime timestamp = date.atZoneSameInstant(timeZone.toZoneId()).toLocalDateTime();
+        return datatypeFormatter.formatLocalDateTime(timestamp);
+    }
+
+
+    public String formatCurrentEngineOffsetDateTime(@Nullable OffsetDateTime date) {
+        if (date == null) {
+            return null;
+        }
+
+        TimeZone timeZone = currentAuthentication.getTimeZone();
+        Locale locale = currentAuthentication.getLocale();
+        return formatCurrentEngineOffsetDateTime(date, locale, timeZone);
+    }
+
+    public OffsetDateTime convertCurrentEngineOffsetDateTimeFilterValue(LocalDateTime localDateTime, ZoneId zoneId) {
+        if (localDateTime == null) {
+            return null;
+        }
+
+        TimeZone timeZone = currentAuthentication.getTimeZone();
+
+        if (zoneId == null) {
+            zoneId = timeZone.toZoneId();
+        }
+
+        OffsetDateTime rawOffsetDateTime = localDateTime.atZone(zoneId)
+                .withZoneSameInstant(TimeZone.getDefault().toZoneId())
+                .toOffsetDateTime();
+
+        EngineService engineService = applicationContext.getBean(EngineService.class);
+
+        BpmEngine selectedEngine = engineService.getSelectedEngine();
+        if (selectedEngine == null) {
+            return rawOffsetDateTime;
+        }
+
+        EngineTimeService engineTimeService = applicationContext.getBean(EngineTimeService.class);
+        Long engineOffset = engineTimeService.getEngineOffset(selectedEngine.getId());
+        if (engineOffset == null) {
+            return rawOffsetDateTime;
+        }
+
+        return rawOffsetDateTime.plus(engineOffset, ChronoUnit.MILLIS);
+    }
+
+    public String formatCurrentEngineOffsetDateTime(@Nullable OffsetDateTime date, Locale locale, TimeZone timeZone) {
+        if (date == null) {
+            return null;
+        }
+
+        EngineService engineService = applicationContext.getBean(EngineService.class);
+
+        BpmEngine selectedEngine = engineService.getSelectedEngine();
+        if (selectedEngine == null) {
+            return formatOffsetDateTime(date, timeZone);
+        }
+
+        EngineTimeService engineTimeService = applicationContext.getBean(EngineTimeService.class);
+        Long engineOffset = engineTimeService.getEngineOffset(selectedEngine.getId());
+        if (engineOffset == null) {
+            return formatOffsetDateTime(date, timeZone);
+        }
+        OffsetDateTime synchronizedDateTime = date.minus(engineOffset, ChronoUnit.MILLIS);
+        return formatOffsetDateTime(synchronizedDateTime, timeZone);
     }
 
     /**

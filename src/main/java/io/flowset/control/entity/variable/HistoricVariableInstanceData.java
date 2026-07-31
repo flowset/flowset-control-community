@@ -8,10 +8,11 @@ package io.flowset.control.entity.variable;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @JmixEntity(annotatedPropertiesOnly = true)
 public class HistoricVariableInstanceData {
@@ -29,9 +30,10 @@ public class HistoricVariableInstanceData {
     @JmixProperty
     protected String taskId;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @Temporal(TemporalType.TIMESTAMP)
     @JmixProperty
-    protected Date createTime;
+    protected OffsetDateTime createTime;
 
     @JmixProperty
     protected VariableValueInfo valueInfo;
@@ -75,8 +77,9 @@ public class HistoricVariableInstanceData {
     @JmixProperty
     protected String state;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @JmixProperty
-    protected Date removalTime;
+    protected OffsetDateTime removalTime;
 
     @JmixProperty
     protected String rootProcessInstanceId;
@@ -123,11 +126,11 @@ public class HistoricVariableInstanceData {
         this.taskId = taskId;
     }
 
-    public Date getCreateTime() {
+    public OffsetDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(OffsetDateTime createTime) {
         this.createTime = createTime;
     }
 
@@ -243,11 +246,11 @@ public class HistoricVariableInstanceData {
         this.state = state;
     }
 
-    public Date getRemovalTime() {
+    public OffsetDateTime getRemovalTime() {
         return removalTime;
     }
 
-    public void setRemovalTime(Date removalTime) {
+    public void setRemovalTime(OffsetDateTime removalTime) {
         this.removalTime = removalTime;
     }
 

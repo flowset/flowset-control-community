@@ -55,6 +55,16 @@ public interface EngineTimeService {
     Long getEngineTime(UUID engineId);
 
     /**
+     * Return engine's time offset if engine is registered.
+     *
+     * @param engineId engine id
+     * @return offset in ms
+     */
+    @Nullable
+    Long getEngineOffset(UUID engineId);
+
+
+    /**
      * Remove engine registration.
      *
      * @param engineId engine id

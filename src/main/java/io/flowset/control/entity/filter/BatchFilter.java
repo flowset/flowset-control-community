@@ -8,6 +8,7 @@ package io.flowset.control.entity.filter;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,8 +32,10 @@ public class BatchFilter {
 
     protected String createdBy;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     protected OffsetDateTime startedBefore;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     protected OffsetDateTime startedAfter;
 
     protected Boolean withFailures;

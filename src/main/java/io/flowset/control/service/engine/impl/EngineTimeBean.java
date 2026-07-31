@@ -99,6 +99,14 @@ public class EngineTimeBean {
         return offsetRecord.isActualAt(System.currentTimeMillis());
     }
 
+    public Long getEngineOffset(UUID engineId) {
+        if (offsets.containsKey(engineId)) {
+            return offsets.get(engineId).offset();
+        }
+
+        return null;
+    }
+
     public Long getEngineTime(UUID engineId) {
         if (offsets.containsKey(engineId)) {
             return offsets.get(engineId).offset() + System.currentTimeMillis();
