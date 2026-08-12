@@ -19,9 +19,9 @@
     </facets>
     <layout expand="processInstancesGrid">
         <hbox id="modeButtonsGroup" spacing="false" padding="false" classNames="toggle-button-group">
-            <button text="msg://io.flowset.control.view.processinstance/ProcessInstanceViewMode.ALL" themeNames="tertiary" classNames="border-b border-t border-l"/>
-            <button text="msg://io.flowset.control.view.processinstance/ProcessInstanceViewMode.ACTIVE" themeNames="tertiary primary" classNames="border rounded-none"/>
-            <button text="msg://io.flowset.control.view.processinstance/ProcessInstanceViewMode.COMPLETED" themeNames="tertiary" classNames="border-b border-t border-r"/>
+            <button text="msg://io.flowset.control.view.processinstance/ProcessInstanceViewMode.ALL" themeNames="tertiary"/>
+            <button text="msg://io.flowset.control.view.processinstance/ProcessInstanceViewMode.ACTIVE" themeNames="tertiary primary"/>
+            <button text="msg://io.flowset.control.view.processinstance/ProcessInstanceViewMode.COMPLETED" themeNames="tertiary"/>
         </hbox>
         <hbox id="buttonsPanel" classNames="buttons-panel" alignItems="BASELINE">
             <button id="refreshBtn" action="processInstancesGrid.refresh" themeNames="success primary"

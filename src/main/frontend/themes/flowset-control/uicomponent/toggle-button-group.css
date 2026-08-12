@@ -3,15 +3,29 @@
  * Use is subject to license terms.
  */
 
+.toggle-button-group {
+    background-color: var(--toggle-button-group-bg-color);
+    border-radius: var(--lumo-border-radius-l);
+    padding: var(--lumo-space-xs) calc(var(--lumo-space-s) / 2);
+    box-sizing: border-box;
+    gap: calc(var(--lumo-space-s) / 2);
+}
+
 .toggle-button-group > vaadin-button {
+    --vaadin-button-height: calc(var(--lumo-size-s) + 0.1em);
     min-width: 9em;
-    border-color: var(--toggle-button-border-color);
+    border-radius: var(--lumo-border-radius-l);
+    color: var(--lumo-secondary-text-color);
+    border: none;
+    margin: 0;
 }
 
-.toggle-button-group > :nth-child(1) {
-    border-radius: 1em 0 0 1em;
+.toggle-button-group > vaadin-button:not([theme~="primary"]):hover {
+    background-color: var(--toggle-button-group-bg-color);
+    color: var(--lumo-body-text-color);
 }
 
-.toggle-button-group > vaadin-button:last-child {
-    border-radius: 0 1em 1em 0;
+.toggle-button-group > vaadin-button[theme~="primary"] {
+    background-color: var(--toggle-button-active-bg-color);
+    color: var(--toggle-button-active-text-color);
 }
