@@ -12,11 +12,18 @@ html {
     --dashboard-background-color: hsla(214, 61%, 25%, 0.02);
     --toggle-button-border-color: rgba(48, 114, 132, 0.8);
 
-    --menu-item-hover-bg-color: #7EB3C2;
-    --menu-item-hover-color:rgb(16, 70, 86);
+    --menu-item-active-bg-color: rgba(255, 255, 255, 0.20);
+    --menu-item-active-color: #FFFFFF;
+    --menu-item-hover-bg-color: rgba(255, 255, 255, 0.12);
+    --menu-item-hover-color: #FFFFFF;
     --user-avatar-bg-color: #7EB3C2;
+    --user-avatar-text-color: #0A3340;
     --menu-group-item-color: #69CE87;
+    --active-menu-item-border-color: var(--menu-group-item-color);
+    --menu-subitems-guide-line-color: rgba(255, 255, 255, 0.18);
     --side-menu-bg-color: rgb(16, 70, 86);
+    --side-menu-bg-gradient-top-color: rgb(16, 70, 86);
+    --side-menu-bg-gradient-bottom-color: #1A6478;
 
     --engine-env-badge-prod-color: #9D174D;
     --engine-env-badge-prod-bg-color: #FCE7F3;

@@ -36,6 +36,11 @@ vaadin-app-layout::part(drawer) {
     min-height: 100%;
 
     background-color: var(--side-menu-bg-color);
+    background-image: linear-gradient(
+            180deg,
+            var(--side-menu-bg-gradient-top-color) 0%,
+            var(--side-menu-bg-color) 35%,
+            var(--side-menu-bg-gradient-bottom-color) 100%);
 
     border-start-end-radius: 0.85em;
     border-end-end-radius: 0.85em;
@@ -99,7 +104,8 @@ vaadin-app-layout::part(drawer) {
 
 .jmix-main-view-footer .user-avatar {
     background-color: var(--user-avatar-bg-color);
-    color: var(--lumo-primary-text-color);
+    color: var(--user-avatar-text-color);
+    border-radius: 100%;
 }
 
 .jmix-main-view-footer .jmix-user-indicator .jmix-user-indicator-label {
@@ -143,6 +149,12 @@ vaadin-app-layout::part(drawer) {
     padding: 0;
 }
 
+.jmix-list-menu .jmix-menubar-item .menubar-list {
+    margin-inline-start: calc(var(--lumo-space-s) + var(--lumo-icon-size-s) / 2);
+    padding-inline-start: calc(var(--lumo-space-l) - var(--lumo-space-s) - var(--lumo-icon-size-s) / 2);
+    border-inline-start: 1px solid var(--menu-subitems-guide-line-color);
+}
+
 .jmix-list-menu .jmix-menu-item-link {
     padding: 0.35em var(--lumo-space-s);
 }
@@ -154,7 +166,8 @@ vaadin-app-layout::part(drawer) {
     color: var(--menu-group-item-color);
     text-transform: uppercase;
     padding-left: var(--lumo-space-s);
-    font-size: var(--lumo-font-size-s);
+    font-size: var(--lumo-font-size-xxs);
+    letter-spacing: calc(var(--lumo-font-size-xxs) / 4);
 }
 
 .jmix-list-menu .jmix-menubar-item .menubar-summary {
@@ -162,8 +175,22 @@ vaadin-app-layout::part(drawer) {
 }
 
 .jmix-list-menu a[highlight][class*='jmix-menu-item-link'] {
-    background-color: #fff;
-    color: var(--lumo-primary-text-color);
+    background-color: var(--menu-item-active-bg-color);
+    color: var(--menu-item-active-color);
+    border-inline-start: 3px solid var(--active-menu-item-border-color);
+}
+
+.jmix-list-menu a[highlight][class*='jmix-menu-item-link'] .link-text {
+    font-weight: 600;
+}
+
+.jmix-list-menu a[highlight][class*='jmix-menu-item-link'] .prefix-component {
+    color: var(--active-menu-item-border-color);
+}
+
+.jmix-list-menu a[class*='jmix-menu-item-link'] .link-text,
+  .jmix-list-menu .jmix-menubar-item .menubar-summary {
+    font-weight: 500;
 }
 
 .select-engine-popover::part(overlay) {
