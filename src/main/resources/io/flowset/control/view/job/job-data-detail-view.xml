@@ -43,12 +43,8 @@
                               padding="false" classNames="lg:flex-row 2xl:flex-row xl:flex-row md:flex-col sm:flex-col">
                             <textField id="jobTypeField"
                                        readOnly="true" width="100%" label="msg://jobType"/>
-                            <vbox padding="false" classNames="text-s text-secondary font-semibold"
-                                  themeNames="spacing-xs" width="auto">
-                                <span text="msg://io.flowset.control.entity.job/JobData.state"/>
-                                <fragment id="stateFragment"
-                                          class="io.flowset.control.view.job.column.state.JobStateColumnFragment"/>
-                            </vbox>
+                            <textField id="stateField" dataContainer="jobDataDc"  property="state" readOnly="true"
+                                       label="msg://io.flowset.control.entity.job/JobData.state"/>
                         </hbox>
 
                         <div classNames="grid grid-flow-row gap-s 2xl:grid-cols-3 xl:grid-cols-3 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1"

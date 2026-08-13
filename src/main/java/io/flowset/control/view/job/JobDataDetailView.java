@@ -16,7 +16,6 @@ import io.flowset.control.action.job.RetryJobAction;
 import io.flowset.control.action.job.SuspendJobAction;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
-import io.flowset.control.view.job.column.state.JobStateColumnFragment;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.Dialogs;
@@ -79,8 +78,6 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
     protected JmixTextArea exceptionMessageField;
 
     @ViewComponent
-    protected JobStateColumnFragment stateFragment;
-    @ViewComponent
     protected ActivateJobAction activateAction;
     @ViewComponent
     protected SuspendJobAction suspendAction;
@@ -110,7 +107,6 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
         }
 
         configureActions();
-        initStateField();
         initProcessFields();
     }
 
@@ -127,11 +123,6 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
         suspendAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
         retryAction.setJobData(jobData);
         retryAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
-    }
-
-    protected void initStateField() {
-        stateFragment.setItem(getEditedEntity());
-        stateFragment.getStyle().setHeight("min-content");
     }
 
     protected void initProcessFields() {
