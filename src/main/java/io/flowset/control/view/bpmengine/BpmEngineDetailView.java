@@ -7,9 +7,16 @@ package io.flowset.control.view.bpmengine;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import io.flowset.control.action.TestEngineConnectionAction;
+import io.flowset.control.entity.engine.AuthType;
+import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.engine.EnvironmentType;
+import io.flowset.control.service.engine.EngineService;
+import io.flowset.control.service.engine.EngineTimeService;
 import io.jmix.core.EntityStates;
 import io.jmix.core.SaveContext;
 import io.jmix.flowui.Fragments;
@@ -20,11 +27,6 @@ import io.jmix.flowui.component.radiobuttongroup.JmixRadioButtonGroup;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.view.*;
-import io.flowset.control.action.TestEngineConnectionAction;
-import io.flowset.control.entity.engine.AuthType;
-import io.flowset.control.entity.engine.BpmEngine;
-import io.flowset.control.entity.engine.EngineType;
-import io.flowset.control.service.engine.EngineService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -49,6 +51,8 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     @Autowired
     protected EntityStates entityStates;
     @Autowired
+    protected EngineTimeService engineTimeService;
+    @Autowired
     protected BuildProperties buildProperties;
 
     @ViewComponent
@@ -65,6 +69,10 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     protected TypedTextField<String> baseUrlField;
     @ViewComponent
     protected JmixComboBox<EnvironmentType> environmentTypeField;
+    @ViewComponent
+    private TypedTextField<String> dateTimeField;
+    @ViewComponent
+    private VerticalLayout dateTimeBox;
 
     @Subscribe
     public void onInitEntity(final InitEntityEvent<BpmEngine> event) {
@@ -82,6 +90,8 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     public void onBeforeShow(final BeforeShowEvent event) {
         BpmEngine engine = getEditedEntity();
         testConnectionAction.setEngine(engine);
+        testConnectionAction.addAfterActionPerformEffect(this::updateTimeField);
+        updateTimeField();
         initAuthBox(engine.getAuthEnabled());
 
         if (BooleanUtils.isTrue(engine.getIsDefault()) && !entityStates.isNew(engine)) {
@@ -165,6 +175,17 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
         if (event.isFromClient()) {
             String trimmedValue = StringUtils.trim(event.getValue());
             getEditedEntity().setBaseUrl(trimmedValue);
+        }
+    }
+
+    protected void updateTimeField() {
+        if(getEditedEntity().getId() != null) {
+            String engineTime = engineTimeService.getEngineTimeDefaultFormat(getEditedEntity().getId());
+
+            dateTimeBox.setVisible(engineTime != null);
+            if(engineTime != null) {
+                dateTimeField.setTypedValue(engineTime);
+            }
         }
     }
 }

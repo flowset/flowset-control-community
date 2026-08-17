@@ -5,9 +5,12 @@
 
 package io.flowset.control.view.bpmengine;
 
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
+import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.service.engine.EngineTimeService;
 import io.jmix.core.Messages;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
@@ -15,9 +18,7 @@ import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.view.*;
-import io.flowset.control.entity.engine.BpmEngine;
 import org.springframework.beans.factory.annotation.Autowired;
-
 
 @Route(value = "bpm/engines", layout = DefaultMainViewParent.class)
 @ViewController(id = "BpmEngine.list")
@@ -29,7 +30,8 @@ public class BpmEngineListView extends StandardListView<BpmEngine> {
     protected UiComponents uiComponents;
     @Autowired
     protected ViewNavigators viewNavigators;
-
+    @Autowired
+    protected EngineTimeService engineTimeService;
     @Autowired
     protected Messages messages;
     @ViewComponent
@@ -50,5 +52,17 @@ public class BpmEngineListView extends StandardListView<BpmEngine> {
 
             return bpmEngineListActionsFragment;
         });
+    }
+
+    @Supply(to = "bpmEnginesDataGrid.engineTime", subject = "renderer")
+    protected Renderer<BpmEngine> bpmEnginesDataGridEngineTimeRenderer() {
+        return new ComponentRenderer<>(bpmEngine -> {
+            Span span = uiComponents.create(Span.class);
+            String engineTime = engineTimeService.getEngineTimeDefaultFormat(bpmEngine.getId());
+            if (engineTime != null) {
+                span.setText(engineTime);
+            }
+            return span;
+        }); 
     }
 }
