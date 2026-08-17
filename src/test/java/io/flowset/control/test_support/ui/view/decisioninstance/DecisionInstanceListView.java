@@ -34,15 +34,19 @@ public class DecisionInstanceListView extends View<DecisionInstanceListView> {
     public static final By PROCESS_INSTANCE_BUTTON_BY = byPath("root", "processInstanceBtn");
     public static final By PROCESS_ID_BUTTON_BY = byPath("root", "processIdBtn");
 
-    public static final int DECISION_INSTANCE_ID_COLUMN_INDEX = 0;
-    public static final int DECISION_DEFINITION_ID_COLUMN_INDEX = 1;
-    public static final int EVALUATION_TIME_COLUMN_INDEX = 2;
-    public static final int PROCESS_INSTANCE_ID_COLUMN_INDEX = 3;
-    public static final int PROCESS_DEFINITION_ID_COLUMN_INDEX = 4;
-    public static final int ACTIVITY_ID_COLUMN_INDEX = 5;
+    public static final int CHECKBOX_COLUMN_INDEX = 0;
+    public static final int DECISION_INSTANCE_ID_COLUMN_INDEX = 1;
+    public static final int DECISION_DEFINITION_ID_COLUMN_INDEX = 2;
+    public static final int EVALUATION_TIME_COLUMN_INDEX = 3;
+    public static final int PROCESS_INSTANCE_ID_COLUMN_INDEX = 4;
+    public static final int PROCESS_DEFINITION_ID_COLUMN_INDEX = 5;
+    public static final int ACTIVITY_ID_COLUMN_INDEX = 6;
 
     @TestComponent(path = "refreshButton")
     private Button refreshButton;
+
+    @TestComponent(path = "excelExportButton")
+    private Button excelExportButton;
 
     @TestComponent(path = "decisionInstancesDataGrid")
     private DataGrid decisionInstancesDataGrid;

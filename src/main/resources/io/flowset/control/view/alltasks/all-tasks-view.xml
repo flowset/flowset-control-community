@@ -82,6 +82,7 @@
                     <button id="refreshBtn" action="tasksDataGrid.refresh" themeNames="primary success"/>
                     <button id="completeTaskBtn" action="tasksDataGrid.completeTask"/>
                     <button id="reassignTaskBtn" action="tasksDataGrid.reassignTask"/>
+                    <button id="excelExportBtn" action="tasksDataGrid.excelExport"/>
                     <simplePagination id="tasksPagination" dataLoader="tasksDl"/>
                 </hbox>
                 <dataGrid id="tasksDataGrid"
@@ -100,6 +101,7 @@
                                 <property name="openMode" value="DIALOG"/>
                             </properties>
                         </action>
+                        <action id="excelExport" type="control_excelExport"/>
                     </actions>
                     <columns resizable="true">
                         <column property="taskId" frozen="true"/>

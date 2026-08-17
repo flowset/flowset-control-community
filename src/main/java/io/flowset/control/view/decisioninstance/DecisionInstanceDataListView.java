@@ -10,6 +10,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
@@ -70,6 +71,8 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
     protected CollectionLoader<HistoricDecisionInstanceShortData> decisionInstancesDl;
     @ViewComponent
     protected InstanceContainer<DecisionInstanceFilter> decisionFilterDc;
+    @ViewComponent("decisionInstancesDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     @ViewComponent
     protected DataGrid<HistoricDecisionInstanceShortData> decisionInstancesDataGrid;
@@ -83,7 +86,26 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
         initFilter();
         setDefaultSort();
         initDataGridHeaderRow();
+        initActions();
         urlQueryParameters.registerBinder(new DecisionInstanceListQueryParamBinder(decisionInstancesDataGrid, this::startLoadData));
+    }
+
+    protected void initActions() {
+        excelExportAction.addColumnValueProvider("decisionDefinitionId", context -> {
+            HistoricDecisionInstanceShortData entity = context.getEntity();
+            String decisionDefinitionId = entity.getDecisionDefinitionId();
+            DecisionDefinitionData decisionDefinition = decisionDefinitionsMap.get(decisionDefinitionId);
+
+            return decisionDefinition != null ? componentHelper.getDecisionLabel(decisionDefinition) : decisionDefinitionId;
+        });
+
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            HistoricDecisionInstanceShortData entity = context.getEntity();
+            String processDefinitionId = entity.getProcessDefinitionId();
+            ProcessDefinitionData processDefinition = processDefinitionsMap.get(processDefinitionId);
+
+            return processDefinition != null ? componentHelper.getProcessLabel(processDefinition) : processDefinitionId;
+        });
     }
 
     @Supply(to = "decisionInstancesDataGrid.decisionDefinitionId", subject = "renderer")

@@ -33,15 +33,19 @@ public class DecisionDefinitionListView extends View<DecisionDefinitionListView>
 
     public static final By NAME_BUTTON_BY = byPath("root", "nameBtn");
     public static final By KEY_BUTTON_BY = byPath("root", "keyBtn");
-    public static final int NAME_COLUMN_INDEX = 0;
-    public static final int KEY_COLUMN_INDEX = 1;
-    public static final int VERSION_COLUMN_INDEX = 2;
+    public static final int CHECKBOX_COLUMN_INDEX = 0;
+    public static final int NAME_COLUMN_INDEX = 1;
+    public static final int KEY_COLUMN_INDEX = 2;
+    public static final int VERSION_COLUMN_INDEX = 3;
 
     @TestComponent(path = "refreshBtn")
     private Button refreshBtn;
 
     @TestComponent(path = "deployBtn")
     private Button deployBtn;
+
+    @TestComponent(path = "excelExportBtn")
+    private Button excelExportBtn;
 
     @TestComponent(path = "decisionDefinitionsGrid")
     private DataGrid decisionDefinitionsGrid;

@@ -26,9 +26,10 @@
     <layout>
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <button id="refreshButton" themeNames="success primary" action="decisionInstancesDataGrid.refreshAction"/>
+            <button id="excelExportButton" action="decisionInstancesDataGrid.excelExport"/>
             <simplePagination id="pagination" dataLoader="decisionInstancesDl"/>
         </hbox>
-        <dataGrid id="decisionInstancesDataGrid"
+        <dataGrid id="decisionInstancesDataGrid" selectionMode="MULTI"
                   width="100%"
                   minHeight="20em"
                   dataContainer="decisionInstancesDc"
@@ -36,6 +37,7 @@
             <actions>
                 <action id="refreshAction" type="list_refresh"/>
                 <action id="viewAction" type="list_edit" visible="false" text="msg:///actions.View"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="decisionInstanceId" sortable="false">

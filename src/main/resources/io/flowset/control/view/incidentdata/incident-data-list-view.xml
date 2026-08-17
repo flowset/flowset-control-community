@@ -27,6 +27,7 @@
         <hbox id="buttonsPanel" classNames="buttons-panel" alignItems="BASELINE">
             <button id="refreshBtn" action="incidentsDataGrid.refresh" themeNames="success primary"/>
             <button id="bulkRetryBtn" action="incidentsDataGrid.bulkRetry"/>
+            <button id="excelExportBtn" action="incidentsDataGrid.excelExport"/>
             <simplePagination id="pagination" dataLoader="incidentsDl"/>
         </hbox>
         <dataGrid id="incidentsDataGrid" classNames="incidents-data-grid"
@@ -37,6 +38,7 @@
                 <action id="refresh" type="list_refresh"/>
                 <action id="bulkRetry" type="control_bulkRetryIncident" icon="ROTATE_LEFT" text="msg:///actions.Retry"/>
                 <action id="view" type="list_edit" visible="false"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="incidentId">

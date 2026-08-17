@@ -32,16 +32,7 @@ public class BatchProgressColumnFragment extends FragmentRenderer<Div, BatchStat
     public void setItem(BatchStatisticsData item) {
         super.setItem(item);
 
-        int totalJobs = item.getTotalJobs() != null && item.getTotalJobs() > 0 ? item.getTotalJobs() : 0;
-        int completedJobs = item.getCompletedJobs() != null ? item.getCompletedJobs() : 0;
-
-        int percent;
-        if (totalJobs == 0) {
-            percent = 0;
-        } else {
-            double ratio = completedJobs / (double) totalJobs;
-            percent = (int) Math.round(ratio * 100);
-        }
+        int percent = item.getProgressPercent();
         progressLabel.setText(datatypeFormatter.formatInteger(percent) + "%");
         progressBar.setValue(percent);
     }

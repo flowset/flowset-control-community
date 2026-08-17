@@ -35,10 +35,11 @@
                 <vbox padding="false" width="100%" height="100%">
                     <hbox id="buttonsPanel" classNames="buttons-panel">
                         <button id="refreshBtn" action="activeBatchesDataGrid.refresh" themeNames="primary success"/>
+                        <button id="excelExportBtn" action="activeBatchesDataGrid.excelExport"/>
                         <simplePagination id="batchesPagination" dataLoader="activeBatchesDl"/>
                     </hbox>
 
-                    <dataGrid id="activeBatchesDataGrid"
+                    <dataGrid id="activeBatchesDataGrid" selectionMode="MULTI"
                               dataContainer="activeBatchesDc"
                               width="100%"
                               minHeight="20em">
@@ -49,6 +50,7 @@
                                     <property name="openMode" value="DIALOG"/>
                                 </properties>
                             </action>
+                            <action id="excelExport" type="control_excelExport"/>
                         </actions>
                         <columns resizable="true">
                             <column property="id" autoWidth="true">
@@ -86,10 +88,11 @@
                     <hbox id="completedBatchButtonsPanel" classNames="buttons-panel">
                         <button id="completedBatchRefreshBtn" action="completedBatchesDataGrid.refresh"
                                 themeNames="primary success"/>
+                        <button id="completedBatchExcelExportBtn" action="completedBatchesDataGrid.excelExport"/>
                         <simplePagination id="completedBatchesPagination" dataLoader="completedBatchesDl"/>
                     </hbox>
 
-                    <dataGrid id="completedBatchesDataGrid"
+                    <dataGrid id="completedBatchesDataGrid" selectionMode="MULTI"
                               dataContainer="completedBatchesDc"
                               width="100%"
                               minHeight="20em">
@@ -100,6 +103,7 @@
                                     <property name="openMode" value="DIALOG"/>
                                 </properties>
                             </action>
+                            <action id="excelExport" type="control_excelExport"/>
                         </actions>
                         <columns resizable="true">
                             <column property="id" autoWidth="true">
