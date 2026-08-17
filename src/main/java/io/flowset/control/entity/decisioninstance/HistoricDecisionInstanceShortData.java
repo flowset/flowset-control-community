@@ -3,6 +3,7 @@ package io.flowset.control.entity.decisioninstance;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -20,6 +21,7 @@ public class HistoricDecisionInstanceShortData {
 
     protected String decisionDefinitionKey;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     protected OffsetDateTime evaluationTime;
 
     protected String processDefinitionKey;

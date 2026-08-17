@@ -14,6 +14,7 @@ import io.flowset.control.action.job.ActivateJobGridAction;
 import io.flowset.control.action.job.RetryJobGridAction;
 import io.flowset.control.action.job.SuspendJobGridAction;
 import io.flowset.control.view.job.column.JobIdColumnFragment;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
@@ -55,7 +56,7 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
     @Autowired
     protected DialogWindows dialogWindows;
     @Autowired
-    protected DatatypeFormatter datatypeFormatter;
+    protected ComponentHelper componentHelper;
 
     @ViewComponent
     protected CollectionLoader<JobData> runtimeJobsDl;
@@ -158,8 +159,7 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
 
     @Install(to = "runtimeJobsGrid.createTime", subject = "tooltipGenerator")
     protected String runtimeJobsGridCreateTimeTooltipGenerator(final JobData jobData) {
-        Date createTime = jobData.getCreateTime();
-        return datatypeFormatter.formatDateTime(createTime);
+        return componentHelper.formatCurrentEngineOffsetDateTime(jobData.getCreateTime());
     }
 
     @Supply(to = "runtimeJobsGrid.jobId", subject = "renderer")

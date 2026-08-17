@@ -9,6 +9,7 @@ import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,8 +31,10 @@ public class DeploymentFilter {
     @InstanceName
     protected String nameLike;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     protected OffsetDateTime deploymentAfter;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     protected OffsetDateTime deploymentBefore;
 
     protected String source;

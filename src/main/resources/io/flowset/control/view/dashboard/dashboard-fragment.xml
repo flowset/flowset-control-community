@@ -31,6 +31,8 @@
                         <hbox id="urlTextBox" width="100%" justifyContent="END" themeNames="spacing-s" alignItems="BASELINE">
                             <span text="msg://urlLabel" classNames="text-body"/>
                             <span id="urlText" classNames="text-secondary"/>
+                            <span id="timeLabel" text="msg://timeLabel" classNames="text-body"/>
+                            <span id="timeText" classNames="text-secondary"/>
                         </hbox>
                     </endSlot>
                 </hbox>

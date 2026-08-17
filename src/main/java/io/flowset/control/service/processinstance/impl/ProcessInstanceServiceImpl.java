@@ -37,10 +37,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.flowset.control.service.variable.VariableUtils.createVariableMap;
@@ -505,8 +504,8 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 .processInstanceId(responseModel.getProcessInstanceId())
                 .singleResult();
         if (historicProcessInstance != null) {
-            processInstanceData.setEndTime(historicProcessInstance.getEndTime());
-            processInstanceData.setStartTime(historicProcessInstance.getStartTime());
+            processInstanceData.setEndTime(dateToOffsetDateTime(historicProcessInstance.getEndTime()));
+            processInstanceData.setStartTime(dateToOffsetDateTime(historicProcessInstance.getStartTime()));
             processInstanceData.setProcessDefinitionName(historicProcessInstance.getProcessDefinitionName());
             processInstanceData.setBusinessKey(historicProcessInstance.getBusinessKey());
             processInstanceData.setDeleteReason(historicProcessInstance.getDeleteReason());
@@ -541,5 +540,13 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 .listPage(0, activeInstanceIds.size());
 
         return instancesWithIncidents.stream().map(ProcessInstance::getId).toList();
+    }
+
+    OffsetDateTime dateToOffsetDateTime(Date value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value.toInstant().atOffset(ZoneOffset.UTC);
     }
 }

@@ -7,30 +7,31 @@ package io.flowset.control.view.dashboard;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.Div;
-import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.asynctask.UiAsyncTasks;
-import io.jmix.flowui.fragment.Fragment;
-import io.jmix.flowui.fragment.FragmentDescriptor;
-import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.MessageBundle;
-import io.jmix.flowui.view.StandardOutcome;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.ViewComponent;
 import io.flowset.control.entity.ProcessExecutionGraphEntry;
 import io.flowset.control.entity.dashboard.ProcessDefinitionStatistics;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.property.UiProperties;
 import io.flowset.control.service.dashboard.DashboardService;
 import io.flowset.control.service.engine.EngineService;
+import io.flowset.control.service.engine.EngineTimeService;
 import io.flowset.control.service.engine.EngineUiService;
 import io.flowset.control.view.bpmengine.BpmEngineDetailView;
+import io.jmix.core.security.CurrentAuthentication;
+import io.jmix.flowui.DialogWindows;
+import io.jmix.flowui.asynctask.UiAsyncTasks;
+import io.jmix.flowui.fragment.Fragment;
+import io.jmix.flowui.fragment.FragmentDescriptor;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
+import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.flowui.model.InstanceContainer;
+import io.jmix.flowui.view.MessageBundle;
+import io.jmix.flowui.view.StandardOutcome;
+import io.jmix.flowui.view.Subscribe;
+import io.jmix.flowui.view.ViewComponent;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,8 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
 
     @Autowired
     protected EngineService engineService;
+    @Autowired
+    protected EngineTimeService engineTimeService;
     @ViewComponent
     protected Div dashboardContainer;
     @ViewComponent
@@ -86,6 +89,10 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
     protected HorizontalLayout urlTextBox;
     @ViewComponent
     protected Span urlText;
+    @ViewComponent
+    protected Span timeLabel;
+    @ViewComponent
+    protected Span timeText;
 
     @Subscribe
     public void onReady(final ReadyEvent event) {
@@ -141,6 +148,17 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
         if (selectedEngine != null) {
             urlTextBox.setVisible(true);
             urlText.setText(selectedEngine.getBaseUrl());
+
+            String engineTime = engineTimeService.getEngineTimeDefaultFormat(selectedEngine.getId());
+            if(engineTime != null) {
+                timeLabel.setVisible(true);
+                timeText.setVisible(true);
+
+                timeText.setText(engineTime);
+            } else {
+                timeLabel.setVisible(false);
+                timeText.setVisible(false);
+            }
         } else {
             urlTextBox.setVisible(false);
         }

@@ -8,11 +8,12 @@ package io.flowset.control.entity.job;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @JmixEntity
 public class JobData {
@@ -39,10 +40,12 @@ public class JobData {
 
     protected String failedActivityId;
 
-    protected Date dueDate;
+    @PropertyDatatype(value = "engineOffsetDateTime")
+    protected OffsetDateTime dueDate;
 
+    @PropertyDatatype(value = "engineOffsetDateTime")
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date createTime;
+    protected OffsetDateTime createTime;
 
     protected Boolean suspended;
 
@@ -130,19 +133,19 @@ public class JobData {
         this.failedActivityId = failedActivityId;
     }
 
-    public Date getDueDate() {
+    public OffsetDateTime getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(OffsetDateTime dueDate) {
         this.dueDate = dueDate;
     }
 
-    public Date getCreateTime() {
+    public OffsetDateTime getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Date createTime) {
+    public void setCreateTime(OffsetDateTime createTime) {
         this.createTime = createTime;
     }
 

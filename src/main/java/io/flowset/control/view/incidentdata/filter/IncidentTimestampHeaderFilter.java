@@ -9,6 +9,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.QueryParameters;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.grid.DataGridColumn;
 import io.jmix.flowui.model.InstanceContainer;
@@ -53,13 +54,14 @@ public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter implemen
 
     @Override
     public void apply() {
+        final ComponentHelper componentHelper = applicationContext.getBean(ComponentHelper.class);
+
         IncidentFilter incidentFilter = filterDc.getItem();
 
         LocalDateTime dateBefore = this.timestampBeforeField.getValue();
         if (dateBefore != null) {
             ZoneId zoneId = this.timestampBeforeField.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            incidentFilter.setIncidentTimestampBefore(dateBefore.atZone(zone).toOffsetDateTime());
+            incidentFilter.setIncidentTimestampBefore(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(dateBefore, zoneId));
         } else {
             incidentFilter.setIncidentTimestampBefore(null);
         }
@@ -67,8 +69,7 @@ public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter implemen
         LocalDateTime dateAfter = this.timestampAfterField.getValue();
         if (dateAfter != null) {
             ZoneId zoneId = this.timestampAfterField.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            incidentFilter.setIncidentTimestampAfter(dateAfter.atZone(zone).toOffsetDateTime());
+            incidentFilter.setIncidentTimestampAfter(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(dateAfter, zoneId));
         } else {
             incidentFilter.setIncidentTimestampAfter(null);
         }

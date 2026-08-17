@@ -5,8 +5,8 @@
 
 package io.flowset.control.mapper;
 
-import io.jmix.core.Metadata;
 import io.flowset.control.entity.deployment.DeploymentData;
+import io.jmix.core.Metadata;
 import org.camunda.bpm.engine.repository.Deployment;
 import org.camunda.community.rest.client.model.DeploymentDto;
 import org.mapstruct.Mapper;

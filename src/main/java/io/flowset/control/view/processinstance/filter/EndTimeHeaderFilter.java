@@ -11,6 +11,7 @@ import com.vaadin.flow.router.QueryParameters;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
@@ -60,13 +61,14 @@ public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter imp
 
     @Override
     public void apply() {
+        final ComponentHelper componentHelper = applicationContext.getBean(ComponentHelper.class);
+
         ProcessInstanceFilter instanceFilter = filterDc.getItem();
 
         LocalDateTime endTimeBefore = this.endTimeBeforeField.getValue();
         if (endTimeBefore != null) {
             ZoneId zoneId = this.endTimeBeforeField.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            instanceFilter.setEndTimeBefore(endTimeBefore.atZone(zone).toOffsetDateTime());
+            instanceFilter.setEndTimeBefore(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(endTimeBefore, zoneId));
         } else {
             instanceFilter.setEndTimeBefore(null);
         }
@@ -74,8 +76,7 @@ public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter imp
         LocalDateTime endTimeAfter = this.endTimeAfterField.getValue();
         if (endTimeAfter != null) {
             ZoneId zoneId = this.endTimeAfterField.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            instanceFilter.setEndTimeAfter(endTimeAfter.atZone(zone).toOffsetDateTime());
+            instanceFilter.setEndTimeAfter(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(endTimeAfter, zoneId));
         } else {
             instanceFilter.setEndTimeAfter(null);
         }
