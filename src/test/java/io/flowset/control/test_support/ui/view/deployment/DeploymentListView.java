@@ -60,6 +60,9 @@ public class DeploymentListView extends View<DeploymentListView> {
     @TestComponent(path = "bulkRemoveBtn")
     private Button bulkRemoveBtn;
 
+    @TestComponent(path = "excelExportBtn")
+    private Button excelExportBtn;
+
     @TestComponent(path = "pagination")
     private SimplePagination pagination;
 

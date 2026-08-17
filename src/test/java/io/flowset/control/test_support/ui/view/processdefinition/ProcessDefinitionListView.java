@@ -62,6 +62,9 @@ public class ProcessDefinitionListView extends View<ProcessDefinitionListView> {
     @TestComponent(path = "bulkSuspendBtn")
     private Button bulkSuspendBtn;
 
+    @TestComponent(path = "otherActions")
+    private DropdownButton otherActionsBtn;
+
     @TestComponent(path = "processDefinitionsGrid")
     private DataGrid processDefinitionsGrid;
 
@@ -146,6 +149,15 @@ public class ProcessDefinitionListView extends View<ProcessDefinitionListView> {
 
             waitUntilDataLoading();
         }
+    }
+
+    /**
+     * Opens the additional actions dropdown in the view toolbar.
+     *
+     * @return dropdown items with actions
+     */
+    public ElementsCollection openOtherActionsDropdown() {
+        return getVisibleDropdownItems(otherActionsBtn.getDelegate());
     }
 
     /**

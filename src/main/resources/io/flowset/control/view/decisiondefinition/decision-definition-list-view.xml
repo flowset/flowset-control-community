@@ -54,9 +54,10 @@
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <button id="refreshBtn" action="decisionDefinitionsGrid.refresh" themeNames="primary success"/>
             <button id="deployBtn" action="decisionDefinitionsGrid.deploy"/>
+            <button id="excelExportBtn" action="decisionDefinitionsGrid.excelExport"/>
             <simplePagination id="decisionDefinitionPagination" dataLoader="decisionDefinitionsDl"/>
         </hbox>
-        <dataGrid id="decisionDefinitionsGrid"
+        <dataGrid id="decisionDefinitionsGrid" selectionMode="MULTI"
                   width="100%"
                   minHeight="20em"
                   dataContainer="decisionDefinitionsDc"
@@ -65,6 +66,7 @@
                 <action id="refresh" type="list_refresh"/>
                 <action id="deploy" type="control_deployDecisionDefinition" icon="ROCKET" text="msg://decisionDefinitionList.uploadDmnXml"/>
                 <action id="view" type="list_edit" visible="false"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="name" autoWidth="true" flexGrow="1">

@@ -13,6 +13,7 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.batch.BatchStatisticsData;
 import io.flowset.control.entity.filter.BatchFilter;
@@ -26,6 +27,7 @@ import io.flowset.control.view.batch.filter.*;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
+import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.UiComponentUtils;
@@ -66,6 +68,9 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     @Autowired
     protected UiComponents uiComponents;
     @Autowired
+    protected DatatypeFormatter datatypeFormatter;
+
+    @Autowired
     protected ApplicationContext applicationContext;
 
     @ViewComponent
@@ -74,6 +79,9 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     protected InstanceContainer<BatchFilter> activeBatchFilterDc;
     @ViewComponent
     protected DataGrid<BatchStatisticsData> activeBatchesDataGrid;
+
+    @ViewComponent("activeBatchesDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     @ViewComponent
     protected CollectionLoader<BatchData> completedBatchesDl;
@@ -111,7 +119,10 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
         componentHelper.addNoDataGridStateComponents(completedBatchGridEmptyStateBox);
 
         setDefaultSort();
+        initActions();
     }
+
+
 
     @Subscribe
     public void onReady(final ReadyEvent event) {
@@ -142,6 +153,14 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
 
         completedBatchesDataGrid.sort(Collections.singletonList(new GridSortOrder<>(
                 completedBatchesDataGrid.getColumnByKey("startTime"), SortDirection.DESCENDING)));
+    }
+
+    protected void initActions() {
+        excelExportAction.addColumnValueProvider("progress", context -> {
+            BatchStatisticsData entity = context.getEntity();
+            int percent = entity.getProgressPercent();
+            return datatypeFormatter.formatInteger(percent) + "%";
+        });
     }
 
     @Install(to = "activeBatchesDl", target = Target.DATA_LOADER)

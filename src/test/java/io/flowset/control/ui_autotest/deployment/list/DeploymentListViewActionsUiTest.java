@@ -61,6 +61,29 @@ public class DeploymentListViewActionsUiTest extends AbstractCamunda7UiTest {
     }
 
     @Test
+    @DisplayName("Excel action availability on Deployment list view")
+    void givenExistingDeployment_whenOpenDeploymentList_thenExcelActionAvailable() {
+        // given
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/vacationApproval.bpmn");
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        DeploymentListView listView = mainView.openDeploymentListView();
+
+        // then
+        listView.getExcelExportBtn()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openDeploymentsGridContextMenu()
+                .shouldBe(VISIBLE)
+                .find(text("Excel"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
     @DisplayName("Refresh action: data in data grid is updated")
     void givenExistingDeployment_whenClickRefresh_thenGridReloaded() {
         // given
@@ -145,9 +168,10 @@ public class DeploymentListViewActionsUiTest extends AbstractCamunda7UiTest {
         // then
         listView.getRefreshBtn().shouldBe(VISIBLE);
         listView.getBulkRemoveBtn().shouldBe(VISIBLE);
+        listView.getExcelExportBtn().shouldBe(VISIBLE);
 
         listView.openDeploymentsGridContextMenu()
-                .shouldHave(visibleItems("Refresh", "Remove"));
+                .shouldHave(visibleItems("Refresh", "Remove", "Excel"));
     }
 
     @Test

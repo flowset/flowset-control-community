@@ -63,6 +63,12 @@
             <button id="bulkRemoveBtn" action="processDefinitionsGrid.bulkRemove"/>
             <button id="bulkActivateBtn" action="processDefinitionsGrid.bulkActivate"/>
             <button id="bulkSuspendBtn" action="processDefinitionsGrid.bulkSuspend"/>
+            <dropdownButton id="otherActions" icon="COG" dropdownIndicatorVisible="false" themeNames="icon"
+                            width="min-content" minWidth="auto">
+                <items>
+                   <actionItem id="excelExport" ref="processDefinitionsGrid.excelExport"/>
+                </items>
+            </dropdownButton>
             <simplePagination id="processDefinitionPagination" dataLoader="processDefinitionsDl"
                               alignSelf="END"/>
         </hbox>
@@ -82,6 +88,7 @@
                 <action id="bulkSuspend" type="control_bulkSuspendProcessDefinition" text="msg://processDefinitionList.suspend"
                         icon="PAUSE"/>
                 <action id="view" type="list_edit" visible="false"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="name" flexGrow="2">

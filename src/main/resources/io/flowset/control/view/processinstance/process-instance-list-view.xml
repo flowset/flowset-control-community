@@ -29,6 +29,12 @@
             <button id="bulkTerminateBtn" action="processInstancesGrid.bulkTerminate" enabled="false"/>
             <button id="bulkSuspendBtn" action="processInstancesGrid.bulkSuspend" enabled="false"/>
             <button id="bulkActivateBtn" action="processInstancesGrid.bulkActivate" enabled="false"/>
+            <dropdownButton id="otherActions" icon="COG" dropdownIndicatorVisible="false" themeNames="icon"
+                            width="min-content" minWidth="auto">
+                <items>
+                    <actionItem id="excelExport" ref="processInstancesGrid.excelExport"/>
+                </items>
+            </dropdownButton>
             <simplePagination id="processInstancePagination" dataLoader="processInstancesDl"/>
         </hbox>
         <dataGrid id="processInstancesGrid"
@@ -41,6 +47,7 @@
                 <action id="bulkActivate" type="control_bulkActivateProcessInstance" icon="PLAY"/>
                 <action id="bulkSuspend" type="control_bulkSuspendProcessInstance" icon="PAUSE"/>
                 <action id="view" type="list_edit" visible="false"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="id" flexGrow="1" frozen="true">
