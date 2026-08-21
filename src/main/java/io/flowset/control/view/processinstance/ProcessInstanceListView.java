@@ -23,6 +23,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionContainer;
@@ -79,6 +80,8 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     protected UrlQueryParametersFacet urlQueryParameters;
     @ViewComponent
     protected HorizontalLayout modeButtonsGroup;
+    @ViewComponent
+    protected SimplePagination processInstancePagination;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -88,6 +91,7 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         setDefaultSort();
         urlQueryParameters.registerBinder(new ProcessInstanceListQueryParamBinder(modeButtonsGroup, processInstanceFilterDc,
                 this::startLoadData, processInstancesGrid));
+        registerPaginationParameterBinder(processInstancePagination);
         setupBulkActions();
     }
 

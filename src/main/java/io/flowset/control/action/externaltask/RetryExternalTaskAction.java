@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(RetryExternalTaskAction.ID)
-public class RetryExternalTaskAction extends SecuredBaseAction implements ExecutableAction {
+public class RetryExternalTaskAction extends SecuredBaseAction<RetryExternalTaskAction> implements ExecutableAction {
 
     public static final String ID = "control_retryExternalTask";
 

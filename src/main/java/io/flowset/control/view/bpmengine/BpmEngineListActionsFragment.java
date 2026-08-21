@@ -33,7 +33,7 @@ public class BpmEngineListActionsFragment extends FragmentRenderer<HorizontalLay
 
     @Subscribe
     public void onAttachEvent(final AttachEvent event) {
-        markAsDefaultBtn.setIcon(new SvgIcon("icons/bookmark_check.svg"));
+
     }
 
     @Override

@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(TerminateProcessInstanceAction.ID)
-public class TerminateProcessInstanceAction extends SecuredBaseAction implements ExecutableAction {
+public class TerminateProcessInstanceAction extends SecuredBaseAction<TerminateProcessInstanceAction> implements ExecutableAction {
 
     public static final String ID = "control_terminateProcessInstance";
 

@@ -31,6 +31,7 @@ import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.component.tabsheet.JmixTabSheet;
 import io.jmix.flowui.facet.Timer;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
@@ -93,6 +94,11 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     @ViewComponent
     protected HorizontalLayout lookupActions;
 
+    @ViewComponent
+    protected SimplePagination batchesPagination;
+    @ViewComponent
+    protected SimplePagination completedBatchesPagination;
+
     protected boolean completedTabFirstSelection = true;
 
     @Subscribe
@@ -105,8 +111,7 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
         initFilters();
         initDataGridHeaderRows();
 
-        urlQueryParameters.registerBinder(new ActiveBatchListQueryParamBinder(activeBatchesDataGrid, tabsheet, this::startLoadData));
-        urlQueryParameters.registerBinder(new CompletedBatchListQueryParamBinder(completedBatchesDataGrid, this::startLoadCompletedBatches));
+        registerQueryParamBinders();
 
         componentHelper.addNoDataGridStateComponents(completedBatchGridEmptyStateBox);
 
@@ -251,6 +256,14 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     @Override
     protected void loadData() {
         activeBatchesDl.load();
+    }
+
+    protected void registerQueryParamBinders() {
+        urlQueryParameters.registerBinder(new ActiveBatchListQueryParamBinder(activeBatchesDataGrid, tabsheet, this::startLoadData));
+        urlQueryParameters.registerBinder(new CompletedBatchListQueryParamBinder(completedBatchesDataGrid, this::startLoadCompletedBatches));
+        registerPaginationParameterBinder(batchesPagination);
+        registerPaginationParameterBinder(completedBatchesPagination, null, "completedFirstResult",
+                "completedMaxResults");
     }
 
     protected void initFilters() {

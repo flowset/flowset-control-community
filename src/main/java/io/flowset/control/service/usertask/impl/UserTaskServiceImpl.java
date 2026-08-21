@@ -24,7 +24,7 @@ import org.camunda.community.rest.client.api.TaskApiClient;
 import org.camunda.community.rest.client.model.*;
 import org.camunda.community.rest.impl.RemoteTaskService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

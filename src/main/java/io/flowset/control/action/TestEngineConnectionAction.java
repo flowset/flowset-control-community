@@ -25,11 +25,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 @ActionType(TestEngineConnectionAction.ID)
-public class TestEngineConnectionAction extends SecuredBaseAction {
+public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConnectionAction> {
     public static final String ID = "control_testEngineConnection";
 
     private BpmEngine engine;
@@ -155,10 +155,17 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
     }
 
     private boolean isValidUrl(String url) {
+        if (Strings.isNullOrEmpty(url)) {
+            return false;
+        }
         try {
-            new URL(url).toURI();
+            URI uri = new URI(url);
+            if (!uri.isAbsolute()) {
+                return false;
+            }
+            uri.toURL();
             return true;
-        } catch (URISyntaxException | MalformedURLException e) {
+        } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
             return false;
         }
     }

@@ -49,12 +49,13 @@ import io.flowset.control.service.job.JobService;
 import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.service.variable.VariableLoadContext;
 import io.flowset.control.service.variable.VariableService;
+import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
 import io.flowset.control.view.processvariable.VariableInstanceDataDetail;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -159,22 +160,22 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     public void onRuntimeTabsheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
         Tab selectedTab = event.getSelectedTab();
         String tabId = selectedTab != null ? selectedTab.getId().orElse(null) : null;
-        if (StringUtils.equals(tabId, USER_TASKS_TAB_ID)) {
+        if (Strings.CS.equals(tabId, USER_TASKS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof RuntimeUserTasksTabFragment userTasksFragment) {
                 userTasksFragment.refreshIfChanged(getSelectedActivityInstanceId());
             }
-        } else if (StringUtils.equals(tabId, JOBS_TAB_ID)) {
+        } else if (Strings.CS.equals(tabId, JOBS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof JobsTabFragment jobsTabFragment) {
                 jobsTabFragment.refreshIfRequired();
             }
-        } else if (StringUtils.equals(tabId, EXTERNAL_TASKS_TAB_ID)) {
+        } else if (Strings.CS.equals(tabId, EXTERNAL_TASKS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof ExternalTasksTabFragment externalTasksTabFragment) {
                 externalTasksTabFragment.refreshIfChanged(getSelectedActivityId());
             }
-        } else if (StringUtils.equals(tabId, INCIDENTS_TAB_ID)) {
+        } else if (Strings.CS.equals(tabId, INCIDENTS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof RuntimeIncidentsTabFragment incidentsTabFragment) {
                 incidentsTabFragment.refreshIfChanged(getSelectedActivityId());
@@ -434,21 +435,18 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         runtimeVariablesGrid.sort(gridSortOrders);
     }
 
-    @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initUserTasksTab() {
         Tab userTasksTab = createTab(USER_TASKS_TAB_ID, "tasksTabCaption", VaadinIcon.USER_CARD);
         runtimeTabsheet.add(userTasksTab, componentHelper.createLazyTabContent(this::createUserTasksFragment),
                 USER_TASKS_TAB_IDX);
     }
 
-    @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initJobsTab() {
         Tab jobsTab = createTab(JOBS_TAB_ID, "jobsTabCaption", VaadinIcon.COGS);
         runtimeTabsheet.add(jobsTab, componentHelper.createLazyTabContent(() ->
                 fragments.create(getParentController(), JobsTabFragment.class)), JOBS_TAB_IDX);
     }
 
-    @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initExternalTasksTab() {
         Tab externalTasksTab = createTab(EXTERNAL_TASKS_TAB_ID, "externalTasksTabCaption", VaadinIcon.CLUSTER);
         runtimeTabsheet.add(externalTasksTab, componentHelper.createLazyTabContent(() ->
@@ -514,6 +512,9 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     @Nullable
     protected Component getTabContent(Tab tab) {
         Component contentByTab = runtimeTabsheet.getContentByTab(tab);
+        if (contentByTab instanceof LazyTabContent lazyTabContent) {
+            return lazyTabContent.getContent();
+        }
         return contentByTab != null
                 ? contentByTab.getChildren()
                 .findFirst()

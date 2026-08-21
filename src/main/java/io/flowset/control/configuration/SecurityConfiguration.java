@@ -18,4 +18,13 @@ public class SecurityConfiguration {
 
         return http.build();
     }
+
+    @Bean
+    @Order(JmixSecurityFilterChainOrder.CUSTOM)
+    public SecurityFilterChain publicResourcesFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/themes/**", "/icons/**", "/lumo/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+        return http.build();
+    }
 }

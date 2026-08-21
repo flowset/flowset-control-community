@@ -17,7 +17,6 @@ import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.ViewEngineConnectionFailedException;
@@ -255,10 +254,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
     }
 
     private Component createImageViewer(String fileName, byte[] byteArrayContent) {
-        Image image = new Image();
-        image.setSrc(new StreamResource(fileName, () -> new ByteArrayInputStream(byteArrayContent)));
-
-        return image;
+        return new Image(byteArrayContent, fileName);
     }
 
     private void showForm(Resource deploymentResourceData) {

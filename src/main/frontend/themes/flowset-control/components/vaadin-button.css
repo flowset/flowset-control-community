@@ -3,26 +3,28 @@
  * Use is subject to license terms.
  */
 
-:host([theme~='link']) .vaadin-button-container {
+vaadin-button[theme~='link'] {
     justify-content: start;
     max-width: 100%;
-    text-overflow: ellipsis;
     overflow: hidden;
 }
 
-:host([theme~='link'])[active] {
+vaadin-button[theme~='link'][active] {
     --vaadin-button-background:  transparent !important;
 }
 
-:host([theme~='link'])::part(label) {
-    overflow: hidden!important;
+vaadin-button[theme~='link']::part(label) {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-:host([theme~='link']) [part='label']:hover {
+vaadin-button[theme~='link']:hover::part(label) {
     text-decoration: underline;
 }
 
-:host([disabled][theme~='link']) {
+vaadin-button[disabled][theme~='link'] {
     color: var(--lumo-body-text-color);
     font-weight: normal !important;
 }

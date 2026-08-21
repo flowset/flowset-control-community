@@ -6,7 +6,7 @@
 package io.flowset.control.service.engine;
 
 import io.flowset.control.entity.engine.BpmEngine;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 import java.util.UUID;

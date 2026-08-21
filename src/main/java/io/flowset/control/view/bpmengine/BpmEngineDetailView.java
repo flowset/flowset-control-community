@@ -27,6 +27,7 @@ import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.service.engine.EngineService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,7 +90,7 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
         }
 
         String buildType = buildProperties.get("buildType");
-        String hostExample = StringUtils.equals(buildType, "docker") ? "http://host.docker.internal:8080/engine-rest"
+        String hostExample = Strings.CS.equals(buildType, "docker") ? "http://host.docker.internal:8080/engine-rest"
                 : "http://localhost:8080/engine-rest";
 
         baseUrlField.setHelperText(messageBundle.formatMessage("baseUrlField.helperText", hostExample));

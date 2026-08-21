@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(SuspendJobAction.ID)
-public class SuspendJobAction extends SecuredBaseAction implements ExecutableAction {
+public class SuspendJobAction extends SecuredBaseAction<SuspendJobAction> implements ExecutableAction {
 
     public static final String ID = "control_suspendJob";
 

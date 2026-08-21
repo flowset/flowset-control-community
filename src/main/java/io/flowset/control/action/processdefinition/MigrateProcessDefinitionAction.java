@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(MigrateProcessDefinitionAction.ID)
-public class MigrateProcessDefinitionAction extends SecuredBaseAction implements ExecutableAction {
+public class MigrateProcessDefinitionAction extends SecuredBaseAction<MigrateProcessDefinitionAction> implements ExecutableAction {
 
     public static final String ID = "control_migrateProcessDefinition";
 

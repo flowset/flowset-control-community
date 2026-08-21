@@ -3,13 +3,18 @@ package io.flowset.control.view;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.facet.urlqueryparameters.ControlPaginationUrlQueryParametersBinder;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.Facets;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.Timer;
+import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.view.StandardListView;
+import io.jmix.flowui.view.navigation.UrlParamSerializer;
 import org.apache.commons.collections4.CollectionUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -36,10 +41,13 @@ public abstract class AbstractListViewWithDelayedLoad<V> extends StandardListVie
 
     @Autowired
     protected ComponentHelper componentHelper;
+    @Autowired
+    protected UrlParamSerializer urlParamSerializer;
 
     protected boolean isLoading = false;
     protected String errorMessage;
     protected boolean hasData = false;
+    protected boolean delayedLoadInProgress = false;
 
     protected Timer dataLoadTimer;
     protected VerticalLayout emptyStateBox;
@@ -76,14 +84,71 @@ public abstract class AbstractListViewWithDelayedLoad<V> extends StandardListVie
 
         emptyStateBox = getContent().findComponent(GRID_EMPTY_CONTENT_DEFAULT_ID)
                 .map(component -> (VerticalLayout) component)
-                .orElseThrow(() -> new IllegalStateException("Unable to find empty grid component in %s by id %s".formatted(getClass(), GRID_EMPTY_CONTENT_DEFAULT_ID)));
+                .orElseThrow(() -> new IllegalStateException("Unable to find empty grid component in %s by id %s"
+                        .formatted(getClass(), GRID_EMPTY_CONTENT_DEFAULT_ID)));
+
+    }
+
+    /**
+     * Registers a {@link ControlPaginationUrlQueryParametersBinder} for the given pagination component.
+     * Use this method instead of the {@code pagination} element of the {@code urlQueryParameters} facet
+     * in the view XML descriptor.
+     *
+     * @param paginationComponent a pagination component to bind
+     */
+    protected void registerPaginationParameterBinder(SimplePagination paginationComponent) {
+        registerPaginationParameterBinder(paginationComponent, null, null, null);
+    }
+
+    /**
+     * Same as {@link #registerPaginationParameterBinder(SimplePagination)}, but with a custom binder id
+     * and URL query parameter names.
+     *
+     * @param paginationComponent  a pagination component to bind
+     * @param binderId             an identifier of the binder
+     * @param firstResultParamName a name of the URL query parameter for the first result
+     * @param maxResultsParamName  a name of the URL query parameter for the max results
+     */
+    protected void registerPaginationParameterBinder(SimplePagination paginationComponent,
+                                                     @Nullable String binderId,
+                                                     @Nullable String firstResultParamName,
+                                                     @Nullable String maxResultsParamName) {
+        UrlQueryParametersFacet facet = getViewFacets()
+                .getFacets()
+                .filter(UrlQueryParametersFacet.class::isInstance)
+                .map(UrlQueryParametersFacet.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("%s facet is not found in %s"
+                        .formatted(UrlQueryParametersFacet.NAME, getClass())));
+
+        ControlPaginationUrlQueryParametersBinder binder = new ControlPaginationUrlQueryParametersBinder(
+                paginationComponent, urlParamSerializer, this::isDelayedLoadInProgress);
+        binder.setId(binderId);
+        binder.setFirstResultParam(firstResultParamName);
+        binder.setMaxResultsParam(maxResultsParamName);
+
+        facet.registerBinder(binder);
+        binder.saveInitialState();
     }
 
     /**
      * Loads data by timer action.
      */
     protected void handleDataLoading() {
-        loadData();
+        delayedLoadInProgress = true;
+        try {
+            loadData();
+        } finally {
+            delayedLoadInProgress = false;
+        }
+    }
+
+    /**
+     * @return {@code true} if a data loading initiated by the view itself, not by a user interaction,
+     * is in progress
+     */
+    public boolean isDelayedLoadInProgress() {
+        return delayedLoadInProgress;
     }
 
     /**

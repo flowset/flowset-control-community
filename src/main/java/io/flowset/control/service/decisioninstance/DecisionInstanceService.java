@@ -3,7 +3,7 @@ package io.flowset.control.service.decisioninstance;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
 import io.flowset.control.security.SecuredEntityLoad;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

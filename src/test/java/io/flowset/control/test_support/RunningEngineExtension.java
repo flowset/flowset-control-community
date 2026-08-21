@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.utility.DockerImageName;
 
@@ -65,7 +65,7 @@ public class RunningEngineExtension implements BeforeAllCallback, BeforeEachCall
         if (isSharedEngineEnabled) {
             ExtensionContext.Store store = context.getStore(NAMESPACE);
 
-            ContainerWrapper<?> engineContainerWrapper = store.getOrComputeIfAbsent(SHARED_ENGINE_KEY_PREFIX, k -> createContainer(context), ContainerWrapper.class);
+            ContainerWrapper<?> engineContainerWrapper = store.computeIfAbsent(SHARED_ENGINE_KEY_PREFIX, k -> createContainer(context), ContainerWrapper.class);
             EngineContainer<?> engineContainer = engineContainerWrapper.getContainer();
             injectRunningEngineField(testClass, null, ModifierSupport::isStatic, engineContainer);
         }
@@ -300,7 +300,7 @@ public class RunningEngineExtension implements BeforeAllCallback, BeforeEachCall
     }
 
     protected ContainerWrapper<?> initLocalContainer(ExtensionContext context, ExtensionContext.Store store, Class<?> testClass) {
-        ContainerWrapper<?> engineContainerWrapper = store.getOrComputeIfAbsent(LOCAL_ENGINE_KEY_PREFIX, k -> createContainer(context), ContainerWrapper.class);
+        ContainerWrapper<?> engineContainerWrapper = store.computeIfAbsent(LOCAL_ENGINE_KEY_PREFIX, k -> createContainer(context), ContainerWrapper.class);
 
         EngineContainer<?> engineContainer = engineContainerWrapper.getContainer();
         Object testInstance = context.getRequiredTestInstance();

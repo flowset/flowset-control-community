@@ -26,7 +26,7 @@ import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.view.bpmengine.EngineEnvironmentBadgeFragment;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.vaadin.addons.componentfactory.spinner.Spinner;
 
 @FragmentDescriptor("engine-status-badge-fragment.xml")

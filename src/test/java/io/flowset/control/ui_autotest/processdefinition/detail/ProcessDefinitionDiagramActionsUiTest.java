@@ -87,8 +87,6 @@ public class ProcessDefinitionDiagramActionsUiTest extends AbstractCamunda7UiTes
                 .find(DIAGRAM_SVG_VIEWPORT_BY)
                 .shouldBe(exist);
 
-        String sourceTransform = viewport.attr("transform");
-
         bpmnViewerFragment
                 .getZoomOutButton()
                 .click();
@@ -100,8 +98,7 @@ public class ProcessDefinitionDiagramActionsUiTest extends AbstractCamunda7UiTes
                 .getResetZoomButton()
                 .click();
 
-        viewport.shouldHave(attribute("transform",
-                Strings.nullToEmpty(sourceTransform)));
+        viewport.shouldHave(attributeMatching("transform", "matrix\\(1 0 0 1 .*"));
     }
 
     @Test

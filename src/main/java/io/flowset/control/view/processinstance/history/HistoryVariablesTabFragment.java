@@ -31,7 +31,7 @@ import io.flowset.control.service.variable.VariableLoadContext;
 import io.flowset.control.service.variable.VariableService;
 import io.flowset.control.view.processinstance.event.HistoryVariableCountUpdateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;

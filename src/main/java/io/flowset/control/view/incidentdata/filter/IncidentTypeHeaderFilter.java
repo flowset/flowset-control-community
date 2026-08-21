@@ -20,7 +20,7 @@ import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
 import io.flowset.control.view.incidentdata.IncidentHeaderFilter;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.camunda.bpm.engine.runtime.Incident;
 
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class IncidentTypeHeaderFilter extends IncidentHeaderFilter implements Ha
     @Override
     public void apply() {
         String value = incidentTypeGroup.getValue();
-        if (StringUtils.equals(value, CUSTOM_TYPE)) {
+        if (Strings.CS.equals(value, CUSTOM_TYPE)) {
             filterDc.getItem().setIncidentType(customTypeField.getValue());
         } else {
             filterDc.getItem().setIncidentType(value);
@@ -71,7 +71,7 @@ public class IncidentTypeHeaderFilter extends IncidentHeaderFilter implements Ha
         if (typeParam == null) {
             incidentTypeGroup.clear();
             customTypeField.clear();
-        } else if (StringUtils.equalsAny(typeParam, Incident.FAILED_JOB_HANDLER_TYPE, Incident.EXTERNAL_TASK_HANDLER_TYPE)) {
+        } else if (Strings.CS.equalsAny(typeParam, Incident.FAILED_JOB_HANDLER_TYPE, Incident.EXTERNAL_TASK_HANDLER_TYPE)) {
             incidentTypeGroup.setValue(typeParam);
             customTypeField.clear();
         } else {
@@ -85,7 +85,7 @@ public class IncidentTypeHeaderFilter extends IncidentHeaderFilter implements Ha
     public Map<String, String> getQueryParamValues() {
         Map<String, String> paramValues = new HashMap<>();
         String value = incidentTypeGroup.getValue();
-        if (StringUtils.equals(value, CUSTOM_TYPE)) {
+        if (Strings.CS.equals(value, CUSTOM_TYPE)) {
             paramValues.put(TYPE_FILTER_PARAM, customTypeField.getTypedValue());
         } else {
             paramValues.put(TYPE_FILTER_PARAM, value);

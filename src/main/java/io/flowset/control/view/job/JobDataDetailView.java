@@ -29,7 +29,7 @@ import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
 import io.flowset.control.service.job.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 

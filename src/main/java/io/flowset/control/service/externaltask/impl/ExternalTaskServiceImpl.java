@@ -27,7 +27,7 @@ import org.camunda.community.rest.client.model.ExternalTaskDto;
 import org.camunda.community.rest.client.model.SetRetriesForExternalTasksDto;
 import org.camunda.community.rest.impl.RemoteExternalTaskService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

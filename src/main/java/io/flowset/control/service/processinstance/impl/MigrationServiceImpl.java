@@ -16,7 +16,7 @@ import org.camunda.community.rest.client.api.MigrationApiClient;
 import org.camunda.community.rest.client.model.*;
 import org.camunda.community.rest.impl.RemoteRuntimeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -77,7 +77,9 @@ public class MigrationServiceImpl implements MigrationService {
                         .orElse(List.of());
                 return instructionReports
                         .stream()
-                        .flatMap(validationInstruction -> validationInstruction.getFailures().stream())
+                        .flatMap(validationInstruction -> Optional.ofNullable(validationInstruction.getFailures())
+                                .orElseGet(List::of)
+                                .stream())
                         .toList();
             }
             log.error("Error on process instances migration: source process definition {}, target process definition {}", srcProcessDefinitionId, targetProcessDefinitionId);

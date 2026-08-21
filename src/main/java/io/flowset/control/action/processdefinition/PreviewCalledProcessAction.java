@@ -16,7 +16,7 @@ import io.jmix.flowui.action.SecuredBaseAction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(PreviewCalledProcessAction.ID)
-public class PreviewCalledProcessAction extends SecuredBaseAction implements ExecutableAction {
+public class PreviewCalledProcessAction extends SecuredBaseAction<PreviewCalledProcessAction> implements ExecutableAction {
 
     public static final String ID = "control_previewCalledProcess";
 

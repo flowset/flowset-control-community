@@ -32,6 +32,7 @@ import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionLoader;
@@ -73,6 +74,8 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
 
     @ViewComponent
     protected DataGrid<HistoricDecisionInstanceShortData> decisionInstancesDataGrid;
+    @ViewComponent
+    protected SimplePagination pagination;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
     protected Map<String, DecisionDefinitionData> decisionDefinitionsMap = new HashMap<>();
@@ -83,7 +86,7 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
         initFilter();
         setDefaultSort();
         initDataGridHeaderRow();
-        urlQueryParameters.registerBinder(new DecisionInstanceListQueryParamBinder(decisionInstancesDataGrid, this::startLoadData));
+        registerQueryParamBinders();
     }
 
     @Supply(to = "decisionInstancesDataGrid.decisionDefinitionId", subject = "renderer")
@@ -135,6 +138,11 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
     @Override
     protected void loadData() {
         decisionInstancesDl.load();
+    }
+
+    protected void registerQueryParamBinders() {
+        urlQueryParameters.registerBinder(new DecisionInstanceListQueryParamBinder(decisionInstancesDataGrid, this::startLoadData));
+        registerPaginationParameterBinder(pagination);
     }
 
     protected void loadDecisionDefinitions(List<HistoricDecisionInstanceShortData> decisionInstances) {

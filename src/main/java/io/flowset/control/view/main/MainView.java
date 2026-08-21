@@ -19,7 +19,6 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.app.main.StandardMainView;
 import io.jmix.flowui.asynctask.UiAsyncTasks;
 import io.jmix.flowui.facet.Timer;
-import io.jmix.flowui.kit.component.main.ListMenu;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import io.jmix.flowui.view.navigation.ViewNavigationSupport;
@@ -188,21 +187,6 @@ public class MainView extends StandardMainView {
         menu.addMenuItem(new ControlListMenu.GroupLabelMenuItem("supportLabel")
                         .withChildrenItems("about")
                         .withTitle(messageBundle.getMessage("menu.supportGroup.label")));
-
-        ListMenu.MenuItem decisionsMenu = menu.getMenuItem("decisions");
-        if (decisionsMenu != null) {
-            decisionsMenu.setPrefixComponent(new SvgIcon("icons/table.svg"));
-        }
-
-        ListMenu.MenuItem decisionInstancesMenu = menu.getMenuItem("decisionInstances");
-        if (decisionInstancesMenu != null) {
-            decisionInstancesMenu.setPrefixComponent(new SvgIcon("icons/table_view.svg"));
-        }
-
-        ListMenu.MenuItem dashboardMenu = menu.getMenuItem("dashboard");
-        if (dashboardMenu != null) {
-            dashboardMenu.setPrefixComponent(new SvgIcon("icons/dashboard.svg"));
-        }
     }
 
     protected void initInitialLayout() {

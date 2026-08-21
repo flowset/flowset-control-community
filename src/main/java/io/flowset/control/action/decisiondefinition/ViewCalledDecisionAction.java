@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(ViewCalledDecisionAction.ID)
-public class ViewCalledDecisionAction extends SecuredBaseAction {
+public class ViewCalledDecisionAction extends SecuredBaseAction<ViewCalledDecisionAction> {
 
     public static final String ID = "control_viewCalledDecision";
 

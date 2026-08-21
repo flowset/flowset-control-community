@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ActivateProcessDefinitionAction.ID)
-public class ActivateProcessDefinitionAction extends SecuredBaseAction implements ExecutableAction {
+public class ActivateProcessDefinitionAction extends SecuredBaseAction<ActivateProcessDefinitionAction> implements ExecutableAction {
 
     public static final String ID = "control_activateProcessDefinition";
 

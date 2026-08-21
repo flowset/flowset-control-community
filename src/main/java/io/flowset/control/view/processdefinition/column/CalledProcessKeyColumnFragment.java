@@ -26,18 +26,11 @@ public class CalledProcessKeyColumnFragment extends FragmentRenderer<HorizontalL
     @ViewComponent
     protected JmixButton keyBtn;
     @ViewComponent
-    protected JmixButton previewBtn;
-    @ViewComponent
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
     @ViewComponent
     protected ViewCalledProcessAction keyAction;
     @ViewComponent
     protected PreviewCalledProcessAction previewAction;
-
-    @Subscribe
-    public void onReady(final ReadyEvent event) {
-        previewBtn.setIcon(new SvgIcon("icons/preview.svg"));
-    }
 
     @Override
     public void setItem(CalledProcessReferenceData item) {

@@ -22,7 +22,7 @@ import java.util.Collections;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ReassignUserTaskAction.ID)
-public class ReassignUserTaskAction extends SecuredBaseAction implements ExecutableAction {
+public class ReassignUserTaskAction extends SecuredBaseAction<ReassignUserTaskAction> implements ExecutableAction {
 
     public static final String ID = "control_reassignUserTask";
 

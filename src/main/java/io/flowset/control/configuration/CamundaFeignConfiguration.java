@@ -31,7 +31,7 @@ import java.util.Optional;
 
 @Configuration
 @EnableCamundaRestClient
-@Import({FeignClientsConfiguration.class, FeignClientConfiguration.class})
+@Import({FeignClientConfiguration.class, FeignClientsConfiguration.class})
 public class CamundaFeignConfiguration {
 
     @Bean("control_FeignClientProvider")

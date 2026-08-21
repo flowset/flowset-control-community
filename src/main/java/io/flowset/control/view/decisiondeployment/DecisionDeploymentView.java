@@ -147,7 +147,7 @@ public class DecisionDeploymentView extends AbstractResourceDeploymentView {
                         new DialogAction(DialogAction.Type.YES)
                                 .withHandler(e -> deployBpmnXml(uploadedXml))
                                 .withText(messageBundle.getMessage("deploy"))
-                                .withIcon(VaadinIcon.ROCKET)
+                                .withIcon(VaadinIcon.ROCKET.create())
                                 .withVariant(ActionVariant.PRIMARY)
                         ,
                         new DialogAction(DialogAction.Type.CANCEL)
@@ -172,9 +172,10 @@ public class DecisionDeploymentView extends AbstractResourceDeploymentView {
     }
 
     @Subscribe("resourceUploadField")
-    public void onBpmnXmlUploadFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileUploadField> event) {
-        if (resourceUploadField.getValue() != null) {
-            String decisionDefinitionXml = new String(resourceUploadField.getValue(), StandardCharsets.UTF_8);
+    public void onBpmnXmlUploadFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileUploadField, byte[]> event) {
+        byte[] uploadedValue = resourceUploadField.getValue();
+        if (uploadedValue != null) {
+            String decisionDefinitionXml = new String(uploadedValue, StandardCharsets.UTF_8);
 
             viewerFragment.initViewer();
             viewerFragment.setDmnXml(decisionDefinitionXml);

@@ -124,3 +124,12 @@ vaadin-button.data-grid-column-action > vaadin-icon {
     top: 0;
     left: 0;
 }
+
+
+vaadin-split-layout {
+    min-width: 0;
+}
+
+vaadin-split-layout > * {
+    overflow: auto;
+}
