@@ -11,7 +11,7 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import io.jmix.securityflowui.view.roleassignment.RoleAssignmentView;
 
-@Route(value = "sec/roleassignment/:username", layout = DefaultMainViewParent.class)
+@Route(value = "sec/role-assignment/:username", layout = DefaultMainViewParent.class)
 @ViewController(id = "roleAssignmentView")
 @ViewDescriptor(path = "control-role-assignment-view.xml")
 public class ControlRoleAssignmentView extends RoleAssignmentView {

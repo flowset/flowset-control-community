@@ -36,7 +36,7 @@ import io.jmix.flowui.view.View;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -262,8 +262,7 @@ public class ComponentHelper {
         return tabContent;
     }
 
-    @Nullable
-    protected <E> HeaderRow.HeaderCell findCell(HeaderRow headerRow, DataGridColumn<E> column) {
+    protected <E> HeaderRow.@Nullable HeaderCell findCell(HeaderRow headerRow, DataGridColumn<E> column) {
         try {
             return headerRow.getCell(column);
         } catch (IllegalArgumentException e) {

@@ -23,7 +23,7 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 /**
  * Base class for actions that open a detail view for the entity with the configured identifier.
  */
-public abstract class ViewEntityDetailAction extends SecuredBaseAction {
+public abstract class ViewEntityDetailAction<A extends ViewEntityDetailAction<A>> extends SecuredBaseAction<A> {
 
     protected ViewNavigators viewNavigators;
     protected final Class<?> entityClass;

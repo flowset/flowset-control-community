@@ -26,7 +26,7 @@ import io.jmix.flowui.view.ViewControllerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(CopyEntityPropertyToClipboardAction.ID)
-public class CopyEntityPropertyToClipboardAction extends BaseAction {
+public class CopyEntityPropertyToClipboardAction extends BaseAction<CopyEntityPropertyToClipboardAction> {
 
     public static final String ID = "control_copyEntityPropertyToClipboard";
 

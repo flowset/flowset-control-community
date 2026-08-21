@@ -49,8 +49,7 @@ public class ProcessDefinitionListViewRemoveUiTest extends AbstractCamunda7UiTes
 
         DataGrid.Row processRow = listView.getRowByProcessKey("vacation_approval");
 
-        listView.openOtherActions(processRow)
-                .find(text("Remove")).click();
+        listView.clickOtherAction(processRow, "Remove");
 
         $j(DeleteProcessDefinitionDialog.class)
                 .exists()
@@ -75,8 +74,7 @@ public class ProcessDefinitionListViewRemoveUiTest extends AbstractCamunda7UiTes
         ProcessDefinitionListView listView = mainView.openProcessListView();
 
         DataGrid.Row processRow = listView.getRowByProcessKey("vacation_approval");
-        listView.openOtherActions(processRow)
-                .find(text("Remove")).click();
+        listView.clickOtherAction(processRow, "Remove");
 
         $j(DeleteProcessDefinitionDialog.class)
                 .exists()

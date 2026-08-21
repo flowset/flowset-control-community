@@ -61,7 +61,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -156,14 +156,9 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
             relatedEntitiesTabSheet.getTabAt(RUNTIME_TAB_IDX).setEnabled(false);
             Tab historyTab = relatedEntitiesTabSheet.getTabAt(HISTORY_TAB_IDX);
             relatedEntitiesTabSheet.setSelectedTab(historyTab);
-            //force init a tab content because an attach event is not triggered
-            LazyTabContent contentByTab = (LazyTabContent) relatedEntitiesTabSheet.getContentByTab(historyTab);
-            if (contentByTab != null) {
-                contentByTab.init();
-                Component tabContent = contentByTab.getChildren().findFirst().orElse(null);
-                if (tabContent instanceof HistoryTabFragment historyTabFragment) {
-                    historyTabFragment.refresh();
-                }
+            Component tabContent = getTabContent(historyTab);
+            if (tabContent instanceof HistoryTabFragment historyTabFragment) {
+                historyTabFragment.refresh();
             }
         }
         initBpmnViewerFragment();
@@ -178,7 +173,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     public void onRelatedEntitiesTabSheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
         Tab selectedTab = event.getSelectedTab();
         String selectedTabId = selectedTab != null ? selectedTab.getId().orElse(null) : null;
-        if (StringUtils.equals(selectedTabId, HISTORY_TAB_ID)) {
+        if (org.apache.commons.lang3.Strings.CS.equals(selectedTabId, HISTORY_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof HistoryTabFragment historyTabFragment) {
                 historyTabFragment.refresh();
@@ -386,6 +381,9 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     @Nullable
     protected Component getTabContent(Tab tab) {
         Component contentByTab = relatedEntitiesTabSheet.getContentByTab(tab);
+        if (contentByTab instanceof LazyTabContent lazyTabContent) {
+            return lazyTabContent.getContent();
+        }
         return contentByTab != null
                 ? contentByTab
                 .getChildren()

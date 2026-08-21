@@ -61,8 +61,7 @@ public class ProcessDefinitionListViewMigrateUiTest extends AbstractCamunda7UiTe
 
         DataGrid.Row processRow = listView.getRowByProcess("visitPlanning", sourceDefinition.getVersion().toString());
 
-        listView.openOtherActions(processRow)
-                .find(text("Migrate")).click();
+        listView.clickOtherAction(processRow, "Migrate");
 
         ProcessInstanceMigrationDialog dialog = $j(ProcessInstanceMigrationDialog.class)
                 .exists()
@@ -103,8 +102,7 @@ public class ProcessDefinitionListViewMigrateUiTest extends AbstractCamunda7UiTe
         ProcessDefinitionListView listView = mainView.openProcessListView();
         DataGrid.Row processRow = listView.getRowByProcess("visitPlanning", sourceDefinition.getVersion().toString());
 
-        listView.openOtherActions(processRow)
-                .find(text("Migrate")).click();
+        listView.clickOtherAction(processRow, "Migrate");
 
         ProcessInstanceMigrationDialog dialog = $j(ProcessInstanceMigrationDialog.class)
                 .exists()

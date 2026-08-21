@@ -23,7 +23,7 @@ import io.jmix.flowui.component.grid.DataGridColumn;
 import io.jmix.flowui.model.InstanceContainer;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;

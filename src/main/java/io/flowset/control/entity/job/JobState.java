@@ -2,7 +2,7 @@ package io.flowset.control.entity.job;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
 public enum JobState implements EnumClass<String> {

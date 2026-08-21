@@ -45,7 +45,7 @@ public class ExternalTaskData {
 
     protected String topicName;
 
-    protected Integer priority;
+    protected Long priority;
 
     protected String businessKey;
 
@@ -65,11 +65,11 @@ public class ExternalTaskData {
         this.businessKey = businessKey;
     }
 
-    public Integer getPriority() {
+    public Long getPriority() {
         return priority;
     }
 
-    public void setPriority(Integer priority) {
+    public void setPriority(Long priority) {
         this.priority = priority;
     }
 

@@ -17,7 +17,7 @@ import io.flowset.control.service.job.JobService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.camunda.bpm.engine.runtime.Incident;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;

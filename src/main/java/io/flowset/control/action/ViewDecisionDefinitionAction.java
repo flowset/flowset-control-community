@@ -9,7 +9,7 @@ import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.jmix.flowui.action.ActionType;
 
 @ActionType(ViewDecisionDefinitionAction.ID)
-public class ViewDecisionDefinitionAction extends ViewEntityDetailAction {
+public class ViewDecisionDefinitionAction extends ViewEntityDetailAction<ViewDecisionDefinitionAction> {
 
     public static final String ID = "control_viewDecisionDefinition";
 

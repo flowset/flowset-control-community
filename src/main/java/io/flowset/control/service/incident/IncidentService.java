@@ -10,7 +10,7 @@ import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.incident.IncidentData;
 import io.flowset.control.dto.ActivityIncidentData;
 import io.flowset.control.security.SecuredEntityLoad;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

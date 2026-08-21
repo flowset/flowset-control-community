@@ -9,7 +9,7 @@ import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.batch.BatchStatisticsData;
 import io.flowset.control.entity.filter.BatchFilter;
 import io.flowset.control.security.SecuredEntityLoad;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

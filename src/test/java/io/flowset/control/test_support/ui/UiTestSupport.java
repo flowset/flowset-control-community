@@ -17,21 +17,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
+import static com.codeborne.selenide.Condition.attribute;
 import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Selectors.shadowCss;
-import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.$$;
-import static io.flowset.control.test_support.ui.TagNames.MENU_BAR_LIST_BOX;
-import static io.flowset.control.test_support.ui.TagNames.VAADIN_LOADING_INDICATOR;
+import static com.codeborne.selenide.Selenide.*;
+import static io.flowset.control.test_support.ui.TagNames.*;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.gridLoading;
 import static io.jmix.masquerade.JConditions.ENABLED;
+import static io.jmix.masquerade.JConditions.EXIST;
 import static io.jmix.masquerade.JConditions.VISIBLE;
 import static io.jmix.masquerade.JSelectors.byChained;
 import static io.jmix.masquerade.Masquerade.UI_TEST_ID;
-import static io.jmix.masquerade.sys.TagNames.MENU_BAR_ITEM;
-import static io.jmix.masquerade.sys.TagNames.MENU_BAR_OVERLAY;
-import static org.openqa.selenium.By.cssSelector;
-import static org.openqa.selenium.By.tagName;
+import static org.openqa.selenium.By.*;
 
 /**
  * Contains help methods for UI tests like finding rows by cell content, finding visible context menu items, etc.
@@ -58,8 +56,11 @@ public class UiTestSupport {
                 .getDelegate()
                 .contextClick();
 
+        // An opened menu whose items are all hidden has no rendered box, so displayedness
+        // cannot be checked on the host element; the [opened] attribute in the selector
+        // already guarantees that the menu is open.
         return new GridContextMenu(dataGrid)
-                .shouldBe(VISIBLE);
+                .shouldBe(EXIST);
     }
 
     /**
@@ -86,13 +87,30 @@ public class UiTestSupport {
      * @return collection of visible dropdown item elements.
      */
     public static ElementsCollection getVisibleDropdownItems(SelenideElement dropdown) {
-        dropdown.$(byChained(cssSelector("[last-visible]")))
+        dropdown.$(cssSelector("[last-visible], [slot='overflow']"))
                 .shouldBe(ENABLED)
                 .shouldBe(VISIBLE)
                 .click();
 
-        return $$(byChained(MENU_BAR_OVERLAY, MENU_BAR_LIST_BOX, MENU_BAR_ITEM))
-                .filterBy(VISIBLE);
+        // Items are rendered into a native popover overlay (Vaadin 25), which WebDriver does not
+        // report as displayed, so they cannot be filtered by visibility. The opened submenu is used
+        // as the search root instead, and actions hidden by security are filtered by the attribute.
+        return dropdown.$$(byChained(MENU_BAR_SUBMENU_OPENED, MENU_BAR_LIST_BOX,
+                        cssSelector("vaadin-menu-bar-item:not([hidden])")))
+                .shouldHave(sizeGreaterThan(0));
+    }
+
+    /**
+     * Clicks the dropdown item with the specified text.
+     * <p>
+     * The click is performed via JavaScript because items rendered in the native popover
+     * overlay are not reported as displayed by WebDriver, so all Selenide click flavors
+     * fail the visibility precondition.
+     */
+    public static void clickDropdownItem(ElementsCollection items, String text) {
+        SelenideElement item = items.findBy(attribute("textContent", text))
+                .should(exist);
+        executeJavaScript("arguments[0].click();", item);
     }
 
     /**

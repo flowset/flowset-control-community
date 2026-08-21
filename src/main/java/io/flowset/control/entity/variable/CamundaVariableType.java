@@ -6,7 +6,7 @@
 package io.flowset.control.entity.variable;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
 public enum CamundaVariableType implements EnumClass<String> {

@@ -3,7 +3,7 @@ package io.flowset.control.service.decisiondefinition;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.filter.DecisionDefinitionFilter;
 import io.flowset.control.security.SecuredEntityLoad;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;

@@ -13,7 +13,7 @@ import io.flowset.control.security.SecuredEntityOperation;
 import io.jmix.core.security.EntityOp;
 import org.camunda.bpm.engine.repository.DeploymentWithDefinitions;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

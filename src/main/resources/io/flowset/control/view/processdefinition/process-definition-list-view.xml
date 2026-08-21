@@ -13,9 +13,7 @@
         <instance id="processDefinitionFilterDc" class="io.flowset.control.entity.filter.ProcessDefinitionFilter"/>
     </data>
     <facets>
-        <urlQueryParameters id="urlQueryParameters">
-            <pagination component="processDefinitionPagination"/>
-        </urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters"/>
     </facets>
     <actions>
         <action id="applyFilter" text="msg:///actions.Apply" icon="SEARCH"/>

@@ -3,19 +3,22 @@
  * Use is subject to license terms.
  */
 
-@import url('./flowset-control.css');
-@import url('view/about-product-view.css');
-@import url('view/main-view.css');
-@import url('view/main-view-top-menu.css');
-@import url('view/login-view.css');
-@import url('view/dashboard-fragment.css');
-@import url('view/decision-definition-detail-view.css');
-@import url('view/decision-instance-detail-view.css');
-@import url('view/all-batch-list-view.css');
-@import url('view/all-tasks-view.css');
-@import url('view/process-definition-detail-view.css');
-@import url('view/process-instance-detail-view.css');
-@import url('uicomponent/toggle-button-group.css');
-@import url('uicomponent/bordered-button.css');
-@import url('uicomponent/process-tooltip.css');
-@import url('uicomponent/engine-env-badge.css');
+@import './flowset-control.css';
+@import 'view/about-product-view.css';
+@import 'view/main-view.css';
+@import 'view/main-view-top-menu.css';
+@import 'view/login-view.css';
+@import 'view/dashboard-fragment.css';
+@import 'view/decision-definition-detail-view.css';
+@import 'view/decision-instance-detail-view.css';
+@import 'view/all-batch-list-view.css';
+@import 'view/batch-job-statistics-fragment.css';
+@import 'view/all-tasks-view.css';
+@import 'view/process-definition-detail-view.css';
+@import 'view/process-instance-detail-view.css';
+@import 'uicomponent/toggle-button-group.css';
+@import 'uicomponent/bordered-button.css';
+@import 'uicomponent/process-tooltip.css';
+@import 'uicomponent/engine-env-badge.css';
+@import 'components/jmix-code-editor.css';
+@import 'components/vaadin-button.css';

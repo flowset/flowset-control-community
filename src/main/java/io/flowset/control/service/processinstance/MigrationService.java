@@ -8,7 +8,7 @@ package io.flowset.control.service.processinstance;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.security.SecuredEntityOperation;
 import io.flowset.control.security.SpecificPermissions;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

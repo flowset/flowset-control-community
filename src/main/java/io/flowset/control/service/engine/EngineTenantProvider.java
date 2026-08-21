@@ -1,6 +1,6 @@
 package io.flowset.control.service.engine;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Provides functionality to retrieve the tenant ID associated with the current user and engine.

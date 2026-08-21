@@ -14,7 +14,11 @@
     </data>
     <actions>
         <action id="keyAction" type="control_viewCalledProcess"/>
-        <action id="previewAction" type="control_previewCalledProcess"/>
+        <action id="previewAction" type="control_previewCalledProcess">
+            <icon>
+                <svgIcon resource="icons/preview.svg"/>
+            </icon>
+        </action>
     </actions>
     <content>
         <hbox id="root" padding="false" width="100%" justifyContent="START" themeNames="spacing-s"

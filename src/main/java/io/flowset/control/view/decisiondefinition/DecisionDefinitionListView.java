@@ -18,6 +18,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -58,6 +59,8 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
     protected TypedTextField<String> nameField;
     @ViewComponent
     protected JmixCheckbox lastVersionOnlyCb;
+    @ViewComponent
+    protected SimplePagination decisionDefinitionPagination;
 
     protected DecisionDefinitionListQueryParamBinder urlQueryParamBinder;
 
@@ -66,9 +69,9 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
         initFilter();
-        urlQueryParamBinder = new DecisionDefinitionListQueryParamBinder(decisionDefinitionFilterDc, this::startLoadData, filterFormLayout);
-        urlQueryParameters.registerBinder(urlQueryParamBinder);
+        registerQueryParamBinders();
     }
+
 
     @Subscribe(id = "clearBtn", subject = "clickListener")
     public void onClearBtnClick(final ClickEvent<JmixButton> event) {
@@ -146,5 +149,11 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
     @Subscribe("decisionDefinitionsGrid.refresh")
     public void onDecisionDefinitionsGridRefresh(final ActionPerformedEvent event) {
         startLoadData();
+    }
+
+    protected void registerQueryParamBinders() {
+        urlQueryParamBinder = new DecisionDefinitionListQueryParamBinder(decisionDefinitionFilterDc, this::startLoadData, filterFormLayout);
+        urlQueryParameters.registerBinder(urlQueryParamBinder);
+        registerPaginationParameterBinder(decisionDefinitionPagination);
     }
 }

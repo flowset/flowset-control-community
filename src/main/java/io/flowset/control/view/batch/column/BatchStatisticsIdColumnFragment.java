@@ -14,7 +14,6 @@ import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.Subscribe;
 import io.jmix.flowui.view.ViewComponent;
-import org.springframework.lang.NonNull;
 
 @FragmentDescriptor("batch-statistics-id-column-fragment.xml")
 @RendererItemContainer("batchStatisticsDc")
@@ -23,7 +22,7 @@ public class BatchStatisticsIdColumnFragment extends EntityDetailLinkFragment<Ho
     protected JmixButton idBtn;
 
     @Override
-    public void setItem(@NonNull BatchStatisticsData item) {
+    public void setItem(BatchStatisticsData item) {
         super.setItem(item);
 
         idBtn.setText(item.getId());

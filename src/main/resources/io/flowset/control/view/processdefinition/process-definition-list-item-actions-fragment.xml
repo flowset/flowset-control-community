@@ -27,7 +27,6 @@
             <button id="activateBtn" themeNames="tertiary-inline" icon="PLAY" classNames="data-grid-column-action"
                     title="msg://processDefinitionList.activate" action="activateAction"/>
             <dropdownButton id="processActions" dropdownIndicatorVisible="false"
-                            overlayClass="process-actions-dropdown-overlay"
                             classNames="data-grid-column-action process-actions-dropdown"
                             themeNames="tertiary-inline" icon="ELLIPSIS_DOTS_V">
                 <items>

@@ -28,6 +28,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -47,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
@@ -92,6 +93,8 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected DataGrid<IncidentData> incidentsDataGrid;
     @ViewComponent("incidentsDataGrid.bulkRetry")
     protected BulkRetryIncidentAction bulkRetryAction;
+    @ViewComponent
+    protected SimplePagination pagination;
 
     @Autowired
     protected Fragments fragments;
@@ -104,6 +107,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
         initDataGridHeaderRow();
         bulkRetryAction.setAfterSaveHandler(this::startLoadData);
         urlQueryParameters.registerBinder(new IncidentListQueryParamBinder(incidentsDataGrid, this::startLoadData));
+        registerPaginationParameterBinder(pagination);
     }
 
     @Subscribe

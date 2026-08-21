@@ -24,7 +24,7 @@ import io.flowset.control.service.engine.EngineTenantProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.camunda.community.rest.client.api.HistoryApiClient;
 import org.camunda.community.rest.client.api.ProcessDefinitionApiClient;
@@ -32,7 +32,7 @@ import org.camunda.community.rest.client.api.ProcessInstanceApiClient;
 import org.camunda.community.rest.client.api.TaskApiClient;
 import org.camunda.community.rest.client.model.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -41,6 +41,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -212,7 +213,7 @@ public class DashboardServiceImpl implements DashboardService {
                             if (definition == null) {
                                 return true;
                             }
-                            return StringUtils.equals(definition.getTenantId(), tenantId);
+                            return Strings.CS.equals(definition.getTenantId(), tenantId);
                         })
                         .map(processDefinitionMapper::fromStatisticsResultDto)
                         .toList();
@@ -235,11 +236,14 @@ public class DashboardServiceImpl implements DashboardService {
     protected List<ProcessExecutionGraphEntry> createWeeklyStatistics(OffsetDateTime from, OffsetDateTime to, List<HistoricProcessInstanceDto> startedInstances,
                                                                       List<HistoricProcessInstanceDto> finishedInstances) {
         Map<LocalDate, Long> startedInstancesByDate = startedInstances.stream()
-                .collect(Collectors.groupingBy(historicInstance -> historicInstance.getStartTime().toLocalDate(), Collectors.counting()));
+                .map(HistoricProcessInstanceDto::getStartTime)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(OffsetDateTime::toLocalDate, Collectors.counting()));
 
         Map<LocalDate, Long> finishedInstancesByDate = finishedInstances.stream()
-                .filter(historicTask -> historicTask.getEndTime() != null)
-                .collect(Collectors.groupingBy(historicInstance -> historicInstance.getEndTime().toLocalDate(), Collectors.counting()));
+                .map(HistoricProcessInstanceDto::getEndTime)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(OffsetDateTime::toLocalDate, Collectors.counting()));
 
         LocalDate fromDate = from.toLocalDate();
         LocalDate toDate = to.toLocalDate().plusDays(1); //add a one day to include the last date of the period

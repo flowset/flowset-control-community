@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 
-@Route(value = "sec/resourcerolemodels/:code", layout = DefaultMainViewParent.class)
+@Route(value = "sec/resource-role-models/:code", layout = DefaultMainViewParent.class)
 @ViewController(id = "sec_ResourceRoleModel.detail")
 @ViewDescriptor(path = "control-resource-role-model-detail-view.xml")
 public class ControlResourceRoleModelDetailView extends ResourceRoleModelDetailView {

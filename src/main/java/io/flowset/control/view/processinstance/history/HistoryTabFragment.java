@@ -10,6 +10,7 @@ import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.Metadata;
@@ -31,7 +32,7 @@ import io.flowset.control.service.variable.VariableService;
 import io.flowset.control.view.processinstance.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @FragmentDescriptor("history-tab-fragment.xml")
 public class HistoryTabFragment extends Fragment<JmixTabSheet> {
@@ -267,6 +268,9 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     @Nullable
     protected Component getTabContent(Tab tab) {
         Component contentByTab = historyTabsheet.getContentByTab(tab);
+        if (contentByTab instanceof LazyTabContent lazyTabContent) {
+            return lazyTabContent.getContent();
+        }
         return contentByTab != null
                 ? contentByTab.getChildren()
                 .findFirst()

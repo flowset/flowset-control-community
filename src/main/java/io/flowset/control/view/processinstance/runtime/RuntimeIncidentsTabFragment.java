@@ -33,7 +33,7 @@ import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.view.processinstance.event.IncidentCountUpdateEvent;
 import io.flowset.control.view.processinstance.event.IncidentUpdateEvent;
 import io.flowset.control.view.util.ComponentHelper;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -81,7 +81,7 @@ public class RuntimeIncidentsTabFragment extends Fragment<VerticalLayout> {
             return;
         }
 
-        if (!StringUtils.equals(this.selectedActivityId, selectedActivityId)) {
+        if (!Strings.CS.equals(this.selectedActivityId, selectedActivityId)) {
             this.selectedActivityId = selectedActivityId;
             filter.setActivityId(selectedActivityId);
             runtimeIncidentsDl.load();

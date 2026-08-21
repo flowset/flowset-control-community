@@ -148,7 +148,7 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
                         new DialogAction(DialogAction.Type.YES)
                                 .withHandler(e -> deployBpmnXml(uploadedXml))
                                 .withText(messageBundle.getMessage("deploy"))
-                                .withIcon(VaadinIcon.ROCKET)
+                                .withIcon(VaadinIcon.ROCKET.create())
                                 .withVariant(ActionVariant.PRIMARY)
                         ,
                         new DialogAction(DialogAction.Type.CANCEL)
@@ -175,9 +175,10 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
     }
 
     @Subscribe("bpmnXmlUploadField")
-    public void onBpmnXmlUploadFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileUploadField> event) {
-        if (bpmnXmlUploadField.getValue() != null) {
-            String processDefinitionBpmnXml = new String(bpmnXmlUploadField.getValue(), StandardCharsets.UTF_8);
+    public void onBpmnXmlUploadFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileUploadField, byte[]> event) {
+        byte[] uploadedValue = bpmnXmlUploadField.getValue();
+        if (uploadedValue != null) {
+            String processDefinitionBpmnXml = new String(uploadedValue, StandardCharsets.UTF_8);
 
             viewerFragment.initViewer(processDefinitionBpmnXml);
             viewerFragment.addImportCompleteListener(this::updateImportedProcesses);

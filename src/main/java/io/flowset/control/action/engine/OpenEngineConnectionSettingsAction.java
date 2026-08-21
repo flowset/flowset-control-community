@@ -9,7 +9,7 @@ import io.jmix.flowui.action.ActionType;
 import io.jmix.flowui.action.SecuredBaseAction;
 
 @ActionType(OpenEngineConnectionSettingsAction.ID)
-public class OpenEngineConnectionSettingsAction extends SecuredBaseAction {
+public class OpenEngineConnectionSettingsAction extends SecuredBaseAction<OpenEngineConnectionSettingsAction> {
 
     public static final String ID = "control_openEngineConnectionSettings";
 

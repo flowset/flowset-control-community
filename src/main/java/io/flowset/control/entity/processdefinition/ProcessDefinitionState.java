@@ -7,8 +7,8 @@ package io.flowset.control.entity.processdefinition;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.lang.Nullable;
+import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.Nullable;
 
 
 public enum ProcessDefinitionState implements EnumClass<String> {
@@ -29,7 +29,7 @@ public enum ProcessDefinitionState implements EnumClass<String> {
     @Nullable
     public static ProcessDefinitionState fromId(String id) {
         for (ProcessDefinitionState at : ProcessDefinitionState.values()) {
-            if (StringUtils.equalsIgnoreCase(at.getId(), id)) {
+            if (Strings.CI.equals(at.getId(), id)) {
                 return at;
             }
         }

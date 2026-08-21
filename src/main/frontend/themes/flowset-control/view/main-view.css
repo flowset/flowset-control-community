@@ -121,45 +121,46 @@ vaadin-app-layout::part(drawer) {
     height: 1.75em;
 }
 
-.jmix-list-menu .jmix-menu-item-link, .jmix-list-menu .jmix-menubar-item > vaadin-details-summary {
+.jmix-list-menu.control-app-menu .jmix-menu-item,
+.jmix-list-menu.control-app-menu .jmix-menubar-item > vaadin-details-summary {
     color: var(--lumo-primary-contrast-color);
 }
 
-.jmix-list-menu .jmix-menu-item-link:hover {
+.jmix-list-menu.control-app-menu .jmix-menu-item:hover {
     background-color: var(--menu-item-hover-bg-color);
     color: var(--menu-item-hover-color);
     border-radius: var(--lumo-border-radius-m);
 }
 
-.jmix-list-menu .jmix-menubar-item > vaadin-details-summary:hover {
+.jmix-list-menu.control-app-menu .jmix-menubar-item > vaadin-details-summary:hover {
     background-color: var(--menu-item-hover-bg-color);
     color: var(--menu-item-hover-color);
     border-radius: var(--lumo-border-radius-m);
 }
 
-.jmix-list-menu .jmix-menubar-item > vaadin-details-summary::part(toggle) {
+.jmix-list-menu.control-app-menu .jmix-menubar-item > vaadin-details-summary::part(toggle) {
     color: inherit;
 }
 
-.jmix-list-menu .jmix-menubar-item {
+.jmix-list-menu.control-app-menu .jmix-menubar-item {
     padding: 0;
 }
 
-.jmix-list-menu .jmix-menubar-item::part(content) {
+.jmix-list-menu.control-app-menu .jmix-menubar-item::part(content) {
     padding: 0;
 }
 
-.jmix-list-menu .jmix-menubar-item .menubar-list {
+.jmix-list-menu.control-app-menu .jmix-menubar-item .menubar-list {
     margin-inline-start: calc(var(--lumo-space-s) + var(--lumo-icon-size-s) / 2);
     padding-inline-start: calc(var(--lumo-space-l) - var(--lumo-space-s) - var(--lumo-icon-size-s) / 2);
     border-inline-start: 1px solid var(--menu-subitems-guide-line-color);
 }
 
-.jmix-list-menu .jmix-menu-item-link {
+.jmix-list-menu.control-app-menu .jmix-menu-item {
     padding: 0.35em var(--lumo-space-s);
 }
 
-.jmix-list-menu .menu-group-label {
+.jmix-list-menu.control-app-menu .menu-group-label {
     font-weight: 500;
     display: flex;
     padding-top: 0.5em;
@@ -170,26 +171,26 @@ vaadin-app-layout::part(drawer) {
     letter-spacing: calc(var(--lumo-font-size-xxs) / 4);
 }
 
-.jmix-list-menu .jmix-menubar-item .menubar-summary {
+.jmix-list-menu.control-app-menu .jmix-menubar-item .menubar-summary {
     font-weight: 500;
 }
 
-.jmix-list-menu a[highlight][class*='jmix-menu-item-link'] {
+.jmix-list-menu.control-app-menu a.jmix-menu-item[highlight] {
     background-color: var(--menu-item-active-bg-color);
     color: var(--menu-item-active-color);
     border-inline-start: 3px solid var(--active-menu-item-border-color);
 }
 
-.jmix-list-menu a[highlight][class*='jmix-menu-item-link'] .link-text {
+.jmix-list-menu.control-app-menu a.jmix-menu-item[highlight] .link-text {
     font-weight: 600;
 }
 
-.jmix-list-menu a[highlight][class*='jmix-menu-item-link'] .prefix-component {
+.jmix-list-menu.control-app-menu a.jmix-menu-item[highlight] .prefix-component {
     color: var(--active-menu-item-border-color);
 }
 
-.jmix-list-menu a[class*='jmix-menu-item-link'] .link-text,
-  .jmix-list-menu .jmix-menubar-item .menubar-summary {
+.jmix-list-menu.control-app-menu a.jmix-menu-item .link-text,
+  .jmix-list-menu.control-app-menu .jmix-menubar-item .menubar-summary {
     font-weight: 500;
 }
 

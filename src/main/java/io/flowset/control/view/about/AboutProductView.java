@@ -1,8 +1,6 @@
 package io.flowset.control.view.about;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.H3;
@@ -31,6 +29,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 import java.util.Locale;
@@ -51,7 +51,7 @@ public class AboutProductView extends StandardView {
     @Autowired
     protected CurrentAuthentication currentAuthentication;
     @Autowired
-    protected ObjectMapper objectMapper;
+    protected JsonMapper objectMapper;
     @Autowired
     protected Notifications notifications;
     @Autowired
@@ -163,7 +163,7 @@ public class AboutProductView extends StandardView {
         if (contentMetadata != null) {
             try {
                 return objectMapper.readValue(contentMetadata, AboutProductMetadata.class);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 log.error("Unable to read content metadata with locale '{}'", locale, e);
             }
         }

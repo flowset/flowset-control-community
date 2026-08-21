@@ -20,8 +20,7 @@ import io.jmix.flowui.action.DialogAction;
 import io.jmix.flowui.exception.AbstractUiExceptionHandler;
 import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.view.navigation.ViewNavigationSupport;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
@@ -55,12 +54,12 @@ public class EngineConnectionFailedExceptionHandler extends AbstractUiExceptionH
 
 
     @Override
-    protected void doHandle(@NonNull String className, @NonNull String message, @Nullable Throwable throwable) {
+    protected void doHandle(String className, String message, @Nullable Throwable throwable) {
         if (throwable instanceof ViewEngineConnectionFailedException) {
             dialogs.createOptionDialog()
                     .withHeader(messages.getMessage(getClass(), "exceptionDialog.engineNotAvailable.header"))
                     .withContent(createContent())
-                    .withActions(new BaseAction("retry")
+                    .withActions(new BaseAction<>("retry")
                                     .withText(messages.getMessage("actions.Retry"))
                                     .withIcon(VaadinIcon.REFRESH.create())
                                     .withHandler(actionPerformedEvent -> {

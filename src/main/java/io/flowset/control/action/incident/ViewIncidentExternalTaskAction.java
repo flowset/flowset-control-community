@@ -23,7 +23,7 @@ import static io.flowset.control.util.ExceptionUtils.isNotFoundError;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ViewIncidentExternalTaskAction.ID)
-public class ViewIncidentExternalTaskAction extends SecuredBaseAction implements ExecutableAction {
+public class ViewIncidentExternalTaskAction extends SecuredBaseAction<ViewIncidentExternalTaskAction> implements ExecutableAction {
 
     public static final String ID = "control_viewIncidentExternalTask";
 

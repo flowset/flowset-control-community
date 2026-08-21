@@ -19,11 +19,7 @@
         <instance id="completedBatchFilterDc" class="io.flowset.control.entity.filter.BatchFilter"/>
     </data>
     <facets>
-        <urlQueryParameters id="urlQueryParameters">
-            <pagination component="batchesPagination"/>
-            <pagination component="completedBatchesPagination" firstResultParam="completedFirstResult"
-                        maxResultsParam="completedMaxResults"/>
-        </urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters"/>
         <timer id="completedBatchLoadTimer" delay="1" autostart="false"/>
     </facets>
     <actions>

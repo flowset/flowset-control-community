@@ -101,7 +101,7 @@ public class ViewAnalyticsListener {
      * Resolves the analytics config for a view class. First tries an exact match, then falls back
      * to a registered superclass so that community subclasses of standard views are still tracked.
      */
-    @org.springframework.lang.Nullable
+    @org.jspecify.annotations.Nullable
     protected ViewEventData resolveViewEventData(Class<?> viewClass) {
         ViewEventData exact = this.viewAnalyticstDataMap.get(viewClass);
         if (exact != null) {
@@ -350,7 +350,7 @@ public class ViewAnalyticsListener {
         ViewActions viewActions = ViewControllerUtils.getViewActions(source);
         Action action = viewActions.getAction(actionId);
         if (action != null) {
-            if (action instanceof BaseAction baseAction) {
+            if (action instanceof BaseAction<?> baseAction) {
                 baseAction.addActionPerformedListener(actionPerformedEvent -> {
                     baseAction.actionPerform(actionPerformedEvent.getComponent());
                     analyticsService.logEvent(amplitudeEventType);

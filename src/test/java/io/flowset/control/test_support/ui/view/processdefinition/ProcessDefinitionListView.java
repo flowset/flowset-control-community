@@ -165,6 +165,18 @@ public class ProcessDefinitionListView extends View<ProcessDefinitionListView> {
     }
 
     /**
+     * Clicks an action with specified text in other actions dropdown in the specified row.
+     *
+     * @param row        process row
+     * @param actionText dropdown action text
+     */
+    public void clickOtherAction(DataGrid.Row row, String actionText) {
+        ElementsCollection otherActions = openOtherActions(row);
+
+        clickDropdownItem(otherActions, actionText);
+    }
+
+    /**
      * Find the row in the process grid for related to the process with the specified key.
      *
      * @param processKey process key
