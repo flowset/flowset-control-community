@@ -19,6 +19,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.action.usertask.BulkCompleteUserTaskAction;
 import io.flowset.control.action.usertask.BulkReassignTaskAction;
 import io.flowset.control.facet.urlqueryparameters.AllUserTaskListQueryParamBinder;
@@ -132,6 +133,8 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     protected SimplePagination tasksPagination;
     @Autowired
     protected Fragments fragments;
+    @ViewComponent("tasksDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
     protected AllUserTaskListQueryParamBinder queryParamBinder;
@@ -162,6 +165,13 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     protected void initActions() {
         completeTaskAction.setAfterSaveHandler(this::startLoadData);
         reassignTaskAction.setAfterSaveHandler(this::startLoadData);
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            UserTaskData entity = context.getEntity();
+            String processDefinitionId = entity.getProcessDefinitionId();
+            ProcessDefinitionData processDefinition = processDefinitionsMap.get(processDefinitionId);
+
+            return processDefinition != null ? componentHelper.getProcessLabel(processDefinition) : processDefinitionId;
+        });
     }
 
     @Install(to = "processDefinitionLookup", subject = "itemsFetchCallback")

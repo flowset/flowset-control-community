@@ -89,6 +89,9 @@ dependencies {
     implementation "org.vaadin.addons.componentfactory:spinner"
     implementation 'com.vaadin:vaadin-dev'
 
+    // Apache POI
+    implementation 'org.apache.poi:poi-ooxml'
+
     // Spring
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation "org.springframework.cloud:spring-cloud-dependencies"

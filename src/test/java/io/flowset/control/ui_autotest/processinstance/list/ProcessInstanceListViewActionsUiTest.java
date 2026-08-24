@@ -16,10 +16,14 @@ import io.flowset.control.test_support.ui.view.processinstance.ProcessInstanceLi
 import io.flowset.control.test_support.ui.view.processinstance.detail.ProcessInstanceDetailView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import static com.codeborne.selenide.CollectionCondition.size;
+import static com.codeborne.selenide.CollectionCondition.texts;
 import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.webdriver;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.*;
@@ -53,6 +57,32 @@ public class ProcessInstanceListViewActionsUiTest extends AbstractCamunda7UiTest
 
         listView.openInstancesGridContextActions()
                 .find(text("Refresh"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
+    @DisplayName("Excel action availability on process instance list view")
+    void givenLoggedInUser_whenOpenProcessInstanceList_thenExcelActionAvailable() {
+        // given
+        MainView mainView = loginAsAdmin();
+
+        // when
+        ProcessInstanceListView listView = mainView.openProcessInstanceListView();
+
+        // then
+        listView.getOtherActionsBtn()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openOtherActionsDropdown()
+                .shouldHave(size(1))
+                .shouldHave(texts("Excel"));
+
+        $("body").sendKeys(Keys.ESCAPE);
+
+        listView.openInstancesGridContextActions()
+                .find(text("Excel"))
                 .shouldBe(VISIBLE)
                 .shouldBe(ENABLED);
     }
@@ -182,6 +212,6 @@ public class ProcessInstanceListViewActionsUiTest extends AbstractCamunda7UiTest
 
 
         listView.openInstancesGridContextActions()
-                .shouldHave(visibleItems("Refresh", "Terminate", "Activate", "Suspend"));
+                .shouldHave(visibleItems("Refresh", "Terminate", "Activate", "Suspend", "Excel"));
     }
 }

@@ -71,6 +71,32 @@ public class DecisionInstanceListViewActionsUiTest extends AbstractCamunda7UiTes
     }
 
     @Test
+    @DisplayName("Excel action availability on decision instance list view")
+    void givenExistingDecisionInstance_whenOpenDecisionInstanceListView_thenExcelActionAvailable() {
+        // given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/dmn/testDmn.dmn")
+                .deploy("test_support/testProcessWithDecision.bpmn")
+                .startByKey("testProcessWithDecision");
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        DecisionInstanceListView listView = mainView.openDecisionInstanceListView();
+
+        // then
+        listView.getExcelExportButton()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openInstancesGridContextMenu()
+                .shouldBe(VISIBLE)
+                .find(text("Excel"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
     @DisplayName("Refresh action: data in data grid is updated")
     void givenOpenedListView_whenClickRefresh_thenDataUpdated() {
         // given
@@ -113,7 +139,7 @@ public class DecisionInstanceListViewActionsUiTest extends AbstractCamunda7UiTes
         listView.getRefreshButton().shouldBe(VISIBLE);
 
         listView.openInstancesGridContextMenu()
-                .shouldHave(visibleItems("Refresh"));
+                .shouldHave(visibleItems("Refresh", "Excel"));
     }
 
     @Test

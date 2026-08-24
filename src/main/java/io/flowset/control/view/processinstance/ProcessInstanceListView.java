@@ -12,6 +12,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.action.processinstance.BulkActivateProcessInstanceAction;
 import io.flowset.control.action.processinstance.BulkSuspendProcessInstanceAction;
 import io.flowset.control.action.processinstance.BulkTerminateProcessInstanceAction;
@@ -76,6 +77,8 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     protected BulkSuspendProcessInstanceAction bulkSuspend;
     @ViewComponent("processInstancesGrid.bulkTerminate")
     protected BulkTerminateProcessInstanceAction bulkTerminate;
+    @ViewComponent("processInstancesGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
     @ViewComponent
@@ -99,6 +102,12 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         bulkActivate.setAfterSaveHandler(this::startLoadData);
         bulkSuspend.setAfterSaveHandler(this::startLoadData);
         bulkTerminate.setAfterSaveHandler(this::startLoadData);
+
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            ProcessInstanceData entity = context.getEntity();
+
+            return getProcessDisplayName(entity);
+        });
     }
 
     protected void setDefaultSort() {
