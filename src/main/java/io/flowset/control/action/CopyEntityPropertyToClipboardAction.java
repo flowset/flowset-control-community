@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Haulmont 2025. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
@@ -26,7 +26,7 @@ import io.jmix.flowui.view.ViewControllerUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(CopyEntityPropertyToClipboardAction.ID)
-public class CopyEntityPropertyToClipboardAction extends BaseAction {
+public class CopyEntityPropertyToClipboardAction extends BaseAction<CopyEntityPropertyToClipboardAction> {
 
     public static final String ID = "control_copyEntityPropertyToClipboard";
 

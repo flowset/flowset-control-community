@@ -17,8 +17,8 @@ import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.ViewComponent;
+import io.jmix.flowui.sys.ViewDescriptorUtils;
+import io.jmix.flowui.view.*;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
@@ -60,5 +60,12 @@ public class InstanceIdColumnFragment extends EntityDetailLinkFragment<Horizonta
                     .navigate();
         }
 
+    }
+
+    @Override
+    protected boolean isDetailViewPermitted() {
+        String viewId = ViewDescriptorUtils.getInferredViewId(ProcessInstanceDetailView.class);
+
+        return securitySupport.isShowViewPermitted(viewId);
     }
 }

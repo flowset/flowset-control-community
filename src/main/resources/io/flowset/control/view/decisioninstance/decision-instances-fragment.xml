@@ -25,7 +25,7 @@
             <dataGrid id="decisionInstancesGrid" dataContainer="decisionInstancesDc" width="100%"
                       minHeight="20em" minWidth="30em" height="100%">
                 <actions>
-                    <action id="edit" type="list_edit" text="msg://viewDecisionInstance" icon="EYE"/>
+                    <action id="edit" type="list_edit" text="msg://viewDecisionInstance" icon="EYE" visible="false"/>
                     <action id="refresh" type="list_refresh"/>
                 </actions>
                 <columns resizable="true">

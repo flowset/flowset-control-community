@@ -7,7 +7,6 @@ package io.flowset.control.view.processdefinition;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.router.Route;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.view.*;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
 
-@Route(value = "bpm/bulkdeleteprocessdefinition", layout = DefaultMainViewParent.class)
 @ViewController("bpm_BulkDeleteProcessDefinition")
 @ViewDescriptor("bulk-delete-process-definition-view.xml")
 @DialogMode(width = "35em")

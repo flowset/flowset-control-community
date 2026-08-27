@@ -62,4 +62,14 @@ public abstract class ProcessInstanceLinkColumnFragment<E extends Component, V> 
         return EntityValues.getValue(item,
                 Objects.requireNonNullElse(processInstanceIdProperty, "processInstanceId"));
     }
+
+    @Override
+    protected Class<?> getTargetEntityClass() {
+        return ProcessInstanceData.class;
+    }
+
+    @Override
+    protected boolean isItemReadPermitted() {
+        return true;
+    }
 }

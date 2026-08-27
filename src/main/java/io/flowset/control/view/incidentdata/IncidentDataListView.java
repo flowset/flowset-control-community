@@ -7,7 +7,6 @@ package io.flowset.control.view.incidentdata;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.GridSortOrder;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -15,12 +14,12 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
+import io.flowset.control.action.incident.BulkRetryIncidentAction;
+import io.flowset.control.action.incident.RetryIncidentAction;
 import io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder;
-import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.flowset.control.view.incidentdata.column.IncidentProcessColumnFragment;
 import io.jmix.core.DataLoadContext;
@@ -30,12 +29,12 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
@@ -47,15 +46,12 @@ import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.incidentdata.filter.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Function;
-
-import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @Slf4j
 @Route(value = "bpm/incidents", layout = DefaultMainViewParent.class)
@@ -82,7 +78,7 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
     @Autowired
-    private DialogWindows dialogWindows;
+    protected Actions actions;
     @Autowired
     protected IncidentService incidentService;
     @Autowired
@@ -96,16 +92,27 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected CollectionLoader<IncidentData> incidentsDl;
     @ViewComponent
     protected DataGrid<IncidentData> incidentsDataGrid;
+    @ViewComponent("incidentsDataGrid.bulkRetry")
+    protected BulkRetryIncidentAction bulkRetryAction;
+    @ViewComponent("incidentsDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
+    @ViewComponent
+    protected SimplePagination pagination;
+
+    @Autowired
+    protected Fragments fragments;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
-    @Autowired
-    private Fragments fragments;
+
 
     @Subscribe
     public void onInit(final InitEvent event) {
         initFilter();
         initDataGridHeaderRow();
+        initActions();
+
         urlQueryParameters.registerBinder(new IncidentListQueryParamBinder(incidentsDataGrid, this::startLoadData));
+        registerPaginationParameterBinder(pagination);
     }
 
     @Subscribe
@@ -161,10 +168,11 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected Renderer<IncidentData> incidentsDataGridActionsRenderer() {
         return new ComponentRenderer<>(incidentData -> {
             HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
+            layout.setId("incidentActionsBox");
             layout.addClassNames(LumoUtility.Padding.Top.XSMALL, LumoUtility.Padding.Bottom.XSMALL);
             layout.setWidth("min-content");
 
-            if (StringUtils.equals(incidentData.getIncidentId(), incidentData.getCauseIncidentId())) {
+            if (Strings.CS.equals(incidentData.getIncidentId(), incidentData.getCauseIncidentId())) {
                 JmixButton retryBtn = createRetryIncidentButton(incidentData);
                 if (retryBtn != null) {
                     layout.add(retryBtn);
@@ -178,23 +186,6 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     @Install(to = "incidentsDataGrid.processInstanceId", subject = "tooltipGenerator")
     protected String incidentsDataGridProcessInstanceIdTooltipGenerator(final IncidentData incidentData) {
         return incidentData.getProcessInstanceId();
-    }
-
-    @Subscribe("incidentsDataGrid.bulkRetry")
-    public void onIncidentsDataGridBulkRetry(final ActionPerformedEvent event) {
-        Set<IncidentData> selectedItems = incidentsDataGrid.getSelectedItems();
-        if (selectedItems.isEmpty()) {
-            return;
-        }
-
-        dialogWindows.view(this, BulkRetryIncidentView.class)
-                .withViewConfigurer(bulkRetryIncidentView -> bulkRetryIncidentView.setIncidentDataSet(selectedItems))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .open();
     }
 
     @Install(to = "incidentsDataGrid.message", subject = "tooltipGenerator")
@@ -231,6 +222,17 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
         incidentsDl.load();
     }
 
+    protected void initActions() {
+        bulkRetryAction.setAfterSaveHandler(this::startLoadData);
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            IncidentData entity = context.getEntity();
+            String processDefinitionId = entity.getProcessDefinitionId();
+            ProcessDefinitionData processDefinition = processDefinitionsMap.get(processDefinitionId);
+
+            return processDefinition != null ? componentHelper.getProcessLabel(processDefinition) : processDefinitionId;
+        });
+    }
+
     protected void loadProcessDefinitions(List<IncidentData> incidents) {
         List<String> idsToLoad = incidents.stream()
                 .map(IncidentData::getProcessDefinitionId)
@@ -245,33 +247,12 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     }
 
     protected void initDataGridHeaderRow() {
-        HeaderRow headerRow = incidentsDataGrid.getDefaultHeaderRow();
-
-        addColumnFilter(headerRow, "activityId", this::createActivityColumnFilter);
-        addColumnFilter(headerRow, "message", this::createMessageColumnFilter);
-        addColumnFilter(headerRow, "timestamp", this::createTimestampColumnFilter);
-        addColumnFilter(headerRow, "processInstanceId", this::createProcessInstanceColumnFilter);
-        addColumnFilter(headerRow, "processDefinitionId", this::createProcessColumnFilter);
-        addColumnFilter(headerRow, "type", this::createTypeColumnFilter);
-    }
-
-    protected <T extends ContainerDataGridHeaderFilter<IncidentFilter, IncidentData>> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<IncidentData>, T> filterProvider) {
-        DataGridColumn<IncidentData> column = incidentsDataGrid.getColumnByKey(columnName);
-        T filterComponent = filterProvider.apply(column);
-        BeanUtil.autowireContext(applicationContext, filterComponent);
-        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-        HorizontalLayout layout = uiComponents.create(HorizontalLayout.class);
-        layout.setSizeFull();
-        layout.addClassNames(LumoUtility.Gap.SMALL);
-        headerCell.setComponent(filterComponent);
-
-        Element child = filterComponent.getElement().getChild(0);
-        if (child != null && child.getStyle() != null) {
-            //set styles for column header text to make a filter button always visible
-            child.getStyle().setOverflow(Style.Overflow.HIDDEN);
-            child.getStyle().set("text-overflow", "ellipsis");
-            child.getStyle().setWhiteSpace(Style.WhiteSpace.PRE_WRAP);
-        }
+        componentHelper.addColumnFilter(incidentsDataGrid, "activityId", this::createActivityColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "message", this::createMessageColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "timestamp", this::createTimestampColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "processInstanceId", this::createProcessInstanceColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "processDefinitionId", this::createProcessColumnFilter);
+        componentHelper.addColumnFilter(incidentsDataGrid, "type", this::createTypeColumnFilter);
     }
 
     protected IncidentHeaderFilter createActivityColumnFilter(DataGridColumn<IncidentData> column) {
@@ -304,42 +285,20 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
             return null;
         }
 
+        RetryIncidentAction retryAction = actions.create(RetryIncidentAction.ID);
+        retryAction.setIncidentData(incident);
+        retryAction.setAfterSaveHandler(this::startLoadData);
+        retryAction.setText("");
+
         JmixButton retryBtn = uiComponents.create(JmixButton.class);
+        retryBtn.setId("retryIncidentBtn");
         retryBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         retryBtn.addClassNames("data-grid-column-action");
         retryBtn.setTitle(messages.getMessage("actions.Retry"));
         retryBtn.setIcon(VaadinIcon.ROTATE_LEFT.create());
-        retryBtn.addClickListener(event -> {
-            if (incident.isJobFailed()) {
-                openRetryJobView(incident);
-            } else if (incident.isExternalTaskFailed()) {
-                openRetryExternalTaskView(incident);
-            }
-        });
+        retryBtn.setAction(retryAction, false);
 
         return retryBtn;
-    }
-
-    protected void openRetryJobView(IncidentData incidentData) {
-        dialogWindows.view(getCurrentView(), RetryJobView.class)
-                .withViewConfigurer(view -> view.setJobId(incidentData.getConfiguration()))
-                .withAfterCloseListener(afterClose -> {
-                    if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .open();
-    }
-
-    protected void openRetryExternalTaskView(IncidentData incidentData) {
-        dialogWindows.view(this, RetryExternalTaskView.class)
-                .withViewConfigurer(view -> view.setExternalTaskId(incidentData.getConfiguration()))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .open();
     }
 
     protected void setDefaultSort() {

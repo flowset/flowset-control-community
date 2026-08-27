@@ -17,6 +17,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.security.SecuritySupport;
+import io.flowset.control.security.accesscontext.processdefinition.ProcessDefinitionDeployAccessContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.Fragments;
@@ -87,6 +89,8 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
     protected Dialogs dialogs;
     @Autowired
     protected Fragments fragments;
+    @Autowired
+    protected SecuritySupport securitySupport;
 
     @ViewComponent
     protected VerticalLayout previewVBox;
@@ -122,6 +126,7 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
         initEmptyPreviewStyles();
         initProcessInfoHBoxStyles();
         initDeploymentErrorsButton();
+        initActions();
     }
 
     @Subscribe(id = "okBtn", subject = "clickListener")
@@ -143,7 +148,7 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
                         new DialogAction(DialogAction.Type.YES)
                                 .withHandler(e -> deployBpmnXml(uploadedXml))
                                 .withText(messageBundle.getMessage("deploy"))
-                                .withIcon(VaadinIcon.ROCKET)
+                                .withIcon(VaadinIcon.ROCKET.create())
                                 .withVariant(ActionVariant.PRIMARY)
                         ,
                         new DialogAction(DialogAction.Type.CANCEL)
@@ -170,9 +175,10 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
     }
 
     @Subscribe("bpmnXmlUploadField")
-    public void onBpmnXmlUploadFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileUploadField> event) {
-        if (bpmnXmlUploadField.getValue() != null) {
-            String processDefinitionBpmnXml = new String(bpmnXmlUploadField.getValue(), StandardCharsets.UTF_8);
+    public void onBpmnXmlUploadFieldFileUploadSucceeded(final FileUploadSucceededEvent<FileUploadField, byte[]> event) {
+        byte[] uploadedValue = bpmnXmlUploadField.getValue();
+        if (uploadedValue != null) {
+            String processDefinitionBpmnXml = new String(uploadedValue, StandardCharsets.UTF_8);
 
             viewerFragment.initViewer(processDefinitionBpmnXml);
             viewerFragment.addImportCompleteListener(this::updateImportedProcesses);
@@ -243,6 +249,10 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
                 throw ex;
             }
         }
+    }
+
+    protected void initActions() {
+        okBtn.setVisible(securitySupport.isActionPermitted(new ProcessDefinitionDeployAccessContext()));
     }
 
     @Nullable

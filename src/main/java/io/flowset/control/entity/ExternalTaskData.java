@@ -5,11 +5,12 @@
 
 package io.flowset.control.entity;
 
-import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Date;
 
@@ -44,7 +45,7 @@ public class ExternalTaskData {
 
     protected String topicName;
 
-    protected Integer priority;
+    protected Long priority;
 
     protected String businessKey;
 
@@ -64,11 +65,11 @@ public class ExternalTaskData {
         this.businessKey = businessKey;
     }
 
-    public Integer getPriority() {
+    public Long getPriority() {
         return priority;
     }
 
-    public void setPriority(Integer priority) {
+    public void setPriority(Long priority) {
         this.priority = priority;
     }
 
@@ -94,6 +95,11 @@ public class ExternalTaskData {
 
     public void setSuspended(Boolean suspended) {
         this.suspended = suspended;
+    }
+
+    @JmixProperty
+    public ExternalTaskState getState() {
+        return BooleanUtils.isTrue(suspended) ? ExternalTaskState.SUSPENDED : ExternalTaskState.ACTIVE;
     }
 
     public Integer getRetries() {

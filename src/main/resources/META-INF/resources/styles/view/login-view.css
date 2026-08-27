@@ -1,0 +1,105 @@
+/*
+ * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+.jmix-login-main-layout {
+   background-image: url("../img/background_vertical.svg");
+   background-position: center;
+   background-size: cover;
+}
+
+.flowset-control-login-form::part(form-title) {
+   text-align: center;
+}
+
+.flowset-control-login-form::part(footer) {
+   display: none;
+}
+
+/* Lumo injects hardcoded width and padding into the card shadow root, so both have to be
+   overridden directly through the 'form' part instead of the --vaadin-login-form-* properties. */
+.flowset-control-login-form::part(form) {
+   width: calc(var(--lumo-size-m) * 10);
+   padding: calc(2 * var(--lumo-space-m));
+   box-shadow: var(--lumo-box-shadow-l);
+   border-radius: var(--lumo-border-radius-l);
+   height: 100%;
+}
+
+@media (min-width: 360px) and (orientation: portrait) {
+   .jmix-login-main-layout {
+      background-image: url("../img/background_vertical.svg");
+      background-position: center;
+      background-size: cover;
+   }
+}
+
+@media (min-width: 640px) and (orientation: portrait) {
+   .jmix-login-main-layout {
+      background-image: url("../img/background_w1024_horizontal.svg");
+      background-size: cover;
+      background-position: center;
+   }
+
+   .flowset-control-login-form {
+      margin-top: 5em;
+   }
+}
+
+@media (min-width: 640px) and (orientation: landscape) {
+   .jmix-login-main-layout {
+      background-image: url("../img/background_w1024_horizontal.svg");
+      background-size: cover;
+      background-position: center;
+   }
+}
+
+@media (min-width: 1280px) and (orientation: landscape) {
+   .jmix-login-main-layout {
+      background-image: url("../img/background_w1280_horizontal.svg");
+      background-size: cover;
+      background-position: left;
+   }
+
+   .flowset-control-login-form {
+      margin-left: auto;
+      margin-right: 5%;
+   }
+}
+
+@media (min-width: 1440px) and (orientation: landscape) {
+   .jmix-login-main-layout {
+      background-image: url("../img/background_w1440_horizontal.svg");
+      background-size: cover;
+      background-position: center;
+   }
+
+   .flowset-control-login-form {
+      margin-left: auto;
+      margin-right: 15%;
+   }
+
+   .flowset-control-login-form::part(form) {
+      width: calc(var(--lumo-size-l) * 10);
+      padding: calc(2 * var(--lumo-space-l));
+   }
+}
+
+@media (min-width: 1920px) and (orientation: landscape) {
+   .jmix-login-main-layout {
+      background-image: url("../img/background_w1920_horizontal.svg");
+      background-size: cover;
+      background-position: center;
+   }
+
+   .flowset-control-login-form {
+      margin-left: auto;
+      margin-right: 13%;
+   }
+
+   .flowset-control-login-form::part(form) {
+      width: calc(var(--lumo-size-l) * 10);
+      padding: calc(2 * var(--lumo-space-l));
+   }
+}

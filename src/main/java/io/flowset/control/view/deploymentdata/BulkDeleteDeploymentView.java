@@ -8,11 +8,9 @@ package io.flowset.control.view.deploymentdata;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
-import io.jmix.flowui.view.DefaultMainViewParent;
 import io.jmix.flowui.view.DialogMode;
 import io.jmix.flowui.view.MessageBundle;
 import io.jmix.flowui.view.StandardOutcome;
@@ -32,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 
-@Route(value = "bpm/bulkdeletedeployment", layout = DefaultMainViewParent.class)
 @ViewController("bpm_BulkDeleteDeployment")
 @ViewDescriptor("bulk-delete-deployment-view.xml")
 @DialogMode(width = "35em")

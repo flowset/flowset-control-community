@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.processinstance;
 
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
@@ -94,10 +95,12 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                 .setReason(reason);
 
         //when
-        processInstanceService.terminateByIdsAsync(context);
-        waitForBatchExecution();
+        BatchData batchData = processInstanceService.terminateByIdsAsync(context);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
         List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
         assertThat(foundRuntimeInstances).isEmpty();
 
@@ -132,10 +135,12 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                 .setReason("Test custom listeners");
 
         //when
-        processInstanceService.terminateByIdsAsync(context);
-        waitForBatchExecution();
+        BatchData batchData = processInstanceService.terminateByIdsAsync(context);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
         List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
         assertThat(foundRuntimeInstances).isEmpty();
 
@@ -169,10 +174,12 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                 .setReason("Test I/O variable mapping");
 
         //when
-        processInstanceService.terminateByIdsAsync(context);
-        waitForBatchExecution();
+        BatchData batchData = processInstanceService.terminateByIdsAsync(context);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
         List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
         assertThat(foundRuntimeInstances).isEmpty();
 
@@ -207,10 +214,12 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                 .setReason("Test subprocesses");
 
         //when
-        processInstanceService.terminateByIdsAsync(context);
-        waitForBatchExecution();
+        BatchData batchData = processInstanceService.terminateByIdsAsync(context);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
         List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
         assertThat(foundRuntimeInstances).isEmpty();
 
@@ -283,10 +292,12 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                 .setReason(reason);
 
         //when
-        processInstanceService.terminateByIdsAsync(context);
-        waitForBatchExecution();
+        BatchData batchData = processInstanceService.terminateByIdsAsync(context);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
         List<RuntimeProcessInstanceDto> foundRuntimeInstances = camundaRestTestHelper.getRuntimeInstancesById(camunda7, processId);
         assertThat(foundRuntimeInstances).isEmpty();
 
@@ -323,21 +334,5 @@ public class Camunda7ProcessInstanceTerminateTest extends AbstractCamunda7Integr
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
 
-    private void waitForBatchExecution() {
-        boolean batchExists;
-        int attempts = 0;
-        do {
-            batchExists = camundaRestTestHelper.activeBatchExits(camunda7);
-            attempts++;
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                //do nothing
-            }
-            if (attempts > 100) { //prevent infinite loop
-                break;
-            }
-        } while (batchExists);
-    }
 }
+

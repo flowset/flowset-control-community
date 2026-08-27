@@ -11,12 +11,6 @@
       "url": "https://flowset.io/tasklist",
       "description": "Open-source web application for displaying end-user tasks",
       "released": true
-    },
-    {
-      "name": "Flowset Workspace (coming soon)",
-      "url": "https://flowset.io/workspace",
-      "description": "A visual tool to create a ready-made prototype of a business application",
-      "released": false
     }
   ],
   "externalLinks": [
@@ -26,7 +20,7 @@
     },
     {
       "label": "Flowset Control Documentation",
-      "url": "https://github.com/flowset/flowset-control-community?tab=readme-ov-file#table-of-contents"
+      "url": "https://docs.flowset.io/flowset/control/index.html"
     },
     {
       "label": "Flowset Control Source code",

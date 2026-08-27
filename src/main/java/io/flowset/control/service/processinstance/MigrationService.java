@@ -5,6 +5,11 @@
 
 package io.flowset.control.service.processinstance;
 
+import io.flowset.control.entity.batch.BatchData;
+import io.flowset.control.security.SecuredEntityOperation;
+import io.flowset.control.security.SpecificPermissions;
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 
 /**
@@ -19,6 +24,7 @@ public interface MigrationService {
      * @param targetProcessDefinitionId a target process definition identifier
      * @return a list of migration failures
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_MIGRATE)
     List<String> validateMigrationOfSingleProcessInstance(String processInstanceId, String targetProcessDefinitionId);
 
     /**
@@ -28,6 +34,7 @@ public interface MigrationService {
      * @param processInstanceId         a process instance identifier
      * @param targetProcessDefinitionId a target process definition identifier
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_MIGRATE)
     void migrateSingleProcessInstance(String processInstanceId, String targetProcessDefinitionId);
 
     /**
@@ -38,6 +45,7 @@ public interface MigrationService {
      * @param targetProcessDefinitionId a target process definition identifier
      * @return a list of migration failures
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_DEFINITION_MIGRATE)
     List<String> validateMigrationOfProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId);
 
     /**
@@ -46,6 +54,9 @@ public interface MigrationService {
      *
      * @param srcProcessDefinitionId    a source process definition identifier
      * @param targetProcessDefinitionId a target process definition identifier
+     * @return created batch or {@code null} if operation failed
      */
-    void migrateAllProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId);
+    @Nullable
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_DEFINITION_MIGRATE)
+    BatchData migrateAllProcessInstances(String srcProcessDefinitionId, String targetProcessDefinitionId);
 }

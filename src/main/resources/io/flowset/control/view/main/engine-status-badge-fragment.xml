@@ -7,10 +7,10 @@
                   class="io.flowset.control.entity.engine.BpmEngine"/>
     </data>
     <content>
-        <hbox padding="false" themeNames="spacing-s" classNames="ml-auto pr-xs mr-l" alignItems="BASELINE">
+        <hbox id="engineStatusRootBox" padding="false" themeNames="spacing-s" classNames="ml-auto pr-xs mr-l" alignItems="BASELINE">
             <flexLayout classNames="gap-s rounded-l border-contrast-30 border box-border pt-xs pb-xs" alignItems="CENTER" height="min-content">
                 <hbox padding="false" id="engineStateBadge" classNames="gap-xs items-baseline">
-                    <spinner id="statusSpinner" classNames="pr-xs" visible="false"/>
+                    <spinner id="statusSpinner" classNames="pr-xs pr-xs pl-xs mt-auto mb-auto" visible="false"/>
                     <icon id="warningStatusIcon" icon="WARNING" classNames="p-xs" visible="false"/>
                     <span id="successStatusBadge" themeNames="badge pill success small" visible="false"/>
                     <span id="warningStatusBadge" themeNames="badge pill error small" visible="false"/>

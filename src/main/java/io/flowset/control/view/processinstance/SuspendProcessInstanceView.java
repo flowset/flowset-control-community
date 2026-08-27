@@ -1,7 +1,6 @@
 package io.flowset.control.view.processinstance;
 
 
-import com.vaadin.flow.router.Route;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
@@ -9,7 +8,6 @@ import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "suspend-process-instance-view", layout = DefaultMainViewParent.class)
 @ViewController(id = "SuspendProcessInstanceView")
 @ViewDescriptor(path = "suspend-process-instance-view.xml")
 public class SuspendProcessInstanceView extends StandardView {

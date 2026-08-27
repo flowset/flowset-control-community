@@ -7,7 +7,7 @@ package io.flowset.control.entity.deployment;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
 public enum ValidationErrorType implements EnumClass<String> {

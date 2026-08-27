@@ -6,28 +6,42 @@
 
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
     <!-- Main group -->
-    <item id="dashboard" view="MainView" title="msg://io.flowset.control/menu_config.dashboard.title"/>
+    <item id="dashboard" view="MainView" title="msg://io.flowset.control/menu_config.dashboard.title">
+        <icon>
+            <svgIcon resource="icons/dashboard.svg"/>
+        </icon>
+    </item>
     <item id="processDefinitions" view="bpm_ProcessDefinition.list"
           description="msg://io.flowset.control/menu_config.bpm_ProcessDefinition.list.description"
           title="msg://io.flowset.control/menu_config.bpm_ProcessDefinition.list.title" icon="SITEMAP"/>
-    <item view="bpm_ProcessInstance.list"
+    <item id="processInstances" view="bpm_ProcessInstance.list"
           description="msg://io.flowset.control/menu_config.bpm_ProcessInstance.list.description"
           title="msg://io.flowset.control/menu_config.bpm_ProcessInstance.list.title" icon="TASKS"/>
-    <item view="IncidentData.list" title="msg://io.flowset.control.view.incidentdata/incidentDataListView.title"
+    <item id="incidents" view="IncidentData.list" title="msg://io.flowset.control.view.incidentdata/incidentDataListView.title"
           icon="WARNING"/>
-    <item view="bpm_AllTasksView" title="msg://io.flowset.control/allTasks" icon="USER_CARD"/>
+    <item id="userTasks" view="bpm_AllTasksView" title="msg://io.flowset.control/allTasks" icon="USER_CARD"/>
 
     <!-- DMN group -->
     <item id="decisions" view="bpm_DecisionDefinition.list"
-          title="msg://io.flowset.control.view.decisiondefinition/decisionDefinitionListView.title"
-          icon="vaadin:table"/>
+          title="msg://io.flowset.control.view.decisiondefinition/decisionDefinitionListView.title">
+        <icon>
+            <svgIcon resource="icons/table.svg"/>
+        </icon>
+    </item>
     <item id="decisionInstances" view="DecisionInstanceData.list"
           description="msg://io.flowset.control/menu_config.decisionInstances.description"
-          title="msg://io.flowset.control/menu_config.decisionInstances.title"/>
+          title="msg://io.flowset.control/menu_config.decisionInstances.title">
+        <icon>
+            <svgIcon resource="icons/table_view.svg"/>
+        </icon>
+    </item>
 
     <!-- System group -->
     <item id="deployments" view="bpm_Deployment.list"
           title="msg://io.flowset.control.view.deploymentdata/deploymentListView.title" icon="vaadin:file-process"/>
+
+    <item id="batches" view="bpm_AllBatchListView"
+          title="msg://io.flowset.control/menu_config.bpm_AllBatchListView.title" icon="CUBES"/>
 
     <menu id="administration" description="msg://io.flowset.control/menu_config.administration.description"
           opened="true"

@@ -15,9 +15,7 @@
         <instance id="decisionFilterDc" class="io.flowset.control.entity.filter.DecisionInstanceFilter"/>
     </data>
     <facets>
-        <urlQueryParameters id="urlQueryParameters">
-            <pagination component="pagination"/>
-        </urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters"/>
     </facets>
     <actions>
         <action id="selectAction" type="lookup_select"/>
@@ -26,16 +24,18 @@
     <layout>
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <button id="refreshButton" themeNames="success primary" action="decisionInstancesDataGrid.refreshAction"/>
+            <button id="excelExportButton" action="decisionInstancesDataGrid.excelExport"/>
             <simplePagination id="pagination" dataLoader="decisionInstancesDl"/>
         </hbox>
-        <dataGrid id="decisionInstancesDataGrid"
+        <dataGrid id="decisionInstancesDataGrid" selectionMode="MULTI"
                   width="100%"
                   minHeight="20em"
                   dataContainer="decisionInstancesDc"
                   columnReorderingAllowed="true">
             <actions>
                 <action id="refreshAction" type="list_refresh"/>
-                <action id="viewAction" type="list_edit" text="msg:///actions.View"/>
+                <action id="viewAction" type="list_edit" visible="false" text="msg:///actions.View"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="decisionInstanceId" sortable="false">

@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.processinstance;
 
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
@@ -103,10 +104,13 @@ public class Camunda7ProcessInstanceActivateTest extends AbstractCamunda7Integra
         List<String> suspendedInstanceIds = camundaRestTestHelper.getSuspendedInstancesByProcessId(camunda7, processId);
 
         //when
-        processInstanceService.activateByIdsAsync(suspendedInstanceIds);
-        waitForBatchExecution();
+        BatchData batchData = processInstanceService.activateByIdsAsync(suspendedInstanceIds);
+        camundaRestTestHelper.waitForBatchExecution(camunda7);
 
         //then
+        assertThat(batchData).isNotNull();
+        assertThat(batchData.getId()).isNotBlank();
+
         List<String> activeInstanceIds = camundaRestTestHelper.getActiveInstancesByProcessId(camunda7, processId);
         assertThat(activeInstanceIds)
                 .hasSize(5)
@@ -135,21 +139,5 @@ public class Camunda7ProcessInstanceActivateTest extends AbstractCamunda7Integra
                 .isInstanceOf(EngineConnectionFailedException.class);
     }
 
-    private void waitForBatchExecution() {
-        boolean batchExists;
-        int attempts = 0;
-        do {
-            batchExists = camundaRestTestHelper.activeBatchExits(camunda7);
-            attempts++;
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                //do nothing
-            }
-            if (attempts > 100) { //prevent infinite loop
-                break;
-            }
-        } while (batchExists);
-    }
 }
+

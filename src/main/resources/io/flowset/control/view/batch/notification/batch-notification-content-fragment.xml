@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <actions>
+        <action id="openBatchAction" type="control_viewBatch"/>
+    </actions>
+    <content>
+        <vbox id="root" padding="false" alignItems="CENTER">
+            <span id="titleText" classNames="text-l font-semibold"/>
+            <hbox id="batchMessageBox" padding="false" themeNames="spacing-s" justifyContent="BETWEEN" alignItems="BASELINE">
+                <span id="messageText" text="msg://batchNotificationDescription"/>
+                <button id="openBatchBtn" text="msg://openBatchBtn.text" themeNames="tertiary-inline"
+                        action="openBatchAction"/>
+            </hbox>
+        </vbox>
+    </content>
+</fragment>

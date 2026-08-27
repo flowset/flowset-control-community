@@ -14,9 +14,7 @@
         <instance id="userTaskFilterDc" class="io.flowset.control.entity.filter.UserTaskFilter"/>
     </data>
     <facets>
-        <urlQueryParameters id="urlQueryParameters">
-            <pagination component="tasksPagination"/>
-        </urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters"/>
     </facets>
     <actions>
         <action id="applyFilter" icon="SEARCH" text="msg:///actions.Apply"
@@ -79,9 +77,10 @@
                         <span id="appliedFiltersCount" themeNames="badge contrast primary small" text="0"
                               classNames="user-tasks-filter-count-badge" visible="false"/>
                     </div>
-                    <button action="tasksDataGrid.refresh" themeNames="primary success"/>
-                    <button action="tasksDataGrid.completeTask"/>
-                    <button action="tasksDataGrid.reassignTask"/>
+                    <button id="refreshBtn" action="tasksDataGrid.refresh" themeNames="primary success"/>
+                    <button id="completeTaskBtn" action="tasksDataGrid.completeTask"/>
+                    <button id="reassignTaskBtn" action="tasksDataGrid.reassignTask"/>
+                    <button id="excelExportBtn" action="tasksDataGrid.excelExport"/>
                     <simplePagination id="tasksPagination" dataLoader="tasksDl"/>
                 </hbox>
                 <dataGrid id="tasksDataGrid"
@@ -92,14 +91,15 @@
                         <action id="refresh"
                                 type="list_refresh"/>
                         <action id="completeTask" text="msg://completeTask" icon="CHECK"
-                                type="list_itemTracking"/>
-                        <action id="reassignTask" text="msg://reassignTask" icon="RETWEET"
-                                type="list_itemTracking"/>
+                                type="control_bulkCompleteUserTask"/>
+                        <action id="reassignTask" icon="RETWEET"
+                                type="control_bulkReassignUserTask"/>
                         <action id="view" type="list_edit" visible="false">
                             <properties>
                                 <property name="openMode" value="DIALOG"/>
                             </properties>
                         </action>
+                        <action id="excelExport" type="control_excelExport"/>
                     </actions>
                     <columns resizable="true">
                         <column property="taskId" frozen="true"/>

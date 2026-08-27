@@ -5,7 +5,6 @@
 
 package io.flowset.control.entity.job;
 
-import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 
@@ -13,9 +12,9 @@ import java.util.UUID;
 
 @JmixEntity
 public class JobDefinitionData {
-    @JmixGeneratedValue
+
     @JmixId
-    protected UUID id;
+    protected String id;
 
     protected String jobDefinitionId;
 
@@ -47,11 +46,11 @@ public class JobDefinitionData {
         this.jobType = jobType;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 }

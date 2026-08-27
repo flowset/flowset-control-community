@@ -13,7 +13,6 @@ import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -33,6 +32,7 @@ import io.flowset.control.view.processinstance.event.HistoryActivityCountUpdateE
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @FragmentDescriptor("activities-tab-fragment.xml")
 public class ActivitiesTabFragment extends Fragment<VerticalLayout> implements HasRefresh {
@@ -73,7 +73,7 @@ public class ActivitiesTabFragment extends Fragment<VerticalLayout> implements H
         if (activityInstanceData == null) {
             return;
         }
-        dialogWindows.detail(UiComponentUtils.getCurrentView(), HistoricActivityInstanceData.class)
+        dialogWindows.detail(getCurrentView(), HistoricActivityInstanceData.class)
                 .withAfterCloseListener(closeEvent -> historicActivityInstancesDl.load())
                 .editEntity(activityInstanceData)
                 .build()

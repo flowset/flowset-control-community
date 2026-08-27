@@ -12,15 +12,13 @@ import io.flowset.control.facet.urlqueryparameters.DecisionDefinitionListQueryPa
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
-import io.flowset.control.view.decisiondeployment.DecisionDeploymentView;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.Fragments;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -38,7 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route(value = "bpmn/decision-definitions", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/decision-definitions", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_DecisionDefinition.list")
 @ViewDescriptor("decision-definition-list-view.xml")
 public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<DecisionDefinitionData> {
@@ -49,11 +47,6 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
     protected Metadata metadata;
     @Autowired
     protected DecisionDefinitionService decisionDefinitionService;
-    @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected Fragments fragments;
-
     @ViewComponent
     protected InstanceContainer<DecisionDefinitionFilter> decisionDefinitionFilterDc;
     @ViewComponent
@@ -66,6 +59,8 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
     protected TypedTextField<String> nameField;
     @ViewComponent
     protected JmixCheckbox lastVersionOnlyCb;
+    @ViewComponent
+    protected SimplePagination decisionDefinitionPagination;
 
     protected DecisionDefinitionListQueryParamBinder urlQueryParamBinder;
 
@@ -74,9 +69,9 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
         initFilter();
-        urlQueryParamBinder = new DecisionDefinitionListQueryParamBinder(decisionDefinitionFilterDc, this::startLoadData, filterFormLayout);
-        urlQueryParameters.registerBinder(urlQueryParamBinder);
+        registerQueryParamBinders();
     }
+
 
     @Subscribe(id = "clearBtn", subject = "clickListener")
     public void onClearBtnClick(final ClickEvent<JmixButton> event) {
@@ -112,13 +107,6 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
         if (event.isFromClient()) {
             startLoadData();
         }
-    }
-
-    @Subscribe("decisionDefinitionsGrid.deploy")
-    protected void onDecisionDefinitionsGridDeploy(final ActionPerformedEvent event) {
-        viewNavigators.view(this, DecisionDeploymentView.class)
-                .withBackwardNavigation(true)
-                .navigate();
     }
 
     protected void initFilter() {
@@ -161,5 +149,11 @@ public class DecisionDefinitionListView extends AbstractListViewWithDelayedLoad<
     @Subscribe("decisionDefinitionsGrid.refresh")
     public void onDecisionDefinitionsGridRefresh(final ActionPerformedEvent event) {
         startLoadData();
+    }
+
+    protected void registerQueryParamBinders() {
+        urlQueryParamBinder = new DecisionDefinitionListQueryParamBinder(decisionDefinitionFilterDc, this::startLoadData, filterFormLayout);
+        urlQueryParameters.registerBinder(urlQueryParamBinder);
+        registerPaginationParameterBinder(decisionDefinitionPagination);
     }
 }

@@ -12,7 +12,7 @@ import org.camunda.community.rest.client.model.ExternalTaskDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;

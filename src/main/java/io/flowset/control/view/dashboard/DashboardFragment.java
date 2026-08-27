@@ -7,6 +7,7 @@ package io.flowset.control.view.dashboard;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.Div;
+import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -153,8 +154,8 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
         }
     }
 
-    @Subscribe(id = "createBpmEnginBtn", subject = "clickListener")
-    public void onCreateBpmEnginBtnClick(final ClickEvent<JmixButton> event) {
+    @Subscribe("createBpmEngineAction")
+    public void onCreateBpmEngineAction(final ActionPerformedEvent event) {
         dialogWindows.detail(getCurrentView(), BpmEngine.class)
                 .newEntity()
                 .withAfterCloseListener(closeEvent -> {

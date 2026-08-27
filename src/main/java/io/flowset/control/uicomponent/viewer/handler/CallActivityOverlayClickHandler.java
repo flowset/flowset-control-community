@@ -16,16 +16,18 @@ import io.jmix.flowui.view.View;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
+import io.flowset.control.view.processdefinition.ProcessDefinitionDiagramView;
 import io.flowset.control.view.processinstance.CalledProcessInstanceDataListView;
 import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.uikit.component.bpmnviewer.model.CallActivityData;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -41,6 +43,7 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public class CallActivityOverlayClickHandler {
 
     protected final ProcessDefinitionService processDefinitionService;
+    protected final SecuritySupport securitySupport;
     protected final Metadata metadata;
     protected final Notifications notifications;
     protected final ViewNavigators viewNavigators;
@@ -57,6 +60,9 @@ public class CallActivityOverlayClickHandler {
     public void handleProcessNavigation(ProcessDefinitionData parentProcess,
                                         CallActivityData callActivityData,
                                         boolean fromDialog) {
+        if (!securitySupport.isEntityViewPermitted(ProcessDefinitionData.class)) {
+            return;
+        }
         ProcessDefinitionData calledProcess = findCalledProcess(callActivityData, parentProcess);
         if (calledProcess != null) {
             View<?> currentView = getCurrentView();
@@ -74,12 +80,34 @@ public class CallActivityOverlayClickHandler {
     }
 
     /**
+     * Opens {@link ProcessDefinitionDiagramView} for the process called from the specified process and activity.
+     *
+     * @param parentProcess    parent process
+     * @param callActivityData the data from Call activity element from the parent process
+     */
+    public void handleProcessPreview(ProcessDefinitionData parentProcess,
+                                     CallActivityData callActivityData) {
+        if (!securitySupport.isEntityViewPermitted(ProcessDefinitionData.class)) {
+            return;
+        }
+        ProcessDefinitionData calledProcess = findCalledProcess(callActivityData, parentProcess);
+        if (calledProcess != null) {
+            dialogWindows.view(getCurrentView(), ProcessDefinitionDiagramView.class)
+                    .withViewConfigurer(view -> view.setProcessDefinition(calledProcess))
+                    .open();
+        }
+    }
+
+    /**
      * Handles a navigation to the specified called process instances. If only one instance is provided, then {@link ProcessInstanceDetailView} is opened.
      * Otherwise, opens {@link CalledProcessInstanceDataListView}.
      *
      * @param calledProcessInstanceIds a list of process instances called from the other process instance
      */
     public void handleInstancesNavigation(List<String> calledProcessInstanceIds) {
+        if (!securitySupport.isEntityViewPermitted(ProcessInstanceData.class)) {
+            return;
+        }
         if (CollectionUtils.size(calledProcessInstanceIds) == 1) {
             viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
                     .withViewClass(ProcessInstanceDetailView.class)

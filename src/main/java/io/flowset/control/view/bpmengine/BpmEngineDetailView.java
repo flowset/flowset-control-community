@@ -109,7 +109,7 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
         }
 
         String buildType = buildProperties.get("buildType");
-        String hostExample = Strings.CI.equals(buildType, "docker") ? "http://host.docker.internal:8080/engine-rest"
+        String hostExample = Strings.CS.equals(buildType, "docker") ? "http://host.docker.internal:8080/engine-rest"
                 : "http://localhost:8080/engine-rest";
 
         baseUrlField.setHelperText(messageBundle.formatMessage("baseUrlField.helperText", hostExample));

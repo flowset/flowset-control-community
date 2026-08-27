@@ -19,19 +19,15 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.app.main.StandardMainView;
 import io.jmix.flowui.asynctask.UiAsyncTasks;
 import io.jmix.flowui.facet.Timer;
-import io.jmix.flowui.kit.component.main.ListMenu;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.MessageBundle;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.View;
-import io.jmix.flowui.view.ViewComponent;
-import io.jmix.flowui.view.ViewController;
-import io.jmix.flowui.view.ViewDescriptor;
+import io.jmix.flowui.view.*;
 import io.jmix.flowui.view.navigation.ViewNavigationSupport;
 import io.flowset.control.entity.EngineConnectionCheckResult;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.event.UserEngineSelectEvent;
 import io.flowset.control.property.EngineConnectionCheckProperties;
+import io.flowset.control.service.analytics.AmplitudeEventType;
+import io.flowset.control.service.analytics.AnalyticsService;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.EngineUiService;
 import io.flowset.control.uicomponent.menu.ControlListMenu;
@@ -58,6 +54,8 @@ public class MainView extends StandardMainView {
 
     @Autowired
     protected Fragments fragments;
+    @Autowired
+    protected AnalyticsService analyticsService;
     @ViewComponent
     protected InstanceContainer<EngineConnectionCheckResult> engineConnectionStatusDc;
     @Autowired
@@ -177,39 +175,30 @@ public class MainView extends StandardMainView {
     }
 
     protected void initMenu() {
-        menu.addMenuItemBefore(new ControlListMenu.GroupLabelMenuItem("mainLabel")
-                .withTitle(messageBundle.getMessage("menu.mainGroup.label")), "dashboard");
+        menu.addMenuItem(new ControlListMenu.GroupLabelMenuItem("mainLabel")
+                .withChildrenItems("dashboard", "processDefinitions",
+                        "processInstances", "incidents", "userTasks")
+                .withTitle(messageBundle.getMessage("menu.mainGroup.label")));
 
-        menu.addMenuItemBefore(new ControlListMenu.GroupLabelMenuItem("dmnLabel")
-                .withTitle(messageBundle.getMessage("menu.dmnGroup.label")), "decisions");
+        menu.addMenuItem(new ControlListMenu.GroupLabelMenuItem("dmnLabel")
+                .withChildrenItems("decisions", "decisionInstances")
+                .withTitle(messageBundle.getMessage("menu.dmnGroup.label")));
 
-        menu.addMenuItemBefore(new ControlListMenu.GroupLabelMenuItem("systemLabel")
-                .withTitle(messageBundle.getMessage("menu.systemGroup.label")), "deployments");
+        menu.addMenuItem(new ControlListMenu.GroupLabelMenuItem("systemLabel")
+                .withChildrenItems("deployments", "batches", "administration")
+                .withTitle(messageBundle.getMessage("menu.systemGroup.label")));
 
-        menu.addMenuItemBefore(new ControlListMenu.GroupLabelMenuItem("supportLabel")
-                        .withTitle(messageBundle.getMessage("menu.supportGroup.label")),
-                "about");
-
-        ListMenu.MenuItem decisionsMenu = menu.getMenuItem("decisions");
-        if (decisionsMenu != null) {
-            decisionsMenu.setPrefixComponent(new SvgIcon("icons/table.svg"));
-        }
-
-        ListMenu.MenuItem decisionInstancesMenu = menu.getMenuItem("decisionInstances");
-        if (decisionInstancesMenu != null) {
-            decisionInstancesMenu.setPrefixComponent(new SvgIcon("icons/table_view.svg"));
-        }
-
-        ListMenu.MenuItem dashboardMenu = menu.getMenuItem("dashboard");
-        if (dashboardMenu != null) {
-            dashboardMenu.setPrefixComponent(new SvgIcon("icons/dashboard.svg"));
-        }
+        menu.addMenuItem(new ControlListMenu.GroupLabelMenuItem("supportLabel")
+                        .withChildrenItems("about")
+                        .withTitle(messageBundle.getMessage("menu.supportGroup.label")));
     }
 
     protected void initInitialLayout() {
         Component initialLayout = getInitialLayout();
         if (initialLayout instanceof HasComponents container) {
             initialLayout.addAttachListener(attachEvent -> {
+                // The initial layout is (re)attached whenever the user navigates to the dashboard.
+                analyticsService.logEvent(AmplitudeEventType.CONTROL_OPEN_DASHBOARD_VIEW);
                 if (container.getElement().getChildCount() == 0) {
                     initDashboard(container);
                 } else {
@@ -232,6 +221,7 @@ public class MainView extends StandardMainView {
 
     protected void initDashboard(HasComponents container) {
         DashboardFragment dashboardFragment = fragments.create(this, DashboardFragment.class);
+        dashboardFragment.setId("dashboardFragment");
         container.add(dashboardFragment);
     }
 
@@ -243,6 +233,7 @@ public class MainView extends StandardMainView {
         boolean engineStatusFragmentExists = header.getChildren().anyMatch(component -> component instanceof EngineStatusBadgeFragment);
         if (!engineStatusFragmentExists) {
             this.engineStatusFragment = fragments.create(this, EngineStatusBadgeFragment.class);
+            this.engineStatusFragment.setId("engineStatusFragment");
             header.add(engineStatusFragment);
         }
     }

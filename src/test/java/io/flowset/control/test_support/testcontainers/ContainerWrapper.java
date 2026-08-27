@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <V> - engine container type
  */
-public class ContainerWrapper<V extends EngineContainer<?>> implements ExtensionContext.Store.CloseableResource {
+public class ContainerWrapper<V extends EngineContainer<?>> implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(ContainerWrapper.class);
 
     private final V container;
@@ -29,7 +29,7 @@ public class ContainerWrapper<V extends EngineContainer<?>> implements Extension
     }
 
     @Override
-    public void close() throws Throwable {
+    public void close() {
         String containerId = container.getContainerId();
 
         log.info("Stopping engine container {} {}", container.getDockerImageName(), containerId);

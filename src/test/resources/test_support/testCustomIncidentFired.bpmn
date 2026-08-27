@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1wjdadg" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.24.0">
+  <bpmn:process id="testCustomIncidentFired" name="testCustomIncidentFired" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_07eu94a</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_07eu94a" sourceRef="StartEvent_1" targetRef="fireCustomIncidentTask" />
+    <bpmn:scriptTask id="fireCustomIncidentTask" name="Fire custom incident" scriptFormat="groovy">
+      <bpmn:incoming>Flow_07eu94a</bpmn:incoming>
+      <bpmn:outgoing>Flow_19nkkqz</bpmn:outgoing>
+      <bpmn:script>execution.createIncident("customTestIncident", "customTestConfiguration", "Throw custom incident for test");</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_19nkkqz" sourceRef="fireCustomIncidentTask" targetRef="waitForResolutionTask" />
+    <bpmn:userTask id="waitForResolutionTask" name="Wait for resolution">
+      <bpmn:incoming>Flow_19nkkqz</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hd6r18</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="Event_0u5b29z">
+      <bpmn:incoming>Flow_1hd6r18</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1hd6r18" sourceRef="waitForResolutionTask" targetRef="Event_0u5b29z" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="testCustomIncidentFired">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="182" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1mpl2u1_di" bpmnElement="fireCustomIncidentTask">
+        <dc:Bounds x="270" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0mvjldp_di" bpmnElement="waitForResolutionTask">
+        <dc:Bounds x="430" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0u5b29z_di" bpmnElement="Event_0u5b29z">
+        <dc:Bounds x="592" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_07eu94a_di" bpmnElement="Flow_07eu94a">
+        <di:waypoint x="218" y="120" />
+        <di:waypoint x="270" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19nkkqz_di" bpmnElement="Flow_19nkkqz">
+        <di:waypoint x="370" y="120" />
+        <di:waypoint x="430" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hd6r18_di" bpmnElement="Flow_1hd6r18">
+        <di:waypoint x="530" y="120" />
+        <di:waypoint x="592" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

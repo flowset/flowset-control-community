@@ -7,22 +7,22 @@ package io.flowset.control.view.processinstance;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
+import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
+import io.jmix.flowui.Fragments;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.jspecify.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.List;
 
-@Route(value = "bpm/bulkterminateprocessinstance", layout = DefaultMainViewParent.class)
 @ViewController("bpm_BulkTerminateProcessInstance")
 @ViewDescriptor("bulk-terminate-process-instance-view.xml")
 @DialogMode(width = "42em")
@@ -31,6 +31,8 @@ public class BulkTerminateProcessInstanceView extends StandardView {
 
     @Autowired
     protected Notifications notifications;
+    @Autowired
+    protected Fragments fragments;
     @ViewComponent
     protected MessageBundle messageBundle;
 
@@ -46,11 +48,11 @@ public class BulkTerminateProcessInstanceView extends StandardView {
     @ViewComponent
     protected JmixCheckbox skipSubprocessesField;
 
-    protected Collection<ProcessInstanceData> processInstances;
+    protected List<String> processInstanceIds;
 
     @SuppressWarnings("LombokSetterMayBeUsed")
-    public void setProcessInstances(Collection<ProcessInstanceData> processInstances) {
-        this.processInstances = processInstances;
+    public void setProcessInstanceIds(List<String> processInstanceIds) {
+        this.processInstanceIds = processInstanceIds;
     }
 
     @Subscribe
@@ -64,16 +66,15 @@ public class BulkTerminateProcessInstanceView extends StandardView {
 
     @Subscribe("okBtn")
     protected void onOkBtnClick(ClickEvent<Button> event) {
-        List<String> ids = processInstances.stream().map(ProcessInstanceData::getInstanceId).toList();
-        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(ids)
+        ProcessInstanceBulkTerminateContext context = new ProcessInstanceBulkTerminateContext(processInstanceIds)
                 .setReason(reasonTextArea.getValue())
                 .setSkipCustomListeners(skipCustomListenersField.getValue())
                 .setSkipIoMappings(skipIoMappingsField.getValue())
                 .setSkipSubprocesses(skipSubprocessesField.getValue());
-        processInstanceService.terminateByIdsAsync(context);
-        notifications.create(messageBundle.getMessage("bulkTerminateProcessesStarted"))
-                .withThemeVariant(NotificationVariant.LUMO_PRIMARY)
-                .show();
+
+        BatchData batchData = processInstanceService.terminateByIdsAsync(context);
+
+        showBatchNotification(batchData);
 
         close(StandardOutcome.SAVE);
     }
@@ -81,5 +82,17 @@ public class BulkTerminateProcessInstanceView extends StandardView {
     @Subscribe("cancelBtn")
     protected void onCancelBtnClick(ClickEvent<Button> event) {
         close(StandardOutcome.DISCARD);
+    }
+
+    protected void showBatchNotification(@Nullable BatchData batchData) {
+        BatchNotificationContentFragment batchNotificationContent = fragments.create(this, BatchNotificationContentFragment.class);
+        batchNotificationContent.setBatchId(batchData != null ? batchData.getId() : null);
+        batchNotificationContent.setTitle(messageBundle.getMessage("bulkTerminateProcessesStarted"));
+
+        Notification notification = notifications.create(batchNotificationContent.getContent())
+                .withCloseable(true)
+                .build();
+        notification.setDuration(BatchNotificationContentFragment.DEFAULT_DURATION);
+        notification.open();
     }
 }

@@ -10,10 +10,15 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.batch.BatchData;
+import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
+import io.jmix.core.Messages;
+import io.jmix.flowui.Fragments;
+import io.jmix.flowui.Notifications;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
@@ -24,10 +29,10 @@ import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.view.*;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
-@Route(value = "bpm/processinstancemigration", layout = DefaultMainViewParent.class)
 @ViewController(ProcessInstanceMigrationView.ID)
 @ViewDescriptor("process-instance-migration-view.xml")
 public class ProcessInstanceMigrationView extends StandardView {
@@ -37,11 +42,17 @@ public class ProcessInstanceMigrationView extends StandardView {
     @Autowired
     protected ProcessDefinitionService processDefinitionService;
     @Autowired
-    private ProcessInstanceService processInstanceService;
+    protected ProcessInstanceService processInstanceService;
     @Autowired
     protected MigrationService migrationService;
     @Autowired
     protected Dialogs dialogs;
+    @Autowired
+    protected Fragments fragments;
+    @Autowired
+    protected Notifications notifications;
+    @Autowired
+    protected Messages messages;
 
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -58,9 +69,9 @@ public class ProcessInstanceMigrationView extends StandardView {
     @ViewComponent
     protected TypedTextField<Integer> sourceDefinitionVersionField;
     @ViewComponent
-    private JmixButton migrateBtn;
+    protected JmixButton migrateBtn;
     @ViewComponent
-    private HorizontalLayout migrationWarningPanel;
+    protected HorizontalLayout migrationWarningPanel;
 
     protected ProcessInstanceData processInstanceData;
     protected ProcessDefinitionData processDefinitionData;
@@ -164,11 +175,25 @@ public class ProcessInstanceMigrationView extends StandardView {
         String srcProcessDefinitionId = processDefinitionData.getId();
         List<String> validationMessages = migrationService.validateMigrationOfProcessInstances(srcProcessDefinitionId, dstProcessDefinitionId);
         if (validationMessages.isEmpty()) {
-            migrationService.migrateAllProcessInstances(srcProcessDefinitionId, dstProcessDefinitionId);
+            BatchData batch = migrationService.migrateAllProcessInstances(srcProcessDefinitionId, dstProcessDefinitionId);
+            showBatchNotification(batch);
+            
             close(StandardOutcome.SAVE);
         } else {
             displayValidationError(validationMessages);
         }
+    }
+
+    protected void showBatchNotification(@Nullable BatchData batchData) {
+        BatchNotificationContentFragment batchNotificationContent = fragments.create(this, BatchNotificationContentFragment.class);
+        batchNotificationContent.setBatchId(batchData != null ? batchData.getId() : null);
+        batchNotificationContent.setTitle(messages.getMessage("io.flowset.control.view.processdefinition/processInstancesMigrationStarted"));
+
+        Notification notification = notifications.create(batchNotificationContent.getContent())
+                .withCloseable(true)
+                .build();
+        notification.setDuration(BatchNotificationContentFragment.DEFAULT_DURATION);
+        notification.open();
     }
 
     protected void displayValidationError(List<String> validationMessages) {

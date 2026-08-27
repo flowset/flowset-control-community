@@ -30,8 +30,6 @@ public class DecisionDefinitionColumnFragment extends EntityDetailLinkFragment<H
 
     @ViewComponent
     protected JmixButton idBtn;
-    @Autowired
-    protected ComponentHelper componentHelper;
 
     protected DecisionDefinitionData decisionDefinitionData;
 
@@ -64,5 +62,15 @@ public class DecisionDefinitionColumnFragment extends EntityDetailLinkFragment<H
                     .withRouteParameters(new RouteParameters("id", decisionDefinitionId))
                     .navigate();
         }
+    }
+
+    @Override
+    protected Class<?> getTargetEntityClass() {
+        return DecisionDefinitionData.class;
+    }
+
+    @Override
+    protected boolean isItemReadPermitted() {
+        return true;
     }
 }

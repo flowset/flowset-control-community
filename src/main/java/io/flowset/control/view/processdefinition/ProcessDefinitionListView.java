@@ -13,19 +13,22 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
+import io.flowset.control.action.processdefinition.BulkActivateProcessDefinitionAction;
+import io.flowset.control.action.processdefinition.BulkDeleteProcessDefinitionAction;
+import io.flowset.control.action.processdefinition.BulkSuspendProcessDefinitionAction;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.SupportsTypedValue;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -39,14 +42,11 @@ import io.flowset.control.entity.processdefinition.ProcessDefinitionState;
 import io.flowset.control.facet.urlqueryparameters.ProcessDefinitionListQueryParamBinder;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
-import io.flowset.control.view.newprocessdeployment.NewProcessDeploymentView;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Set;
 
 @Route(value = "bpm/process-definitions", layout = DefaultMainViewParent.class)
 @ViewController("bpm_ProcessDefinition.list")
@@ -56,10 +56,6 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
 
     @ViewComponent
     protected MessageBundle messageBundle;
-    @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected DialogWindows dialogWindows;
     @Autowired
     protected UiComponents uiComponents;
     @Autowired
@@ -71,6 +67,14 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
     protected CollectionLoader<ProcessDefinitionData> processDefinitionsDl;
     @ViewComponent
     protected InstanceContainer<ProcessDefinitionFilter> processDefinitionFilterDc;
+    @ViewComponent("processDefinitionsGrid.bulkActivate")
+    protected BulkActivateProcessDefinitionAction bulkActivate;
+    @ViewComponent("processDefinitionsGrid.bulkRemove")
+    protected BulkDeleteProcessDefinitionAction bulkRemove;
+    @ViewComponent("processDefinitionsGrid.bulkSuspend")
+    protected BulkSuspendProcessDefinitionAction bulkSuspend;
+    @ViewComponent("processDefinitionsGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     @Autowired
     protected ProcessDefinitionService processDefinitionService;
@@ -84,6 +88,8 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
     protected DataGrid<ProcessDefinitionData> processDefinitionsGrid;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
+    @ViewComponent
+    protected SimplePagination processDefinitionPagination;
 
     protected ProcessDefinitionListQueryParamBinder filterParamBinder;
 
@@ -92,9 +98,11 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
         initFilter();
+        initActions();
 
         this.filterParamBinder = new ProcessDefinitionListQueryParamBinder(processDefinitionFilterDc, this::startLoadData, filterFormLayout);
         urlQueryParameters.registerBinder(filterParamBinder);
+        registerPaginationParameterBinder(processDefinitionPagination);
     }
 
     @Install(to = "processDefinitionsDl", target = Target.DATA_LOADER)
@@ -110,28 +118,6 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         }
 
         return loadItemsWithStateHandling(() -> processDefinitionService.findAll(context));
-    }
-
-    @Install(to = "processDefinitionsGrid.bulkActivate", subject = "enabledRule")
-    protected boolean processDefinitionsGridBulkActivateEnabledRule() {
-        Set<ProcessDefinitionData> selectedItems = processDefinitionsGrid.getSelectedItems();
-        boolean suspendedDefinitionExists = selectedItems.stream().anyMatch(definition -> BooleanUtils.isTrue(definition.getSuspended()));
-
-        return CollectionUtils.isNotEmpty(selectedItems) && suspendedDefinitionExists;
-    }
-
-    @Subscribe("processDefinitionsGrid.bulkActivate")
-    public void onProcessDefinitionsGridBulkActivate(final ActionPerformedEvent event) {
-        Set<ProcessDefinitionData> selectedItems = processDefinitionsGrid.getSelectedItems();
-        dialogWindows.view(this, BulkActivateProcessDefinitionView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .withViewConfigurer(view -> view.setProcessDefinitions(selectedItems))
-                .build()
-                .open();
     }
 
     @Install(to = "processDefinitionPagination", subject = "totalCountDelegate")
@@ -190,30 +176,6 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         });
     }
 
-    @Subscribe("processDefinitionsGrid.bulkRemove")
-    protected void onProcessDefinitionsGridBulkRemove(final ActionPerformedEvent event) {
-        Set<ProcessDefinitionData> selectedItems = processDefinitionsGrid.getSelectedItems();
-        if (selectedItems.isEmpty()) {
-            return;
-        }
-        dialogWindows.view(this, BulkDeleteProcessDefinitionView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        processDefinitionsDl.load();
-                    }
-                })
-                .withViewConfigurer(view -> view.setProcessDefinitions(selectedItems))
-                .build()
-                .open();
-    }
-
-    @Subscribe("processDefinitionsGrid.deploy")
-    protected void onProcessDefinitionsGridDeploy(final ActionPerformedEvent event) {
-        viewNavigators.view(this, NewProcessDeploymentView.class)
-                .withBackwardNavigation(true)
-                .navigate();
-    }
-
     @Install(to = "processDefinitionsGrid.name", subject = "tooltipGenerator")
     protected String processDefinitionsGridNameTooltipGenerator(final ProcessDefinitionData processDefinitionData) {
         return processDefinitionData.getName();
@@ -224,8 +186,8 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         startLoadData();
     }
 
-    @Supply(to = "processDefinitionsGrid.status", subject = "renderer")
-    protected Renderer<ProcessDefinitionData> processDefinitionsGridStatusRenderer() {
+    @Supply(to = "processDefinitionsGrid.suspended", subject = "renderer")
+    protected Renderer<ProcessDefinitionData> processDefinitionsGridSuspendedRenderer() {
         return new ComponentRenderer<>(this::createStateBadge);
     }
 
@@ -243,28 +205,6 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         });
     }
 
-    @Install(to = "processDefinitionsGrid.bulkSuspend", subject = "enabledRule")
-    protected boolean processDefinitionsGridBulkSuspendEnabledRule() {
-        Set<ProcessDefinitionData> selectedDefinitions = processDefinitionsGrid.getSelectedItems();
-        boolean activeDefinitionExists = selectedDefinitions.stream().anyMatch(definition -> BooleanUtils.isNotTrue(definition.getSuspended()));
-
-        return CollectionUtils.isNotEmpty(selectedDefinitions) && activeDefinitionExists;
-    }
-
-    @Subscribe("processDefinitionsGrid.bulkSuspend")
-    protected void onProcessDefinitionsGridBulkSuspend(final ActionPerformedEvent event) {
-        Set<ProcessDefinitionData> selectedItems = processDefinitionsGrid.getSelectedItems();
-        dialogWindows.view(this, BulkSuspendProcessDefinitionView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        processDefinitionsDl.load();
-                    }
-                })
-                .withViewConfigurer(view -> view.setProcessDefinitions(selectedItems))
-                .build()
-                .open();
-    }
-
     protected void initFilterFormStyles() {
         filterFormLayout.getOwnComponents().forEach(component -> component.addClassName(LumoUtility.Padding.Top.XSMALL));
         filterPanel.addClassNames(LumoUtility.Padding.Top.XSMALL, LumoUtility.Padding.Left.MEDIUM,
@@ -278,6 +218,18 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         processDefinitionFilterDc.setItem(filter);
     }
 
+    protected void initActions() {
+        bulkActivate.setAfterSaveHandler(this::startLoadData);
+        bulkRemove.setAfterSaveHandler(this::startLoadData);
+        bulkSuspend.setAfterSaveHandler(this::startLoadData);
+
+        excelExportAction.addColumnValueProvider("suspended", context -> {
+            ProcessDefinitionData entity = context.getEntity();
+
+            return getStateText(BooleanUtils.isTrue(entity.getSuspended()));
+        });
+    }
+
     protected Span createStateBadge(ProcessDefinitionData processDefinitionData) {
         return createStateBadge(BooleanUtils.isTrue(processDefinitionData.getSuspended()));
     }
@@ -287,9 +239,13 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         String themeNames = suspended ? "badge warning pill" : "badge success pill";
         badge.getElement().getThemeList().add(themeNames);
 
-        String messageKey = suspended ? "processDefinitionList.status.suspended" : "processDefinitionList.status.active";
-        badge.setText(messageBundle.getMessage(messageKey));
+        badge.setText(getStateText(suspended));
         return badge;
+    }
+
+    protected String getStateText(boolean suspended) {
+        String messageKey = suspended ? "processDefinitionList.status.suspended" : "processDefinitionList.status.active";
+        return messageBundle.getMessage(messageKey);
     }
 
     @Override

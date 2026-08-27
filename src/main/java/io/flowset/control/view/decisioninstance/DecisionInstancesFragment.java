@@ -6,7 +6,6 @@
 package io.flowset.control.view.decisioninstance;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -46,7 +45,6 @@ import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortD
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
 import io.flowset.control.service.decisioninstance.DecisionInstanceLoadContext;
 import io.flowset.control.service.decisioninstance.DecisionInstanceService;
-import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
 import io.flowset.control.view.decisioninstance.filter.ActivityIdHeaderFilter;
 import io.flowset.control.view.decisioninstance.filter.EvaluationTimeHeaderFilter;
 import io.flowset.control.view.decisioninstance.filter.ProcessInstanceIdHeaderFilter;
@@ -58,7 +56,6 @@ import org.springframework.context.ApplicationContext;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
@@ -173,12 +170,10 @@ public class DecisionInstancesFragment extends Fragment<VerticalLayout> {
     }
 
     protected void initDataGridHeaderRow() {
-        HeaderRow headerRow = decisionInstancesGrid.getDefaultHeaderRow();
-
-        addColumnFilter(headerRow, "evaluationTime", this::createEvaluationTimeColumnFilter);
-        addColumnFilter(headerRow, "processDefinitionId", this::createProcessColumnFilter);
-        addColumnFilter(headerRow, "processInstanceId", this::createProcessInstanceIdColumnFilter);
-        addColumnFilter(headerRow, "activityId", this::createActivityIdColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesGrid, "evaluationTime", this::createEvaluationTimeColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesGrid, "processDefinitionId", this::createProcessColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesGrid, "processInstanceId", this::createProcessInstanceIdColumnFilter);
+        componentHelper.addColumnFilter(decisionInstancesGrid, "activityId", this::createActivityIdColumnFilter);
     }
 
     protected void loadProcessDefinitions(List<HistoricDecisionInstanceShortData> decisionInstances) {
@@ -226,15 +221,5 @@ public class DecisionInstancesFragment extends Fragment<VerticalLayout> {
     protected void initFilter() {
         DecisionInstanceFilter filter = metadata.create(DecisionInstanceFilter.class);
         decisionInstanceFilterDc.setItem(filter);
-    }
-
-    protected <T extends ContainerDataGridHeaderFilter> void addColumnFilter(
-            HeaderRow headerRow, String columnName,
-            Function<DataGridColumn<HistoricDecisionInstanceShortData>, T> filterProvider) {
-        DataGridColumn<HistoricDecisionInstanceShortData> column = decisionInstancesGrid.getColumnByKey(columnName);
-        T filterComponent = filterProvider.apply(column);
-        BeanUtil.autowireContext(applicationContext, filterComponent);
-        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-        headerCell.setComponent(filterComponent);
     }
 }

@@ -11,19 +11,15 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.shared.Tooltip;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.jmix.core.AccessManager;
+import io.flowset.control.action.processinstance.BulkActivateRuntimeProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkSuspendRuntimeProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkTerminateRuntimeProcessInstanceAction;
+import io.flowset.control.view.processdefinition.event.ProcessInstancesRefreshEvent;
 import io.jmix.core.DataLoadContext;
-import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.Fragments;
-import io.jmix.flowui.Notifications;
-import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.ViewNavigators;
-import io.jmix.flowui.accesscontext.UiEntityContext;
+import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.data.pagination.PaginationDataLoader;
@@ -36,11 +32,7 @@ import io.jmix.flowui.model.BaseCollectionLoader;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.HasLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.view.Install;
-import io.jmix.flowui.view.MessageBundle;
-import io.jmix.flowui.view.Subscribe;
-import io.jmix.flowui.view.Supply;
-import io.jmix.flowui.view.ViewComponent;
+import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
@@ -50,6 +42,8 @@ import io.flowset.control.view.processdefinition.event.ResetActivityEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @FragmentDescriptor("process-instances-fragment.xml")
@@ -57,10 +51,6 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
 
     @Autowired
     protected ApplicationContext applicationContext;
-    @Autowired
-    protected Notifications notifications;
-    @Autowired
-    protected Messages messages;
     @Autowired
     protected ViewNavigators viewNavigators;
     @Autowired
@@ -88,6 +78,12 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     protected Div selectedActivityContainer;
     @ViewComponent
     protected InstanceContainer<ProcessInstanceFilter> processInstanceFilterDc;
+    @ViewComponent("processInstancesGrid.bulkActivate")
+    protected BulkActivateRuntimeProcessInstanceAction bulkActivate;
+    @ViewComponent("processInstancesGrid.bulkSuspend")
+    protected BulkSuspendRuntimeProcessInstanceAction bulkSuspend;
+    @ViewComponent("processInstancesGrid.bulkTerminate")
+    protected BulkTerminateRuntimeProcessInstanceAction bulkTerminate;
 
     @Subscribe
     public void onReady(ReadyEvent event) {
@@ -96,6 +92,16 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
                     applicationContext.getBean(PaginationDataLoaderImpl.class, container.getLoader());
             processInstancesPagination.setPaginationLoader(paginationLoader);
         }
+        setupBulkActions();
+    }
+
+    protected void setupBulkActions() {
+        bulkActivate.setAfterSaveHandler(
+                () -> uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false)));
+        bulkSuspend.setAfterSaveHandler(
+                () -> uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false)));
+        bulkTerminate.setAfterSaveHandler(
+                () -> uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, true)));
     }
 
     @Install(to = "processInstancesPagination", subject = "totalCountDelegate")
@@ -115,6 +121,11 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
     @Install(to = "processInstancesGrid.id", subject = "tooltipGenerator")
     protected String processInstancesGridIdTooltipGenerator(final RuntimeProcessInstanceData processInstanceData) {
         return processInstanceData.getId();
+    }
+
+    @Subscribe("processInstancesGrid.refresh")
+    public void onProcessInstancesGridRefresh(final ActionPerformedEvent event) {
+        uiEventPublisher.publishEventForCurrentUI(new ProcessInstancesRefreshEvent(this, false));
     }
 
     protected void openProcessInstanceDetailView(RuntimeProcessInstanceData selectedInstance) {

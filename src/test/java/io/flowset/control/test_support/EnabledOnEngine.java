@@ -6,21 +6,23 @@
 package io.flowset.control.test_support;
 
 import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.test_support.property.ControlEngineTestingProperties;
+import io.flowset.control.test_support.property.ControlUiTestingProperties;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Enables executing a test on specific engine types.
  * <p>
- * Works when the Spring `test-engine` profile is used as an additional profile.
+ * Works when:
+ * <ol>
+ *     <li>The Spring profile <code>test-engine</code> is used</li>
+ *     <li>The Spring profile <code>ui-test</code> is used and {@link ControlUiTestingProperties#getEngine()} type is one of available ones</li>
+ * </ol>
  *
  * @see ControlEngineTestingProperties#getType()
+ * @see ControlUiTestingProperties#getEngine()
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -7,7 +7,7 @@ package io.flowset.control.view.historicactivityinstancedata;
 
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.jmix.core.LoadContext;;
+import io.jmix.core.LoadContext;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.activity.HistoricActivityInstanceData;

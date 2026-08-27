@@ -2,9 +2,9 @@ package io.flowset.control.configuration;
 
 import com.vaadin.flow.spring.security.VaadinSavedRequestAwareAuthenticationSuccessHandler;
 import io.jmix.core.JmixOrder;
+import io.jmix.oidc.OidcVaadinWebSecurity;
 import io.jmix.oidc.userinfo.JmixOidcUserService;
 import io.jmix.securityflowui.security.FlowuiVaadinWebSecurity;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper;
@@ -43,45 +43,8 @@ import java.util.List;
 @Order(JmixOrder.HIGHEST_PRECEDENCE + 100)
 @ConditionalOnProperty(name = "flowset.control.security.login-mode", havingValue = "oidc")
 @EnableConfigurationProperties(OAuth2ClientProperties.class)
-public class OidcSecurityConfiguration extends FlowuiVaadinWebSecurity {
+public class OidcSecurityConfiguration extends OidcVaadinWebSecurity {
 
-    protected final JmixOidcUserService jmixOidcUserService;
-    protected final ObjectProvider<ClientRegistrationRepository> registrationRepositoryObjectProvider;
-
-    /**
-     * Creates a new OIDC security configuration.
-     *
-     * @param jmixOidcUserService          the service used to load user information from the OIDC provider
-     * @param registrationRepositoryObjectProvider the client registration repository used for OIDC logout handling
-     */
-    public OidcSecurityConfiguration(JmixOidcUserService jmixOidcUserService,
-                                     ObjectProvider<ClientRegistrationRepository> registrationRepositoryObjectProvider) {
-        this.jmixOidcUserService = jmixOidcUserService;
-        this.registrationRepositoryObjectProvider = registrationRepositoryObjectProvider;
-    }
-
-
-    /**
-     * Configures {@link HttpSecurity} for OIDC authentication and logout.
-     *
-     * @param http the {@link HttpSecurity} to modify
-     * @throws Exception if an error occurs while configuring security
-     */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        super.configure(http);
-
-        http.oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo -> userInfo.oidcUserService(jmixOidcUserService))
-                .successHandler(new VaadinSavedRequestAwareAuthenticationSuccessHandler())
-        );
-
-        OidcClientInitiatedLogoutSuccessHandler oidcLogoutHandler =
-                new OidcClientInitiatedLogoutSuccessHandler(registrationRepositoryObjectProvider.getObject());
-        oidcLogoutHandler.setPostLogoutRedirectUri("{baseUrl}/login");
-
-        http.logout(logout -> logout.logoutSuccessHandler(oidcLogoutHandler));
-    }
 
     @Bean("control_ClientRegistrationRepository")
     ClientRegistrationRepository inMemoryClientRegistrationRepository(OAuth2ClientProperties properties) {

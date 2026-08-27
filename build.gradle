@@ -4,23 +4,23 @@
  */
 import com.github.spotbugs.snom.Confidence
 import com.github.spotbugs.snom.Effort
-
 import org.springframework.boot.gradle.tasks.buildinfo.BuildInfo
 
 plugins {
-    id 'io.jmix' version '2.7.4'
+    id 'io.jmix' version '3.0.1'
     id 'java'
-    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.9'
-    id 'com.github.spotbugs' version '6.1.7'
-    id "org.sonarqube" version "6.3.1.5724"
-    id "org.cyclonedx.bom" version "3.0.2"
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.4.1'
+    id 'com.github.spotbugs' version '6.5.9'
+    id "org.sonarqube" version "7.4.0.8496"
+    id "org.cyclonedx.bom" version "3.2.4"
 }
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.vaadin'
+apply plugin: 'war'
 
 jmix {
-    bomVersion = '2.7.3'
+    bomVersion = '3.0.1'
 }
 
 group = 'io.flowset'
@@ -28,31 +28,32 @@ version = project.findProperty("appVersion") ?: '2026.1.999-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
-        url 'https://global.repo.jmix.io/repository/public'
+        url = 'https://global.repo.jmix.io/repository/public'
     }
     maven {
-        url 'https://maven.vaadin.com/vaadin-addons'
+        url = 'https://maven.vaadin.com/vaadin-addons'
     }
 
     if (project.hasProperty('flowsetRepoUrl')) {
         maven {
             url = rootProject['flowsetRepoUrl']
             credentials {
-                username rootProject['flowsetRepoUser']
-                password rootProject['flowsetRepoPassword']
+                username = rootProject['flowsetRepoUser']
+                password = rootProject['flowsetRepoPassword']
             }
             allowInsecureProtocol = true
         }
     } else {
         maven {
-            url 'https://nexus.flowset.io/repository/public'
+            url = 'https://nexus.flowset.io/repository/public'
         }
     }
 }
@@ -74,8 +75,6 @@ dependencies {
     implementation 'io.jmix.flowui:jmix-flowui-starter'
     implementation 'io.jmix.flowui:jmix-flowui-data-starter'
     implementation 'io.jmix.flowui:jmix-flowui-themes'
-    implementation 'io.jmix.datatools:jmix-datatools-starter'
-    implementation 'io.jmix.datatools:jmix-datatools-flowui-starter'
     implementation 'io.jmix.charts:jmix-charts-flowui-starter'
     implementation 'io.jmix.oidc:jmix-oidc-starter'
     implementation 'io.jmix.multitenancy:jmix-multitenancy-starter'
@@ -86,26 +85,38 @@ dependencies {
     implementation 'io.jmix.translations:jmix-translations-es'
     implementation 'io.jmix.translations:jmix-translations-ru'
 
-    //Vaadin add-ons
+    //Vaadin
     implementation "org.vaadin.addons.componentfactory:spinner"
+    implementation 'com.vaadin:vaadin-dev'
+
+    // Apache POI
+    implementation 'org.apache.poi:poi-ooxml'
 
     // Spring
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation "org.springframework.cloud:spring-cloud-dependencies"
     implementation "org.springframework.cloud:spring-cloud-starter-openfeign"
 
     // Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    // AOP (analytics collection points)
+    implementation 'org.springframework.boot:spring-boot-starter-aspectj'
+
+    // Amplitude (anonymous product analytics)
+    implementation 'com.amplitude:java-sdk:1.12.4'
+    // org.json is used on the Amplitude Event API surface (Event.eventProperties)
+    implementation 'org.json:json:20231013'
+
     // Camunda
-    implementation "org.camunda.community.rest:camunda-platform-7-rest-client-spring-boot"
-    implementation "io.holunda.camunda-api:camunda-bpm-engine-api"
+    implementation "io.holunda.c7:c7-rest-client-spring-boot-starter-4"
+    implementation "org.springframework.boot:spring-boot-jackson2" // for compatibility with client
 
     // Camunda util dependencies
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"
+    implementation "tools.jackson.module:jackson-module-kotlin"
 
     // Preprocessors
-    implementation "org.mapstruct:mapstruct:"
+    implementation "org.mapstruct:mapstruct"
     implementation "org.projectlombok:lombok"
 
     annotationProcessor platform("io.flowset.bom:flowset-bom:$bomVersion")
@@ -118,6 +129,8 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+    runtimeOnly 'org.eclipse.persistence:org.eclipse.persistence.oracle'
 
     // test: Spring
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -132,17 +145,49 @@ dependencies {
     testAnnotationProcessor platform("io.flowset.bom:flowset-bom:$bomVersion")
     testAnnotationProcessor "org.projectlombok:lombok"
 
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testImplementation 'org.testcontainers:testcontainers-oracle-free'
+    testImplementation 'org.testcontainers:testcontainers-mysql'
+    testImplementation 'org.testcontainers:testcontainers-mysql'
+    testImplementation 'io.jmix.masquerade:jmix-masquerade'
+
+    testImplementation 'org.springframework.boot:spring-boot-jdbc-test'
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 configurations.implementation {
     exclude group: 'com.vaadin', module: 'hilla'
     exclude group: 'com.vaadin', module: 'hilla-dev'
+    exclude group: 'com.vaadin', module: 'copilot'
+}
+
+configurations.testImplementation {
+    // JSONAssert bundles a repackaged org.json that clashes with the org.json used by the Amplitude API.
+    exclude group: 'com.vaadin.external.google', module: 'android-json'
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform() {
+        jvmArgs = ['-Xmx1024m']
+
+        if (project.hasProperty("uiTests")) {
+            includeTags("uiTest")
+            excludeTags("integrationTest")
+        } else if (project.hasProperty("integrationTests")) {
+            excludeTags("uiTest")
+            includeTags("integrationTest")
+        }
+
+        if (project.hasProperty("includeTags")) {
+            includeTags(project.property("includeTags").toString())
+        }
+
+        if (project.hasProperty("excludeTags")) {
+            excludeTags(project.property("excludeTags").toString())
+        }
+    }
     systemProperties(System.getProperties())
 }
 
@@ -154,6 +199,7 @@ idea {
 
 vaadin {
     optimizeBundle = false
+    productionMode = false
 }
 
 project.afterEvaluate {
@@ -161,7 +207,8 @@ project.afterEvaluate {
     if (bootBuildInfoTask != null) {
         bootBuildInfoTask.properties({
             additional = [
-                    'buildType': project.findProperty('buildType') ?: 'sources'
+                    'buildType'   : project.findProperty('buildType') ?: 'sources',
+                    'analyticsKey': project.findProperty('analyticsKey') ?: ''
             ]
         })
     }
@@ -184,7 +231,7 @@ spotbugsMain {
         html {
             required = true
             stylesheet = 'fancy-hist.xsl'
-            destination layout.buildDirectory.file("reports/spotbugs/${project.name}.html").get().asFile
+            outputLocation = layout.buildDirectory.file("reports/spotbugs/${project.name}.html").get().asFile
         }
     }
 
@@ -201,11 +248,80 @@ spotbugsTest {
         html {
             required = true
             stylesheet = 'fancy-hist.xsl'
-            destination layout.buildDirectory.file("reports/spotbugs/test-${project.name}.html").get().asFile
+            outputLocation = layout.buildDirectory.file("reports/spotbugs/test-${project.name}.html").get().asFile
         }
     }
 
     onlyIf {
         project.hasProperty('spotbugsEnabled')
     }
+}
+
+// ---------------------------------------------------------------------------
+// WAR artifact for WildFly deployment
+// Build with: ./gradlew -Pvaadin.productionMode=true bootWar
+// Output:     build/libs/flowset-control-community.war
+// ---------------------------------------------------------------------------
+bootWar {
+    archiveFileName = "flowset-control-community-${version}.war"
+
+    doLast {
+        def warFile = archiveFile.get().asFile
+        def tmpFile = new File(warFile.parentFile, warFile.name + ".stripped")
+        ant.zip(destfile: tmpFile.absolutePath) {
+            zipfileset(src: warFile.absolutePath) {
+                exclude(name: "org/springframework/boot/loader/**")
+
+                exclude(name: "META-INF/services/java.nio.file.spi.FileSystemProvider")
+
+                exclude(name: "WEB-INF/lib/tomcat-embed-*.jar")
+                exclude(name: "WEB-INF/lib/spring-boot-starter-tomcat-*.jar")
+                exclude(name: "WEB-INF/lib/spring-boot-tomcat-*.jar")
+            }
+        }
+        warFile.delete()
+        tmpFile.renameTo(warFile)
+        logger.lifecycle("Stripped Spring Boot Loader and embedded Tomcat from WAR (WildFly deployment).")
+    }
+}
+
+// ---------------------------------------------------------------------------
+// EclipseLink Static Weaving  (optional, advanced)
+//
+// Dynamic weaving is disabled in application-wildfly.properties because JBoss
+// Modules' classloader is incompatible with EclipseLink's instrumentation.
+// If you need static weaving for full lazy-loading support, do the following:
+//
+//   1. Create src/main/resources/META-INF/persistence.xml listing your entity
+//      packages (required by the EclipseLink weaver CLI tool).
+//   2. Uncomment the task below.
+//   3. Set eclipselink.weaving=static in application-wildfly.properties.
+//   4. Run: ./gradlew -Pvaadin.productionMode=true -PstaticWeave=true bootWar
+//
+// The task is guarded by the 'staticWeave' Gradle property so it does NOT
+// affect normal bootRun / bootJar / Docker builds.
+// ---------------------------------------------------------------------------
+if (project.hasProperty('staticWeave')) {
+    tasks.register('eclipseLinkStaticWeave') {
+        dependsOn 'compileJava'
+        description = 'Runs EclipseLink static weaving on compiled entity classes.'
+        group = 'build'
+
+        doLast {
+            ant.taskdef(
+                    name: 'weave',
+                    classname: 'org.eclipse.persistence.tools.weaving.jpa.StaticWeaveAntTask',
+                    classpath: configurations.runtimeClasspath.asPath
+            )
+            ant.weave(
+                    source: layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath,
+                    target: layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath,
+                    persistenceinfo: layout.buildDirectory.dir('classes/java/main').get().asFile.absolutePath,
+                    loglevel: 'INFO'
+            ) {}
+        }
+    }
+    classes.dependsOn 'eclipseLinkStaticWeave'
+
+    logger.lifecycle('EclipseLink static weaving ENABLED (staticWeave property detected).')
 }

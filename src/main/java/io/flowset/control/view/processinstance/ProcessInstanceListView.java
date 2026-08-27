@@ -6,14 +6,16 @@
 package io.flowset.control.view.processinstance;
 
 import com.vaadin.flow.component.grid.GridSortOrder;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.flowset.control.uicomponent.ContainerDataGridHeaderFilter;
+import io.flowset.control.action.ControlExcelExportAction;
+import io.flowset.control.action.processinstance.BulkActivateProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkSuspendProcessInstanceAction;
+import io.flowset.control.action.processinstance.BulkTerminateProcessInstanceAction;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -22,27 +24,23 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
-import io.jmix.flowui.sys.BeanUtil;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.facet.urlqueryparameters.ProcessInstanceListQueryParamBinder;
-import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.view.processinstance.filter.*;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 @Route(value = "bpm/process-instances", layout = DefaultMainViewParent.class)
 @ViewController("bpm_ProcessInstance.list")
@@ -60,9 +58,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
 
     @Autowired
     protected ProcessInstanceService processInstanceService;
-    @Autowired
-    protected ProcessDefinitionService processDefinitionService;
-
     @ViewComponent
     protected CollectionContainer<ProcessInstanceData> processInstancesDc;
 
@@ -76,18 +71,20 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     protected CollectionLoader<ProcessInstanceData> processInstancesDl;
     @Autowired
     protected Metadata metadata;
-    @Autowired
-    protected ApplicationContext applicationContext;
-    @Autowired
-    protected Dialogs dialogs;
-    @Autowired
-    protected Notifications notifications;
-    @Autowired
-    protected DialogWindows dialogWindows;
+    @ViewComponent("processInstancesGrid.bulkActivate")
+    protected BulkActivateProcessInstanceAction bulkActivate;
+    @ViewComponent("processInstancesGrid.bulkSuspend")
+    protected BulkSuspendProcessInstanceAction bulkSuspend;
+    @ViewComponent("processInstancesGrid.bulkTerminate")
+    protected BulkTerminateProcessInstanceAction bulkTerminate;
+    @ViewComponent("processInstancesGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
     @ViewComponent
     protected HorizontalLayout modeButtonsGroup;
+    @ViewComponent
+    protected SimplePagination processInstancePagination;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -97,6 +94,20 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         setDefaultSort();
         urlQueryParameters.registerBinder(new ProcessInstanceListQueryParamBinder(modeButtonsGroup, processInstanceFilterDc,
                 this::startLoadData, processInstancesGrid));
+        registerPaginationParameterBinder(processInstancePagination);
+        setupBulkActions();
+    }
+
+    protected void setupBulkActions() {
+        bulkActivate.setAfterSaveHandler(this::startLoadData);
+        bulkSuspend.setAfterSaveHandler(this::startLoadData);
+        bulkTerminate.setAfterSaveHandler(this::startLoadData);
+
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            ProcessInstanceData entity = context.getEntity();
+
+            return getProcessDisplayName(entity);
+        });
     }
 
     protected void setDefaultSort() {
@@ -104,96 +115,13 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         processInstancesGrid.sort(gridSortOrders);
     }
 
-    @Install(to = "processInstancesGrid.bulkActivate", subject = "enabledRule")
-    protected boolean processInstancesGridBulkActivateEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean suspendedInstanceSelected = processInstancesGrid.getSelectedItems().stream().anyMatch(processInstanceData ->
-                BooleanUtils.isTrue(processInstanceData.getSuspended()) && BooleanUtils.isNotTrue(processInstanceData.getComplete()));
-        boolean notCompletedSelected = processInstancesGrid.getSelectedItems().stream().noneMatch(processInstanceData -> BooleanUtils.isTrue(processInstanceData.getComplete()));
-
-        return selectedNotEmpty && suspendedInstanceSelected && notCompletedSelected;
-    }
-
-    @Install(to = "processInstancesGrid.bulkTerminate", subject = "enabledRule")
-    protected boolean processInstancesGridBulkTerminateEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean notCompletedSelected = processInstancesGrid.getSelectedItems().stream().noneMatch(processInstanceData -> BooleanUtils.isTrue(processInstanceData.getFinished()));
-
-        return selectedNotEmpty && notCompletedSelected;
-    }
-
-    @Install(to = "processInstancesGrid.bulkSuspend", subject = "enabledRule")
-    protected boolean processInstancesGridBulkSuspendEnabledRule() {
-        boolean selectedNotEmpty = !processInstancesGrid.getSelectedItems().isEmpty();
-        boolean activeInstanceSelected = processInstancesGrid.getSelectedItems().stream().anyMatch(processInstanceData ->
-                BooleanUtils.isNotTrue(processInstanceData.getSuspended()) && BooleanUtils.isNotTrue(processInstanceData.getFinished())
-        );
-
-        boolean notCompletedSelected = processInstancesGrid.getSelectedItems().stream().noneMatch(processInstanceData -> BooleanUtils.isTrue(processInstanceData.getFinished()));
-        return selectedNotEmpty && activeInstanceSelected && notCompletedSelected;
-    }
-
-
     protected void initDataGridHeaderRow() {
-        HeaderRow headerRow = processInstancesGrid.getDefaultHeaderRow();
-
-        addColumnFilter(headerRow, "id", this::createIdColumnFilter);
-        addColumnFilter(headerRow, "processDefinitionId", this::createProcessColumnFilter);
-        addColumnFilter(headerRow, "businessKey", this::createBusinessKeyColumnFilter);
-        addColumnFilter(headerRow, "state", this::createStateColumnFilter);
-        addColumnFilter(headerRow, "startTime", this::createStartTimeColumnFilter);
-        addColumnFilter(headerRow, "endTime", this::createEndTimeColumnFilter);
-    }
-
-
-    @Subscribe("processInstancesGrid.bulkTerminate")
-    public void onProcessInstancesGridBulkTerminate(final ActionPerformedEvent event) {
-        dialogWindows.view(this, BulkTerminateProcessInstanceView.class)
-                .withViewConfigurer(view -> view.setProcessInstances(processInstancesGrid.getSelectedItems()))
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .build()
-                .open();
-    }
-
-
-    @Subscribe("processInstancesGrid.bulkActivate")
-    public void onProcessInstancesGridBulkActivate(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(ProcessInstanceData::getInstanceId).toList();
-
-        DialogWindow<BulkActivateProcessInstanceView> dialogWindow = dialogWindows.view(this, BulkActivateProcessInstanceView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .build();
-
-        BulkActivateProcessInstanceView bulkActivateProcessInstanceView = dialogWindow.getView();
-        bulkActivateProcessInstanceView.setInstancesIds(instancesIds);
-
-        dialogWindow.open();
-    }
-
-    @Subscribe("processInstancesGrid.bulkSuspend")
-    public void onProcessInstancesGridBulkSuspend(final ActionPerformedEvent event) {
-        List<String> instancesIds = processInstancesGrid.getSelectedItems().stream().map(ProcessInstanceData::getInstanceId).toList();
-
-        DialogWindow<BulkSuspendProcessInstanceView> dialogWindow = dialogWindows.view(this, BulkSuspendProcessInstanceView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .build();
-
-        BulkSuspendProcessInstanceView bulkSuspendProcessInstanceView = dialogWindow.getView();
-        bulkSuspendProcessInstanceView.setInstancesIds(instancesIds);
-
-        dialogWindow.open();
+        componentHelper.addColumnFilter(processInstancesGrid, "id", this::createIdColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "processDefinitionId", this::createProcessColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "businessKey", this::createBusinessKeyColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "state", this::createStateColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "startTime", this::createStartTimeColumnFilter);
+        componentHelper.addColumnFilter(processInstancesGrid, "endTime", this::createEndTimeColumnFilter);
     }
 
 
@@ -290,14 +218,6 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected ProcessInstanceStateHeaderFilter createStateColumnFilter(DataGridColumn<ProcessInstanceData> stateColumn) {
         return new ProcessInstanceStateHeaderFilter(processInstancesGrid, stateColumn, processInstanceFilterDc);
-    }
-
-    protected <T extends ContainerDataGridHeaderFilter<ProcessInstanceFilter, ProcessInstanceData>> void addColumnFilter(HeaderRow headerRow, String columnName, Function<DataGridColumn<ProcessInstanceData>, T> filterProvider) {
-        DataGridColumn<ProcessInstanceData> column = processInstancesGrid.getColumnByKey(columnName);
-        T filterComponent = filterProvider.apply(column);
-        BeanUtil.autowireContext(applicationContext, filterComponent);
-        HeaderRow.HeaderCell headerCell = headerRow.getCell(column);
-        headerCell.setComponent(filterComponent);
     }
 
     @Override

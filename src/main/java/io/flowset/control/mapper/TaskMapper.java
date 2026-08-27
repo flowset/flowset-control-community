@@ -9,6 +9,7 @@ import io.jmix.core.Metadata;
 import io.flowset.control.entity.UserTaskData;
 import org.camunda.community.rest.client.model.HistoricTaskInstanceDto;
 import org.camunda.community.rest.client.model.TaskWithAttachmentAndCommentDto;
+import org.jspecify.annotations.Nullable;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +49,18 @@ public abstract class TaskMapper {
     @Mapping(target = "followUpDate", source = "followUp")
     @Mapping(target = "lastUpdateDate", source = "lastUpdated")
     @Mapping(target = "createTime", source = "created")
+    @Mapping(target = "delegationState", expression = "java(delegationStateToString(source))")
     public abstract UserTaskData fromRuntimeTaskDto(TaskWithAttachmentAndCommentDto source);
 
     UserTaskData targetClassFactory() {
         return metadata.create(UserTaskData.class);
+    }
+
+    @Nullable
+    String delegationStateToString(TaskWithAttachmentAndCommentDto source) {
+        TaskWithAttachmentAndCommentDto.DelegationStateEnum delegationState = source.getDelegationState();
+
+        return delegationState != null ? delegationState.getValue() : null;
     }
 
     Date map(OffsetDateTime value) {

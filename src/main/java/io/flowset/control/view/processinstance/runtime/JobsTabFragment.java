@@ -8,18 +8,20 @@ package io.flowset.control.view.processinstance.runtime;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.event.SortEvent;
-import io.flowset.control.entity.job.JobState;
-import io.flowset.control.view.job.ActivateJobView;
-import io.flowset.control.view.job.SuspendJobView;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
+import io.flowset.control.action.job.ActivateJobGridAction;
+import io.flowset.control.action.job.RetryJobGridAction;
+import io.flowset.control.action.job.SuspendJobGridAction;
+import io.flowset.control.view.job.column.JobIdColumnFragment;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
-import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.Dialogs;
+import io.jmix.flowui.Fragments;
+import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -33,7 +35,6 @@ import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.job.JobLoadContext;
 import io.flowset.control.service.job.JobService;
-import io.flowset.control.view.incidentdata.RetryJobView;
 import io.flowset.control.view.processinstance.event.JobCountUpdateEvent;
 import io.flowset.control.view.processinstance.event.JobRetriesUpdateEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,29 +55,28 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
     @Autowired
     protected DialogWindows dialogWindows;
     @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
-    protected Dialogs dialogs;
-    @ViewComponent
-    protected MessageBundle messageBundle;
-    @Autowired
-    protected Messages messages;
-    @Autowired
     protected DatatypeFormatter datatypeFormatter;
 
     @ViewComponent
     protected CollectionLoader<JobData> runtimeJobsDl;
-
     @ViewComponent
     protected CollectionContainer<JobData> runtimeJobsDc;
-
     @ViewComponent
     protected DataGrid<JobData> runtimeJobsGrid;
-
+    @ViewComponent("runtimeJobsGrid.retry")
+    protected RetryJobGridAction retryAction;
+    @ViewComponent("runtimeJobsGrid.activate")
+    protected ActivateJobGridAction activateAction;
+    @ViewComponent("runtimeJobsGrid.suspend")
+    protected SuspendJobGridAction suspendAction;
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
     protected JobFilter filter;
     protected boolean initialized = false;
+    @Autowired
+    private UiComponents uiComponents;
+    @Autowired
+    private Fragments fragments;
 
 
     public void refreshIfRequired() {
@@ -87,6 +87,13 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
             runtimeJobsDl.load();
             this.initialized = true;
         }
+    }
+
+    @Subscribe
+    public void onReady(ReadyEvent event) {
+        retryAction.setAfterSaveHandler(this::reloadJobs);
+        activateAction.setAfterSaveHandler(this::reloadJobs);
+        suspendAction.setAfterSaveHandler(this::reloadJobs);
     }
 
     @Install(to = "runtimeJobsDl", target = Target.DATA_LOADER)
@@ -139,33 +146,6 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
         return jobData.getRetries() != null && jobData.getRetries() == 0 ? "error-cell" : null;
     }
 
-    @Install(to = "runtimeJobsGrid.retry", subject = "enabledRule")
-    protected boolean runtimeJobsGridRetryEnabledRule() {
-        JobData selectedJob = runtimeJobsGrid.getSingleSelectedItem();
-        return selectedJob != null && selectedJob.getRetries() != null && selectedJob.getRetries() == 0;
-    }
-
-    @Subscribe("runtimeJobsGrid.retry")
-    public void onRuntimeJobsGridRetry(final ActionPerformedEvent event) {
-        JobData selectedJob = runtimeJobsGrid.getSingleSelectedItem();
-        if (selectedJob == null) {
-            return;
-        }
-
-        DialogWindow<RetryJobView> dialogWindow = dialogWindows.view(getCurrentView(), RetryJobView.class)
-                .withAfterCloseListener(afterClose -> {
-                    if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                        reloadJobs();
-                    }
-                })
-                .build();
-
-        RetryJobView retryJobView = dialogWindow.getView();
-        retryJobView.setJobId(selectedJob.getJobId());
-
-        dialogWindow.open();
-    }
-
     protected void reloadJobs() {
         runtimeJobsDl.load();
         uiEventPublisher.publishEventForCurrentUI(new JobRetriesUpdateEvent(this));
@@ -182,49 +162,15 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
         return datatypeFormatter.formatDateTime(createTime);
     }
 
-    @Subscribe("runtimeJobsGrid.activate")
-    public void onRuntimeJobsGridActivate(final ActionPerformedEvent event) {
-        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
-        if (selectedItem == null) {
-            return;
-        }
-
-        dialogWindows.view(getCurrentView(), ActivateJobView.class)
-                .withViewConfigurer(activateJobView -> activateJobView.setJobId(selectedItem.getJobId()))
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        reloadJobs();
-                    }
-                })
-                .open();
+    @Supply(to = "runtimeJobsGrid.jobId", subject = "renderer")
+    private Renderer<JobData> runtimeJobsGridJobIdRenderer() {
+        return new ComponentRenderer<>(job -> {
+            JobIdColumnFragment fragment = fragments.create(this, JobIdColumnFragment.class);
+            fragment.setOpenMode(OpenMode.DIALOG);
+            fragment.setItem(job);
+            fragment.setAfterSaveHandler(this::reloadJobs);
+            return fragment;
+        });
     }
 
-    @Install(to = "runtimeJobsGrid.activate", subject = "enabledRule")
-    private boolean runtimeJobsGridActivateEnabledRule() {
-        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
-        return selectedItem != null && selectedItem.getState() == JobState.SUSPENDED;
-    }
-
-    @Subscribe("runtimeJobsGrid.suspend")
-    public void onRuntimeJobsGridSuspend(final ActionPerformedEvent event) {
-        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
-        if (selectedItem == null) {
-            return;
-        }
-
-        dialogWindows.view(getCurrentView(), SuspendJobView.class)
-                .withViewConfigurer(activateJobView -> activateJobView.setJobId(selectedItem.getJobId()))
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        reloadJobs();
-                    }
-                })
-                .open();
-    }
-
-    @Install(to = "runtimeJobsGrid.suspend", subject = "enabledRule")
-    private boolean runtimeJobsGridSuspendEnabledRule() {
-        JobData selectedItem = runtimeJobsGrid.getSingleSelectedItem();
-        return selectedItem != null && selectedItem.getState() == JobState.ACTIVE;
-    }
 }

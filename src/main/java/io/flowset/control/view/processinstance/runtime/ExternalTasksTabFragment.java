@@ -6,14 +6,15 @@
 package io.flowset.control.view.processinstance.runtime;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
+import io.flowset.control.action.externaltask.RetryExternalTaskGridAction;
+import io.flowset.control.view.externaltask.column.ExternalTaskIdColumnFragment;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.Dialogs;
-import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -27,10 +28,9 @@ import io.flowset.control.entity.filter.ExternalTaskFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.externaltask.ExternalTaskLoadContext;
 import io.flowset.control.service.externaltask.ExternalTaskService;
-import io.flowset.control.view.incidentdata.RetryExternalTaskView;
 import io.flowset.control.view.processinstance.event.ExternalTaskCountUpdateEvent;
 import io.flowset.control.view.processinstance.event.ExternalTaskRetriesUpdateEvent;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -64,12 +64,18 @@ public class ExternalTasksTabFragment extends Fragment<VerticalLayout> {
 
     @ViewComponent
     protected DataGrid<ExternalTaskData> runtimeExternalTasksGrid;
+    @ViewComponent("runtimeExternalTasksGrid.retry")
+    protected RetryExternalTaskGridAction retryAction;
 
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
     protected ExternalTaskFilter filter;
     protected String selectedActivityId;
     protected boolean initialized = false;
+    @Autowired
+    private UiComponents uiComponents;
+    @Autowired
+    private Fragments fragments;
 
     @SuppressWarnings("LombokSetterMayBeUsed")
     public void setSelectedActivityId(String selectedActivityId) {
@@ -80,12 +86,13 @@ public class ExternalTasksTabFragment extends Fragment<VerticalLayout> {
         if (!initialized) {
             this.filter = metadata.create(ExternalTaskFilter.class);
             this.filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+            retryAction.setAfterSaveHandler(this::reloadExternalTasks);
             runtimeExternalTasksDl.load();
             this.initialized = true;
             return;
         }
 
-        if (!StringUtils.equals(this.selectedActivityId, selectedActivityId)) {
+        if (!Strings.CS.equals(this.selectedActivityId, selectedActivityId)) {
             this.selectedActivityId = selectedActivityId;
             filter.setActivityId(selectedActivityId);
             runtimeExternalTasksDl.load();
@@ -136,31 +143,15 @@ public class ExternalTasksTabFragment extends Fragment<VerticalLayout> {
         return externalTaskData.getRetries() != null && externalTaskData.getRetries() == 0 ? "error-cell" : null;
     }
 
-    @Install(to = "runtimeExternalTasksGrid.retry", subject = "enabledRule")
-    protected boolean runtimeExternalTasksGridRetryEnabledRule() {
-        ExternalTaskData selectedTask = runtimeExternalTasksGrid.getSingleSelectedItem();
-        return selectedTask != null && selectedTask.getRetries() != null && selectedTask.getRetries() == 0;
-    }
-
-    @Subscribe("runtimeExternalTasksGrid.retry")
-    public void onRuntimeExternalTasksGridRetry(final ActionPerformedEvent event) {
-        ExternalTaskData selectedTask = runtimeExternalTasksGrid.getSingleSelectedItem();
-        if (selectedTask == null) {
-            return;
-        }
-
-        DialogWindow<RetryExternalTaskView> dialogWindow = dialogWindows.view(getCurrentView(), RetryExternalTaskView.class)
-                .withAfterCloseListener(afterClose -> {
-                    if (afterClose.closedWith(StandardOutcome.SAVE)) {
-                        reloadExternalTasks();
-                    }
-                })
-                .build();
-
-        RetryExternalTaskView retryExternalTaskView = dialogWindow.getView();
-        retryExternalTaskView.setExternalTaskId(selectedTask.getExternalTaskId());
-
-        dialogWindow.open();
+    @Supply(to = "runtimeExternalTasksGrid.externalTaskId", subject = "renderer")
+    private Renderer<ExternalTaskData> runtimeExternalTasksGridExternalTaskIdRenderer() {
+        return new ComponentRenderer<>(externalTask -> {
+            ExternalTaskIdColumnFragment fragment = fragments.create(this, ExternalTaskIdColumnFragment.class);
+            fragment.setOpenMode(OpenMode.DIALOG);
+            fragment.setItem(externalTask);
+            fragment.setAfterSaveHandler(this::reloadExternalTasks);
+            return fragment;
+        });
     }
 
     protected void reloadExternalTasks() {

@@ -40,7 +40,7 @@
                 <nav id="navigation"
                      classNames="jmix-main-view-navigation"
                      ariaLabel="msg://navigation.ariaLabel">
-                    <listMenu id="menu" themeNames="toggle-reverse"/>
+                    <listMenu id="menu" themeNames="toggle-reverse" classNames="control-app-menu"/>
                 </nav>
                 <footer id="footer" classNames="jmix-main-view-footer">
                     <fragment id="userIndicator" class="io.flowset.control.view.main.UserIndicatorFragment"/>

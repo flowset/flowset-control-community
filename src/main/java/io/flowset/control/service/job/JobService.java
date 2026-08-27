@@ -6,9 +6,13 @@
 package io.flowset.control.service.job;
 
 import io.flowset.control.entity.filter.JobFilter;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
-import org.springframework.lang.Nullable;
+import io.flowset.control.security.SecuredEntityLoad;
+import io.flowset.control.security.SecuredEntityOperation;
+import io.flowset.control.security.SpecificPermissions;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -23,6 +27,7 @@ public interface JobService {
      * @param loadContext a context to load running jobs
      * @return a list of running jobs
      */
+    @SecuredEntityLoad(entityClass = JobData.class)
     List<JobData> findAll(JobLoadContext loadContext);
 
     /**
@@ -31,6 +36,7 @@ public interface JobService {
      * @param filter a job filter instance
      * @return count of running incidents
      */
+    @SecuredEntityLoad(entityClass = JobData.class)
     long getCount(@Nullable JobFilter filter);
 
     /**
@@ -40,6 +46,7 @@ public interface JobService {
      * @return the {@code JobData} corresponding to the specified job identifier,
      *         or {@code null} if no such job exists
      */
+    @SecuredEntityLoad(entityClass = JobData.class)
     JobData findById(String jobId);
 
     /**
@@ -49,6 +56,7 @@ public interface JobService {
      * @return found job definition or null if not found
      */
     @Nullable
+    @SecuredEntityLoad(entityClass = JobDefinitionData.class)
     JobDefinitionData findJobDefinition(String jobDefinitionId);
 
     /**
@@ -57,6 +65,7 @@ public interface JobService {
      * @param jobId   a job identifier
      * @param retries a new value of retries
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.JOB_RETRY)
     void setJobRetries(String jobId, int retries);
 
     /**
@@ -64,8 +73,11 @@ public interface JobService {
      *
      * @param jobIds  a list of job identifiers
      * @param retries a new value of retries
+     * @return created batch or {@code null} if operation failed
      */
-    void setJobRetriesAsync(List<String> jobIds, int retries);
+    @Nullable
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.JOB_RETRY)
+    BatchData setJobRetriesAsync(List<String> jobIds, int retries);
 
     /**
      * Loads error details of the running job with the specified identifier.
@@ -73,6 +85,7 @@ public interface JobService {
      * @param jobId an identifier of running job
      * @return error details
      */
+    @SecuredEntityLoad(entityClass = JobData.class)
     String getErrorDetails(String jobId);
 
     /**
@@ -80,6 +93,7 @@ public interface JobService {
      *
      * @param jobId the identifier of the job to be activated
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.JOB_ACTIVATE)
     void activateJob(String jobId);
 
     /**
@@ -87,5 +101,6 @@ public interface JobService {
      *
      * @param jobId the identifier of the job to be suspended
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.JOB_SUSPEND)
     void suspendJob(String jobId);
 }

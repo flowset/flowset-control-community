@@ -10,8 +10,10 @@ import com.vaadin.flow.router.RouterLink;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.filter.DecisionDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionLoadContext;
 import io.flowset.control.service.decisiondefinition.DecisionDefinitionService;
+import io.flowset.control.view.decisiondefinition.DecisionDefinitionDiagramView;
 import io.flowset.control.view.decisiondefinition.DecisionDefinitionDetailView;
 import io.flowset.uikit.component.bpmnviewer.event.DecisionLinkOverlayClickEvent;
 import io.flowset.uikit.component.bpmnviewer.model.BusinessRuleTaskData;
@@ -24,7 +26,7 @@ import io.jmix.flowui.view.View;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,6 +41,7 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 public class BusinessRuleTaskOverlayClickHandler {
 
     protected final DecisionDefinitionService decisionDefinitionService;
+    protected final SecuritySupport securitySupport;
     protected final Metadata metadata;
     protected final Notifications notifications;
     protected final ViewNavigators viewNavigators;
@@ -55,6 +58,9 @@ public class BusinessRuleTaskOverlayClickHandler {
     public void handleDecisionNavigation(ProcessDefinitionData parentProcess,
                                          BusinessRuleTaskData businessRuleTaskData,
                                          boolean fromDialog) {
+        if (!securitySupport.isEntityViewPermitted(DecisionDefinitionData.class)) {
+            return;
+        }
         DecisionDefinitionData decisionDefinition = findDecisionDefinition(businessRuleTaskData, parentProcess);
         if (decisionDefinition != null) {
             View<?> currentView = getCurrentView();
@@ -68,6 +74,25 @@ public class BusinessRuleTaskOverlayClickHandler {
                         .withBackwardNavigation(true)
                         .navigate();
             }
+        }
+    }
+
+    /**
+     * Opens {@link DecisionDefinitionDiagramView} for the decision called from the specified process and activity.
+     *
+     * @param parentProcess        parent process
+     * @param businessRuleTaskData the data from Business Rule Task element from the parent process
+     */
+    public void handleDecisionPreview(ProcessDefinitionData parentProcess,
+                                      BusinessRuleTaskData businessRuleTaskData) {
+        if (!securitySupport.isEntityViewPermitted(DecisionDefinitionData.class)) {
+            return;
+        }
+        DecisionDefinitionData decisionDefinition = findDecisionDefinition(businessRuleTaskData, parentProcess);
+        if (decisionDefinition != null) {
+            dialogWindows.view(getCurrentView(), DecisionDefinitionDiagramView.class)
+                    .withViewConfigurer(view -> view.setDecisionDefinition(decisionDefinition))
+                    .open();
         }
     }
 

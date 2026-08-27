@@ -5,7 +5,7 @@
   -->
 
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0yil78w" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.23.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.21.0">
-  <bpmn:process id="contractApproval" name="Contract approval" isExecutable="true" camunda:historyTimeToLive="44" camunda:isStartableInTasklist="false">
+  <bpmn:process id="contractApproval" name="Contract Approval" isExecutable="true" camunda:historyTimeToLive="44" camunda:isStartableInTasklist="false">
     <bpmn:documentation>The contract approval process involves reviewing the contract terms by relevant stakeholders to ensure they meet legal and business requirements. </bpmn:documentation>
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0rlhqu9</bpmn:outgoing>

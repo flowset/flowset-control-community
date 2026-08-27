@@ -1,0 +1,38 @@
+name: Sync GitHub issue
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  sync-issue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync issue
+        shell: bash
+        run: |
+          jq -n \
+            --arg title "${{ github.event.issue.title }}" \
+            --arg issueUrl "${{ github.event.issue.html_url }}" \
+            --arg assigneeId "${{ secrets.DEFAULT_ASSIGNED_USER }}" \
+            '{
+              title: $title,
+              description: ("GitHub issue:\n[" + $issueUrl + "](" + $issueUrl + ")"),
+              assignedUsers: [
+                {
+                  id: $assigneeId
+                }
+              ],
+              status: {
+                id: "OPEN"
+              }
+            }' > payload.json
+
+          cat payload.json
+
+          curl --fail-with-body --request POST \
+            --url "${{ secrets.REPOSITORY_URL }}" \
+            --header "Content-Type: application/json" \
+            --header "Authorization: token ${{ secrets.REPOSITORY_TOKEN }}" \
+            --data @payload.json

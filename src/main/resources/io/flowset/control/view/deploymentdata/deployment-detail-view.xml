@@ -13,7 +13,18 @@
     </facets>
     <actions>
         <action id="closeAction" type="detail_close" text="msg:///actions.Close"/>
-        <action id="copyToClipboardAction" type="control_copyComponentValueToClipboard"/>
+        <action id="copyDeploymentIdAction" type="control_copyEntityPropertyToClipboard">
+            <properties>
+                <property name="dataContainer" value="deploymentDataDc"/>
+                <property name="property" value="deploymentId"/>
+            </properties>
+        </action>
+        <action id="copyNameAction" type="control_copyEntityPropertyToClipboard">
+            <properties>
+                <property name="dataContainer" value="deploymentDataDc"/>
+                <property name="property" value="name"/>
+            </properties>
+        </action>
     </actions>
     <layout spacing="false">
         <split orientation="HORIZONTAL" height="100%" width="100%" splitterPosition="20"
@@ -29,14 +40,16 @@
                         <suffix>
                             <button id="copyDeploymentId"
                                     icon="COPY_O"
-                                    themeNames="tertiary-inline"/>
+                                    themeNames="tertiary-inline"
+                                    action="copyDeploymentIdAction"/>
                         </suffix>
                     </textField>
                     <textField id="nameTextField" property="name" readOnly="true">
                         <suffix>
                             <button id="copyName"
                                     icon="COPY_O"
-                                    themeNames="tertiary-inline"/>
+                                    themeNames="tertiary-inline"
+                                    action="copyNameAction"/>
                         </suffix>
                     </textField>
                     <dateTimePicker property="deploymentTime" readOnly="true" width="100%" step="1ms"/>

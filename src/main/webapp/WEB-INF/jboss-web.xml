@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    JBoss/WildFly-specific web deployment descriptor.
+
+    Mounts the application at the root context path ("/") so it behaves
+    identically to the standard JAR/Docker deployment (port-based routing,
+    no sub-path prefix).
+
+    Remove or change <context-root> if you need the app under a sub-path,
+    e.g. <context-root>/flowset-control</context-root>.
+-->
+<jboss-web xmlns="urn:jboss:jboss-web:14.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="urn:jboss:jboss-web:14.0
+               https://www.jboss.org/j2ee/schema/jboss-web_14_0.xsd">
+
+    <!-- Deploy at root — mirrors embedded-Tomcat behaviour -->
+    <context-root>/</context-root>
+
+</jboss-web>

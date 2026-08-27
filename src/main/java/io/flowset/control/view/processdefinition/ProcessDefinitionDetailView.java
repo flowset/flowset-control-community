@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
  * Use is subject to license terms.
  */
 
@@ -8,6 +8,7 @@ package io.flowset.control.view.processdefinition;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -15,6 +16,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.exception.ViewEngineConnectionFailedException;
+import io.flowset.control.mapper.ProcessElementMetadataMapper;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
@@ -31,8 +33,12 @@ import io.flowset.control.entity.activity.ProcessActivityStatistics;
 import io.flowset.control.entity.dashboard.IncidentStatistics;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
+import io.flowset.control.entity.processdefinition.CalledProcessReferenceData;
+import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
+import io.flowset.control.entity.decisiondefinition.DecisionReferenceData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
+import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
@@ -41,6 +47,7 @@ import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.uicomponent.viewer.handler.BusinessRuleTaskOverlayClickHandler;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.flowset.control.view.event.TitleUpdateEvent;
+import io.flowset.control.view.processdefinition.event.ProcessInstancesRefreshEvent;
 import io.flowset.control.view.processdefinition.event.ReloadSelectedProcess;
 import io.flowset.control.view.processdefinition.event.ResetActivityEvent;
 import io.flowset.uikit.component.bpmnviewer.ViewerMode;
@@ -49,6 +56,7 @@ import io.flowset.uikit.component.bpmnviewer.command.ElementMarkerType;
 import io.flowset.uikit.component.bpmnviewer.command.RemoveMarkerCmd;
 import io.flowset.uikit.component.bpmnviewer.command.SetActivityStatisticsCmd;
 import io.flowset.uikit.component.bpmnviewer.event.ElementClickEvent;
+import io.flowset.uikit.component.bpmnviewer.event.XmlImportCompleteEvent;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -90,6 +98,8 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     @Autowired
     protected Metadata metadata;
     @Autowired
+    protected SecuritySupport securitySupport;
+    @Autowired
     protected CallActivityOverlayClickHandler callActivityClickHandler;
     @Autowired
     protected BusinessRuleTaskOverlayClickHandler businessRuleTaskClickHandler;
@@ -104,6 +114,10 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     @ViewComponent
     protected CollectionLoader<RuntimeProcessInstanceData> processInstanceDataDl;
     @ViewComponent
+    protected CollectionContainer<CalledProcessReferenceData> calledProcessesDc;
+    @ViewComponent
+    protected CollectionContainer<DecisionReferenceData> decisionsDc;
+    @ViewComponent
     protected InstanceContainer<ProcessInstanceFilter> processInstanceFilterDc;
 
     @ViewComponent
@@ -115,6 +129,9 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected ProcessDefinitionService processDefinitionService;
     @Autowired
     protected ActivityService activityService;
+
+    @ViewComponent
+    protected CollectionContainer<ProcessActivityStatistics> activityStatisticsDc;
 
     @ViewComponent
     protected ProcessInstancesFragment processInstancesFragment;
@@ -136,6 +153,12 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
 
     @ViewComponent("tabsheet.bpmnXmlTab")
     protected Tab tabsheetBpmnXmlTab;
+    @ViewComponent("tabsheet.calledProcessesTab")
+    protected Tab tabsheetCalledProcessesTab;
+    @ViewComponent("tabsheet.decisionsTab")
+    protected Tab tabsheetDecisionsTab;
+    @Autowired
+    protected ProcessElementMetadataMapper elementMetadataMapper;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -152,7 +175,7 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
 
         updateAllRunningInstancesCount();
 
-        viewerFragment.showStatisticsButton(true);
+        viewerFragment.showStatisticsButton(securitySupport.isEntityViewPermitted(ProcessActivityStatistics.class));
     }
 
     @Subscribe
@@ -187,6 +210,11 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected void initTabIcons() {
         tabsheetProcessInstancesTab.addComponentAsFirst(VaadinIcon.TASKS.create());
         tabsheetBpmnXmlTab.addComponentAsFirst(VaadinIcon.FILE_CODE.create());
+        tabsheetCalledProcessesTab.addComponentAsFirst(VaadinIcon.SITEMAP.create());
+
+        SvgIcon decisionIcon = new SvgIcon("icons/table.svg");
+        decisionIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+        tabsheetDecisionsTab.addComponentAsFirst(decisionIcon);
     }
 
 
@@ -271,26 +299,59 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         processInstanceDataDl.load();
     }
 
-    protected void initViewer(String bpmnXml) {
-        viewerFragment.initViewer(bpmnXml);
-        viewerFragment.showCalledProcessOverlays();
-        viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent -> {
-            callActivityClickHandler.handleProcessNavigation(processDefinitionDataDc.getItem(),
-                    callActivityOverlayClickEvent.getCallActivity(),
-                    UiComponentUtils.isComponentAttachedToDialog(this));
-        });
-        viewerFragment.showDecisionLinkOverlays();
-        viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent -> {
-            businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
-                    businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
-                    UiComponentUtils.isComponentAttachedToDialog(this));
-        });
-        showStatistics();
+    @EventListener
+    public void handleProcessInstanceRefresh(ProcessInstancesRefreshEvent event) {
+        processInstanceDataDl.load();
+        updateCurrentVersionInstancesCount(processInstanceFilterDc.getItem());
+
+        if (event.isTerminate()) {
+            updateAllRunningInstancesCount();
+            updateActivityStatistics();
+        }
     }
 
-    protected void showStatistics() {
+    protected void initViewer(String bpmnXml) {
+        viewerFragment.initViewer(bpmnXml);
+        if (securitySupport.isEntityViewPermitted(ProcessDefinitionData.class)) {
+            viewerFragment.showCalledProcessOverlays();
+            viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent ->
+                    callActivityClickHandler.handleProcessNavigation(processDefinitionDataDc.getItem(),
+                            callActivityOverlayClickEvent.getCallActivity(),
+                            UiComponentUtils.isComponentAttachedToDialog(this)));
+        }
+        if (securitySupport.isEntityViewPermitted(DecisionDefinitionData.class)) {
+            viewerFragment.showDecisionLinkOverlays();
+            viewerFragment.addDecisionLinkOverlayClickListener(businessRuleTaskOverlayClickEvent ->
+                    businessRuleTaskClickHandler.handleDecisionNavigation(processDefinitionDataDc.getItem(),
+                            businessRuleTaskOverlayClickEvent.getBusinessRuleTask(),
+                            UiComponentUtils.isComponentAttachedToDialog(this)));
+        }
+        viewerFragment.addImportCompleteListener(this::handleImportComplete);
+        updateActivityStatistics();
+    }
+
+    protected void handleImportComplete(XmlImportCompleteEvent event) {
+        updateCalledProcessesAndDecisions(event);
+
+    }
+
+    protected void updateCalledProcessesAndDecisions(XmlImportCompleteEvent event) {
+        List<CalledProcessReferenceData> calledProcesses = elementMetadataMapper.fromCallActivities(event.getCalledProcesses());
+        List<DecisionReferenceData> decisions = elementMetadataMapper.fromBusinessRuleTasks(event.getCalledDecisions());
+
+        calledProcessesDc.setItems(calledProcesses);
+        decisionsDc.setItems(decisions);
+
+        updateCalledProcessesTabCaption(calledProcesses.size());
+        updateDecisionsTabCaption(decisions.size());
+    }
+
+    protected void updateActivityStatistics() {
+        clearPreviousStatistics();
+
         List<ProcessActivityStatistics> processStatistics = activityService.getStatisticsByProcessId(getEditedEntity().getProcessDefinitionId());
 
+        activityStatisticsDc.setItems(processStatistics);
         List<String> activeElements = new ArrayList<>();
         processStatistics.forEach(activityStatistics -> {
             Optional<Integer> totalIncidentCount = CollectionUtils.emptyIfNull(activityStatistics.getIncidents())
@@ -307,9 +368,20 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
             activeElements.add(activityStatistics.getActivityId());
         });
 
-        viewerFragment.setMode(ViewerMode.INTERACTIVE);
-        viewerFragment.setActiveElements(activeElements);
-        viewerFragment.addElementClickListener(this::handleDiagramElementClick);
+        if (CollectionUtils.isNotEmpty(activeElements)) {
+            viewerFragment.setMode(ViewerMode.INTERACTIVE);
+            viewerFragment.setActiveElements(activeElements);
+            viewerFragment.addElementClickListener(this::handleDiagramElementClick);
+        }
+    }
+
+    protected void clearPreviousStatistics() {
+        List<ProcessActivityStatistics> items = activityStatisticsDc.getItems();
+        if (CollectionUtils.isNotEmpty(items)) {
+            items.forEach(activityStatistics -> {
+                viewerFragment.removeActivityStatistics(activityStatistics.getActivityId());
+            });
+        }
     }
 
     protected void handleDiagramElementClick(ElementClickEvent elementClickEvent) {
@@ -350,6 +422,18 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         tabsheetProcessInstancesTab.addComponentAsFirst(VaadinIcon.TASKS.create());
     }
 
+    protected void updateCalledProcessesTabCaption(long count) {
+        tabsheetCalledProcessesTab.setLabel(messageBundle.formatMessage("calledProcessesTab.label", count));
+        tabsheetCalledProcessesTab.addComponentAsFirst(VaadinIcon.SITEMAP.create());
+    }
+
+    protected void updateDecisionsTabCaption(long count) {
+        tabsheetDecisionsTab.setLabel(messageBundle.formatMessage("decisionsTab.label", count));
+        SvgIcon decisionIcon = new SvgIcon("icons/table.svg");
+        decisionIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+        tabsheetDecisionsTab.addComponentAsFirst(decisionIcon);
+    }
+
     protected void initProcessInstanceFilter() {
         ProcessInstanceFilter processInstanceFilter = metadata.create(ProcessInstanceFilter.class);
         processInstanceFilter.setUnfinished(true);
@@ -377,4 +461,5 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
         badge.setText(text);
         return badge;
     }
+
 }

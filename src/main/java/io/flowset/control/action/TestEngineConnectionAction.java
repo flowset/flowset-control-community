@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
 package io.flowset.control.action;
 
 import com.google.common.base.Strings;
@@ -30,7 +35,7 @@ import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.UrlUtils.isValidUrl;
 
 @ActionType(TestEngineConnectionAction.ID)
-public class TestEngineConnectionAction extends SecuredBaseAction {
+public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConnectionAction> {
     public static final String ID = "control_testEngineConnection";
     protected static final Logger log = LoggerFactory.getLogger(TestEngineConnectionAction.class);
 
@@ -159,7 +164,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
                     .show();
             return false;
         }
-        
+
         if (StringUtils.isEmpty(engine.getOauth2ClientId())) {
             notifications.create(messages.getMessage("engineNotAvailable.title"),
                             messages.getMessage("engineNotAvailable.emptyOauth2ClientId"))
@@ -167,7 +172,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
                     .show();
             return false;
         }
-        
+
         if (StringUtils.isEmpty(engine.getOauth2ClientSecret())) {
             notifications.create(messages.getMessage("engineNotAvailable.title"),
                             messages.getMessage("engineNotAvailable.emptyOauth2ClientSecret"))

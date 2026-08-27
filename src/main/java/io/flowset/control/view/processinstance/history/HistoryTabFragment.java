@@ -10,7 +10,9 @@ import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.Metadata;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.component.tabsheet.JmixTabSheet;
@@ -27,11 +29,10 @@ import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.service.variable.VariableService;
-import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @FragmentDescriptor("history-tab-fragment.xml")
 public class HistoryTabFragment extends Fragment<JmixTabSheet> {
@@ -63,6 +64,9 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     protected IncidentService incidentService;
     @Autowired
     protected DecisionInstanceService decisionInstanceService;
+
+    @Autowired
+    protected ComponentHelper componentHelper;
 
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
@@ -189,27 +193,31 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     protected void initUserTasksTab() {
         Tab userTasksTab = createTab(USER_TASKS_TAB_ID, "ProcessInstanceEditHistoryFragment.tasksTabCaption",
                 VaadinIcon.USER_CARD);
-        historyTabsheet.add(userTasksTab, new LazyTabContent(() -> fragments.create(getParentController(), HistoryUserTasksTabFragment.class)), USER_TASKS_TAB_IDX);
+        historyTabsheet.add(userTasksTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), HistoryUserTasksTabFragment.class)), USER_TASKS_TAB_IDX);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initVariablesTab() {
         Tab variablesTab = createTab(VARIABLES_TAB_ID, "ProcessInstanceEditHistoryFragment.historicVariableInstancesTabCaption",
                 VaadinIcon.COGS);
-        historyTabsheet.add(variablesTab, new LazyTabContent(() -> fragments.create(getParentController(), HistoryVariablesTabFragment.class)), VARIABLES_TAB_IDX);
+        historyTabsheet.add(variablesTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), HistoryVariablesTabFragment.class)), VARIABLES_TAB_IDX);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initIncidentsTab() {
         Tab incidentsTab = createTab(INCIDENTS_TAB_ID, "ProcessInstanceEditHistoryFragment.incidentsTabCaption",
                 VaadinIcon.WARNING);
-        historyTabsheet.add(incidentsTab, new LazyTabContent(() -> fragments.create(getParentController(), HistoryIncidentsTabFragment.class)), INCIDENTS_TAB_IDX);
+        historyTabsheet.add(incidentsTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), HistoryIncidentsTabFragment.class)), INCIDENTS_TAB_IDX);
     }
 
     protected void initDecisionsTab() {
         Tab decisionsTab = createTab(DECISIONS_TAB_ID, "ProcessInstanceEditHistoryFragment.decisionsTabCaption",
                 VaadinIcon.TABLE);
-        historyTabsheet.add(decisionsTab, new LazyTabContent(() -> fragments.create(getParentController(), HistoryDecisionsFragment.class)), DECISIONS_TAB_IDX);
+        historyTabsheet.add(decisionsTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), HistoryDecisionsFragment.class)), DECISIONS_TAB_IDX);
     }
 
     protected void updateUserTasksTabCaption(long userTasksCount) {
@@ -260,6 +268,9 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     @Nullable
     protected Component getTabContent(Tab tab) {
         Component contentByTab = historyTabsheet.getContentByTab(tab);
+        if (contentByTab instanceof LazyTabContent lazyTabContent) {
+            return lazyTabContent.getContent();
+        }
         return contentByTab != null
                 ? contentByTab.getChildren()
                 .findFirst()

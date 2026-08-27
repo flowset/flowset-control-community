@@ -29,7 +29,7 @@ import org.camunda.community.rest.client.model.*;
 import org.camunda.community.rest.impl.RemoteRuntimeService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -239,8 +239,10 @@ public class VariableServiceImpl implements VariableService {
 
     @Override
     public void removeVariableLocal(VariableInstanceData variableInstanceData) {
-        Objects.requireNonNull(variableInstanceData.getExecutionId(), "executionId can not be null");
-        remoteRuntimeService.removeVariableLocal(variableInstanceData.getExecutionId(), variableInstanceData.getName());
+        String executionId = variableInstanceData.getExecutionId();
+
+        Objects.requireNonNull(executionId, "executionId can not be null");
+        remoteRuntimeService.removeVariableLocal(executionId, variableInstanceData.getName());
     }
 
     @Override

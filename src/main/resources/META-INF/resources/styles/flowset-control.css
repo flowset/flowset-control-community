@@ -1,0 +1,135 @@
+/*
+ * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+:host {
+    pointer-events: none;
+}
+
+html {
+    --bpmn-history-activity-color: rgba(162, 224, 172, 0.45);
+    --dashboard-background-color: hsla(214, 61%, 25%, 0.02);
+    --toggle-button-group-bg-color: var(--lumo-primary-color-10pct);
+    --toggle-button-active-bg-color: var(--lumo-primary-color);
+    --toggle-button-active-text-color: #FFFFFF;
+
+    --menu-item-active-bg-color: rgba(255, 255, 255, 0.20);
+    --menu-item-active-color: #FFFFFF;
+    --menu-item-hover-bg-color: rgba(255, 255, 255, 0.12);
+    --menu-item-hover-color: #FFFFFF;
+    --user-avatar-bg-color: #7EB3C2;
+    --user-avatar-text-color: #0A3340;
+    --menu-group-item-color: #69CE87;
+    --active-menu-item-border-color: var(--menu-group-item-color);
+    --menu-subitems-guide-line-color: rgba(255, 255, 255, 0.18);
+    --side-menu-bg-color: rgb(16, 70, 86);
+    --side-menu-bg-gradient-top-color: rgb(16, 70, 86);
+    --side-menu-bg-gradient-bottom-color: #1A6478;
+
+    --engine-env-badge-prod-color: #9D174D;
+    --engine-env-badge-prod-bg-color: #FCE7F3;
+    --engine-env-badge-prod-border-color: #F472B6;
+
+    --engine-env-badge-qa-color: #0D9488;
+    --engine-env-badge-qa-bg-color:#F0FDFA;
+    --engine-env-badge-qa-border-color: #5EEAD4;
+
+    --engine-env-badge-dev-color: #4B5563;
+    --engine-env-badge-dev-bg-color:#F3F4F6;
+    --engine-env-badge-dev-border-color: #9CA3AF;
+}
+
+[part="toggle"] {
+    pointer-events: auto;
+}
+
+[part='footer'] {
+    background-color: var(--lumo-base-color);
+}
+
+.suspended-state-small-icon {
+    padding: calc(var(--lumo-space-xs) + 0.15rem);
+}
+
+.bordered-container {
+    padding: 0;
+    border: 1px var(--lumo-utility-border-style, solid) var(--lumo-utility-border-color, var(--lumo-contrast-20pct));
+    border-radius: var(--lumo-border-radius-l);
+}
+
+.sticky-buttons-bottom-panel {
+    position: sticky;
+    bottom: 0;
+    background-color: var(--lumo-base-color);
+}
+
+.no-click-tree-grid vaadin-grid-cell-content {
+    display: flex;
+    align-items: center;
+}
+
+.no-click-tree-item-name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.empty-grid-icon {
+    width: 2em;
+    height: 2em;
+}
+
+vaadin-grid::part(multiline-text-cell) {
+    white-space: pre-wrap;
+}
+
+[theme~='badge'][theme~='warning'] {
+    color: var(--lumo-warning-text-color);
+    background-color: var(--lumo-warning-color-10pct);
+}
+
+vaadin-grid::part(error-cell) {
+    background-color: var(--lumo-error-color-10pct);
+}
+
+vaadin-button[theme~='badge'][theme~='has-icon'] {
+    padding-block: 0.2em;
+}
+
+vaadin-button[theme~='badge'][theme~='has-icon'] vaadin-icon {
+    margin-left: 0;
+    margin-block: 0;
+}
+
+.break-word {
+    word-break: break-word;
+}
+
+.data-grid-column-action {
+    min-width: 2.5em;
+}
+
+vaadin-button.data-grid-column-action > vaadin-icon {
+    padding: 0.175em;
+}
+
+.vertical-resize {
+    resize: vertical;
+    overflow: auto;
+}
+
+.full-screen-dialog::part(overlay) {
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+
+vaadin-split-layout {
+    min-width: 0;
+}
+
+vaadin-split-layout > * {
+    overflow: auto;
+}

@@ -1,0 +1,262 @@
+/*
+ * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+.jmix-main-view-header {
+    box-sizing: border-box;
+    display: flex;
+    height: var(--lumo-size-xl);
+    align-items: center;
+    width: 100%;
+}
+
+.jmix-main-view-drawer-toggle {
+    color: var(--lumo-secondary-text-color);
+}
+
+.jmix-logout-button {
+    color: var(--lumo-base-color) !important;
+}
+
+.jmix-main-view-title {
+    margin: 0;
+    font-size: var(--lumo-font-size-l);
+}
+
+vaadin-app-layout::part(drawer) {
+    border: none;
+}
+
+.jmix-main-view-section {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    max-height: 100%;
+    min-height: 100%;
+
+    background-color: var(--side-menu-bg-color);
+    background-image: linear-gradient(
+            180deg,
+            var(--side-menu-bg-gradient-top-color) 0%,
+            var(--side-menu-bg-color) 35%,
+            var(--side-menu-bg-gradient-bottom-color) 100%);
+
+    border-start-end-radius: 0.85em;
+    border-end-end-radius: 0.85em;
+    border: none;
+
+    --lumo-header-text-color: #fff;
+    --lumo-utility-border-color: #88A3AB;
+}
+
+
+.jmix-main-view-application-title {
+    display: flex;
+    align-items: center;
+    height: var(--lumo-size-xl);
+    margin: 0;
+    padding-left: var(--lumo-space-m);
+    padding-right: var(--lumo-space-m);
+    font-size: var(--lumo-font-size-l);
+}
+
+.jmix-main-view-application-title-base-link {
+    color: var(--lumo-primary-contrast-color);
+    height: var(--lumo-size-xl);
+    align-items: center;
+}
+
+.jmix-main-view-application-title-base-link:hover {
+    text-decoration: none;
+}
+
+.jmix-main-view-navigation {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid;
+    border-color: var(--lumo-contrast-10pct);
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.jmix-main-view-footer {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--lumo-space-xs);
+    margin-top: var(--lumo-space-xs);
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    gap: var(--lumo-space-s);
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
+.jmix-main-view-footer .jmix-user-indicator {
+    flex-grow: 1;
+    line-height: var(--lumo-line-height-s);
+}
+
+.jmix-main-view-footer .user-email {
+    line-height: var(--lumo-line-height-s);
+    color: var(--user-avatar-bg-color);
+}
+
+.jmix-main-view-footer .user-avatar {
+    background-color: var(--user-avatar-bg-color);
+    color: var(--user-avatar-text-color);
+    border-radius: 100%;
+}
+
+.jmix-main-view-footer .jmix-user-indicator .jmix-user-indicator-label {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+    font-size: var(--lumo-font-size-s);
+}
+
+.logo-icon {
+    width: 1.75em;
+    height: 1.75em;
+}
+
+.jmix-list-menu.control-app-menu .jmix-menu-item,
+.jmix-list-menu.control-app-menu .jmix-menubar-item > vaadin-details-summary {
+    color: var(--lumo-primary-contrast-color);
+}
+
+.jmix-list-menu.control-app-menu .jmix-menu-item:hover {
+    background-color: var(--menu-item-hover-bg-color);
+    color: var(--menu-item-hover-color);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.jmix-list-menu.control-app-menu .jmix-menubar-item > vaadin-details-summary:hover {
+    background-color: var(--menu-item-hover-bg-color);
+    color: var(--menu-item-hover-color);
+    border-radius: var(--lumo-border-radius-m);
+}
+
+.jmix-list-menu.control-app-menu .jmix-menubar-item > vaadin-details-summary::part(toggle) {
+    color: inherit;
+}
+
+.jmix-list-menu.control-app-menu .jmix-menubar-item {
+    padding: 0;
+}
+
+.jmix-list-menu.control-app-menu .jmix-menubar-item::part(content) {
+    padding: 0;
+}
+
+.jmix-list-menu.control-app-menu .jmix-menubar-item .menubar-list {
+    margin-inline-start: calc(var(--lumo-space-s) + var(--lumo-icon-size-s) / 2);
+    padding-inline-start: calc(var(--lumo-space-l) - var(--lumo-space-s) - var(--lumo-icon-size-s) / 2);
+    border-inline-start: 1px solid var(--menu-subitems-guide-line-color);
+}
+
+.jmix-list-menu.control-app-menu .jmix-menu-item {
+    padding: 0.35em var(--lumo-space-s);
+}
+
+.jmix-list-menu.control-app-menu .menu-group-label {
+    font-weight: 500;
+    display: flex;
+    padding-top: 0.5em;
+    color: var(--menu-group-item-color);
+    text-transform: uppercase;
+    padding-left: var(--lumo-space-s);
+    font-size: var(--lumo-font-size-xxs);
+    letter-spacing: calc(var(--lumo-font-size-xxs) / 4);
+}
+
+.jmix-list-menu.control-app-menu .jmix-menubar-item .menubar-summary {
+    font-weight: 500;
+}
+
+.jmix-list-menu.control-app-menu a.jmix-menu-item[highlight] {
+    background-color: var(--menu-item-active-bg-color);
+    color: var(--menu-item-active-color);
+    border-inline-start: 3px solid var(--active-menu-item-border-color);
+}
+
+.jmix-list-menu.control-app-menu a.jmix-menu-item[highlight] .link-text {
+    font-weight: 600;
+}
+
+.jmix-list-menu.control-app-menu a.jmix-menu-item[highlight] .prefix-component {
+    color: var(--active-menu-item-border-color);
+}
+
+.jmix-list-menu.control-app-menu a.jmix-menu-item .link-text,
+  .jmix-list-menu.control-app-menu .jmix-menubar-item .menubar-summary {
+    font-weight: 500;
+}
+
+.select-engine-popover::part(overlay) {
+    border: 1px solid var(--lumo-shade-30pct);
+    box-shadow: var(--lumo-box-shadow-l);
+    border-radius: var(--lumo-border-radius-l);
+}
+
+.engine-list-box hr {
+    margin: calc(var(--lumo-space-xs) / 2);
+}
+
+.engine-list-box vaadin-item {
+    overflow: hidden;
+}
+
+.engine-list-box vaadin-item::part(content) {
+    width: 100%;
+}
+
+.engine-list-box vaadin-item::part(checkmark)::before {
+    border: 1px solid var(--lumo-primary-color);
+    border-radius: 50%;
+    color: var(--lumo-primary-color);
+    font-size: 1em;
+}
+
+@media (min-width: 360px) and (orientation: portrait) {
+    .engine-popover-content {
+        min-width: 85vw;
+        max-width: 85vw;
+    }
+}
+
+@media (min-width: 640px) and (orientation: portrait) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 640px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 1280px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 1440px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}
+
+@media (min-width: 1920px) and (orientation: landscape) {
+    .engine-popover-content {
+        min-width: 25em;
+        max-width: 40em;
+    }
+}

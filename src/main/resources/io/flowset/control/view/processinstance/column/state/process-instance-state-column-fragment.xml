@@ -8,7 +8,7 @@
         <instance id="processInstanceDataDc" class="io.flowset.control.entity.processinstance.RuntimeProcessInstanceData"/>
     </data>
     <content>
-        <hbox padding="false" themeNames="spacing-xs" classNames="mt-xs mb-xs" width="max-content" alignItems="BASELINE">
+        <hbox id="root" padding="false" themeNames="spacing-xs" classNames="mt-xs mb-xs" width="max-content" alignItems="BASELINE">
             <icon id="incidentIcon" icon="WARNING" size="1em" classNames="text-error" visible="false">
                 <tooltip text="msg://processInstanceIncidentTooltip"/>
             </icon>

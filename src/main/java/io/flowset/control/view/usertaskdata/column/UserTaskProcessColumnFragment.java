@@ -18,6 +18,14 @@ import io.jmix.flowui.view.Subscribe;
 @RendererItemContainer("userTaskDc")
 public class UserTaskProcessColumnFragment extends ProcessLinkColumnFragment<HorizontalLayout, UserTaskData> {
 
+    @Override
+    public void setItem(UserTaskData item) {
+        setProcessDefinitionId(item.getProcessDefinitionId());
+        refreshLinkButton();
+
+        super.setItem(item);
+    }
+
     @Subscribe(id = "idBtn", subject = "clickListener")
     public void onIdBtnClick(final ClickEvent<JmixButton> event) {
         openProcessDetailView();

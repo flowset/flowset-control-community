@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.engine.EngineAuthState;
 import io.flowset.control.entity.engine.EnvironmentType;
@@ -44,7 +43,6 @@ import org.springframework.lang.Nullable;
 import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 
 @Slf4j
-@Route(value = "engine-connection-settings", layout = DefaultMainViewParent.class)
 @ViewController("EngineConnectionSettingsView")
 @ViewDescriptor("engine-connection-settings-view.xml")
 @DialogMode(minWidth = "32em", maxWidth = "42em")
@@ -256,12 +254,15 @@ public class EngineConnectionSettingsView extends StandardView {
     protected Renderer<BpmEngine> bpmEnginesComboBoxRenderer() {
         return new ComponentRenderer<>(bpmEngine -> {
             HorizontalLayout horizontalLayout = uiComponents.create(HorizontalLayout.class);
+            horizontalLayout.setId("bpmEngineItemBox");
             horizontalLayout.setPadding(false);
             horizontalLayout.addClassNames(LumoUtility.Gap.SMALL);
 
             Span name = new Span(ENGINE_WITH_TYPE_LABEL_FORMAT.formatted(bpmEngine.getName(), messages.getMessage(bpmEngine.getType())));
+            name.setId("engineNameLabel");
 
             Span url = new Span(bpmEngine.getBaseUrl());
+            url.setId("engineUrlLabel");
             url.addClassNames(LumoUtility.TextColor.TERTIARY);
             horizontalLayout.add(name, url);
             return horizontalLayout;

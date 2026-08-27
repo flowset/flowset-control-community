@@ -16,6 +16,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Messages;
@@ -42,7 +43,6 @@ import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import io.flowset.control.entity.variable.ObjectTypeInfo;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.entity.variable.VariableValueInfo;
-import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.JobService;
@@ -52,10 +52,10 @@ import io.flowset.control.service.variable.VariableService;
 import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
 import io.flowset.control.view.processvariable.VariableInstanceDataDetail;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -97,6 +97,8 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     private Dialogs dialogs;
     @Autowired
     private Messages messages;
+    @Autowired
+    protected ComponentHelper componentHelper;
 
 
     @ViewComponent
@@ -127,9 +129,10 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     public void onHostBeforeShow(View.BeforeShowEvent event) {
         ProcessInstanceData item = processInstanceDataDc.getItem();
         if (item.getState() != ProcessInstanceState.COMPLETED) {
-            setVariablesDefaultSort();
             this.variableFilter = metadata.create(VariableFilter.class);
             this.variableFilter.setProcessInstanceId(item.getInstanceId());
+
+            setVariablesDefaultSort();
 
             updateVariablesTabCaption(VARIABLES_TAB_IDX);
             initUserTasksTab();
@@ -150,29 +153,29 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
 
     protected void initIncidentsTab() {
         Tab incidentsTab = createTab(INCIDENTS_TAB_ID, "incidentsTabCaption", VaadinIcon.WARNING);
-        runtimeTabsheet.add(incidentsTab, new LazyTabContent(this::createIncidentsFragment), INCIDENTS_TAB_IDX);
+        runtimeTabsheet.add(incidentsTab, componentHelper.createLazyTabContent(this::createIncidentsFragment), INCIDENTS_TAB_IDX);
     }
 
     @Subscribe("runtimeTabsheet")
     public void onRuntimeTabsheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
         Tab selectedTab = event.getSelectedTab();
         String tabId = selectedTab != null ? selectedTab.getId().orElse(null) : null;
-        if (StringUtils.equals(tabId, USER_TASKS_TAB_ID)) {
+        if (Strings.CS.equals(tabId, USER_TASKS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof RuntimeUserTasksTabFragment userTasksFragment) {
                 userTasksFragment.refreshIfChanged(getSelectedActivityInstanceId());
             }
-        } else if (StringUtils.equals(tabId, JOBS_TAB_ID)) {
+        } else if (Strings.CS.equals(tabId, JOBS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof JobsTabFragment jobsTabFragment) {
                 jobsTabFragment.refreshIfRequired();
             }
-        } else if (StringUtils.equals(tabId, EXTERNAL_TASKS_TAB_ID)) {
+        } else if (Strings.CS.equals(tabId, EXTERNAL_TASKS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof ExternalTasksTabFragment externalTasksTabFragment) {
                 externalTasksTabFragment.refreshIfChanged(getSelectedActivityId());
             }
-        } else if (StringUtils.equals(tabId, INCIDENTS_TAB_ID)) {
+        } else if (Strings.CS.equals(tabId, INCIDENTS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof RuntimeIncidentsTabFragment incidentsTabFragment) {
                 incidentsTabFragment.refreshIfChanged(getSelectedActivityId());
@@ -294,7 +297,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         dialogs.createOptionDialog()
                 .withHeader(messageBundle.getMessage("removeProcessVariableTaskDialog.header"))
                 .withText(messageBundle.getMessage("removeProcessVariableTaskDialog.text"))
-                .withActions(new DialogAction(DialogAction.Type.YES)
+                .withActions(new DialogAction(DialogAction.Type.OK)
                                 .withIcon(VaadinIcon.TRASH.create())
                                 .withText(messages.getMessage("actions.Remove"))
                                 .withVariant(ActionVariant.PRIMARY)
@@ -432,22 +435,22 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         runtimeVariablesGrid.sort(gridSortOrders);
     }
 
-    @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initUserTasksTab() {
         Tab userTasksTab = createTab(USER_TASKS_TAB_ID, "tasksTabCaption", VaadinIcon.USER_CARD);
-        runtimeTabsheet.add(userTasksTab, new LazyTabContent(this::createUserTasksFragment), USER_TASKS_TAB_IDX);
+        runtimeTabsheet.add(userTasksTab, componentHelper.createLazyTabContent(this::createUserTasksFragment),
+                USER_TASKS_TAB_IDX);
     }
 
-    @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initJobsTab() {
         Tab jobsTab = createTab(JOBS_TAB_ID, "jobsTabCaption", VaadinIcon.COGS);
-        runtimeTabsheet.add(jobsTab, new LazyTabContent(() -> fragments.create(getParentController(), JobsTabFragment.class)), JOBS_TAB_IDX);
+        runtimeTabsheet.add(jobsTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), JobsTabFragment.class)), JOBS_TAB_IDX);
     }
 
-    @SuppressWarnings("JmixIncorrectCreateGuiComponent")
     protected void initExternalTasksTab() {
         Tab externalTasksTab = createTab(EXTERNAL_TASKS_TAB_ID, "externalTasksTabCaption", VaadinIcon.CLUSTER);
-        runtimeTabsheet.add(externalTasksTab, new LazyTabContent(() -> fragments.create(getParentController(), ExternalTasksTabFragment.class)), EXTERNAL_TASKS_TAB_IDX);
+        runtimeTabsheet.add(externalTasksTab, componentHelper.createLazyTabContent(() ->
+                fragments.create(getParentController(), ExternalTasksTabFragment.class)), EXTERNAL_TASKS_TAB_IDX);
     }
 
     protected void updateUserTasksTabCaption(long userTasksCount) {
@@ -509,6 +512,9 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     @Nullable
     protected Component getTabContent(Tab tab) {
         Component contentByTab = runtimeTabsheet.getContentByTab(tab);
+        if (contentByTab instanceof LazyTabContent lazyTabContent) {
+            return lazyTabContent.getContent();
+        }
         return contentByTab != null
                 ? contentByTab.getChildren()
                 .findFirst()

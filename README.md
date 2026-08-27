@@ -1,4 +1,22 @@
-**Flowset Control Community** is a web application that provides administrative functionality for external BPM engines.
+<div align="center">
+
+# 🚀 Flowset Control Community
+
+**A powerful web application for managing and administering external BPM engines**
+
+[![Website](https://img.shields.io/badge/Website-flowset.io-blue?style=for-the-badge&logo=google-chrome)](https://flowset.io/)
+[![Demo](https://img.shields.io/badge/Demo-Try_Now-green?style=for-the-badge&logo=demo)](https://demo-control.flowset.io/login)
+[![Documentation](https://img.shields.io/badge/Docs-Read_Here-orange?style=for-the-badge&logo=read-the-docs)](https://docs.flowset.io/flowset/intro.html)
+[![GitHub](https://img.shields.io/badge/GitHub-flowset-black?style=for-the-badge&logo=github)](https://github.com/flowset)
+[![Slack](https://img.shields.io/badge/Slack-Join_Us-purple?style=for-the-badge&logo=slack)](https://flowset-io.slack.com/)
+
+---
+
+![Flowset Control Community](img/preview.png)
+
+---
+
+</div>
 
 **Key Features**
 - **Connection Management:** Easily set up connections to various BPM engines and switch between them as needed.
@@ -27,6 +45,8 @@ Flowset Control Community is built using the open-source [Jmix](https://www.jmix
    - [Incidents](#incidents)
    - [Configuring Users](#configuring-users)
 - [Running the Tests](#running-the-tests)  
+   - [Running Integration Tests](#running-integration-tests) 
+   - [Running UI Tests](#running-ui-tests) 
 - [License](#license) 
 
 
@@ -55,6 +75,8 @@ You must have the following installed:
 2. Java 21 (JDK and JRE)
 3. PostgreSQL
 
+The project is built with Gradle 9, which is provided by the Gradle wrapper (`gradlew`), so no local Gradle installation is required.
+
 **Instructions:**
 
 1. Clone the repository:
@@ -73,6 +95,12 @@ You must have the following installed:
     .\gradlew bootRun
    ```
 The application is now running at http://localhost:8081 in the browser.
+
+> **Note:** `bootRun` activates the `dev` Spring profile, which prefills the login form with the
+> default `admin/admin` credentials for convenience. Production builds (`bootJar`) do not activate
+> this profile, so the login form is empty. When starting the app directly from the IDE (running the
+> `Application` main class instead of `bootRun`), add `dev` to the active profiles of the run
+> configuration to get the same behavior.
 
 ## Usage <a name="usage"></a>
 Flowset Control Community requires authenticated access. An administrative user with the credentials `admin/admin` is provided 
@@ -209,6 +237,7 @@ The user can now log in to Flowset Control Community and use all the functionali
 
 ## Running the Tests <a name="running-the-tests"></a>
 
+### Running Integration Tests <a name="running-integration-tests"></a>
 **Prerequisites:**
 
 You must have the following installed:
@@ -218,10 +247,10 @@ You must have the following installed:
 Flowset Control Community tests use [Testcontainers](https://testcontainers.com/) to run database and BPM engine containers.
 and do not require a pre-prepared running instances for them.
 
-To run all tests in Flowset Control Community, use the following command:
+To run all integration tests in Flowset Control Community, use the following command:
 
 ```shell
-.\gradlew test
+.\gradlew test -PintegrationTests
 ```
 
 By default, all integration tests related to the BPM engine features are performed on the Camunda Run (version 7.22) which
@@ -243,31 +272,68 @@ You can pass the values of these properties as environment variables or by using
 
 **Example 1: Run tests for Camunda Run (version 7.21)**
 
-Using environment variable:
+Using environment variables in PowerShell:
 
 ```shell
-  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_DOCKER_IMAGE=camunda/camunda-bpm-platform:run-7.21.0 .\gradlew test
+  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_DOCKER_IMAGE=camunda/camunda-bpm-platform:run-7.21.0 .\gradlew test -PintegrationTests
 ```
 
 Using Gradle command properties:
 
 ```shell
-  .\gradlew test  -Dspring.profiles.include=test-engine -Dcontrol.testing.engine.docker-image=camunda/camunda-bpm-platform:run-7.21.0
+  .\gradlew test -PintegrationTests -Dspring.profiles.include=test-engine -Dflowset.control.testing.engine.docker-image=camunda/camunda-bpm-platform:run-7.21.0
 ```
 
 **Example 2: Run tests for the default engine (Camunda Run 7.22) with basic authentication configured**
 
-Using environment variable:
+Using environment variables in PowerShell:
 
 ```shell
-  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_AUTH_TYPE=Basic .\gradlew test
+  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_AUTH_TYPE=Basic .\gradlew test -PintegrationTests
 ```
 
 Using Gradle command properties:
 
 ```shell
-  .\gradlew test  -Dspring.profiles.include=test-engine -Dcontrol.testing.engine.auth-type=Basic
+  .\gradlew test -PintegrationTests -Dspring.profiles.include=test-engine -Dflowset.control.testing.engine.auth-type=Basic
 ```
+
+### Running UI Tests <a name="running-ui-tests"></a>
+
+**Prerequisites:**
+
+You must have the following running:
+
+1. External Flowset Control instance:
+   - Running with the Spring profile `ui-test`
+   - Connected to the database supported multiple connections, e.g., PostgreSQL
+2. External running BPM engine instance (e.g., Camunda 7)
+
+**Example: Start Flowset Control from sources for UI tests**
+
+MacOS and Linux:
+```shell
+./gradlew bootRun -Dspring.profiles.active=ui-test
+```
+
+Windows:
+
+```shell
+.\gradlew bootRun "-Dspring.profiles.active=ui-test"
+```
+
+**Example: Run tests for Camunda 7 without authentication running locally on port 8088**
+
+MacOS and Linux:
+```shell
+./gradlew test -PuiTests -Dflowset.control.testing.ui.engine.rest-base-url=http://localhost:8088/engine-rest
+```
+Windows:
+
+```shell
+.\gradlew test -PuiTests "-Dflowset.control.testing.ui.engine.rest-base-url=http://localhost:8088/engine-rest"
+```
+A full list of available properties can be found in the [application-ui-test.properties](src/test/resources/application-ui-test.properties) file.
 
 ## License <a name="license"></a>
 Flowset Control Community is an open-source project distributed under the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) license. 

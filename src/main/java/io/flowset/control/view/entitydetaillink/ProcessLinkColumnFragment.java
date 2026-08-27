@@ -11,13 +11,11 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
-import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.Subscribe;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
@@ -29,17 +27,24 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
  * @param <V> the type of the data entity used by the fragment
  */
 public abstract class ProcessLinkColumnFragment<E extends Component, V> extends EntityDetailLinkFragment<E, V> {
-    @Autowired
-    protected ComponentHelper componentHelper;
 
     protected ProcessDefinitionData processDefinitionData;
+    protected String processDefinitionId;
 
     public void setProcessDefinitionData(ProcessDefinitionData processDefinitionData) {
         this.processDefinitionData = processDefinitionData;
     }
 
+    public void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
+
     @Subscribe
     public void onAttachEvent(final AttachEvent event) {
+        refreshLinkButton();
+    }
+
+    protected void refreshLinkButton() {
         JmixButton linkButton = findLinkButton();
         if (linkButton != null) {
             String processDefinitionId = getProcessDefinitionId();
@@ -64,13 +69,23 @@ public abstract class ProcessLinkColumnFragment<E extends Component, V> extends 
     @Nullable
     protected String getProcessLabel() {
         if (processDefinitionData == null) {
-            return null;
+            return processDefinitionId;
         }
         return componentHelper.getProcessLabel(processDefinitionData);
     }
 
     @Nullable
     protected String getProcessDefinitionId() {
-        return processDefinitionData != null ? processDefinitionData.getId() : null;
+        return processDefinitionData != null ? processDefinitionData.getId() : processDefinitionId;
+    }
+
+    @Override
+    protected Class<?> getTargetEntityClass() {
+        return ProcessDefinitionData.class;
+    }
+
+    @Override
+    protected boolean isItemReadPermitted() {
+        return true;
     }
 }

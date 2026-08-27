@@ -16,7 +16,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.TargetType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
@@ -27,6 +27,7 @@ public abstract class ProcessInstanceMapper {
     @Autowired
     Metadata metadata;
 
+    @Mapping(target = "superProcessInstanceId", ignore = true)
     @Mapping(target = "hasIncidents", ignore = true)
     @Mapping(target = "instanceId", source = "id")
     @Mapping(target = "complete", constant = "false")
@@ -55,8 +56,12 @@ public abstract class ProcessInstanceMapper {
     }
 
     @AfterMapping
-    protected void afterHistoricProcessInstanceDtoMapping(@MappingTarget ProcessInstanceData processInstanceData, HistoricProcessInstanceDto sourceDto) {
+    protected void afterHistoricProcessInstanceMapping(@MappingTarget ProcessInstanceData processInstanceData, HistoricProcessInstanceDto sourceDto) {
         HistoricProcessInstanceDto.StateEnum state = sourceDto.getState();
+        if (state == null) {
+            return;
+        }
+
         switch (state) {
             case COMPLETED -> processInstanceData.setComplete(true);
             case SUSPENDED -> processInstanceData.setSuspended(true);

@@ -11,7 +11,7 @@ import io.jmix.flowui.view.ViewController;
 import io.jmix.flowui.view.ViewDescriptor;
 import io.jmix.securityflowui.view.resourcerole.ResourceRoleModelListView;
 
-@Route(value = "sec/resourcerolemodels", layout = DefaultMainViewParent.class)
+@Route(value = "sec/resource-role-models", layout = DefaultMainViewParent.class)
 @ViewController(id = "sec_ResourceRoleModel.list")
 @ViewDescriptor(path = "control-resource-role-model-list-view.xml")
 public class ControlResourceRoleModelListView extends ResourceRoleModelListView {

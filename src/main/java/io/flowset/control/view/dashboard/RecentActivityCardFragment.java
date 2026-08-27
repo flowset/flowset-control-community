@@ -5,6 +5,7 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.dom.Style;
 import io.jmix.chartsflowui.component.Chart;
+import io.jmix.chartsflowui.kit.component.model.legend.AbstractLegend;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.model.CollectionContainer;
 import io.jmix.flowui.view.Subscribe;
@@ -41,8 +42,13 @@ public class RecentActivityCardFragment extends DashboardCard<VerticalLayout> {
 
     protected void initChart(List<ProcessExecutionGraphEntry> weeklyStatistics) {
         processExecutionsDc.setItems(weeklyStatistics);
-        String formatterFunction = generateLegendJsFormatter(weeklyStatistics);
-        processExecutionGraph.getLegend().setFormatterFunction(formatterFunction);
+
+        AbstractLegend<?> legend = processExecutionGraph.getLegend();
+        if (legend == null) {
+            return;
+        }
+
+        legend.setFormatterFunction(generateLegendJsFormatter(weeklyStatistics));
     }
 
     protected void updateComponents(boolean loading) {

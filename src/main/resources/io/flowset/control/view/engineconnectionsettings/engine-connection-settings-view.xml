@@ -54,7 +54,7 @@
             <textField id="environmentTypeField" readOnly="true" dataContainer="engineDc" property="environmentType"
                        label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType"/>
             <hbox width="100%"  classNames="mt-s" alignItems="BASELINE" justifyContent="BETWEEN">
-                <h4 text="msg://authentication" classNames="pt-xs"/>
+                <h4 id="authenticationGroupHeader" text="msg://authentication" classNames="pt-xs"/>
                 <hbox id="authStateBox" visible="false" padding="false" justifySelf="END" alignItems="BASELINE" themeNames="spacing-s">
                     <icon icon="WARNING" size="0.85em" classNames="text-warning"/>
                     <span text="msg://accessTokenRetrievalLockedMsg" classNames="text-warning text-s"/>

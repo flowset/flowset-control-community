@@ -7,7 +7,7 @@ package io.flowset.control.entity.incident;
 
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.camunda.bpm.engine.runtime.Incident;
 
 import java.time.OffsetDateTime;
@@ -197,10 +197,10 @@ public class HistoricIncidentData {
     }
 
     public boolean isJobFailed() {
-        return StringUtils.equals(type, Incident.FAILED_JOB_HANDLER_TYPE);
+        return Strings.CS.equals(type, Incident.FAILED_JOB_HANDLER_TYPE);
     }
 
     public boolean isExternalTaskFailed() {
-        return StringUtils.equals(type, Incident.EXTERNAL_TASK_HANDLER_TYPE);
+        return Strings.CS.equals(type, Incident.EXTERNAL_TASK_HANDLER_TYPE);
     }
 }

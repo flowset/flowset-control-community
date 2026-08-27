@@ -21,7 +21,7 @@
         </keyValueCollection>
     </data>
     <content>
-        <div classNames="grid grid-flow-row grid-rows-2 grid-cols-1 gap-m">
+        <div id="runningInstancesAndIncidentsCard" classNames="grid grid-flow-row grid-rows-2 grid-cols-1 gap-m">
             <div id="runningInstancesCard" classNames="bordered-card p-m bg-base col-span-2">
                 <hbox padding="false" themeNames="spacing-s" width="100%" alignItems="BASELINE">
                     <h3 text="msg://runningInstances"/>

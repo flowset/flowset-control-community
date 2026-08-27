@@ -13,9 +13,7 @@
         <instance id="processDefinitionFilterDc" class="io.flowset.control.entity.filter.ProcessDefinitionFilter"/>
     </data>
     <facets>
-        <urlQueryParameters id="urlQueryParameters">
-            <pagination component="processDefinitionPagination"/>
-        </urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters"/>
     </facets>
     <actions>
         <action id="applyFilter" text="msg:///actions.Apply" icon="SEARCH"/>
@@ -63,6 +61,12 @@
             <button id="bulkRemoveBtn" action="processDefinitionsGrid.bulkRemove"/>
             <button id="bulkActivateBtn" action="processDefinitionsGrid.bulkActivate"/>
             <button id="bulkSuspendBtn" action="processDefinitionsGrid.bulkSuspend"/>
+            <dropdownButton id="otherActions" icon="COG" dropdownIndicatorVisible="false" themeNames="icon"
+                            width="min-content" minWidth="auto">
+                <items>
+                   <actionItem id="excelExport" ref="processDefinitionsGrid.excelExport"/>
+                </items>
+            </dropdownButton>
             <simplePagination id="processDefinitionPagination" dataLoader="processDefinitionsDl"
                               alignSelf="END"/>
         </hbox>
@@ -74,14 +78,15 @@
                   selectionMode="MULTI">
             <actions>
                 <action id="refresh" type="list_refresh"/>
-                <action id="deploy" icon="ROCKET" text="msg://processDefinitionList.uploadBpmnXml"/>
-                <action id="bulkRemove" type="list_itemTracking" text="msg://processDefinitionList.remove" icon="TRASH"
+                <action id="deploy" type="control_deployProcessDefinition" icon="ROCKET" text="msg://processDefinitionList.uploadBpmnXml"/>
+                <action id="bulkRemove" type="control_bulkDeleteProcessDefinition" text="msg://processDefinitionList.remove" icon="TRASH"
                         actionVariant="DANGER"/>
-                <action id="bulkActivate" type="list_itemTracking" text="msg://processDefinitionList.activate"
+                <action id="bulkActivate" type="control_bulkActivateProcessDefinition" text="msg://processDefinitionList.activate"
                         icon="PLAY"/>
-                <action id="bulkSuspend" type="list_itemTracking" text="msg://processDefinitionList.suspend"
+                <action id="bulkSuspend" type="control_bulkSuspendProcessDefinition" text="msg://processDefinitionList.suspend"
                         icon="PAUSE"/>
                 <action id="view" type="list_edit" visible="false"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="name" flexGrow="2">
@@ -93,7 +98,7 @@
                             class="io.flowset.control.view.processdefinition.column.ProcessKeyColumnFragment"/>
                 </column>
                 <column property="version" autoWidth="true" flexGrow="1"/>
-                <column key="status" header="msg://processDefinitionList.status" autoWidth="true" sortable="false"
+                <column property="suspended" header="msg://processDefinitionList.status" autoWidth="true" sortable="false"
                         flexGrow="1"/>
                 <column key="actions" sortable="false" editable="false" autoWidth="true" flexGrow="0"/>
             </columns>

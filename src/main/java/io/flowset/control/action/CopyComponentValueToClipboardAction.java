@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
 package io.flowset.control.action;
 
 import com.vaadin.flow.component.Component;
@@ -18,7 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 
 @ActionType(CopyComponentValueToClipboardAction.ID)
-public class CopyComponentValueToClipboardAction extends BaseAction implements TargetAction<HasValue<?, ?>> {
+public class CopyComponentValueToClipboardAction extends BaseAction<CopyComponentValueToClipboardAction>
+        implements TargetAction<HasValue<?, ?>> {
 
     public static final String ID = "control_copyComponentValueToClipboard";
 

@@ -5,6 +5,8 @@
 
 package io.flowset.control.test_support;
 
+import io.flowset.control.test_support.engine.HasRunningEngineData;
+import io.flowset.control.test_support.engine.external.ExternalRunningEngineExtension;
 import io.flowset.control.test_support.testcontainers.EngineContainer;
 
 /**
@@ -13,8 +15,9 @@ import io.flowset.control.test_support.testcontainers.EngineContainer;
  * @param <E> engine container type
  * @see RunningEngineExtension
  * @see WithRunningEngine#shared()
+ * @see ExternalRunningEngineExtension
  */
-public interface EngineDataCleaner<E extends EngineContainer<?>> {
+public interface EngineDataCleaner<E extends HasRunningEngineData> {
 
     /**
      * Cleans the data in the specified engine container.
@@ -29,5 +32,5 @@ public interface EngineDataCleaner<E extends EngineContainer<?>> {
      * @param engineContainer engine container
      * @return engine container is supported
      */
-    boolean supports(EngineContainer<?> engineContainer);
+    boolean supports(HasRunningEngineData engineContainer);
 }

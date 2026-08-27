@@ -14,8 +14,8 @@
     </data>
     <content>
         <vbox height="100%" width="100%" themeNames="spacing-xs" minHeight="20em" padding="false">
-            <hbox classNames="buttons-panel" padding="false">
-                <button action="runtimeExternalTasksGrid.retry" themeNames="small"/>
+            <hbox id="runtimeExternalTasksGridActionsPanel" classNames="buttons-panel" padding="false">
+                <button id="runtimeExternalTaskRetryBtn" action="runtimeExternalTasksGrid.retry" themeNames="small"/>
                 <simplePagination id="pagination" dataLoader="runtimeExternalTasksDl"/>
             </hbox>
             <dataGrid id="runtimeExternalTasksGrid" width="100%" height="100%" themeNames="compact"
@@ -23,18 +23,15 @@
                 <actions>
                     <action id="edit"
                             text="msg:///actions.View"
-                            icon="EYE"
-                            type="list_itemTracking"/>
+                            icon="EYE" visible="false"
+                            type="list_edit"/>
                     <action id="retry"
                             text="msg:///actions.Retry"
                             icon="ROTATE_LEFT"
-                            type="list_itemTracking"/>
+                            type="control_retryGridExternalTask"/>
                 </actions>
                 <columns resizable="true" sortable="false">
-                    <column property="externalTaskId" frozen="true">
-                        <fragmentRenderer
-                                class="io.flowset.control.view.externaltask.column.ExternalTaskIdColumnFragment"/>
-                    </column>
+                    <column property="externalTaskId" frozen="true"/>
                     <column property="activityId"/>
                     <column property="topicName" autoWidth="true"/>
                     <column property="retries" autoWidth="true"/>

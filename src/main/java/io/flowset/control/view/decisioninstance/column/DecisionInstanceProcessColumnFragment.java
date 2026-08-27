@@ -8,7 +8,7 @@ package io.flowset.control.view.decisioninstance.column;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
-import io.flowset.control.view.entitydetaillink.ProcessLinkColumnFragment;;
+import io.flowset.control.view.entitydetaillink.ProcessLinkColumnFragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -17,6 +17,16 @@ import io.jmix.flowui.view.Subscribe;
 @FragmentDescriptor("decision-instance-process-column-fragment.xml")
 @RendererItemContainer("decisionInstanceDc")
 public class DecisionInstanceProcessColumnFragment extends ProcessLinkColumnFragment<HorizontalLayout, HistoricDecisionInstanceShortData> {
+
+    @Override
+    public void setItem(HistoricDecisionInstanceShortData item) {
+        setProcessDefinitionId(item.getProcessDefinitionId());
+        refreshLinkButton();
+
+        super.setItem(item);
+    }
+
+
 
     @Subscribe(id = "processIdBtn", subject = "clickListener")
     public void onProcessIdBtnClick(final ClickEvent<JmixButton> event) {

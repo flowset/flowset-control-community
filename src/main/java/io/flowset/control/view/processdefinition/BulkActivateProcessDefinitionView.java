@@ -8,7 +8,6 @@ package io.flowset.control.view.processdefinition;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.router.Route;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.jmix.core.Messages;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Set;
 
-@Route(value = "bpm/bulkactivateprocessdefinition", layout = DefaultMainViewParent.class)
 @ViewController("bpm_BulkActivateProcessDefinition")
 @ViewDescriptor("bulk-activate-process-definition-view.xml")
 @DialogMode(width = "35em")

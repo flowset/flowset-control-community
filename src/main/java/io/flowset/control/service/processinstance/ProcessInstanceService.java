@@ -6,10 +6,14 @@
 package io.flowset.control.service.processinstance;
 
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
+import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.entity.variable.VariableInstanceData;
-import org.springframework.lang.Nullable;
+import io.flowset.control.security.SecuredEntityLoad;
+import io.flowset.control.security.SecuredEntityOperation;
+import io.flowset.control.security.SpecificPermissions;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,6 +29,7 @@ public interface ProcessInstanceService {
      * @param loadContext a context to load process instances
      * @return a list of process instances
      */
+    @SecuredEntityLoad(entityClass = ProcessInstanceData.class)
     List<ProcessInstanceData> findAllHistoricInstances(ProcessInstanceLoadContext loadContext);
 
 
@@ -34,6 +39,7 @@ public interface ProcessInstanceService {
      * @param loadContext a context to load process instances
      * @return a list of process instances
      */
+    @SecuredEntityLoad(entityClass = RuntimeProcessInstanceData.class)
     List<RuntimeProcessInstanceData> findAllRuntimeInstances(ProcessInstanceLoadContext loadContext);
 
     /**
@@ -42,6 +48,7 @@ public interface ProcessInstanceService {
      * @param filter a process instance filter
      * @return count of process instances
      */
+    @SecuredEntityLoad(entityClass = ProcessInstanceData.class)
     long getHistoricInstancesCount(ProcessInstanceFilter filter);
 
     /**
@@ -50,6 +57,7 @@ public interface ProcessInstanceService {
      * @param filter a process instance filter
      * @return count of process instances
      */
+    @SecuredEntityLoad(entityClass = RuntimeProcessInstanceData.class)
     long getRuntimeInstancesCount(ProcessInstanceFilter filter);
 
 
@@ -59,6 +67,7 @@ public interface ProcessInstanceService {
      * @param processInstanceId a process instance identifier
      * @return found instance
      */
+    @SecuredEntityLoad(entityClass = ProcessInstanceData.class)
     ProcessInstanceData getProcessInstanceById(String processInstanceId);
 
     /**
@@ -68,6 +77,7 @@ public interface ProcessInstanceService {
      * @param variableInstances   process variables with values
      * @return started process instance
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_DEFINITION_START)
     ProcessInstanceData startProcessByDefinitionId(String processDefinitionId, Collection<VariableInstanceData> variableInstances,
                                                    @Nullable String businessKey);
 
@@ -76,6 +86,7 @@ public interface ProcessInstanceService {
      *
      * @param processInstanceId a process instance identifier
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_SUSPEND)
     void suspendById(String processInstanceId);
 
     /**
@@ -83,6 +94,7 @@ public interface ProcessInstanceService {
      *
      * @param processInstanceId a process instance identifier
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_ACTIVATE)
     void activateById(String processInstanceId);
 
     /**
@@ -90,28 +102,38 @@ public interface ProcessInstanceService {
      *
      * @param processInstanceId a process instance identifier
      */
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_TERMINATE)
     void terminateById(String processInstanceId);
 
     /**
      * Asynchronously terminates process instances with the specified context.
      *
      * @param context a context containing data like process instance identifiers
+     * @return created batch or {@code null} if operation failed
      */
-    void terminateByIdsAsync(ProcessInstanceBulkTerminateContext context);
+    @Nullable
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_TERMINATE)
+    BatchData terminateByIdsAsync(ProcessInstanceBulkTerminateContext context);
 
     /**
      * Activates asynchronously the process instances with the specified identifiers.
      *
      * @param processInstancesIds a list of process instance identifiers
+     * @return created batch or {@code null} if operation failed
      */
-    void activateByIdsAsync(List<String> processInstancesIds);
+    @Nullable
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_ACTIVATE)
+    BatchData activateByIdsAsync(List<String> processInstancesIds);
 
     /**
      * Suspends asynchronously the process instances with the specified identifiers.
      *
      * @param processInstancesIds a list of process instance identifiers
+     * @return created batch or {@code null} if operation failed
      */
-    void suspendByIdsAsync(List<String> processInstancesIds);
+    @Nullable
+    @SecuredEntityOperation(specificPermission = SpecificPermissions.PROCESS_INSTANCE_SUSPEND)
+    BatchData suspendByIdsAsync(List<String> processInstancesIds);
 
     /**
      * Loads the total count of running instances of the process definition version with the specified identifier.
@@ -119,6 +141,7 @@ public interface ProcessInstanceService {
      * @param processDefinitionId a process definition identifier
      * @return count of instances
      */
+    @SecuredEntityLoad(entityClass = ProcessInstanceData.class)
     long getCountByProcessDefinitionId(String processDefinitionId);
 
     /**
@@ -127,7 +150,8 @@ public interface ProcessInstanceService {
      * @param deploymentId a deployment identifier
      * @return count of instances
      */
-    public long getCountByDeploymentId(String deploymentId);
+    @SecuredEntityLoad(entityClass = ProcessInstanceData.class)
+    long getCountByDeploymentId(String deploymentId);
 
     /**
      * Loads the count of running instances of the process definition with the specified key.
@@ -135,5 +159,6 @@ public interface ProcessInstanceService {
      * @param processDefinitionKey a process key
      * @return count of instances
      */
+    @SecuredEntityLoad(entityClass = ProcessInstanceData.class)
     long getCountByProcessDefinitionKey(String processDefinitionKey);
 }

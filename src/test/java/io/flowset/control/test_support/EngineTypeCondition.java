@@ -6,7 +6,11 @@
 package io.flowset.control.test_support;
 
 import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.test_support.property.ControlEngineTestingProperties;
+import io.flowset.control.test_support.property.ControlUiTestingProperties;
+import io.flowset.control.test_support.engine.external.ExternalEngine;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -18,12 +22,14 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static io.flowset.control.test_support.Constants.TEST_ENGINE_PROFILE;
+import static io.flowset.control.test_support.Constants.UI_TEST_PROFILE;
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 /**
- * Checks whether a test should be executed for the engine type set in {@link ControlEngineTestingProperties#getType()}.
+ * Checks whether a test should be executed for the engine type set in {@link ControlEngineTestingProperties#getType()}
+ * or {@link ControlUiTestingProperties#getEngine()}.
  */
 public class EngineTypeCondition implements ExecutionCondition {
 
@@ -53,6 +59,10 @@ public class EngineTypeCondition implements ExecutionCondition {
         ApplicationContext applicationContext = SpringExtension.getApplicationContext(context);
         Environment environment = applicationContext.getEnvironment();
 
+        if (environment.matchesProfiles(UI_TEST_PROFILE)) {
+            return evaluateAgainstExternalEngine(annotation, applicationContext);
+        }
+
         if (!environment.matchesProfiles(TEST_ENGINE_PROFILE)) {
             return enabled("The 'test-engine' profile is not used");
         }
@@ -67,7 +77,7 @@ public class EngineTypeCondition implements ExecutionCondition {
         EngineType[] allowedTypes = annotation.value();
 
         boolean enabled = Arrays.stream(allowedTypes)
-                .anyMatch(engineType -> StringUtils.equalsIgnoreCase(engineTypeProperty, engineType.name()));
+                .anyMatch(engineType -> Strings.CI.equals(engineTypeProperty, engineType.name()));
 
         if (!enabled) {
             return disabled("Configured test engine type is " + engineTypeProperty);
@@ -75,6 +85,22 @@ public class EngineTypeCondition implements ExecutionCondition {
 
         return enabled("Configured test engine type is " + engineTypeProperty);
 
+    }
+
+    private ConditionEvaluationResult evaluateAgainstExternalEngine(EnabledOnEngine annotation,
+                                                                     ApplicationContext applicationContext) {
+        ExternalEngine engine = applicationContext.getBean(ControlUiTestingProperties.class).getEngine();
+        if (engine == null) {
+            return disabled("External engine is not configured");
+        }
+        EngineType engineType = engine.getType();
+        if (engineType == null) {
+            return enabled("Configured external engine type is not set");
+        }
+        boolean matches = Arrays.asList(annotation.value()).contains(engineType);
+        return matches
+                ? enabled("Configured external engine type is " + engineType)
+                : disabled("Configured external engine type is " + engineType);
     }
 
     protected ConditionEvaluationResult enabledByDefault() {

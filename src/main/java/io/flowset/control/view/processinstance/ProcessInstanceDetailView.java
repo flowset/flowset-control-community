@@ -46,6 +46,7 @@ import io.flowset.control.service.decisioninstance.DecisionInstanceService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
+import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.flowset.control.view.decisioninstance.DecisionInstanceDetailView;
 import io.flowset.control.view.event.TitleUpdateEvent;
@@ -60,7 +61,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,6 +93,8 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     @Autowired
     protected ComponentHelper componentHelper;
     @Autowired
+    protected SecuritySupport securitySupport;
+    @Autowired
     protected CallActivityOverlayClickHandler callActivityClickHandler;
     @Autowired
     protected Messages messages;
@@ -113,7 +116,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     @ViewComponent
     protected CollectionLoader<ActivityInstanceTreeItem> runtimeActivityInstancesDl;
     @ViewComponent
-    protected BpmnViewerFragment diagramFragment;
+    protected BpmnViewerFragment viewerFragment;
     @ViewComponent
     protected VerticalLayout emptyDiagramBox;
     @ViewComponent
@@ -129,8 +132,13 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
         historyTab.setId(HISTORY_TAB_ID);
         historyTab.setLabel(messageBundle.getMessage("historyTabCaption"));
         historyTab.addComponentAsFirst(VaadinIcon.TIME_BACKWARD.create());
-        relatedEntitiesTabSheet.add(historyTab,
-                new LazyTabContent(() -> fragments.create(this, HistoryTabFragment.class)), HISTORY_TAB_IDX);
+        LazyTabContent historyTabContent = componentHelper.createLazyTabContent(() -> {
+            HistoryTabFragment historyTabFragment = fragments.create(this, HistoryTabFragment.class);
+            historyTabFragment.setId("historyTabFragment");
+            return historyTabFragment;
+        });
+        historyTabContent.setId("historyTabContent");
+        relatedEntitiesTabSheet.add(historyTab, historyTabContent, HISTORY_TAB_IDX);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
@@ -148,14 +156,9 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
             relatedEntitiesTabSheet.getTabAt(RUNTIME_TAB_IDX).setEnabled(false);
             Tab historyTab = relatedEntitiesTabSheet.getTabAt(HISTORY_TAB_IDX);
             relatedEntitiesTabSheet.setSelectedTab(historyTab);
-            //force init a tab content because an attach event is not triggered
-            LazyTabContent contentByTab = (LazyTabContent) relatedEntitiesTabSheet.getContentByTab(historyTab);
-            if (contentByTab != null) {
-                contentByTab.init();
-                Component tabContent = contentByTab.getChildren().findFirst().orElse(null);
-                if (tabContent instanceof HistoryTabFragment historyTabFragment) {
-                    historyTabFragment.refresh();
-                }
+            Component tabContent = getTabContent(historyTab);
+            if (tabContent instanceof HistoryTabFragment historyTabFragment) {
+                historyTabFragment.refresh();
             }
         }
         initBpmnViewerFragment();
@@ -170,7 +173,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     public void onRelatedEntitiesTabSheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
         Tab selectedTab = event.getSelectedTab();
         String selectedTabId = selectedTab != null ? selectedTab.getId().orElse(null) : null;
-        if (StringUtils.equals(selectedTabId, HISTORY_TAB_ID)) {
+        if (org.apache.commons.lang3.Strings.CS.equals(selectedTabId, HISTORY_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof HistoryTabFragment historyTabFragment) {
                 historyTabFragment.refresh();
@@ -230,15 +233,15 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
                 (processInstanceDataDc.getItem().getProcessDefinitionId());
         if (!Strings.isNullOrEmpty(processBpmnXml)) {
             emptyDiagramBox.setVisible(false);
-            diagramFragment.initViewer(processBpmnXml);
-            diagramFragment.addImportCompleteListener(event -> handleProcessXmlImportComplete());
-            diagramFragment.addDecisionInstanceLinkOverlayClickListener(
+            viewerFragment.initViewer(processBpmnXml);
+            viewerFragment.addImportCompleteListener(event -> handleProcessXmlImportComplete());
+            viewerFragment.addDecisionInstanceLinkOverlayClickListener(
                     event -> handleDecisionInstanceLinkOverlayClicked(event.getDecisionInstanceId()));
-            diagramFragment.addCalledProcessInstanceOverlayClickListener(event ->
+            viewerFragment.addCalledProcessInstanceOverlayClickListener(event ->
                     callActivityClickHandler.handleInstancesNavigation(event.getProcessInstanceIds()));
         } else if (processBpmnXml == null) {
             emptyDiagramBox.setVisible(true);
-            diagramFragment.setVisible(false);
+            viewerFragment.setVisible(false);
         }
     }
 
@@ -251,7 +254,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
 
         if (processInstanceData.getState() != ProcessInstanceState.COMPLETED) {
             List<ActivityIncidentData> incidents = incidentService.findRuntimeIncidents(processInstanceId);
-            diagramFragment.setIncidentCount(new SetIncidentCountCmd(incidents));
+            viewerFragment.setIncidentCount(new SetIncidentCountCmd(incidents));
         }
     }
 
@@ -262,17 +265,10 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
         for (ActivityShortData activityData : finishedActivities) {
             String activityId = activityData.getActivityId();
             if (!Strings.isNullOrEmpty(activityId)) {
-                diagramFragment.setElementColor(new SetElementColorCmd(activityId, "#000000", "var(--bpmn-history-activity-color)"));
+                viewerFragment.setElementColor(new SetElementColorCmd(activityId, "#000000", "var(--bpmn-history-activity-color)"));
             }
 
-            String decisionInstanceId = findDecisionInstanceByActivity(activityId);
-            if (!Strings.isNullOrEmpty(activityId)) {
-                String tooltipMessage = messages.formatMessage(
-                        "", "viewer.openDecisionInstanceOverlay.tooltipMessage", decisionInstanceId);
-                diagramFragment.showDecisionInstanceLinkOverlay(new ShowDecisionInstanceLinkOverlayCmd(activityId,
-                        decisionInstanceId, tooltipMessage));
-            }
-
+            showCalledDecisionOverlay(activityId);
             addCalledInstance(activityData, calledInstancesByActivityId);
         }
 
@@ -287,7 +283,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
 
         runtimeActivityIds.forEach(activityId -> {
             if (!Strings.isNullOrEmpty(activityId)) {
-                diagramFragment.addMarker(new AddMarkerCmd(activityId, ElementMarkerType.RUNNING_ACTIVITY));
+                viewerFragment.addMarker(new AddMarkerCmd(activityId, ElementMarkerType.RUNNING_ACTIVITY));
             }
         });
 
@@ -312,13 +308,27 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     }
 
     protected void showCalledInstanceOverlays(Map<String, List<String>> calledInstances) {
+        if (!securitySupport.isEntityViewPermitted(ProcessInstanceData.class)) {
+            return;
+        }
         calledInstances.forEach((activityId, calledInstanceIds) -> {
             ShowCalledInstanceOverlayCmd showCalledInstanceOverlayCmd = new ShowCalledInstanceOverlayCmd();
             showCalledInstanceOverlayCmd.setElementId(activityId);
             showCalledInstanceOverlayCmd.setProcessInstanceIds(calledInstanceIds);
 
-            diagramFragment.showCalledInstance(showCalledInstanceOverlayCmd);
+            viewerFragment.showCalledInstance(showCalledInstanceOverlayCmd);
         });
+    }
+
+    protected void showCalledDecisionOverlay(String activityId) {
+        if (!Strings.isNullOrEmpty(activityId)
+                && securitySupport.isEntityViewPermitted(HistoricDecisionInstanceShortData.class)) {
+            String decisionInstanceId = findDecisionInstanceByActivity(activityId);
+            String tooltipMessage = messages.formatMessage(
+                    "", "viewer.openDecisionInstanceOverlay.tooltipMessage", decisionInstanceId);
+            viewerFragment.showDecisionInstanceLinkOverlay(new ShowDecisionInstanceLinkOverlayCmd(activityId,
+                    decisionInstanceId, tooltipMessage));
+        }
     }
 
     protected void sendUpdateViewTitleEvent() {
@@ -332,6 +342,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
 
     protected FlexLayout createTitleLayout() {
         FlexLayout flexLayout = uiComponents.create(FlexLayout.class);
+        flexLayout.setId("processInstanceTitleRoot");
         flexLayout.addClassNames(LumoUtility.Margin.Left.XSMALL, LumoUtility.Gap.SMALL);
         flexLayout.setAlignItems(FlexComponent.Alignment.CENTER);
 
@@ -346,6 +357,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
 
     protected H5 createInstanceIdComponent() {
         H5 instanceId = new H5("\"%s\"".formatted(getEditedEntity().getInstanceId()));
+        instanceId.setId("instanceIdText");
         instanceId.setHeightFull();
         instanceId.addClassNames(LumoUtility.TextColor.BODY);
         return instanceId;
@@ -353,6 +365,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
 
     protected Span createProcessBadge() {
         Span processDefinitionBadge = uiComponents.create(Span.class);
+        processDefinitionBadge.setId("processBadge");
         processDefinitionBadge.getElement().getThemeList().add("badge normal pill");
 
         Integer processVersion = getEditedEntity().getProcessDefinitionVersion();
@@ -368,6 +381,9 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     @Nullable
     protected Component getTabContent(Tab tab) {
         Component contentByTab = relatedEntitiesTabSheet.getContentByTab(tab);
+        if (contentByTab instanceof LazyTabContent lazyTabContent) {
+            return lazyTabContent.getContent();
+        }
         return contentByTab != null
                 ? contentByTab
                 .getChildren()
@@ -377,7 +393,8 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     }
 
     private void handleDecisionInstanceLinkOverlayClicked(String decisionInstanceId) {
-        if (!Strings.isNullOrEmpty(decisionInstanceId)) {
+        if (!Strings.isNullOrEmpty(decisionInstanceId)
+                && securitySupport.isEntityViewPermitted(HistoricDecisionInstanceShortData.class)) {
             viewNavigators.detailView(this, HistoricDecisionInstanceShortData.class)
                     .withViewClass(DecisionInstanceDetailView.class)
                     .withRouteParameters(new RouteParameters("id", decisionInstanceId))

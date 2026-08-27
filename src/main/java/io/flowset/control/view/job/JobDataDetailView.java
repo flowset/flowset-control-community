@@ -7,37 +7,29 @@ package io.flowset.control.view.job;
 
 
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
-import io.flowset.control.entity.job.JobState;
+import io.flowset.control.action.ViewProcessDefinitionAction;
+import io.flowset.control.action.ViewProcessInstanceAction;
+import io.flowset.control.action.job.ActivateJobAction;
+import io.flowset.control.action.job.RetryJobAction;
+import io.flowset.control.action.job.SuspendJobAction;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
-import io.flowset.control.view.incidentdata.RetryJobView;
-import io.flowset.control.view.job.column.state.JobStateColumnFragment;
-import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
-import io.flowset.control.view.processinstance.ProcessInstanceDetailView;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.LoadContext;
-import io.jmix.core.Messages;
-import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.UiComponents;
-import io.jmix.flowui.ViewNavigators;
-import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.codeeditor.CodeEditor;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.component.textfield.TypedTextField;
-import io.jmix.flowui.kit.action.ActionPerformedEvent;
-import io.jmix.flowui.kit.action.BaseAction;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobDefinitionData;
 import io.flowset.control.service.job.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -58,8 +50,6 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
     @Autowired
     protected ComponentHelper componentHelper;
     @Autowired
-    protected ViewNavigators viewNavigators;
-    @Autowired
     protected UiComponents uiComponents;
 
     @ViewComponent
@@ -68,10 +58,6 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
     protected TypedTextField<String> activityField;
     @ViewComponent
     protected TypedTextField<String> jobTypeField;
-    @Autowired
-    protected Messages messages;
-    @Autowired
-    protected DialogWindows dialogWindows;
     @ViewComponent
     protected CopyComponentValueToClipboardAction copyIdAction;
     @ViewComponent
@@ -92,13 +78,15 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
     protected JmixTextArea exceptionMessageField;
 
     @ViewComponent
-    protected JobStateColumnFragment stateFragment;
+    protected ActivateJobAction activateAction;
     @ViewComponent
-    protected BaseAction activateAction;
+    protected SuspendJobAction suspendAction;
     @ViewComponent
-    protected BaseAction suspendAction;
+    protected RetryJobAction retryAction;
     @ViewComponent
-    protected BaseAction retryAction;
+    protected ViewProcessDefinitionAction viewProcessAction;
+    @ViewComponent
+    protected ViewProcessInstanceAction viewProcessInstanceAction;
 
     @Subscribe
     public void onInit(final InitEvent event) {
@@ -118,60 +106,8 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
             jobTypeField.setTypedValue(jobDefinition.getJobType());
         }
 
-        updateActionsVisibility();
-        initStateField();
+        configureActions();
         initProcessFields();
-    }
-
-    @Subscribe("suspendAction")
-    public void onSuspend(final ActionPerformedEvent event) {
-        dialogWindows.view(this, SuspendJobView.class)
-                .withViewConfigurer(suspendJobView -> {
-                    suspendJobView.setJobId(getEditedEntity().getJobId());
-                })
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        close(StandardOutcome.SAVE);
-                    }
-                })
-                .open();
-    }
-    @Subscribe("activateAction")
-    public void onActivate(final ActionPerformedEvent event) {
-        dialogWindows.view(this, ActivateJobView.class)
-                .withViewConfigurer(activateJobView -> {
-                    activateJobView.setJobId(getEditedEntity().getJobId());
-                })
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        close(StandardOutcome.SAVE);
-                    }
-                })
-                .open();
-    }
-
-    @Subscribe("viewProcessAction")
-    public void onViewProcess(final ActionPerformedEvent event) {
-        openView(ProcessDefinitionDetailView.class, new RouteParameters("id", getEditedEntity().getProcessDefinitionId()));
-    }
-
-    @Subscribe("viewProcessInstanceAction")
-    public void onViewProcessInstance(final ActionPerformedEvent event) {
-        openView(ProcessInstanceDetailView.class, new RouteParameters("id", getEditedEntity().getProcessInstanceId()));
-    }
-
-    @Subscribe("retryAction")
-    public void onRetryAction(final ActionPerformedEvent event) {
-        dialogWindows.view(this, RetryJobView.class)
-                .withViewConfigurer(retryJobView -> {
-                    retryJobView.setJobId(getEditedEntity().getJobId());
-                })
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        close(StandardOutcome.SAVE);
-                    }
-                })
-                .open();
     }
 
     @Install(to = "jobDataDl", target = Target.DATA_LOADER)
@@ -179,40 +115,22 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
         return jobService.findById(Objects.requireNonNull(loadContext.getId()).toString());
     }
 
-    protected void openView(Class<? extends StandardView> viewClass, RouteParameters routeParameters) {
-        boolean isOpenedInDialog = UiComponentUtils.isComponentAttachedToDialog(this);
-        if (!isOpenedInDialog) {
-            viewNavigators.view(this, viewClass)
-                    .withRouteParameters(routeParameters)
-                    .withBackwardNavigation(false)
-                    .navigate();
-        } else {
-            RouterLink routerLink = new RouterLink(viewClass, routeParameters);
-            getUI().ifPresent(ui -> ui.getPage().open(routerLink.getHref()));
-        }
-    }
-
-    protected void updateActionsVisibility() {
-        if (getEditedEntity().getRetries() != null && getEditedEntity().getRetries() == 0) {
-            retryAction.setVisible(true);
-        }
-
-        JobState state = getEditedEntity().getState();
-        activateAction.setVisible(state == JobState.SUSPENDED);
-        suspendAction.setVisible(state == JobState.ACTIVE);
-    }
-
-    protected void initStateField() {
-        stateFragment.setItem(getEditedEntity());
-        stateFragment.getStyle().setHeight("min-content");
+    protected void configureActions() {
+        JobData jobData = getEditedEntity();
+        activateAction.setJobData(jobData);
+        activateAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
+        suspendAction.setJobData(jobData);
+        suspendAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
+        retryAction.setJobData(jobData);
+        retryAction.setAfterSaveHandler(() -> close(StandardOutcome.SAVE));
     }
 
     protected void initProcessFields() {
         String processLabel = getProcessLabel(getEditedEntity());
         processDefinitionIdField.setTypedValue(processLabel);
 
-        viewProcessBtn.setVisible(getEditedEntity().getProcessDefinitionId() != null);
-        viewProcessInstanceBtn.setVisible(getEditedEntity().getProcessInstanceId() != null);
+        viewProcessAction.setEntityId(getEditedEntity().getProcessDefinitionId());
+        viewProcessInstanceAction.setEntityId(getEditedEntity().getProcessInstanceId());
     }
 
     @Nullable

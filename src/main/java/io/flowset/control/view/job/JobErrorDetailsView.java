@@ -5,7 +5,6 @@
 
 package io.flowset.control.view.job;
 
-import com.vaadin.flow.router.Route;
 import io.jmix.flowui.kit.component.codeeditor.JmixCodeEditor;
 import io.jmix.flowui.view.*;
 import io.flowset.control.action.CopyComponentValueToClipboardAction;
@@ -13,7 +12,6 @@ import io.flowset.control.service.job.JobService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "job-error-details", layout = DefaultMainViewParent.class)
 @ViewController("JobErrorDetailsView")
 @ViewDescriptor("job-error-details-view.xml")
 @DialogMode(minWidth = "60em", width = "70%", minHeight = "40em", height = "70%", resizable = true)

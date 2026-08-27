@@ -6,6 +6,9 @@
 package io.flowset.control.test_support;
 
 import io.flowset.control.entity.engine.AuthType;
+import io.flowset.control.test_support.property.ControlEngineTestingProperties;
+import io.flowset.control.test_support.property.ControlUiTestingProperties;
+import io.flowset.control.test_support.engine.external.ExternalEngine;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
@@ -21,7 +24,8 @@ import static org.junit.jupiter.api.extension.ConditionEvaluationResult.enabled;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 /**
- * Checks whether to run the test for the engine authentication type set in {@link ControlEngineTestingProperties#getAuthType()}.
+ * Checks whether to run the test for the engine authentication type set in {@link ControlEngineTestingProperties#getAuthType()}
+ * and in {@link ControlUiTestingProperties#getEngine().getAuthType()}.
  */
 public class BasicAuthenticationCondition implements ExecutionCondition {
 
@@ -51,6 +55,10 @@ public class BasicAuthenticationCondition implements ExecutionCondition {
         ApplicationContext applicationContext = SpringExtension.getApplicationContext(context);
         Environment environment = applicationContext.getEnvironment();
 
+        if (environment.matchesProfiles(Constants.UI_TEST_PROFILE)) {
+            return evaluateForExternalEngine(applicationContext);
+        }
+
         boolean testEngineProfileUsed = environment.matchesProfiles(Constants.TEST_ENGINE_PROFILE);
         if (!testEngineProfileUsed) {
             return enabled("Test engine profile is not used");
@@ -65,6 +73,17 @@ public class BasicAuthenticationCondition implements ExecutionCondition {
         AuthType authType = AuthType.fromId(authTypeProperty);
 
         return authType == AuthType.BASIC ? enabled("Basic authentication is used") : disabled("Basic authentication is not set as Basic");
+    }
+
+    private ConditionEvaluationResult evaluateForExternalEngine(ApplicationContext applicationContext) {
+        ExternalEngine engine = applicationContext.getBean(ControlUiTestingProperties.class).getEngine();
+        if (engine == null) {
+            return disabled("External engine is not configured");
+        }
+        return engine.getAuthType() == AuthType.BASIC
+                ? enabled("External engine '" + engine.getName() + "' uses Basic authentication")
+                : disabled("External engine '" + engine.getName() + "' does not use Basic authentication " +
+                        "(authType=" + engine.getAuthType() + ")");
     }
 
     private ConditionEvaluationResult enabledByDefault() {

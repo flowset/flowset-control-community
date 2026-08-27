@@ -31,7 +31,7 @@ import org.camunda.community.rest.client.model.HistoricActivityInstanceDto;
 import org.camunda.community.rest.client.model.HistoricActivityInstanceQueryDto;
 import org.camunda.community.rest.client.model.HistoricActivityInstanceQueryDtoSortingInner;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -261,7 +261,7 @@ public class ActivityServiceImpl implements ActivityService {
             return;
         }
 
-        rootItem.getChildActivityInstances()
+        CollectionUtils.emptyIfNull(rootItem.getChildActivityInstances())
                 .forEach(activityInstanceDto -> {
                     ActivityInstanceTreeItem activityInstanceTreeItem = cresteActivityInstanceTreeItem(parentItem, activityInstanceDto);
                     resultItems.add(activityInstanceTreeItem);
@@ -282,7 +282,7 @@ public class ActivityServiceImpl implements ActivityService {
             return;
         }
 
-        rootItem.getChildTransitionInstances()
+        CollectionUtils.emptyIfNull(rootItem.getChildTransitionInstances())
                 .forEach(transitionInstanceDto -> {
                     ActivityInstanceTreeItem activityInstanceTreeItem = activityMapper.fromRuntimeTransitionDto(transitionInstanceDto);
                     activityInstanceTreeItem.setParentActivityInstance(treeItem);

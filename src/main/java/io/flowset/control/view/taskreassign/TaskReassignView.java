@@ -5,8 +5,6 @@
 
 package io.flowset.control.view.taskreassign;
 
-
-import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.service.usertask.UserTaskService;
@@ -22,7 +20,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Route(value = "bpm/taskreassign", layout = DefaultMainViewParent.class)
 @ViewController("bpm_TaskReassignView")
 @ViewDescriptor("task-reassign-view.xml")
 @DialogMode(width = "30em")

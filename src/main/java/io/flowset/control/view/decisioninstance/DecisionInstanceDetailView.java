@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
-@Route(value = "decision-instances/:id", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/decision-instances/:id", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_DecisionInstance.detail")
 @ViewDescriptor("decision-instance-detail-view.xml")
 @EditedEntityContainer("decisionInstanceDc")

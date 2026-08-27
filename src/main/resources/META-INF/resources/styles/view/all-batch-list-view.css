@@ -1,0 +1,26 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+.batch-progress-bar-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.batch-progress-bar {
+    height: var(--lumo-font-size-l);
+}
+
+.batch-progress-bar-label {
+    position: absolute;
+    left:50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 500;
+    white-space: nowrap;
+    line-height: var(--lumo-line-height-xs);
+}

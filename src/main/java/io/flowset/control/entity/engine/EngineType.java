@@ -6,13 +6,14 @@
 package io.flowset.control.entity.engine;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
 public enum EngineType implements EnumClass<String> {
 
     CAMUNDA_7("Camunda 7"),
-    OPERATON("OPERATON");
+    OPERATON("OPERATON"),
+    FLUXNOVA("FLUXNOVA");
 
     private final String id;
 

@@ -4,7 +4,7 @@
         <instance id="selectedEngineDc" provided="true" class="io.flowset.control.entity.engine.BpmEngine"/>
     </data>
     <content>
-        <div classNames="bordered-card p-m bg-base count-statistics-card">
+        <div id="deployedProcessesCard" classNames="bordered-card p-m bg-base count-statistics-card">
             <hbox width="100%" height="100%"
                   classNames="sm:small-gap md:small-gap lg:small-gap xl:small-gap xxl:small-gap">
                 <vbox padding="false" themeNames="spacing-s" width="fit-content" alignItems="BASELINE">

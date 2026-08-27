@@ -5,20 +5,18 @@
 
 package io.flowset.control.entity.incident;
 
-import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import org.apache.commons.lang3.Strings;
 import org.camunda.bpm.engine.runtime.Incident;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @JmixEntity
 public class IncidentData {
-    @JmixGeneratedValue
+
     @JmixId
-    protected UUID id;
+    protected String id;
 
     protected String incidentId;
 
@@ -150,11 +148,11 @@ public class IncidentData {
         this.type = type;
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(UUID id) {
+    public void setId(String id) {
         this.id = id;
     }
 

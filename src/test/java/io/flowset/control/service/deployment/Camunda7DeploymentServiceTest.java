@@ -83,7 +83,7 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
                 .first()
                 .satisfies(processDefinitionDto -> {
                     assertThat(processDefinitionDto.getKey()).isEqualTo("contractApproval");
-                    assertThat(processDefinitionDto.getName()).isEqualTo("Contract approval");
+                    assertThat(processDefinitionDto.getName()).isEqualTo("Contract Approval");
                     assertThat(processDefinitionDto.getResource()).isEqualTo("contractApproval.bpmn");
 
                     String savedXml = camundaRestTestHelper.getBpmnXml(camunda7, processDefinitionDto.getId());

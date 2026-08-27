@@ -21,6 +21,8 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 
+import static io.flowset.control.util.EngineRestUtils.getCountResult;
+
 @Slf4j
 public class DecisionDefinitionQueryImpl extends BaseQuery<DecisionDefinitionQuery, DecisionDefinition>
         implements DecisionDefinitionQuery {
@@ -69,7 +71,7 @@ public class DecisionDefinitionQueryImpl extends BaseQuery<DecisionDefinitionQue
                 includeDecisionDefinitionsWithoutTenantId, versionTag, versionTagLike);
         CountResultDto countResultDto = response.getBody();
         if (response.getStatusCode().is2xxSuccessful() && countResultDto != null) {
-            return countResultDto.getCount();
+            return getCountResult(countResultDto);
         }
         log.error("Error on loading decisions count, status code {}", response.getStatusCode());
         return -1;
@@ -93,11 +95,15 @@ public class DecisionDefinitionQueryImpl extends BaseQuery<DecisionDefinitionQue
         if (response.getStatusCode().is2xxSuccessful() && decisionDefinitionDtoList != null) {
             return decisionDefinitionDtoList
                     .stream()
-                    .map(e -> (DecisionDefinition) new DecisionDefinitionImpl(
-                            e.getId(), e.getCategory(), e.getName(), e.getKey(), e.getVersion(), e.getResource(),
-                            e.getDeploymentId(), null, e.getTenantId(), e.getHistoryTimeToLive(),
-                            e.getDecisionRequirementsDefinitionId(), e.getDecisionRequirementsDefinitionKey(),
-                            e.getVersionTag()))
+                    .map(e -> {
+                        Integer definitionVersion = e.getVersion();
+                        return (DecisionDefinition) new DecisionDefinitionImpl(
+                                e.getId(), e.getCategory(), e.getName(), e.getKey(),
+                                definitionVersion != null ? definitionVersion : 0, e.getResource(),
+                                e.getDeploymentId(), null, e.getTenantId(), e.getHistoryTimeToLive(),
+                                e.getDecisionRequirementsDefinitionId(), e.getDecisionRequirementsDefinitionKey(),
+                                e.getVersionTag());
+                    })
                     .toList();
         }
         log.error("Error on loading decisions, status code {}", response.getStatusCode());

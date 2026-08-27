@@ -6,16 +6,16 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.deployment.BulkDeleteDeploymentAction;
 import io.flowset.control.facet.urlqueryparameters.DeploymentListQueryParamBinder;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
-import io.jmix.flowui.DialogWindows;
-import io.jmix.flowui.Fragments;
 import io.jmix.flowui.component.ComponentContainer;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -29,9 +29,8 @@ import io.flowset.control.service.deployment.DeploymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Set;
 
-@Route(value = "bpmn/deployments", layout = DefaultMainViewParent.class)
+@Route(value = "bpm/deployments", layout = DefaultMainViewParent.class)
 @ViewController(id = "bpm_Deployment.list")
 @ViewDescriptor(path = "deployment-list-view.xml")
 public class DeploymentListView extends AbstractListViewWithDelayedLoad<DeploymentData> {
@@ -51,12 +50,12 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     protected JmixFormLayout filterFormLayout;
     @ViewComponent
     protected HorizontalLayout filterPanel;
-    @Autowired
-    protected Fragments fragments;
     @ViewComponent
     protected DataGrid<DeploymentData> deploymentsDataGrid;
-    @Autowired
-    protected DialogWindows dialogWindows;
+    @ViewComponent("deploymentsDataGrid.bulkRemove")
+    protected BulkDeleteDeploymentAction bulkRemove;
+    @ViewComponent
+    protected SimplePagination pagination;
     private DeploymentListQueryParamBinder queryParamBinder;
 
     @Subscribe
@@ -65,10 +64,10 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         initFilterFormStyles();
         initFilter();
 
-        queryParamBinder = new DeploymentListQueryParamBinder(deploymentFilterDc, this::startLoadData, filterFormLayout);
-        urlQueryParameters.registerBinder(queryParamBinder);
+        registerQueryParamBinders();
 
         addFilterValueChangeListeners(filterFormLayout);
+        bulkRemove.setAfterSaveHandler(this::startLoadData);
     }
 
     @Subscribe("applyFilter")
@@ -115,38 +114,6 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         return loadItemsWithStateHandling(() -> deploymentService.findAll(context));
     }
 
-    @Subscribe("deploymentsDataGrid.bulkRemove")
-    protected void onDeploymentsDataGridBulkRemove(final ActionPerformedEvent event) {
-        Set<DeploymentData> selectedItems = deploymentsDataGrid.getSelectedItems();
-        if (selectedItems.isEmpty()) {
-            return;
-        }
-
-        if (selectedItems.size() == 1) {
-            dialogWindows.view(this, DeleteDeploymentView.class)
-                    .withAfterCloseListener(closeEvent -> {
-                        if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                            startLoadData();
-                        }
-                    })
-                    .withViewConfigurer(view -> view.setDeploymentId(
-                            deploymentsDataGrid.getSingleSelectedItem().getId()))
-                    .build()
-                    .open();
-            return;
-        }
-
-        dialogWindows.view(this, BulkDeleteDeploymentView.class)
-                .withAfterCloseListener(closeEvent -> {
-                    if (closeEvent.closedWith(StandardOutcome.SAVE)) {
-                        startLoadData();
-                    }
-                })
-                .withViewConfigurer(view -> view.setDeployments(selectedItems))
-                .build()
-                .open();
-    }
-
     @Override
     protected void loadData() {
         deploymentDatasDl.load();
@@ -161,6 +128,12 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     private Integer paginationTotalCountDelegate(final DataLoadContext dataLoadContext) {
         DeploymentFilter filter = deploymentFilterDc.getItemOrNull();
         return (int) deploymentService.getCount(filter);
+    }
+
+    protected void registerQueryParamBinders() {
+        queryParamBinder = new DeploymentListQueryParamBinder(deploymentFilterDc, this::startLoadData, filterFormLayout);
+        urlQueryParameters.registerBinder(queryParamBinder);
+        registerPaginationParameterBinder(pagination);
     }
 
     protected void addFilterValueChangeListeners(ComponentContainer componentContainer) {
