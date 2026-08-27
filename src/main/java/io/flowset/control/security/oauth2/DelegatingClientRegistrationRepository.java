@@ -8,7 +8,7 @@ package io.flowset.control.security.oauth2;
 import com.google.common.collect.Iterators;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Primary;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Component;

@@ -7,7 +7,7 @@ package io.flowset.control.service.engine.auth;
 
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.entity.engine.EngineAuthState;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 

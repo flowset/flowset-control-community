@@ -24,9 +24,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
@@ -166,7 +167,7 @@ public class EngineAuthenticatorImpl implements EngineAuthenticator {
 
     protected static Authentication createAuthentication(final String principalName) {
         Assert.hasText(principalName, "principalName cannot be empty");
-        return new AbstractAuthenticationToken(null) {
+        return new AbstractAuthenticationToken(AuthorityUtils.NO_AUTHORITIES) {
 
             @Override
             public Object getCredentials() {

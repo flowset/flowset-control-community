@@ -1,25 +1,11 @@
 package io.flowset.control.configuration;
 
-import com.vaadin.flow.spring.security.VaadinSavedRequestAwareAuthenticationSuccessHandler;
 import io.jmix.core.JmixOrder;
 import io.jmix.oidc.OidcVaadinWebSecurity;
-import io.jmix.oidc.userinfo.JmixOidcUserService;
-import io.jmix.securityflowui.security.FlowuiVaadinWebSecurity;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-
-import java.util.List;
 
 /**
  * Security configuration for OpenID Connect (OIDC) authentication mode.
@@ -30,30 +16,12 @@ import java.util.List;
  * </pre>
  * is set.
  * <p>
- * Extends {@link FlowuiVaadinWebSecurity} to integrate with Jmix FlowUI and configure
- * {@link HttpSecurity} for OIDC login and logout flows.
- * <ul>
- *     <li>Configures {@link JmixOidcUserService} for user information retrieval.</li>
- *     <li>Uses {@link VaadinSavedRequestAwareAuthenticationSuccessHandler} as a success handler.</li>
- *     <li>Sets up {@link OidcClientInitiatedLogoutSuccessHandler} to handle logout via the OIDC provider.</li>
- * </ul>
+ * Extends {@link OidcVaadinWebSecurity} to integrate with Jmix FlowUI.
  */
 @Configuration
 @EnableWebSecurity
 @Order(JmixOrder.HIGHEST_PRECEDENCE + 100)
 @ConditionalOnProperty(name = "flowset.control.security.login-mode", havingValue = "oidc")
-@EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class OidcSecurityConfiguration extends OidcVaadinWebSecurity {
 
-
-    @Bean("control_ClientRegistrationRepository")
-    ClientRegistrationRepository inMemoryClientRegistrationRepository(OAuth2ClientProperties properties) {
-        List<ClientRegistration> registrations = new OAuth2ClientPropertiesMapper(properties)
-                .asClientRegistrations()
-                .values()
-                .stream()
-                .toList();
-
-        return new InMemoryClientRegistrationRepository(registrations);
-    }
 }
