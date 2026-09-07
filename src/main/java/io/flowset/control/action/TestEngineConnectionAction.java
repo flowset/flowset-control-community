@@ -132,8 +132,8 @@ public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConn
 
             Throwable cause = ExceptionUtils.getRootCause(e);
             String errorMessage = cause instanceof HttpClientErrorException || isConnectionError(cause) ? cause.getMessage() : e.getMessage();
-            notifications.create(messages.getMessage("oauth2AutorizationFailure.title"),
-                            messages.formatMessage("", "oauth2AutorizationFailure.descriptionWithError", errorMessage))
+            notifications.create(messages.getMessage("oauth2AuthorizationFailure.title"),
+                            messages.formatMessage("", "oauth2AuthorizationFailure.descriptionWithError", errorMessage))
                     .withType(Notifications.Type.ERROR)
                     .show();
         }
