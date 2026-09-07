@@ -5,6 +5,7 @@
 
 package io.flowset.control.util;
 
+import com.google.common.base.Strings;
 import org.jspecify.annotations.Nullable;
 
 import java.net.MalformedURLException;
@@ -15,7 +16,10 @@ import java.util.Optional;
 
 public class UrlUtils {
 
-    public static boolean isValidUrl(String url) {
+    public static boolean isValidUrl(@Nullable String url) {
+        if (Strings.isNullOrEmpty(url)) {
+            return false;
+        }
         try {
             //noinspection ResultOfMethodCallIgnored
             new URI(url).toURL();
