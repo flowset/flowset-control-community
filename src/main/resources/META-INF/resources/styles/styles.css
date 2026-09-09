@@ -4,6 +4,7 @@
  */
 
 @import './flowset-control.css';
+@import 'view/bpmn-viewer.css';
 @import 'view/about-product-view.css';
 @import 'view/main-view.css';
 @import 'view/main-view-top-menu.css';

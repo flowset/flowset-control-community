@@ -1,0 +1,6 @@
+.bpmn-viewer-left-side-actions {
+    background-color: var(--lumo-base-color);
+    border: 1px solid var(--lumo-contrast-20pct);
+    border-radius: var(--lumo-border-radius-m);
+    box-shadow: var(--lumo-box-shadow-xs);
+}
