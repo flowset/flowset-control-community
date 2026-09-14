@@ -5,6 +5,7 @@
 
 package io.flowset.control.entity.processinstance;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.annotation.*;
 import lombok.Getter;
@@ -31,10 +32,10 @@ public class ProcessInstanceData extends RuntimeProcessInstanceData {
 
     protected String superProcessInstanceId;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime endTime;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime startTime;
 
     protected Boolean complete = false;

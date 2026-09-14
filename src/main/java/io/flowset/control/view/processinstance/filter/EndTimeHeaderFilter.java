@@ -33,11 +33,19 @@ public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter imp
     protected TypedDateTimePicker<LocalDateTime> endTimeBeforeField;
     protected TypedDateTimePicker<LocalDateTime> endTimeAfterField;
 
+    protected ComponentHelper componentHelper;
+
     public EndTimeHeaderFilter(DataGrid<ProcessInstanceData> dataGrid, DataGridColumn<ProcessInstanceData> column,
                                InstanceContainer<ProcessInstanceFilter> filterDc) {
         super(dataGrid, column, filterDc);
     }
 
+    @Override
+    protected void autowireDependencies() {
+        super.autowireDependencies();
+
+        this.componentHelper = applicationContext.getBean(ComponentHelper.class);
+    }
 
     @Override
     protected Component createFilterComponent() {
@@ -61,8 +69,6 @@ public class EndTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter imp
 
     @Override
     public void apply() {
-        final ComponentHelper componentHelper = applicationContext.getBean(ComponentHelper.class);
-
         ProcessInstanceFilter instanceFilter = filterDc.getItem();
 
         LocalDateTime endTimeBefore = this.endTimeBeforeField.getValue();

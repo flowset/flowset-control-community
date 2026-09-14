@@ -5,6 +5,7 @@
 
 package io.flowset.control.entity.filter;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -31,10 +32,10 @@ public class UserTaskFilter {
 
     protected String assigneeLike;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime createdAfter;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime createdBefore;
 
     protected Boolean assigned;

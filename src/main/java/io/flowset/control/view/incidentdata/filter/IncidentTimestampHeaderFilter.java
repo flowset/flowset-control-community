@@ -31,12 +31,21 @@ import static io.flowset.control.view.util.JsUtils.SET_DEFAULT_TIME_SCRIPT;
 
 public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter implements HasFilterUrlParamHeaderFilter {
 
-    private TypedDateTimePicker<LocalDateTime> timestampAfterField;
-    private TypedDateTimePicker<LocalDateTime> timestampBeforeField;
+    protected TypedDateTimePicker<LocalDateTime> timestampAfterField;
+    protected TypedDateTimePicker<LocalDateTime> timestampBeforeField;
+
+    protected ComponentHelper componentHelper;
 
     public IncidentTimestampHeaderFilter(Grid<IncidentData> dataGrid, DataGridColumn<IncidentData> column,
                                          InstanceContainer<IncidentFilter> filterDc) {
         super(dataGrid, column, filterDc);
+    }
+
+    @Override
+    protected void autowireDependencies() {
+        super.autowireDependencies();
+
+        componentHelper = applicationContext.getBean(ComponentHelper.class);
     }
 
     @Override
@@ -54,8 +63,6 @@ public class IncidentTimestampHeaderFilter extends IncidentHeaderFilter implemen
 
     @Override
     public void apply() {
-        final ComponentHelper componentHelper = applicationContext.getBean(ComponentHelper.class);
-
         IncidentFilter incidentFilter = filterDc.getItem();
 
         LocalDateTime dateBefore = this.timestampBeforeField.getValue();

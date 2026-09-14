@@ -5,6 +5,7 @@
 
 package io.flowset.control.entity.filter;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
@@ -31,10 +32,10 @@ public class DeploymentFilter {
     @InstanceName
     protected String nameLike;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime deploymentAfter;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime deploymentBefore;
 
     protected String source;

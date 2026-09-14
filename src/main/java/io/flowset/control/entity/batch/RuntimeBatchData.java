@@ -5,6 +5,7 @@
 
 package io.flowset.control.entity.batch;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
@@ -45,10 +46,10 @@ public class RuntimeBatchData {
 
     protected String createUserId;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime startTime;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime executionStartTime;
 
     @JmixProperty

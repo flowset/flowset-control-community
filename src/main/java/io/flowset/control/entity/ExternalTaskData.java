@@ -5,6 +5,7 @@
 
 package io.flowset.control.entity;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
@@ -29,7 +30,7 @@ public class ExternalTaskData {
 
     protected String errorMessage;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime lockExpirationTime;
 

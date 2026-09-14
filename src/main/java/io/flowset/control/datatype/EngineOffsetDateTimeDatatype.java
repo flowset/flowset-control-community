@@ -8,8 +8,8 @@ import io.jmix.core.metamodel.datatype.FormatStrings;
 import io.jmix.core.metamodel.datatype.TimeZoneAwareDatatype;
 import io.jmix.core.metamodel.datatype.impl.AbstractTemporalDatatype;
 import io.jmix.core.security.CurrentAuthentication;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
@@ -21,13 +21,17 @@ import java.time.temporal.TemporalQuery;
 import java.util.Locale;
 import java.util.TimeZone;
 
-@DatatypeDef(id = "engineOffsetDateTime", javaClass = OffsetDateTime.class, value = "control_EngineOffsetDateTimeDatatype")
+@DatatypeDef(id = EngineOffsetDateTimeDatatype.DATATYPE_NAME, javaClass = OffsetDateTime.class, value = "control_EngineOffsetDateTimeDatatype")
 public class EngineOffsetDateTimeDatatype extends AbstractTemporalDatatype<OffsetDateTime> implements TimeZoneAwareDatatype {
+
+    public static final String DATATYPE_NAME = "engineOffsetDateTime";
 
     @Autowired
     protected CurrentAuthentication currentAuthentication;
     @Autowired
-    protected ApplicationContext applicationContext;
+    protected ObjectProvider<EngineService> engineServiceProvider;
+    @Autowired
+    protected ObjectProvider<EngineTimeService> engineTimeServiceProvider;
 
     public EngineOffsetDateTimeDatatype() {
         super(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -56,13 +60,13 @@ public class EngineOffsetDateTimeDatatype extends AbstractTemporalDatatype<Offse
             return "";
         }
 
-        final EngineService engineService = applicationContext.getBean(EngineService.class);
+        final EngineService engineService = engineServiceProvider.getIfAvailable();
         final BpmEngine selectedEngine = engineService.getSelectedEngine();
         if (selectedEngine == null) {
             return formatOffsetDateTime(date, locale, timeZone);
         }
 
-        final EngineTimeService engineTimeService = applicationContext.getBean(EngineTimeService.class);
+        final EngineTimeService engineTimeService = engineTimeServiceProvider.getIfAvailable();
         final Long engineOffset = engineTimeService.getEngineOffset(selectedEngine.getId());
         if (engineOffset == null) {
             return formatOffsetDateTime(date, locale, timeZone);

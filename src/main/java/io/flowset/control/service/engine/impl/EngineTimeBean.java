@@ -1,9 +1,9 @@
 package io.flowset.control.service.engine.impl;
 
 import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.property.EngineProperties;
 import io.flowset.control.service.engine.EngineService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -25,8 +25,7 @@ public class EngineTimeBean {
 
     private final EngineService engineService;
 
-    @Value("${flowset.control.engine.offset-lifetime-in-millis:10000}")
-    private Long offsetLifetimeInMillis;
+    private final EngineProperties engineProperties;
 
     public void actualizeAllRegistered(Consumer<BpmEngine> actualizationAction) {
         for (UUID engineId : offsets.keySet()) {
@@ -73,7 +72,7 @@ public class EngineTimeBean {
                     computeOffset(engineServerDate, rtt, retrieveTime),
                     rtt,
                     retrieveTime,
-                    offsetLifetimeInMillis
+                    engineProperties.getOffsetLifetimeInMillis()
             ));
             return responseEntity;
         } catch (Exception e) {

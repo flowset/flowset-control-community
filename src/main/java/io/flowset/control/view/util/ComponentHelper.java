@@ -106,27 +106,49 @@ public class ComponentHelper {
         return span;
     }
 
-    public String formatOffsetDateTime(@Nullable OffsetDateTime date, TimeZone timeZone) {
-        if (date == null) {
+    /**
+     * Format dateTime for timeZone.
+     *
+     * @param dateTime nullable dateTime
+     * @param timeZone timezone
+     * @return formatted dateTime or null if dateTime is null
+     */
+    @Nullable
+    public String formatOffsetDateTime(@Nullable OffsetDateTime dateTime, TimeZone timeZone) {
+        if (dateTime == null) {
             return null;
         }
 
-        LocalDateTime timestamp = date.atZoneSameInstant(timeZone.toZoneId()).toLocalDateTime();
+        LocalDateTime timestamp = dateTime.atZoneSameInstant(timeZone.toZoneId()).toLocalDateTime();
         return datatypeFormatter.formatLocalDateTime(timestamp);
     }
 
-
-    public String formatCurrentEngineOffsetDateTime(@Nullable OffsetDateTime date) {
-        if (date == null) {
+    /**
+     * Format dateTime from engine with current user timeZone.
+     *
+     * @param dateTime nullable dateTime
+     * @return formatted dateTime or null if dateTime is null
+     */
+    @Nullable
+    public String formatCurrentEngineOffsetDateTime(@Nullable OffsetDateTime dateTime) {
+        if (dateTime == null) {
             return null;
         }
 
         TimeZone timeZone = currentAuthentication.getTimeZone();
         Locale locale = currentAuthentication.getLocale();
-        return formatCurrentEngineOffsetDateTime(date, locale, timeZone);
+        return formatCurrentEngineOffsetDateTime(dateTime, timeZone);
     }
 
-    public OffsetDateTime convertCurrentEngineOffsetDateTimeFilterValue(LocalDateTime localDateTime, ZoneId zoneId) {
+    /**
+     * Convert current user localDateTime to engine's offsetDateTime using zoneId and current engine offset.
+     *
+     * @param localDateTime nullable user dateTime
+     * @param zoneId        nullable zoneId (using current user if null)
+     * @return converted dateTime for current engine or null if localDateTime is null
+     */
+    @Nullable
+    public OffsetDateTime convertCurrentEngineOffsetDateTimeFilterValue(@Nullable LocalDateTime localDateTime, @Nullable ZoneId zoneId) {
         if (localDateTime == null) {
             return null;
         }
@@ -157,7 +179,15 @@ public class ComponentHelper {
         return rawOffsetDateTime.plus(engineOffset, ChronoUnit.MILLIS);
     }
 
-    public String formatCurrentEngineOffsetDateTime(@Nullable OffsetDateTime date, Locale locale, TimeZone timeZone) {
+    /**
+     * Format dateTime from current engine, shifted with offset for user timeZone.
+     *
+     * @param date     OffsetDateTime from engine
+     * @param timeZone target time zone
+     * @return formatted engine date
+     */
+    @Nullable
+    public String formatCurrentEngineOffsetDateTime(@Nullable OffsetDateTime date, TimeZone timeZone) {
         if (date == null) {
             return null;
         }

@@ -5,6 +5,7 @@
 
 package io.flowset.control.entity.activity;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -43,11 +44,11 @@ public class HistoricActivityInstanceData {
 
     protected String assignee;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime startTime;
 
-    @PropertyDatatype(value = "engineOffsetDateTime")
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime endTime;
 

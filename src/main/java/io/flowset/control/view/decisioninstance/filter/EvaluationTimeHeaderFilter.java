@@ -26,7 +26,9 @@ public class EvaluationTimeHeaderFilter
 
     protected TypedDateTimePicker<LocalDateTime> evaluatedAfter;
     protected TypedDateTimePicker<LocalDateTime> evaluatedBefore;
-    
+
+    protected ComponentHelper componentHelper;
+
     protected final Runnable loadDelegate;
 
     public EvaluationTimeHeaderFilter(DataGrid<HistoricDecisionInstanceShortData> dataGrid,
@@ -37,9 +39,14 @@ public class EvaluationTimeHeaderFilter
     }
 
     @Override
-    public void apply() {
-        final ComponentHelper componentHelper = applicationContext.getBean(ComponentHelper.class);
+    protected void autowireDependencies() {
+        super.autowireDependencies();
 
+        this.componentHelper = applicationContext.getBean(ComponentHelper.class);
+    }
+
+    @Override
+    public void apply() {
         LocalDateTime startTimeBefore = this.evaluatedBefore.getValue();
         DecisionInstanceFilter decisionInstanceFilter = filterDc.getItem();
         

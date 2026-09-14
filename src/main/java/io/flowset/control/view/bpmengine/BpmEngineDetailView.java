@@ -7,7 +7,6 @@ package io.flowset.control.view.bpmengine;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import io.flowset.control.action.TestEngineConnectionAction;
@@ -70,9 +69,9 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     @ViewComponent
     protected JmixComboBox<EnvironmentType> environmentTypeField;
     @ViewComponent
-    private TypedTextField<String> dateTimeField;
+    protected TypedTextField<String> dateTimeField;
     @ViewComponent
-    private VerticalLayout dateTimeBox;
+    protected VerticalLayout dateTimeBox;
 
     @Subscribe
     public void onInitEntity(final InitEntityEvent<BpmEngine> event) {
@@ -90,7 +89,7 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     public void onBeforeShow(final BeforeShowEvent event) {
         BpmEngine engine = getEditedEntity();
         testConnectionAction.setEngine(engine);
-        testConnectionAction.addAfterActionPerformEffect(this::updateTimeField);
+        testConnectionAction.addAfterActionHandler(this::updateTimeField);
         updateTimeField();
         initAuthBox(engine.getAuthEnabled());
 
@@ -179,11 +178,11 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     }
 
     protected void updateTimeField() {
-        if(getEditedEntity().getId() != null) {
+        if (getEditedEntity().getId() != null) {
             String engineTime = engineTimeService.getEngineTimeDefaultFormat(getEditedEntity().getId());
 
             dateTimeBox.setVisible(engineTime != null);
-            if(engineTime != null) {
+            if (engineTime != null) {
                 dateTimeField.setTypedValue(engineTime);
             }
         }

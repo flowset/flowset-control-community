@@ -150,7 +150,7 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
             urlText.setText(selectedEngine.getBaseUrl());
 
             String engineTime = engineTimeService.getEngineTimeDefaultFormat(selectedEngine.getId());
-            if(engineTime != null) {
+            if (engineTime != null) {
                 timeLabel.setVisible(true);
                 timeText.setVisible(true);
 

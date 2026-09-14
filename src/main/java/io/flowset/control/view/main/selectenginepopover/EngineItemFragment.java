@@ -25,7 +25,7 @@ public class EngineItemFragment extends FragmentRenderer<HorizontalLayout, BpmEn
     @ViewComponent
     protected Span engineName;
     @ViewComponent
-    private Span engineTime;
+    protected Span engineTime;
 
     @Override
     public void setItem(BpmEngine item) {

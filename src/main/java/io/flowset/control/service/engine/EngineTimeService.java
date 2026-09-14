@@ -27,10 +27,10 @@ public interface EngineTimeService {
     void actualizeEngineTime(UUID engineId);
 
     /**
-     * Register (or update) engine offset by provided http call.
+     * Register (or update) engine offset by provided HTTP call.
      *
      * @param engineId    engine id
-     * @param requestCall http call that returns response entity
+     * @param requestCall HTTP call that returns response entity
      * @param <T>         response entity type parameter
      * @return response entity from call
      */

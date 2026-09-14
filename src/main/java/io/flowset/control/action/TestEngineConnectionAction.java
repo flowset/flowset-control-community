@@ -42,7 +42,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
     protected Metadata metadata;
     protected AccessManager accessManager;
 
-    protected List<Runnable> afterActionPerformEffects = new ArrayList<>();
+    protected List<Runnable> afterActionHandlers = new ArrayList<>();
 
     public TestEngineConnectionAction() {
         super(ID);
@@ -58,8 +58,8 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
         this.engine = engine;
     }
 
-    public void addAfterActionPerformEffect(Runnable afterPerformEffect) {
-        afterActionPerformEffects.add(afterPerformEffect);
+    public void addAfterActionHandler(Runnable afterActionHandler) {
+        afterActionHandlers.add(afterActionHandler);
     }
 
     @Autowired
@@ -97,7 +97,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
                                 Strings.nullToEmpty(engine.getBaseUrl())))
                         .withType(Notifications.Type.ERROR)
                         .show();
-                afterActionPerformEffects.forEach(Runnable::run);
+                afterActionHandlers.forEach(Runnable::run);
                 return;
             }
             if (engine.getAuthEnabled() && engine.getAuthType() != null) {
@@ -106,7 +106,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
                                     messages.getMessage("engineNotAvailable.emptyAuthUsername"))
                             .withType(Notifications.Type.ERROR)
                             .show();
-                    afterActionPerformEffects.forEach(Runnable::run);
+                    afterActionHandlers.forEach(Runnable::run);
                     return;
                 } else if (AuthType.BASIC == engine.getAuthType()
                         && StringUtils.isEmpty(engine.getBasicAuthPassword())) {
@@ -114,7 +114,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
                                     messages.getMessage("engineNotAvailable.emptyAuthPassword"))
                             .withType(Notifications.Type.ERROR)
                             .show();
-                    afterActionPerformEffects.forEach(Runnable::run);
+                    afterActionHandlers.forEach(Runnable::run);
                     return;
                 } else if (AuthType.HTTP_HEADER == engine.getAuthType()
                         && StringUtils.isEmpty(engine.getHttpHeaderName())) {
@@ -122,7 +122,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
                                     messages.getMessage("engineNotAvailable.emptyHeaderName"))
                             .withType(Notifications.Type.ERROR)
                             .show();
-                    afterActionPerformEffects.forEach(Runnable::run);
+                    afterActionHandlers.forEach(Runnable::run);
                     return;
                 }
             }
@@ -145,7 +145,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction {
                             .show();
                 }
             }
-            afterActionPerformEffects.forEach(Runnable::run);
+            afterActionHandlers.forEach(Runnable::run);
         }
     }
 
