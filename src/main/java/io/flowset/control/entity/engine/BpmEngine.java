@@ -70,6 +70,18 @@ public class BpmEngine {
     @Column(name = "HTTP_HEADER_VALUE", length = 500)
     private String httpHeaderValue;
 
+    @Column(name = "OAUTH2_ISSUER_URI", length = 1000)
+    private String oauth2IssuerUri;
+
+    @Column(name = "OAUTH2_CLIENT_ID")
+    private String oauth2ClientId;
+
+    @Column(name = "OAUTH2_CLIENT_SECRET", length = 1000)
+    private String oauth2ClientSecret;
+
+    @Column(name = "OAUTH2_SCOPE", length = 1000)
+    private String oauth2Scope;
+
     @Column(name = "VERSION", nullable = false)
     @Version
     private Integer version;
@@ -128,6 +140,38 @@ public class BpmEngine {
 
     public void setHttpHeaderName(String httpHeaderName) {
         this.httpHeaderName = httpHeaderName;
+    }
+
+    public String getOauth2IssuerUri() {
+        return oauth2IssuerUri;
+    }
+
+    public void setOauth2IssuerUri(String oauth2IssuerUri) {
+        this.oauth2IssuerUri = oauth2IssuerUri;
+    }
+
+    public String getOauth2ClientId() {
+        return oauth2ClientId;
+    }
+
+    public void setOauth2ClientId(String oauth2ClientId) {
+        this.oauth2ClientId = oauth2ClientId;
+    }
+
+    public String getOauth2ClientSecret() {
+        return oauth2ClientSecret;
+    }
+
+    public void setOauth2ClientSecret(String oauth2ClientSecret) {
+        this.oauth2ClientSecret = oauth2ClientSecret;
+    }
+
+    public String getOauth2Scope() {
+        return oauth2Scope;
+    }
+
+    public void setOauth2Scope(String oauth2Scope) {
+        this.oauth2Scope = oauth2Scope;
     }
 
     public String getBasicAuthPassword() {

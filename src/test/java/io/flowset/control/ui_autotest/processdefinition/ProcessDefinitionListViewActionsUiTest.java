@@ -19,6 +19,7 @@ import io.flowset.control.test_support.ui.view.processdefinition.StartProcessWit
 import io.flowset.control.test_support.ui.view.processdefinition.detail.ProcessDefinitionDetailView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -26,6 +27,7 @@ import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.CollectionCondition.texts;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.value;
+import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.webdriver;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 import static io.flowset.control.test_support.ui.UiTestSupport.getVisibleDropdownItems;
@@ -61,6 +63,32 @@ public class ProcessDefinitionListViewActionsUiTest extends AbstractCamunda7UiTe
 
         listView.openProcessGridContextActions()
                 .find(text("Refresh"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
+    @DisplayName("Excel action availability on process list view")
+    void givenLoggedInUser_whenOpenProcessList_thenExcelActionAvailable() {
+        // given
+        MainView mainView = loginAsAdmin();
+
+        // when
+        ProcessDefinitionListView listView = mainView.openProcessListView();
+
+        // then
+        listView.getOtherActionsBtn()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openOtherActionsDropdown()
+                .shouldHave(size(1))
+                .shouldHave(texts("Excel"));
+
+        $("body").sendKeys(Keys.ESCAPE);
+
+        listView.openProcessGridContextActions()
+                .find(text("Excel"))
                 .shouldBe(VISIBLE)
                 .shouldBe(ENABLED);
     }
@@ -293,6 +321,6 @@ public class ProcessDefinitionListViewActionsUiTest extends AbstractCamunda7UiTe
         listView.getBulkSuspendBtn().shouldBe(VISIBLE);
 
         listView.openProcessGridContextActions()
-                .shouldHave(visibleItems("Refresh", "Deploy", "Remove", "Activate", "Suspend"));
+                .shouldHave(visibleItems("Refresh", "Deploy", "Remove", "Activate", "Suspend", "Excel"));
     }
 }

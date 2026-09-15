@@ -66,6 +66,27 @@ public class BatchListViewCompletedTabActionsUiTest extends AbstractCamunda7UiTe
     }
 
     @Test
+    @DisplayName("Excel action availability on Completed tab")
+    void givenOpenedListView_whenSwitchToCompletedTab_thenExcelActionAvailable() {
+        // given
+        MainView mainView = loginAsAdmin();
+
+        // when
+        AllBatchListView listView = mainView.openAllBatchListView()
+                .selectCompletedTab();
+
+        // then
+        listView.getCompletedBatchExcelExportBtn()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openCompletedBatchesGridContextMenu()
+                .find(text("Excel"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
     @DisplayName("Refresh action: data in Completed tab data grid is updated")
     void givenOpenedListView_whenClickRefreshOnCompletedTab_thenDataUpdated() {
         // given
@@ -116,7 +137,7 @@ public class BatchListViewCompletedTabActionsUiTest extends AbstractCamunda7UiTe
         listView.getCompletedBatchRefreshBtn().shouldBe(VISIBLE);
 
         listView.openCompletedBatchesGridContextMenu()
-                .shouldHave(visibleItems("Refresh"));
+                .shouldHave(visibleItems("Refresh", "Excel"));
     }
 
     @Test

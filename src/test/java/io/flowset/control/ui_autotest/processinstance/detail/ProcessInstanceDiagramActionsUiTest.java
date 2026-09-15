@@ -137,7 +137,6 @@ public class ProcessInstanceDiagramActionsUiTest extends AbstractCamunda7UiTest 
         SelenideElement viewport = bpmnViewerFragment.getBpmnViewerContainer()
                 .find(DIAGRAM_SVG_VIEWPORT_BY)
                 .shouldBe(exist);
-        String sourceTransform = Strings.nullToEmpty(viewport.attr("transform"));
 
         // when
         bpmnViewerFragment.getZoomOutButton()
@@ -146,7 +145,7 @@ public class ProcessInstanceDiagramActionsUiTest extends AbstractCamunda7UiTest 
                 .click();
 
         // then
-        viewport.shouldNotHave(attribute("transform", sourceTransform));
+        viewport.shouldNotHave(attributeMatching("transform", "matrix\\(1 0 0 1 .*"));
     }
 
     @Test
@@ -167,14 +166,13 @@ public class ProcessInstanceDiagramActionsUiTest extends AbstractCamunda7UiTest 
         SelenideElement viewport = bpmnViewerFragment.getBpmnViewerContainer()
                 .find(DIAGRAM_SVG_VIEWPORT_BY)
                 .shouldBe(exist);
-        String sourceTransform = Strings.nullToEmpty(viewport.attr("transform"));
 
         bpmnViewerFragment.getZoomOutButton()
                 .shouldBe(VISIBLE)
                 .shouldBe(ENABLED)
                 .click();
 
-        viewport.shouldNotHave(attribute("transform", sourceTransform));
+        viewport.shouldNotHave(attributeMatching("transform", "matrix\\(1 0 0 1 .*"));
 
         // when
         bpmnViewerFragment.getResetZoomButton()
@@ -183,7 +181,7 @@ public class ProcessInstanceDiagramActionsUiTest extends AbstractCamunda7UiTest 
                 .click();
 
         // then
-        viewport.shouldHave(attribute("transform", sourceTransform));
+        viewport.shouldHave(attributeMatching("transform", "matrix\\(1 0 0 1 .*"));
     }
 
     @Test

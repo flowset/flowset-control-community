@@ -23,7 +23,7 @@ import static io.flowset.control.util.ExceptionUtils.isNotFoundError;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ViewIncidentJobAction.ID)
-public class ViewIncidentJobAction extends SecuredBaseAction implements ExecutableAction {
+public class ViewIncidentJobAction extends SecuredBaseAction<ViewIncidentJobAction> implements ExecutableAction {
 
     public static final String ID = "control_viewIncidentJob";
 

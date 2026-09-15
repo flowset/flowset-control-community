@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(CompleteUserTaskAction.ID)
-public class CompleteUserTaskAction extends SecuredBaseAction implements ExecutableAction {
+public class CompleteUserTaskAction extends SecuredBaseAction<CompleteUserTaskAction> implements ExecutableAction {
 
     public static final String ID = "control_completeUserTask";
 

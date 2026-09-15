@@ -9,9 +9,7 @@
         <instance id="deploymentFilterDc" class="io.flowset.control.entity.filter.DeploymentFilter"/>
     </data>
     <facets>
-        <urlQueryParameters id="urlQueryParameters">
-            <pagination component="pagination"/>
-        </urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters"/>
     </facets>
     <actions>
         <action id="applyFilter" text="msg:///actions.Apply" icon="SEARCH"/>
@@ -54,6 +52,7 @@
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <button id="refreshBtn" action="deploymentsDataGrid.refresh" themeNames="primary success"/>
             <button id="bulkRemoveBtn" action="deploymentsDataGrid.bulkRemove"/>
+            <button id="excelExportBtn" action="deploymentsDataGrid.excelExport"/>
             <simplePagination id="pagination" dataLoader="deploymentDatasDl"/>
         </hbox>
         <dataGrid id="deploymentsDataGrid"
@@ -67,6 +66,7 @@
                 <action id="bulkRemove" type="control_bulkDeleteDeployment" icon="TRASH"
                         actionVariant="DANGER"/>
                 <action id="view" type="list_edit" visible="false"/>
+                <action id="excelExport" type="control_excelExport"/>
             </actions>
             <columns resizable="true">
                 <column property="deploymentId" flexGrow="1">

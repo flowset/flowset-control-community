@@ -28,11 +28,33 @@
     },
     {
       "label": "Soporte",
-      "url": "https://flowset-io.slack.com/"
+      "url": "https://flowset-io.slack.com/",
+      "icon": "icons/slack.svg",
+      "iconLink": true
+    },
+    {
+      "label": "Facebook",
+      "url": "https://www.facebook.com/Flowset",
+      "icon": "icons/facebook.svg",
+      "iconLink": true
+    },
+    {
+      "label": "YouTube",
+      "url": "https://www.youtube.com/@Flowset-platform",
+      "icon": "icons/youtube.svg",
+      "iconLink": true
+    },
+    {
+      "label": "X",
+      "url": "https://x.com/Flowset_io",
+      "icon": "icons/x.svg",
+      "iconLink": true
     },
     {
       "label": "LinkedIn",
-      "url": "https://www.linkedin.com/company/flowset-platform/"
+      "url": "https://www.linkedin.com/company/flowset-platform/",
+      "icon": "icons/linkedin.svg",
+      "iconLink": true
     }
   ]
 }

@@ -32,19 +32,21 @@ public class AllBatchListView extends View<AllBatchListView> {
 
     public static final By ID_BUTTON_BY = byPath("root", "idBtn");
 
-    public static final int ACTIVE_ID_COLUMN_INDEX = 0;
-    public static final int ACTIVE_TYPE_COLUMN_INDEX = 1;
-    public static final int ACTIVE_START_TIME_COLUMN_INDEX = 2;
-    public static final int ACTIVE_STATE_COLUMN_INDEX = 3;
-    public static final int ACTIVE_FAILED_JOBS_COLUMN_INDEX = 4;
-    public static final int ACTIVE_TOTAL_JOBS_COLUMN_INDEX = 5;
-    public static final int ACTIVE_PROGRESS_COLUMN_INDEX = 6;
+    public static final int CHECKBOX_COLUMN_INDEX = 0;
 
-    public static final int COMPLETED_ID_COLUMN_INDEX = 0;
-    public static final int COMPLETED_TYPE_COLUMN_INDEX = 1;
-    public static final int COMPLETED_START_TIME_COLUMN_INDEX = 2;
-    public static final int COMPLETED_END_TIME_COLUMN_INDEX = 3;
-    public static final int COMPLETED_TOTAL_JOBS_COLUMN_INDEX = 4;
+    public static final int ACTIVE_ID_COLUMN_INDEX = 1;
+    public static final int ACTIVE_TYPE_COLUMN_INDEX = 2;
+    public static final int ACTIVE_START_TIME_COLUMN_INDEX = 3;
+    public static final int ACTIVE_STATE_COLUMN_INDEX = 4;
+    public static final int ACTIVE_FAILED_JOBS_COLUMN_INDEX = 5;
+    public static final int ACTIVE_TOTAL_JOBS_COLUMN_INDEX = 6;
+    public static final int ACTIVE_PROGRESS_COLUMN_INDEX = 7;
+
+    public static final int COMPLETED_ID_COLUMN_INDEX = 1;
+    public static final int COMPLETED_TYPE_COLUMN_INDEX = 2;
+    public static final int COMPLETED_START_TIME_COLUMN_INDEX = 3;
+    public static final int COMPLETED_END_TIME_COLUMN_INDEX = 4;
+    public static final int COMPLETED_TOTAL_JOBS_COLUMN_INDEX = 5;
 
     @TestComponent
     private TabSheet tabsheet;
@@ -52,11 +54,17 @@ public class AllBatchListView extends View<AllBatchListView> {
     @TestComponent(path = "refreshBtn")
     private Button refreshBtn;
 
+    @TestComponent(path = "excelExportBtn")
+    private Button excelExportBtn;
+
     @TestComponent(path = "activeBatchesDataGrid")
     private DataGrid activeBatchesDataGrid;
 
     @TestComponent(path = "completedBatchRefreshBtn")
     private Button completedBatchRefreshBtn;
+
+    @TestComponent(path = "completedBatchExcelExportBtn")
+    private Button completedBatchExcelExportBtn;
 
     @TestComponent(path = "completedBatchesDataGrid")
     private DataGrid completedBatchesDataGrid;

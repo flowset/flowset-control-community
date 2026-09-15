@@ -10,6 +10,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
@@ -32,6 +33,7 @@ import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionLoader;
@@ -70,9 +72,13 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
     protected CollectionLoader<HistoricDecisionInstanceShortData> decisionInstancesDl;
     @ViewComponent
     protected InstanceContainer<DecisionInstanceFilter> decisionFilterDc;
+    @ViewComponent("decisionInstancesDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     @ViewComponent
     protected DataGrid<HistoricDecisionInstanceShortData> decisionInstancesDataGrid;
+    @ViewComponent
+    protected SimplePagination pagination;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
     protected Map<String, DecisionDefinitionData> decisionDefinitionsMap = new HashMap<>();
@@ -83,7 +89,26 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
         initFilter();
         setDefaultSort();
         initDataGridHeaderRow();
-        urlQueryParameters.registerBinder(new DecisionInstanceListQueryParamBinder(decisionInstancesDataGrid, this::startLoadData));
+        initActions();
+        registerQueryParamBinders();
+    }
+
+    protected void initActions() {
+        excelExportAction.addColumnValueProvider("decisionDefinitionId", context -> {
+            HistoricDecisionInstanceShortData entity = context.getEntity();
+            String decisionDefinitionId = entity.getDecisionDefinitionId();
+            DecisionDefinitionData decisionDefinition = decisionDefinitionsMap.get(decisionDefinitionId);
+
+            return decisionDefinition != null ? componentHelper.getDecisionLabel(decisionDefinition) : decisionDefinitionId;
+        });
+
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            HistoricDecisionInstanceShortData entity = context.getEntity();
+            String processDefinitionId = entity.getProcessDefinitionId();
+            ProcessDefinitionData processDefinition = processDefinitionsMap.get(processDefinitionId);
+
+            return processDefinition != null ? componentHelper.getProcessLabel(processDefinition) : processDefinitionId;
+        });
     }
 
     @Supply(to = "decisionInstancesDataGrid.decisionDefinitionId", subject = "renderer")
@@ -135,6 +160,11 @@ public class DecisionInstanceDataListView extends AbstractListViewWithDelayedLoa
     @Override
     protected void loadData() {
         decisionInstancesDl.load();
+    }
+
+    protected void registerQueryParamBinders() {
+        urlQueryParameters.registerBinder(new DecisionInstanceListQueryParamBinder(decisionInstancesDataGrid, this::startLoadData));
+        registerPaginationParameterBinder(pagination);
     }
 
     protected void loadDecisionDefinitions(List<HistoricDecisionInstanceShortData> decisionInstances) {

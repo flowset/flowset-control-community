@@ -5,18 +5,17 @@
 
 package io.flowset.control.restsupport.camunda;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import io.flowset.control.exception.RemoteEngineParseException;
 import io.flowset.control.exception.RemoteProcessEngineException;
 import org.apache.commons.io.IOUtils;
 import org.camunda.community.rest.config.CamundaRestClientProperties;
-import org.camunda.community.rest.config.ErrorDecoding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -31,23 +30,22 @@ public class CamundaFeignErrorDecoder implements ErrorDecoder {
 
     protected final CamundaRestClientProperties camundaRestClientProperties;
     protected final ErrorDecoder defaultErrorDecoder;
-    protected final ObjectMapper objectMapper;
+    protected final JsonMapper objectMapper;
 
     public CamundaFeignErrorDecoder(CamundaRestClientProperties camundaRestClientProperties) {
         this.camundaRestClientProperties = camundaRestClientProperties;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = new JsonMapper();
         this.defaultErrorDecoder = new Default();
     }
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        ErrorDecoding errorDecoding = camundaRestClientProperties.getErrorDecoding();
-
-        List<Integer> httpCodes = errorDecoding.getHttpCodes();
+        List<Integer> httpCodes = camundaRestClientProperties.getErrorDecoding().getHttpCodes();
         if (httpCodes.contains(response.status())) {
             Exception decodedException = decodeException(response);
             if (decodedException != null) {
-                if (errorDecoding.getWrapExceptions() && !(decodedException instanceof RemoteProcessEngineException)) {
+                boolean wrapExceptions = camundaRestClientProperties.getErrorDecoding().getWrapExceptions();
+                if (wrapExceptions && !(decodedException instanceof RemoteProcessEngineException)) {
                     return new RemoteProcessEngineException("Error during remote BPM engine engine invocation", decodedException);
                 } else {
                     return decodedException;
@@ -120,7 +118,7 @@ public class CamundaFeignErrorDecoder implements ErrorDecoder {
         try {
             ParseExceptionResponse parseExceptionResponse = objectMapper.readValue(responseContent, ParseExceptionResponse.class);
             return new RemoteEngineParseException(parseExceptionResponse.getMessage(), parseExceptionResponse.getDetails());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Unable to parse exception response from BPM engine: {}", e.getMessage(), e);
             return null;
         }

@@ -46,8 +46,7 @@ public class ProcessDefinitionListViewSuspendUiTest extends AbstractCamunda7UiTe
         ProcessDefinitionListView listView = mainView.openProcessListView();
 
         DataGrid.Row processRow = listView.getRowByProcessKey("vacation_approval");
-        listView.openOtherActions(processRow)
-                .find(text("Suspend")).click();
+        listView.clickOtherAction(processRow, "Suspend");
 
         $j(SuspendProcessDefinitionDialog.class)
                 .exists()
@@ -74,8 +73,7 @@ public class ProcessDefinitionListViewSuspendUiTest extends AbstractCamunda7UiTe
         ProcessDefinitionListView listView = mainView.openProcessListView();
 
         DataGrid.Row processRow = listView.getRowByProcessKey("vacation_approval");
-        listView.openOtherActions(processRow)
-                .find(text("Suspend")).click();
+        listView.clickOtherAction(processRow, "Suspend");
 
         $j(SuspendProcessDefinitionDialog.class)
                 .exists()

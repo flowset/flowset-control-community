@@ -13,6 +13,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.view.AbstractListViewWithDelayedLoad;
 import io.flowset.control.action.processdefinition.BulkActivateProcessDefinitionAction;
 import io.flowset.control.action.processdefinition.BulkDeleteProcessDefinitionAction;
@@ -27,6 +28,7 @@ import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -71,6 +73,8 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
     protected BulkDeleteProcessDefinitionAction bulkRemove;
     @ViewComponent("processDefinitionsGrid.bulkSuspend")
     protected BulkSuspendProcessDefinitionAction bulkSuspend;
+    @ViewComponent("processDefinitionsGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     @Autowired
     protected ProcessDefinitionService processDefinitionService;
@@ -84,6 +88,8 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
     protected DataGrid<ProcessDefinitionData> processDefinitionsGrid;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
+    @ViewComponent
+    protected SimplePagination processDefinitionPagination;
 
     protected ProcessDefinitionListQueryParamBinder filterParamBinder;
 
@@ -96,6 +102,7 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
 
         this.filterParamBinder = new ProcessDefinitionListQueryParamBinder(processDefinitionFilterDc, this::startLoadData, filterFormLayout);
         urlQueryParameters.registerBinder(filterParamBinder);
+        registerPaginationParameterBinder(processDefinitionPagination);
     }
 
     @Install(to = "processDefinitionsDl", target = Target.DATA_LOADER)
@@ -213,10 +220,14 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
 
     protected void initActions() {
         bulkActivate.setAfterSaveHandler(this::startLoadData);
-
         bulkRemove.setAfterSaveHandler(this::startLoadData);
-
         bulkSuspend.setAfterSaveHandler(this::startLoadData);
+
+        excelExportAction.addColumnValueProvider("suspended", context -> {
+            ProcessDefinitionData entity = context.getEntity();
+
+            return getStateText(BooleanUtils.isTrue(entity.getSuspended()));
+        });
     }
 
     protected Span createStateBadge(ProcessDefinitionData processDefinitionData) {
@@ -228,9 +239,13 @@ public class ProcessDefinitionListView extends AbstractListViewWithDelayedLoad<P
         String themeNames = suspended ? "badge warning pill" : "badge success pill";
         badge.getElement().getThemeList().add(themeNames);
 
-        String messageKey = suspended ? "processDefinitionList.status.suspended" : "processDefinitionList.status.active";
-        badge.setText(messageBundle.getMessage(messageKey));
+        badge.setText(getStateText(suspended));
         return badge;
+    }
+
+    protected String getStateText(boolean suspended) {
+        String messageKey = suspended ? "processDefinitionList.status.suspended" : "processDefinitionList.status.active";
+        return messageBundle.getMessage(messageKey);
     }
 
     @Override

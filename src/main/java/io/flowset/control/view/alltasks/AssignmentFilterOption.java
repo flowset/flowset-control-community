@@ -7,8 +7,8 @@ package io.flowset.control.view.alltasks;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.lang.Nullable;
+import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.Nullable;
 
 
 public enum AssignmentFilterOption implements EnumClass<String> {
@@ -29,7 +29,7 @@ public enum AssignmentFilterOption implements EnumClass<String> {
     @Nullable
     public static AssignmentFilterOption fromId(String id) {
         for (AssignmentFilterOption at : AssignmentFilterOption.values()) {
-            if (StringUtils.equalsIgnoreCase(at.getId(), id)) {
+            if (Strings.CI.equals(at.getId(), id)) {
                 return at;
             }
         }

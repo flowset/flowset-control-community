@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1" author="flowset-control-community">
+        <createTable tableName="CONTROL_ENGINE_AUTH_STATE">
+            <column name="ID" type="${uuid.type}">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_CONTROL_ENGINE_AUTH_STATE"/>
+            </column>
+            <column name="ENGINE_ID" type="${uuid.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ACCESS_TOKEN_RETRIES" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="IS_LOCKED" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LOCK_DATE" type="${offsetDateTime.type}"/>
+            <column name="VERSION" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATED_BY" type="VARCHAR(255)"/>
+            <column name="CREATED_DATE" type="${offsetDateTime.type}"/>
+            <column name="LAST_MODIFIED_BY" type="VARCHAR(255)"/>
+            <column name="LAST_MODIFIED_DATE" type="${offsetDateTime.type}"/>
+            <column name="DELETED_BY" type="VARCHAR(255)"/>
+            <column name="DELETED_DATE" type="${offsetDateTime.type}"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="flowset-control-community">
+        <addColumn tableName="CONTROL_BPM_ENGINE">
+            <column name="OAUTH2_CLIENT_ID" type="VARCHAR(255)"/>
+            <column name="OAUTH2_CLIENT_SECRET" type="VARCHAR(1000)"/>
+            <column name="OAUTH2_ISSUER_URI" type="VARCHAR(1000)"/>
+            <column name="OAUTH2_SCOPE" type="VARCHAR(1000)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="3-postgresql" author="flowset-control-community" dbms="postgresql">
+        <createIndex tableName="CONTROL_ENGINE_AUTH_STATE" indexName="IDX_ENGINE_AUTH_STATE_ENGINE_UNQ" unique="true">
+            <column name="ENGINE_ID"/>
+        </createIndex>
+        <modifySql>
+            <append value="where DELETED_DATE is null "/>
+        </modifySql>
+    </changeSet>
+    <changeSet id="3-mysql-mariadb" author="flowset-control-community" dbms="mysql, mariadb">
+        <addColumn tableName="CONTROL_ENGINE_AUTH_STATE">
+            <column name="DELETED_DATE_NN" type="datetime" defaultValueDate="1000-01-01 00:00:00.000">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <createIndex tableName="CONTROL_ENGINE_AUTH_STATE" indexName="IDX_ENGINE_AUTH_STATE_ENGINE_UNQ" unique="true">
+            <column name="ENGINE_ID"/>
+            <column name="DELETED_DATE_NN"/>
+        </createIndex>
+        <sql endDelimiter=";\ndelimiter $$">
+            <![CDATA[
+            create trigger CONTROL_ENGINE_AUTH_STATE_AND_DELETED_DATE_NN_UPDATE_TRIGGER before update on CONTROL_ENGINE_AUTH_STATE
+            for each row
+            begin
+                
+                if not(NEW.DELETED_DATE <=> OLD.DELETED_DATE) then
+                  set NEW.DELETED_DATE_NN = if (NEW.DELETED_DATE is null, '1000-01-01 00:00:00.000', NEW.DELETED_DATE);
+                end if;
+            end;
+            ]]>
+        </sql>
+        <rollback>
+            <sql>
+                DROP TRIGGER CONTROL_ENGINE_AUTH_STATE_AND_DELETED_DATE_NN_UPDATE_TRIGGER
+            </sql>
+            <dropIndex tableName="CONTROL_ENGINE_AUTH_STATE" indexName="IDX_ENGINE_AUTH_STATE_ENGINE_UNQ"/>
+            <dropColumn tableName="CONTROL_ENGINE_AUTH_STATE" columnName="DELETED_DATE_NN"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="3-another-db" author="flowset-control-community" dbms="mssql, hsqldb, h2, oracle">
+        <createIndex tableName="CONTROL_ENGINE_AUTH_STATE" indexName="IDX_ENGINE_AUTH_STATE_ENGINE_UNQ" unique="true">
+            <column name="ENGINE_ID"/>
+            <column name="DELETED_DATE"/>
+        </createIndex>
+    </changeSet>
+    <changeSet id="4" author="flowset-control-community">
+        <addForeignKeyConstraint baseColumnNames="ENGINE_ID" baseTableName="CONTROL_ENGINE_AUTH_STATE"
+                                 constraintName="FK_CONTROL_ENGINE_AUTH_STATE_ON_ENGINE" referencedColumnNames="ID"
+                                 referencedTableName="CONTROL_BPM_ENGINE"/>
+    </changeSet>
+</databaseChangeLog>

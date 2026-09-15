@@ -38,7 +38,7 @@ import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.entity.variable.VariableValueInfo;
 import io.flowset.control.service.variable.VariableService;
 import io.flowset.control.service.variable.VariableUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,7 +160,7 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
             return;
         }
 
-        if (newVariable || !StringUtils.equals(variableInstanceData.getName(), originalVariableInstanceData.getName())) {
+        if (newVariable || !Strings.CS.equals(variableInstanceData.getName(), originalVariableInstanceData.getName())) {
             VariableFilter variableFilter = metadata.create(VariableFilter.class);
             variableFilter.setProcessInstanceId(processInstanceId);
             variableFilter.setVariableName(variableInstanceData.getName());
@@ -304,14 +304,10 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
         return fileUploadField;
     }
 
-    protected void handleFileUpload(FileUploadSucceededEvent<FileUploadField> event) {
-        MemoryBuffer memoryBuffer = event.getReceiver();
+    protected void handleFileUpload(FileUploadSucceededEvent<FileUploadField, byte[]> event) {
         VariableValueInfo valueInfo = getEditedEntity().getValueInfo();
-        valueInfo.setFilename(memoryBuffer.getFileName());
-        valueInfo.setMimeType(memoryBuffer.getFileData().getMimeType());
-
-        OutputStream outputBuffer = memoryBuffer.getFileData().getOutputBuffer();
-        ByteArrayOutputStream fileBytes = ((ByteArrayOutputStream) outputBuffer);
+        valueInfo.setFilename(event.getFileName());
+        valueInfo.setMimeType(event.getMimeType());
 
         String tempDir = coreProperties.getTempDir();
 
@@ -321,9 +317,9 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
                     "Cannot create temp directory: " + dir.getAbsolutePath());
         }
 
-        File outputFile = new File(tempDir, memoryBuffer.getFileName());
+        File outputFile = new File(tempDir, event.getFileName());
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
-            fileBytes.writeTo(outputStream);
+            outputStream.write(event.getData());
             getEditedEntity().setValue(outputFile);
         } catch (IOException e) {
             throw new RuntimeException("Error storing uploaded file", e);

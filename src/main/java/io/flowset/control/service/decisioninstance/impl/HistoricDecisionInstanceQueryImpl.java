@@ -21,6 +21,8 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 
+import static io.flowset.control.util.EngineRestUtils.getCountResult;
+
 @Slf4j
 public class HistoricDecisionInstanceQueryImpl extends BaseQuery<HistoricDecisionInstanceQuery, HistoricDecisionInstance>
         implements HistoricDecisionInstanceQuery {
@@ -71,7 +73,7 @@ public class HistoricDecisionInstanceQueryImpl extends BaseQuery<HistoricDecisio
                 rootDecisionInstancesOnly, decisionRequirementsDefinitionId, decisionRequirementsDefinitionKey);
         CountResultDto countResultDto = response.getBody();
         if (response.getStatusCode().is2xxSuccessful() && countResultDto != null) {
-            return countResultDto.getCount();
+            return getCountResult(countResultDto);
         }
         log.error("Error on loading decisions count, status code {}", response.getStatusCode());
         return -1;
@@ -319,6 +321,12 @@ public class HistoricDecisionInstanceQueryImpl extends BaseQuery<HistoricDecisio
     @Override
     public HistoricDecisionInstanceQuery decisionRequirementsDefinitionKey(String decisionrequirementsDefinitionKey) {
         this.decisionRequirementsDefinitionKey = decisionrequirementsDefinitionKey;
+        return this;
+    }
+
+    @Override
+    public HistoricDecisionInstanceQuery orderByDecisionInstanceId() {
+        orderBy("decisionInstanceId");
         return this;
     }
 

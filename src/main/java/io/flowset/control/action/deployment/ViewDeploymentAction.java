@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ViewDeploymentAction.ID)
-public class ViewDeploymentAction extends ViewEntityDetailAction implements ExecutableAction {
+public class ViewDeploymentAction extends ViewEntityDetailAction<ViewDeploymentAction> implements ExecutableAction {
 
     public static final String ID = "control_viewDeployment";
 

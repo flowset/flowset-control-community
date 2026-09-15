@@ -78,6 +78,31 @@ public class IncidentListViewActionsUiTest extends AbstractCamunda7UiTest {
     }
 
     @Test
+    @DisplayName("Excel action availability on incident list view")
+    void givenExistingIncident_whenOpenIncidentListView_thenExcelActionAvailable() {
+        // given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testFailedJobIncident.bpmn")
+                .startByKey("testFailedJobIncident")
+                .waitJobsExecution();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        IncidentListView listView = mainView.openIncidentListView();
+
+        // then
+        listView.getExcelExportButton()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openIncidentsGridContextMenu()
+                .find(text("Excel"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
     @DisplayName("Refresh action: data in data grid is updated")
     void givenOpenedListView_whenClickRefresh_thenDataUpdated() {
         // given
@@ -255,7 +280,7 @@ public class IncidentListViewActionsUiTest extends AbstractCamunda7UiTest {
         listView.getBulkRetryButton().shouldBe(VISIBLE);
 
         listView.openIncidentsGridContextMenu()
-                .shouldHave(visibleItems("Refresh", "Retry"));
+                .shouldHave(visibleItems("Refresh", "Retry", "Excel"));
     }
 
     @Test

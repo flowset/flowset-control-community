@@ -34,7 +34,7 @@ import org.camunda.community.rest.client.model.*;
 import org.camunda.community.rest.impl.RemoteHistoryService;
 import org.camunda.community.rest.impl.RemoteRuntimeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -412,7 +412,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                     null, null, currentUserTenantId,
                     null, null, null,
                     null, null, null,
-                    null, null
+                    null, null, null
             );
             if (processInstancesCount.getStatusCode().is2xxSuccessful()) {
                 return getCountResult(processInstancesCount.getBody());
@@ -446,11 +446,11 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                     null, null, currentUserTenantId,
                     null, null, null,
                     null, null, null,
-                    null, null
+                    null, null, null
             );
             CountResultDto countResultDto = processInstancesCount.getBody();
             if (processInstancesCount.getStatusCode().is2xxSuccessful() && countResultDto != null) {
-                return countResultDto.getCount();
+                return getCountResult(countResultDto);
             }
             return -1;
         } catch (Exception e) {
@@ -480,7 +480,7 @@ public class ProcessInstanceServiceImpl implements ProcessInstanceService {
                 null, null, currentUserTenantId,
                 null, null, null,
                 null, null, null,
-                null, null
+                null, null, null
         );
         if (processInstancesCount.getStatusCode().is2xxSuccessful()) {
             return getCountResult(processInstancesCount.getBody());

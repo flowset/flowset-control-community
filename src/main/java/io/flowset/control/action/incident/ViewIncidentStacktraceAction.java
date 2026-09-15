@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ViewIncidentStacktraceAction.ID)
-public class ViewIncidentStacktraceAction extends SecuredBaseAction implements ExecutableAction {
+public class ViewIncidentStacktraceAction extends SecuredBaseAction<ViewIncidentStacktraceAction> implements ExecutableAction {
 
     public static final String ID = "control_viewIncidentStacktrace";
 

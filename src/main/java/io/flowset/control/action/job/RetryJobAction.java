@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(RetryJobAction.ID)
-public class RetryJobAction extends SecuredBaseAction implements ExecutableAction {
+public class RetryJobAction extends SecuredBaseAction<RetryJobAction> implements ExecutableAction {
 
     public static final String ID = "control_retryJob";
 

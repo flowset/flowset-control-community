@@ -50,6 +50,9 @@ public class IncidentListView extends View<IncidentListView> {
     @TestComponent(path = "bulkRetryBtn")
     private Button bulkRetryButton;
 
+    @TestComponent(path = "excelExportBtn")
+    private Button excelExportButton;
+
     @TestComponent(path = "incidentsDataGrid")
     private DataGrid incidentsGrid;
 

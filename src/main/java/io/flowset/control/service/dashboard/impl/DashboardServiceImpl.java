@@ -7,24 +7,23 @@ package io.flowset.control.service.dashboard.impl;
 
 import feign.FeignException;
 import feign.RequestInterceptor;
-import feign.auth.BasicAuthRequestInterceptor;
 import io.jmix.core.Id;
 import io.jmix.core.Metadata;
 import io.jmix.core.event.EntityChangedEvent;
 import io.flowset.control.entity.ProcessExecutionGraphEntry;
 import io.flowset.control.entity.dashboard.ProcessDefinitionStatistics;
-import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.mapper.ProcessDefinitionMapper;
 import io.flowset.control.property.UiProperties;
 import io.flowset.control.restsupport.FeignClientCreationContext;
 import io.flowset.control.restsupport.FeignClientProvider;
+import io.flowset.control.service.engine.auth.EngineAuthenticator;
 import io.flowset.control.service.dashboard.DashboardService;
 import io.flowset.control.service.engine.EngineTenantProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.camunda.community.rest.client.api.HistoryApiClient;
 import org.camunda.community.rest.client.api.ProcessDefinitionApiClient;
@@ -32,7 +31,7 @@ import org.camunda.community.rest.client.api.ProcessInstanceApiClient;
 import org.camunda.community.rest.client.api.TaskApiClient;
 import org.camunda.community.rest.client.model.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -41,6 +40,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,6 +59,7 @@ public class DashboardServiceImpl implements DashboardService {
     protected final ProcessDefinitionMapper processDefinitionMapper;
     protected final UiProperties uiProperties;
     protected final EngineTenantProvider engineTenantProvider;
+    protected final EngineAuthenticator engineAuthenticator;
 
     protected Map<UUID, TaskApiClient> taskClientByEngineId = new ConcurrentHashMap<>();
     protected Map<UUID, ProcessDefinitionApiClient> processDefinitionClientByEngineId = new ConcurrentHashMap<>();
@@ -68,12 +69,14 @@ public class DashboardServiceImpl implements DashboardService {
     public DashboardServiceImpl(Metadata metadata, FeignClientProvider feignClientProvider,
                                 ProcessDefinitionMapper processDefinitionMapper,
                                 UiProperties uiProperties,
-                                EngineTenantProvider engineTenantProvider) {
+                                EngineTenantProvider engineTenantProvider,
+                                EngineAuthenticator engineAuthenticator) {
         this.metadata = metadata;
         this.feignClientProvider = feignClientProvider;
         this.processDefinitionMapper = processDefinitionMapper;
         this.uiProperties = uiProperties;
         this.engineTenantProvider = engineTenantProvider;
+        this.engineAuthenticator = engineAuthenticator;
     }
 
     @Override
@@ -137,7 +140,7 @@ public class DashboardServiceImpl implements DashboardService {
             if (isConnectionError(rootCause)) {
                 log.error("Unable to load deployed processes count because of connection error: {} ", e.getMessage());
             } else {
-                log.error("Error while deployed processes count loading ", e);
+                log.error("Error while deployed processes count loading: {}", e.getMessage());
             }
             return 0;
         }
@@ -161,7 +164,7 @@ public class DashboardServiceImpl implements DashboardService {
             if (isConnectionError(rootCause)) {
                 log.error("Error while running process instances loading because of connection error: {}", e.getMessage());
             } else {
-                log.error("Error while running process instances loading", e);
+                log.error("Error while running process instances loading: {}", e.getMessage());
             }
 
             return 0;
@@ -186,7 +189,7 @@ public class DashboardServiceImpl implements DashboardService {
             if (isConnectionError(rootCause)) {
                 log.error("Error while suspended process instances loading because of connection error: {}", e.getMessage());
             } else {
-                log.error("Error while suspended process instances loading", e);
+                log.error("Error while suspended process instances loading: {}", e.getMessage());
             }
 
             return 0;
@@ -212,7 +215,7 @@ public class DashboardServiceImpl implements DashboardService {
                             if (definition == null) {
                                 return true;
                             }
-                            return StringUtils.equals(definition.getTenantId(), tenantId);
+                            return Strings.CS.equals(definition.getTenantId(), tenantId);
                         })
                         .map(processDefinitionMapper::fromStatisticsResultDto)
                         .toList();
@@ -224,7 +227,7 @@ public class DashboardServiceImpl implements DashboardService {
             if (isConnectionError(rootCause)) {
                 log.error("Error while process definition statistics loading because of connection error: {}", e.getMessage());
             } else {
-                log.error("Error while process definition statistics loading", e);
+                log.error("Error while process definition statistics loading: {}", e.getMessage());
             }
 
 
@@ -235,11 +238,14 @@ public class DashboardServiceImpl implements DashboardService {
     protected List<ProcessExecutionGraphEntry> createWeeklyStatistics(OffsetDateTime from, OffsetDateTime to, List<HistoricProcessInstanceDto> startedInstances,
                                                                       List<HistoricProcessInstanceDto> finishedInstances) {
         Map<LocalDate, Long> startedInstancesByDate = startedInstances.stream()
-                .collect(Collectors.groupingBy(historicInstance -> historicInstance.getStartTime().toLocalDate(), Collectors.counting()));
+                .map(HistoricProcessInstanceDto::getStartTime)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(OffsetDateTime::toLocalDate, Collectors.counting()));
 
         Map<LocalDate, Long> finishedInstancesByDate = finishedInstances.stream()
-                .filter(historicTask -> historicTask.getEndTime() != null)
-                .collect(Collectors.groupingBy(historicInstance -> historicInstance.getEndTime().toLocalDate(), Collectors.counting()));
+                .map(HistoricProcessInstanceDto::getEndTime)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(OffsetDateTime::toLocalDate, Collectors.counting()));
 
         LocalDate fromDate = from.toLocalDate();
         LocalDate toDate = to.toLocalDate().plusDays(1); //add a one day to include the last date of the period
@@ -266,17 +272,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Nullable
     protected RequestInterceptor createBpmEngineRequestInterceptor(BpmEngine engine) {
-        RequestInterceptor requestInterceptor = null;
-        if (BooleanUtils.isTrue(engine.getAuthEnabled())) {
-            if (engine.getAuthType() == AuthType.BASIC) {
-                requestInterceptor = new BasicAuthRequestInterceptor(engine.getBasicAuthUsername(), engine.getBasicAuthPassword());
-            } else if (engine.getAuthType() == AuthType.HTTP_HEADER) {
-                requestInterceptor = requestTemplate -> {
-                    requestTemplate.header(engine.getHttpHeaderName(), engine.getHttpHeaderValue());
-                };
-            }
-        }
-        return requestInterceptor;
+        return engineAuthenticator.createLockAwareAuthInterceptor(engine);
     }
 
     protected List<HistoricProcessInstanceDto> loadStartedInstances(OffsetDateTime from, OffsetDateTime to, HistoryApiClient historyApiClient) {
@@ -295,7 +291,7 @@ public class DashboardServiceImpl implements DashboardService {
             if (isConnectionError(rootCause)) {
                 log.error("Unable to load started instances by period: from '{}', to '{}' because of connection error: {}", from, to, e.getMessage());
             } else {
-                log.error("Unable to load started instances by period: from '{}', to '{}'", from, to, e);
+                log.error("Unable to load started instances by period: from '{}', to '{}', error: {}", from, to, e.getMessage());
             }
             return List.of();
         }
@@ -317,7 +313,7 @@ public class DashboardServiceImpl implements DashboardService {
             if (isConnectionError(rootCause)) {
                 log.error("Unable to load finished instances by period: from '{}', to '{}' because of connection error: {}", from, to, e.getMessage());
             } else {
-                log.error("Unable to load finished instances by period: from '{}', to '{}'", from, to, e);
+                log.error("Unable to load finished instances by period: from '{}', to '{}', error: {}", from, to, e.getMessage());
             }
 
             return List.of();
@@ -328,10 +324,11 @@ public class DashboardServiceImpl implements DashboardService {
     public void onBpmEngineChangedAfterCommit(final EntityChangedEvent<BpmEngine> event) {
         Id<BpmEngine> entityId = event.getEntityId();
         if (event.getType() == EntityChangedEvent.Type.DELETED || event.getType() == EntityChangedEvent.Type.UPDATED) {
-            processDefinitionClientByEngineId.remove((UUID) entityId.getValue());
-            processInstanceClientByEngineId.remove((UUID) entityId.getValue());
-            historyApiClientByEngineId.remove((UUID) entityId.getValue());
-            taskClientByEngineId.remove((UUID) entityId.getValue());
+            UUID engineId = (UUID) entityId.getValue();
+            processDefinitionClientByEngineId.remove(engineId);
+            processInstanceClientByEngineId.remove(engineId);
+            historyApiClientByEngineId.remove(engineId);
+            taskClientByEngineId.remove(engineId);
         }
     }
 

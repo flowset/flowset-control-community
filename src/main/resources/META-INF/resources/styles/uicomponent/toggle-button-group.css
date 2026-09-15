@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) Haulmont 2024. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+.toggle-button-group {
+    background-color: var(--toggle-button-group-bg-color);
+    border-radius: var(--lumo-border-radius-l);
+    padding: var(--lumo-space-xs) calc(var(--lumo-space-s) / 2);
+    box-sizing: border-box;
+    gap: calc(var(--lumo-space-s) / 2);
+}
+
+.toggle-button-group > vaadin-button {
+    --vaadin-button-height: calc(var(--lumo-size-s) + 0.1em);
+    min-width: 9em;
+    border-radius: var(--lumo-border-radius-l);
+    color: var(--lumo-secondary-text-color);
+    border: none;
+    margin: 0;
+}
+
+/*
+ * Lumo forces 'background: transparent !important' on the 'tertiary' variant inside the button shadow root.
+ * An important declaration of an inner tree wins over the outer tree, so the background of these buttons
+ * can only be set through the --vaadin-button-tertiary-background property.
+ */
+.toggle-button-group > vaadin-button:not([theme~="primary"]):hover {
+    --vaadin-button-tertiary-background: var(--toggle-button-group-bg-color);
+    color: var(--lumo-body-text-color);
+}
+
+.toggle-button-group > vaadin-button[theme~="primary"] {
+    --vaadin-button-tertiary-background: var(--toggle-button-active-bg-color);
+    color: var(--toggle-button-active-text-color);
+}

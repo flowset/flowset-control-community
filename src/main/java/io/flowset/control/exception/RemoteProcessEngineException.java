@@ -6,7 +6,7 @@
 package io.flowset.control.exception;
 
 import io.flowset.control.restsupport.camunda.CamundaErrorResponse;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.camunda.bpm.engine.ProcessEngineException;
 
 /**
@@ -64,6 +64,6 @@ public class RemoteProcessEngineException extends ProcessEngineException {
     }
 
     public boolean isProcessEngineException() {
-        return StringUtils.equals("ProcessEngineException", engineExceptionType);
+        return Strings.CS.equals("ProcessEngineException", engineExceptionType);
     }
 }

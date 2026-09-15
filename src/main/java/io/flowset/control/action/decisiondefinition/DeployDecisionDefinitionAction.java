@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(DeployDecisionDefinitionAction.ID)
-public class DeployDecisionDefinitionAction extends SecuredBaseAction implements ExecutableAction {
+public class DeployDecisionDefinitionAction extends SecuredBaseAction<DeployDecisionDefinitionAction> implements ExecutableAction {
 
     public static final String ID = "control_deployDecisionDefinition";
 

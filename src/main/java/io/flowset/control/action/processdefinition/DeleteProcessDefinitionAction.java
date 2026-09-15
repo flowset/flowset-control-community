@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(DeleteProcessDefinitionAction.ID)
-public class DeleteProcessDefinitionAction extends SecuredBaseAction implements ExecutableAction {
+public class DeleteProcessDefinitionAction extends SecuredBaseAction<DeleteProcessDefinitionAction> implements ExecutableAction {
 
     public static final String ID = "control_deleteProcessDefinition";
 

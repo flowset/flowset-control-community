@@ -20,4 +20,23 @@ public class BatchStatisticsData extends RuntimeBatchData {
     public boolean isFailed() {
         return failedJobs != null && failedJobs > 0;
     }
+
+    /**
+     * Calculates the progress of the batch execution in percentage.
+     *
+     * @return progress of batch execution in percents
+     */
+    public int getProgressPercent() {
+        int totalJobs = this.totalJobs != null && this.totalJobs > 0 ? this.totalJobs : 0;
+        int completedJobs = this.completedJobs != null ? this.completedJobs : 0;
+
+        int percent;
+        if (totalJobs == 0) {
+            percent = 0;
+        } else {
+            double ratio = completedJobs / (double) totalJobs;
+            percent = (int) Math.round(ratio * 100);
+        }
+        return percent;
+    }
 }

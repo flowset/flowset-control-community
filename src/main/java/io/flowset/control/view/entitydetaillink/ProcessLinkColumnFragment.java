@@ -11,13 +11,11 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.RouterLink;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.view.processdefinition.ProcessDefinitionDetailView;
-import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.Subscribe;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 

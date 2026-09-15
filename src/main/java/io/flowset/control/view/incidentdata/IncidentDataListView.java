@@ -16,6 +16,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.action.incident.BulkRetryIncidentAction;
 import io.flowset.control.action.incident.RetryIncidentAction;
 import io.flowset.control.facet.urlqueryparameters.IncidentListQueryParamBinder;
@@ -28,6 +29,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -47,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
@@ -92,18 +94,25 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     protected DataGrid<IncidentData> incidentsDataGrid;
     @ViewComponent("incidentsDataGrid.bulkRetry")
     protected BulkRetryIncidentAction bulkRetryAction;
+    @ViewComponent("incidentsDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
+    @ViewComponent
+    protected SimplePagination pagination;
 
     @Autowired
     protected Fragments fragments;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
 
+
     @Subscribe
     public void onInit(final InitEvent event) {
         initFilter();
         initDataGridHeaderRow();
-        bulkRetryAction.setAfterSaveHandler(this::startLoadData);
+        initActions();
+
         urlQueryParameters.registerBinder(new IncidentListQueryParamBinder(incidentsDataGrid, this::startLoadData));
+        registerPaginationParameterBinder(pagination);
     }
 
     @Subscribe
@@ -211,6 +220,17 @@ public class IncidentDataListView extends AbstractListViewWithDelayedLoad<Incide
     @Override
     protected void loadData() {
         incidentsDl.load();
+    }
+
+    protected void initActions() {
+        bulkRetryAction.setAfterSaveHandler(this::startLoadData);
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            IncidentData entity = context.getEntity();
+            String processDefinitionId = entity.getProcessDefinitionId();
+            ProcessDefinitionData processDefinition = processDefinitionsMap.get(processDefinitionId);
+
+            return processDefinition != null ? componentHelper.getProcessLabel(processDefinition) : processDefinitionId;
+        });
     }
 
     protected void loadProcessDefinitions(List<IncidentData> incidents) {

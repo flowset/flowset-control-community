@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(SuspendProcessInstanceAction.ID)
-public class SuspendProcessInstanceAction extends SecuredBaseAction implements ExecutableAction {
+public class SuspendProcessInstanceAction extends SecuredBaseAction<SuspendProcessInstanceAction> implements ExecutableAction {
 
     public static final String ID = "control_suspendProcessInstance";
 

@@ -59,6 +59,9 @@ public class AllTasksListView extends View<AllTasksListView> {
     @TestComponent(path = "reassignTaskBtn")
     private Button reassignTaskBtn;
 
+    @TestComponent(path = "excelExportBtn")
+    private Button excelExportBtn;
+
     @TestComponent(path = "tasksDataGrid")
     private DataGrid tasksDataGrid;
 

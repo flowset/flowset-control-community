@@ -32,6 +32,7 @@ import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.model.InstanceLoader;
 import io.jmix.flowui.view.*;
 import io.flowset.control.dto.ActivityIncidentData;
+import io.flowset.control.dto.ElementStatisticsData;
 import io.flowset.control.entity.activity.ActivityInstanceTreeItem;
 import io.flowset.control.entity.activity.ActivityShortData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
@@ -61,10 +62,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Route(value = "bpm/process-instances/:id", layout = DefaultMainViewParent.class)
 @ViewController("bpm_ProcessInstanceData.detail")
@@ -156,14 +156,9 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
             relatedEntitiesTabSheet.getTabAt(RUNTIME_TAB_IDX).setEnabled(false);
             Tab historyTab = relatedEntitiesTabSheet.getTabAt(HISTORY_TAB_IDX);
             relatedEntitiesTabSheet.setSelectedTab(historyTab);
-            //force init a tab content because an attach event is not triggered
-            LazyTabContent contentByTab = (LazyTabContent) relatedEntitiesTabSheet.getContentByTab(historyTab);
-            if (contentByTab != null) {
-                contentByTab.init();
-                Component tabContent = contentByTab.getChildren().findFirst().orElse(null);
-                if (tabContent instanceof HistoryTabFragment historyTabFragment) {
-                    historyTabFragment.refresh();
-                }
+            Component tabContent = getTabContent(historyTab);
+            if (tabContent instanceof HistoryTabFragment historyTabFragment) {
+                historyTabFragment.refresh();
             }
         }
         initBpmnViewerFragment();
@@ -178,7 +173,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     public void onRelatedEntitiesTabSheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
         Tab selectedTab = event.getSelectedTab();
         String selectedTabId = selectedTab != null ? selectedTab.getId().orElse(null) : null;
-        if (StringUtils.equals(selectedTabId, HISTORY_TAB_ID)) {
+        if (org.apache.commons.lang3.Strings.CS.equals(selectedTabId, HISTORY_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof HistoryTabFragment historyTabFragment) {
                 historyTabFragment.refresh();
@@ -239,6 +234,8 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
         if (!Strings.isNullOrEmpty(processBpmnXml)) {
             emptyDiagramBox.setVisible(false);
             viewerFragment.initViewer(processBpmnXml);
+            viewerFragment.showBpmnModelColorsButton(true);
+            viewerFragment.showStatisticsButton(true);
             viewerFragment.addImportCompleteListener(event -> handleProcessXmlImportComplete());
             viewerFragment.addDecisionInstanceLinkOverlayClickListener(
                     event -> handleDecisionInstanceLinkOverlayClicked(event.getDecisionInstanceId()));
@@ -254,23 +251,46 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
         ProcessInstanceData processInstanceData = processInstanceDataDc.getItem();
         String processInstanceId = processInstanceData.getInstanceId();
 
-        showRunningActivities(processInstanceId);
-        showFinishedActivities(processInstanceId);
+        List<String> passedActivities = new ArrayList<>();
+        Map<String, ElementStatisticsData> passedActivityStats = new HashMap<>();
+        showRunningActivities(processInstanceId, passedActivityStats);
+        showFinishedActivities(processInstanceId, passedActivities, passedActivityStats);
+        showTokenPath(passedActivities);
 
         if (processInstanceData.getState() != ProcessInstanceState.COMPLETED) {
             List<ActivityIncidentData> incidents = incidentService.findRuntimeIncidents(processInstanceId);
-            viewerFragment.setIncidentCount(new SetIncidentCountCmd(incidents));
+            incidents.forEach(incident -> {
+                String elementId = incident.getElementId();
+                ElementStatisticsData elementStat = passedActivityStats.getOrDefault(elementId, new ElementStatisticsData(elementId));
+                elementStat.setIncidentCount(incident.getIncidentCount());
+            });
         }
+        viewerFragment.setActivityInstanceStatistics(new SetActivityInstanceStatisticsCmd(new ArrayList<>(
+                passedActivityStats.values())));
+        viewerFragment.setShowNotPassedAsDisabled(true);
     }
 
-    protected void showFinishedActivities(String processInstanceId) {
+    protected void showTokenPath(List<String> finishedActivities) {
+        List<String> runningActivityIds = runtimeActivityInstancesDc.getItems()
+                .stream().filter(treeItem -> treeItem.getParentActivityInstance() != null)
+                .map(ActivityInstanceTreeItem::getActivityId)
+                .toList();
+
+        viewerFragment.showPassedFlows(finishedActivities, runningActivityIds);
+    }
+
+    protected void showFinishedActivities(String processInstanceId, List<String> passedActivities, Map<String, ElementStatisticsData> activityStats) {
         List<ActivityShortData> finishedActivities = activityService.findFinishedActivities(processInstanceId);
 
         Map<String, List<String>> calledInstancesByActivityId = new HashMap<>();
         for (ActivityShortData activityData : finishedActivities) {
             String activityId = activityData.getActivityId();
             if (!Strings.isNullOrEmpty(activityId)) {
-                viewerFragment.setElementColor(new SetElementColorCmd(activityId, "#000000", "var(--bpmn-history-activity-color)"));
+                viewerFragment.addMarker(new AddMarkerCmd(activityId, ElementMarkerType.FINISHED_ACTIVITY));
+                passedActivities.add(activityId);
+                ElementStatisticsData elementStatisticsData = activityStats.getOrDefault(activityId, new ElementStatisticsData(activityId));
+                elementStatisticsData.incrementFinishedCount();
+                activityStats.put(activityId, elementStatisticsData);
             }
 
             showCalledDecisionOverlay(activityId);
@@ -280,17 +300,27 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
         showCalledInstanceOverlays(calledInstancesByActivityId);
     }
 
-    protected void showRunningActivities(String processInstanceId) {
-        Set<String> runtimeActivityIds = runtimeActivityInstancesDc.getItems()
-                .stream().filter(treeItem -> treeItem.getParentActivityInstance() != null)
-                .map(ActivityInstanceTreeItem::getActivityId)
-                .collect(Collectors.toSet());
+    protected void showRunningActivities(String processInstanceId, Map<String, ElementStatisticsData> activityStats) {
+        Set<String> runtimeActivityIds = new HashSet<>();
 
+        runtimeActivityInstancesDc.getItems().forEach(activityInstanceTreeItem -> {
+            if (activityInstanceTreeItem.getParentActivityInstance() != null) {
+                String activityId = activityInstanceTreeItem.getActivityId();
+                if (!Strings.isNullOrEmpty(activityId)) {
+                    ElementStatisticsData elementStatisticsData = activityStats.getOrDefault(activityId, new ElementStatisticsData(activityId));
+                    elementStatisticsData.incrementActiveCount();
+                    activityStats.put(activityId, elementStatisticsData);
+                    runtimeActivityIds.add(activityId);
+                }
+
+            }
+        });
         runtimeActivityIds.forEach(activityId -> {
             if (!Strings.isNullOrEmpty(activityId)) {
                 viewerFragment.addMarker(new AddMarkerCmd(activityId, ElementMarkerType.RUNNING_ACTIVITY));
             }
         });
+
 
         List<ActivityShortData> runningHistoricActivities = activityService.findRunningActivities(processInstanceId);
 
@@ -386,6 +416,9 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     @Nullable
     protected Component getTabContent(Tab tab) {
         Component contentByTab = relatedEntitiesTabSheet.getContentByTab(tab);
+        if (contentByTab instanceof LazyTabContent lazyTabContent) {
+            return lazyTabContent.getContent();
+        }
         return contentByTab != null
                 ? contentByTab
                 .getChildren()

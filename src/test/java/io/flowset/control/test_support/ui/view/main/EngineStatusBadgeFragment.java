@@ -26,7 +26,7 @@ import static org.openqa.selenium.By.cssSelector;
  */
 @Getter
 public class EngineStatusBadgeFragment extends Composite<EngineStatusBadgeFragment> {
-    public static final By ENGINE_POPOVER_BY = cssSelector("vaadin-popover-overlay.select-engine-popover");
+    public static final By ENGINE_POPOVER_BY = cssSelector("vaadin-popover.select-engine-popover");
 
     public static final By POPOVER_CONTENT_BY = byChained(ENGINE_POPOVER_BY,
             className("engine-popover-content"));

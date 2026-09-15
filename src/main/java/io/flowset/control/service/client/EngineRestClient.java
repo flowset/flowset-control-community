@@ -1,12 +1,10 @@
 package io.flowset.control.service.client;
 
-import com.google.common.base.Strings;
-import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.service.engine.EngineService;
-import org.apache.commons.lang3.BooleanUtils;
+import io.flowset.control.service.engine.auth.EngineAuthenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -26,9 +24,12 @@ public class EngineRestClient {
 
     protected final RestTemplate restTemplate;
     protected final EngineService engineService;
+    protected final EngineAuthenticator engineAuthenticator;
 
-    public EngineRestClient(EngineService engineService) {
+    public EngineRestClient(EngineService engineService,
+                            EngineAuthenticator engineAuthenticator) {
         this.engineService = engineService;
+        this.engineAuthenticator = engineAuthenticator;
 
         this.restTemplate = new RestTemplate();
     }
@@ -46,13 +47,7 @@ public class EngineRestClient {
             throw new EngineConnectionFailedException(HttpStatus.SERVICE_UNAVAILABLE.value(), "Server unavailable");
         }
 
-        if (BooleanUtils.isTrue(engine.getAuthEnabled())) {
-            if (engine.getAuthType() == AuthType.BASIC) {
-                headers.setBasicAuth(Strings.nullToEmpty(engine.getBasicAuthUsername()), Strings.nullToEmpty(engine.getBasicAuthPassword()));
-            } else if (engine.getAuthType() == AuthType.HTTP_HEADER) {
-                headers.add(engine.getHttpHeaderName(), engine.getHttpHeaderValue());
-            }
-        }
+        engineAuthenticator.applyAuthentication(engine, headers);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -74,13 +69,7 @@ public class EngineRestClient {
         if (engine == null) {
             throw new EngineConnectionFailedException(HttpStatus.SERVICE_UNAVAILABLE.value(), "Server unavailable");
         }
-        if (BooleanUtils.isTrue(engine.getAuthEnabled())) {
-            if (engine.getAuthType() == AuthType.BASIC) {
-                headers.setBasicAuth(Strings.nullToEmpty(engine.getBasicAuthUsername()), Strings.nullToEmpty(engine.getBasicAuthPassword()));
-            } else if (engine.getAuthType() == AuthType.HTTP_HEADER) {
-                headers.add(engine.getHttpHeaderName(), engine.getHttpHeaderValue());
-            }
-        }
+        engineAuthenticator.applyAuthentication(engine, headers);
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
 

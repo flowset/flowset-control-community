@@ -1,7 +1,8 @@
 package io.flowset.control.service.analytics;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.lang.Nullable;
+import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.Nullable;
 
 public enum AmplitudeEventType {
 
@@ -105,7 +106,7 @@ public enum AmplitudeEventType {
     public static AmplitudeEventType fromId(String id) {
         AmplitudeEventType[] values = AmplitudeEventType.values();
         for (AmplitudeEventType value : values) {
-            if (StringUtils.equalsIgnoreCase(value.id, id)) {
+            if (Strings.CI.equals(value.id, id)) {
                 return value;
             }
         }

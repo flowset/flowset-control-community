@@ -27,7 +27,7 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.entity.ExternalTaskData;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 

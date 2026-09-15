@@ -15,7 +15,7 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.impl.JobServiceImpl;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Route(value = "historic-incidents/:id", layout = DefaultMainViewParent.class)
@@ -72,7 +72,7 @@ public class HistoricIncidentDataDetailView extends StandardDetailView<HistoricI
     protected void initCauseIncidentFields() {
         String causeIncidentLabel;
         String causeIncidentId = getEditedEntity().getCauseIncidentId();
-        if (StringUtils.equals(getEditedEntity().getIncidentId(), causeIncidentId)) {
+        if (Strings.CS.equals(getEditedEntity().getIncidentId(), causeIncidentId)) {
             causeIncidentLabel = messages.formatMessage("io.flowset.control.view.incidentdata", "incidentWithProcess", causeIncidentId, getEditedEntity().getProcessDefinitionKey());
         } else {
             causeIncidentLabel = getRelatedIncidentFieldLabel(causeIncidentId);
@@ -94,7 +94,7 @@ public class HistoricIncidentDataDetailView extends StandardDetailView<HistoricI
     protected void initRootCauseIncidentFields() {
         String rootCauseIncidentLabel;
         String rootCauseIncidentId = getEditedEntity().getRootCauseIncidentId();
-        boolean sameIncident = StringUtils.equals(getEditedEntity().getIncidentId(), getEditedEntity().getRootCauseIncidentId());
+        boolean sameIncident = Strings.CS.equals(getEditedEntity().getIncidentId(), getEditedEntity().getRootCauseIncidentId());
         if (sameIncident) {
             rootCauseIncidentLabel = messages.formatMessage("io.flowset.control.view.incidentdata", "incidentWithProcess", rootCauseIncidentId, getEditedEntity().getProcessDefinitionKey());
         } else {

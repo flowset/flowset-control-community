@@ -24,15 +24,9 @@ public class ProcessKeyColumnFragment extends EntityDetailLinkFragment<Horizonta
 
     @ViewComponent
     protected JmixButton keyBtn;
-    @ViewComponent
-    protected JmixButton previewBtn;
+
     @ViewComponent
     protected PreviewProcessDefinitionAction previewAction;
-
-    @Subscribe
-    public void onAttachEvent(final AttachEvent event) {
-        previewBtn.setIcon(new SvgIcon("icons/preview.svg"));
-    }
 
     @Override
     public void setItem(ProcessDefinitionData item) {

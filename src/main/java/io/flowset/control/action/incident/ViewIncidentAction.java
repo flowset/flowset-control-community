@@ -10,7 +10,7 @@ import io.flowset.control.entity.incident.IncidentData;
 import io.jmix.flowui.action.ActionType;
 
 @ActionType(ViewIncidentAction.ID)
-public class ViewIncidentAction extends ViewEntityDetailAction {
+public class ViewIncidentAction extends ViewEntityDetailAction<ViewIncidentAction> {
 
     public static final String ID = "control_viewIncident";
 

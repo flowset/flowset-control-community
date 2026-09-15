@@ -6,7 +6,7 @@
 package io.flowset.control.view.batch;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public enum BatchStateFilterOption implements EnumClass<String> {
     ALL("ALL"),

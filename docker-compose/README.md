@@ -28,15 +28,6 @@ The following Docker Compose files are provided:
    > .\gradlew clean bootJar -PbuildType=docker "-Pvaadin.productionMode=true"
    >```
 
-   > You might encounter the `Execution failed for task ':vaadinBuildFrontend'.` error,
-   >
-   > This `com.vaadin.flow.server.ExecutionFailedException: PWA icons generation failed` error can occur in projects with Jmix version 2.5 while executing Gradle task `vaadinBuildFrontend` with enabled flag `vaadin.productionMode`. It is related to the [Vaadin issue](https://github.com/vaadin/flow/issues/20842).
-   >
-   > To fix it run the Gradle command with additional flags `--no-build-cache --no-daemon` and add the following property to gradle.properties in the project:
-   >```shell
-   > org.gradle.jvmargs=-Xmx1024M
-   > ```
-
 4. Go to the `docker-compose` directory:
    ```shell 
    cd docker-compose

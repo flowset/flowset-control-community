@@ -175,7 +175,9 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
 
         updateAllRunningInstancesCount();
 
-        viewerFragment.showStatisticsButton(securitySupport.isEntityViewPermitted(ProcessActivityStatistics.class));
+        boolean statisticsEnabled = securitySupport.isEntityViewPermitted(ProcessActivityStatistics.class);
+        viewerFragment.showStatisticsButton(statisticsEnabled);
+        viewerFragment.setStatisticsVisible(statisticsEnabled);
     }
 
     @Subscribe

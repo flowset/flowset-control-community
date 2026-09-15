@@ -21,7 +21,7 @@ import io.jmix.flowui.kit.action.ActionVariant;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(MarkAsDefaultEngineAction.ID)
-public class MarkAsDefaultEngineAction extends SecuredBaseAction implements ExecutableAction {
+public class MarkAsDefaultEngineAction extends SecuredBaseAction<MarkAsDefaultEngineAction> implements ExecutableAction {
 
     public static final String ID = "control_markAsDefaultEngine";
 

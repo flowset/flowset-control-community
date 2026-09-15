@@ -14,9 +14,7 @@
         <instance id="userTaskFilterDc" class="io.flowset.control.entity.filter.UserTaskFilter"/>
     </data>
     <facets>
-        <urlQueryParameters id="urlQueryParameters">
-            <pagination component="tasksPagination"/>
-        </urlQueryParameters>
+        <urlQueryParameters id="urlQueryParameters"/>
     </facets>
     <actions>
         <action id="applyFilter" icon="SEARCH" text="msg:///actions.Apply"
@@ -82,6 +80,7 @@
                     <button id="refreshBtn" action="tasksDataGrid.refresh" themeNames="primary success"/>
                     <button id="completeTaskBtn" action="tasksDataGrid.completeTask"/>
                     <button id="reassignTaskBtn" action="tasksDataGrid.reassignTask"/>
+                    <button id="excelExportBtn" action="tasksDataGrid.excelExport"/>
                     <simplePagination id="tasksPagination" dataLoader="tasksDl"/>
                 </hbox>
                 <dataGrid id="tasksDataGrid"
@@ -100,6 +99,7 @@
                                 <property name="openMode" value="DIALOG"/>
                             </properties>
                         </action>
+                        <action id="excelExport" type="control_excelExport"/>
                     </actions>
                     <columns resizable="true">
                         <column property="taskId" frozen="true"/>

@@ -23,7 +23,7 @@ import io.jmix.flowui.view.ViewDescriptor;
 import io.jmix.securityflowui.view.resourcepolicy.SpecificResourcePolicyModelDetailView;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @ViewController(id = "sec_SpecificResourcePolicyModel.detail")
 @ViewDescriptor(path = "control-specific-resource-policy-model-detail-view.xml")

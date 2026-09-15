@@ -20,7 +20,7 @@ import static org.openqa.selenium.By.cssSelector;
 @Getter
 public class JmixDialog extends Composite<JmixDialog> {
 
-    public static final By OVERLAY = cssSelector("vaadin-dialog-overlay[role='dialog']");
+    public static final By OVERLAY = cssSelector("vaadin-dialog[opened][role='dialog']");
 
     @TestComponent(path = "yes")
     private Button yesBtn;

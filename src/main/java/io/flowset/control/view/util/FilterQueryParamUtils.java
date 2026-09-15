@@ -6,7 +6,7 @@
 package io.flowset.control.view.util;
 
 import com.vaadin.flow.router.QueryParameters;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;

@@ -9,23 +9,19 @@
    background-size: cover;
 }
 
-.flowset-control-login-form vaadin-login-form-wrapper::part(form-title) {
+.flowset-control-login-form::part(form-title) {
    text-align: center;
 }
 
-.flowset-control-login-form vaadin-login-form-wrapper {
-   max-width: calc(var(--lumo-size-m) * 10);
-}
-
-.flowset-control-login-form vaadin-login-form-wrapper::part(form) {
-   padding: calc(2 * var(--lumo-space-m));
-}
-
-.flowset-control-login-form vaadin-login-form-wrapper::part(footer) {
+.flowset-control-login-form::part(footer) {
    display: none;
 }
 
-.flowset-control-login-form vaadin-login-form-wrapper {
+/* Lumo injects hardcoded width and padding into the card shadow root, so both have to be
+   overridden directly through the 'form' part instead of the --vaadin-login-form-* properties. */
+.flowset-control-login-form::part(form) {
+   width: calc(var(--lumo-size-m) * 10);
+   padding: calc(2 * var(--lumo-space-m));
    box-shadow: var(--lumo-box-shadow-l);
    border-radius: var(--lumo-border-radius-l);
    height: 100%;
@@ -84,11 +80,8 @@
       margin-right: 15%;
    }
 
-   .flowset-control-login-form vaadin-login-form-wrapper {
-      max-width: calc(var(--lumo-size-l) * 10);
-   }
-
-   .flowset-control-login-form vaadin-login-form-wrapper::part(form) {
+   .flowset-control-login-form::part(form) {
+      width: calc(var(--lumo-size-l) * 10);
       padding: calc(2 * var(--lumo-space-l));
    }
 }
@@ -105,11 +98,8 @@
       margin-right: 13%;
    }
 
-   .flowset-control-login-form vaadin-login-form-wrapper {
-      max-width: calc(var(--lumo-size-l) * 10);
-   }
-
-   .flowset-control-login-form vaadin-login-form-wrapper::part(form) {
+   .flowset-control-login-form::part(form) {
+      width: calc(var(--lumo-size-l) * 10);
       padding: calc(2 * var(--lumo-space-l));
    }
 }

@@ -67,6 +67,26 @@ public class BatchListViewActiveTabActionsUiTest extends AbstractCamunda7UiTest 
     }
 
     @Test
+    @DisplayName("Excel action availability")
+    void givenLoggedInUser_whenOpenAllBatchListView_thenExcelActionAvailable() {
+        // given
+        MainView mainView = loginAsAdmin();
+
+        // when
+        AllBatchListView listView = mainView.openAllBatchListView();
+
+        // then
+        listView.getExcelExportBtn()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openActiveBatchesGridContextMenu()
+                .find(text("Excel"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
     @DisplayName("Refresh action: data in data grid is updated")
     void givenOpenedListView_whenClickRefreshOnActiveTab_thenDataUpdated() {
         // given
@@ -106,7 +126,7 @@ public class BatchListViewActiveTabActionsUiTest extends AbstractCamunda7UiTest 
         listView.getRefreshBtn().shouldBe(VISIBLE);
 
         listView.openActiveBatchesGridContextMenu()
-                .shouldHave(visibleItems("Refresh"));
+                .shouldHave(visibleItems("Refresh", "Excel"));
     }
 
     @Test

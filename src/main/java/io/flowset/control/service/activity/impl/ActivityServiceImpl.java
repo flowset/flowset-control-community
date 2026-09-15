@@ -31,10 +31,11 @@ import org.camunda.community.rest.client.model.HistoricActivityInstanceDto;
 import org.camunda.community.rest.client.model.HistoricActivityInstanceQueryDto;
 import org.camunda.community.rest.client.model.HistoricActivityInstanceQueryDtoSortingInner;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.flowset.control.util.EngineRestUtils.getCountResult;
@@ -108,6 +109,9 @@ public class ActivityServiceImpl implements ActivityService {
     public List<ActivityShortData> findFinishedActivities(String processInstanceId) {
         HistoricActivityInstanceQueryDto queryDto = createHistoricActivityInstanceQueryDto()
                 .processInstanceId(processInstanceId)
+                .sorting(Collections.singletonList(new HistoricActivityInstanceQueryDtoSortingInner()
+                        .sortBy(HistoricActivityInstanceQueryDtoSortingInner.SortByEnum.OCCURRENCE)
+                        .sortOrder(HistoricActivityInstanceQueryDtoSortingInner.SortOrderEnum.ASC)))
                 .finished(true);
 
         ResponseEntity<List<HistoricActivityInstanceDto>> response = historyApiClient.queryHistoricActivityInstances(null, null,
@@ -261,7 +265,7 @@ public class ActivityServiceImpl implements ActivityService {
             return;
         }
 
-        rootItem.getChildActivityInstances()
+        CollectionUtils.emptyIfNull(rootItem.getChildActivityInstances())
                 .forEach(activityInstanceDto -> {
                     ActivityInstanceTreeItem activityInstanceTreeItem = cresteActivityInstanceTreeItem(parentItem, activityInstanceDto);
                     resultItems.add(activityInstanceTreeItem);
@@ -282,7 +286,7 @@ public class ActivityServiceImpl implements ActivityService {
             return;
         }
 
-        rootItem.getChildTransitionInstances()
+        CollectionUtils.emptyIfNull(rootItem.getChildTransitionInstances())
                 .forEach(transitionInstanceDto -> {
                     ActivityInstanceTreeItem activityInstanceTreeItem = activityMapper.fromRuntimeTransitionDto(transitionInstanceDto);
                     activityInstanceTreeItem.setParentActivityInstance(treeItem);

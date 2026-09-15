@@ -17,12 +17,12 @@ import io.jmix.flowui.Notifications;
 import io.jmix.flowui.action.ActionType;
 import io.jmix.flowui.action.SecuredBaseAction;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ViewBatchAction.ID)
-public class ViewBatchAction extends SecuredBaseAction {
+public class ViewBatchAction extends SecuredBaseAction<ViewBatchAction> {
 
     public static final String ID = "control_viewBatch";
 

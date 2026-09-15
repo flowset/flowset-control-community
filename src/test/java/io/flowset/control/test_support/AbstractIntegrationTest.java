@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import static io.flowset.control.entity.engine.BpmEngine.SELECTED_ENGINE_ATTRIBUTE;
 
@@ -27,7 +27,7 @@ import static io.flowset.control.entity.engine.BpmEngine.SELECTED_ENGINE_ATTRIBU
 @Tag("integrationTest")
 public abstract class AbstractIntegrationTest {
 
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16.3")
+    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16.3")
             .withDatabaseName("flowset-control-test")
             .withUsername("root")
             .withPassword("root");

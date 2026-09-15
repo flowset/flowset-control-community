@@ -9,7 +9,7 @@ import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.jmix.flowui.action.ActionType;
 
 @ActionType(ViewProcessDefinitionAction.ID)
-public class ViewProcessDefinitionAction extends ViewEntityDetailAction {
+public class ViewProcessDefinitionAction extends ViewEntityDetailAction<ViewProcessDefinitionAction> {
 
     public static final String ID = "control_viewProcessDefinition";
 

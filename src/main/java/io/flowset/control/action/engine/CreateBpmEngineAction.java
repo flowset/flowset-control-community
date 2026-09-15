@@ -12,7 +12,7 @@ import io.jmix.flowui.action.SecuredBaseAction;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(CreateBpmEngineAction.ID)
-public class CreateBpmEngineAction extends SecuredBaseAction {
+public class CreateBpmEngineAction extends SecuredBaseAction<CreateBpmEngineAction> {
 
     public static final String ID = "control_createBpmEngine";
 

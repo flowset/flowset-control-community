@@ -63,6 +63,29 @@ public class DecisionListViewActionsUiTest extends AbstractCamunda7UiTest {
     }
 
     @Test
+    @DisplayName("Excel action availability on decision definition list view")
+    void givenLoggedInUser_whenOpenDecisionDefinitionList_thenExcelActionEnabledRuleApplied() {
+        // given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/dmn/testDmn.dmn");
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        DecisionDefinitionListView listView = mainView.openDecisionDefinitionListView();
+
+        // then
+        listView.getExcelExportBtn()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openDecisionGridContextActions()
+                .find(text("Excel"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
     @DisplayName("Refresh action reloads data in the data grid")
     void givenNewlyDeployedDecisionDefinition_whenClickRefresh_thenGridReloaded() {
         // given
@@ -190,6 +213,6 @@ public class DecisionListViewActionsUiTest extends AbstractCamunda7UiTest {
         listView.getDeployBtn().shouldBe(VISIBLE);
 
         listView.openDecisionGridContextActions()
-                .shouldHave(visibleItems("Refresh", "Deploy"));
+                .shouldHave(visibleItems("Refresh", "Deploy", "Excel"));
     }
 }

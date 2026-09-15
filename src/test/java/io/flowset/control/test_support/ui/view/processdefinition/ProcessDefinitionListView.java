@@ -62,6 +62,9 @@ public class ProcessDefinitionListView extends View<ProcessDefinitionListView> {
     @TestComponent(path = "bulkSuspendBtn")
     private Button bulkSuspendBtn;
 
+    @TestComponent(path = "otherActions")
+    private DropdownButton otherActionsBtn;
+
     @TestComponent(path = "processDefinitionsGrid")
     private DataGrid processDefinitionsGrid;
 
@@ -149,6 +152,15 @@ public class ProcessDefinitionListView extends View<ProcessDefinitionListView> {
     }
 
     /**
+     * Opens the additional actions dropdown in the view toolbar.
+     *
+     * @return dropdown items with actions
+     */
+    public ElementsCollection openOtherActionsDropdown() {
+        return getVisibleDropdownItems(otherActionsBtn.getDelegate());
+    }
+
+    /**
      * Opens additional actions dropdown for the specified row.
      *
      * @param row process row
@@ -162,6 +174,18 @@ public class ProcessDefinitionListView extends View<ProcessDefinitionListView> {
                 .shouldBe(VISIBLE);
 
         return getVisibleDropdownItems(dropdown);
+    }
+
+    /**
+     * Clicks an action with specified text in other actions dropdown in the specified row.
+     *
+     * @param row        process row
+     * @param actionText dropdown action text
+     */
+    public void clickOtherAction(DataGrid.Row row, String actionText) {
+        ElementsCollection otherActions = openOtherActions(row);
+
+        clickDropdownItem(otherActions, actionText);
     }
 
     /**

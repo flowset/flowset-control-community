@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(RetryIncidentAction.ID)
-public class RetryIncidentAction extends SecuredBaseAction implements ExecutableAction {
+public class RetryIncidentAction extends SecuredBaseAction<RetryIncidentAction> implements ExecutableAction {
 
     public static final String ID = "control_retryIncident";
 

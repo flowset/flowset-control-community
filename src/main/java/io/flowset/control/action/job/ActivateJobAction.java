@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @ActionType(ActivateJobAction.ID)
-public class ActivateJobAction extends SecuredBaseAction implements ExecutableAction {
+public class ActivateJobAction extends SecuredBaseAction<ActivateJobAction> implements ExecutableAction {
 
     public static final String ID = "control_activateJob";
 

@@ -14,7 +14,11 @@
     </data>
     <actions>
         <action id="keyAction" type="control_viewCalledDecision"/>
-        <action id="previewAction" type="control_decisionTablePreview"/>
+        <action id="previewAction" type="control_decisionTablePreview">
+            <icon>
+                <svgIcon resource="icons/preview.svg"/>
+            </icon>
+        </action>
     </actions>
     <content>
         <hbox id="root" padding="false" width="100%" justifyContent="START" themeNames="spacing-s"

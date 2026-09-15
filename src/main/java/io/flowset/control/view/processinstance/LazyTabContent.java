@@ -51,4 +51,17 @@ public class LazyTabContent extends Div implements ApplicationContextAware, Init
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
+    /**
+     * Finds the first child component and returns it.
+     *
+     * @return found first component
+     */
+    public Component getContent() {
+        init();
+
+        return getChildren()
+                .findFirst()
+                .orElse(null);
+    }
 }

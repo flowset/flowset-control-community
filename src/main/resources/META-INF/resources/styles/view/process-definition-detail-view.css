@@ -46,6 +46,6 @@
     position: absolute;
 }
 
-vaadin-menu-bar-overlay.process-actions-dropdown-overlay vaadin-menu-bar-item#deleteItem {
+.process-actions-dropdown vaadin-menu-bar-item#deleteItem {
     color: var(--lumo-error-text-color);
 }

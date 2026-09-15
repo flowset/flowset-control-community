@@ -22,45 +22,44 @@
                             maxColumns="4" columnSpacing="var(--lumo-space-s)" rowSpacing="var(--lumo-space-xs)"
                             columnWidth="8em" autoResponsive="true">
                     <formRow>
-                        <card themeNames="outlined" classNames="bg-base" width="100%">
+                        <card themeNames="outlined" classNames="jobs-stat-card bg-base" width="100%">
                             <title>
-                                <span text="msg://totalJobsCard.title" width="max-content"
-                                      classNames="text-secondary text-xs font-normal"/>
+                                <span text="msg://totalJobsCard.title" width="max-content"/>
                             </title>
                             <subtitle>
-                                <span id="totalJobsValue" classNames="text-l font-semibold mt-s"/>
+                                <span id="totalJobsValue"/>
                             </subtitle>
                         </card>
-                        <card themeNames="outlined" classNames="bg-success-10 border-success-20" width="100%">
+                        <card themeNames="outlined"
+                              classNames="jobs-stat-card jobs-stat-card-success bg-success-10 border-success-20"
+                              width="100%">
                             <title>
-                                <span text="msg://completedJobsCard.title" width="max-content"
-                                      classNames="text-secondary text-xs font-normal"/>
+                                <span text="msg://completedJobsCard.title" width="max-content"/>
                             </title>
                             <subtitle>
-                                <hbox width="100%" justifyContent="BETWEEN" classNames="items-baseline mt-s">
-                                    <span id="completedJobsValue" classNames="text-l font-semibold text-success"/>
-                                    <span id="completedJobsPercentValue" classNames="text-l font-semibold text-success"/>
+                                <hbox width="100%" justifyContent="BETWEEN" classNames="items-baseline">
+                                    <span id="completedJobsValue"/>
+                                    <span id="completedJobsPercentValue"/>
                                 </hbox>
                             </subtitle>
                         </card>
-                        <card themeNames="outlined" classNames="bg-error-10 border-error-20" width="100%">
+                        <card themeNames="outlined"
+                              classNames="jobs-stat-card jobs-stat-card-error bg-error-10 border-error-20"
+                              width="100%">
                             <title>
-                                <span text="msg://failedJobsCard.title" width="max-content"
-                                      classNames="text-secondary text-xs font-normal"/>
+                                <span text="msg://failedJobsCard.title" width="max-content"/>
                             </title>
                             <subtitle>
-                                <span id="failedJobsValue" dataContainer="batchStatisticsDc" property="failedJobs"
-                                      classNames="text-l font-semibold text-error mt-s"/>
+                                <span id="failedJobsValue" dataContainer="batchStatisticsDc" property="failedJobs"/>
                             </subtitle>
                         </card>
 
-                        <card themeNames="outlined" classNames="bg-contrast-5" width="100%">
+                        <card themeNames="outlined" classNames="jobs-stat-card bg-contrast-5" width="100%">
                             <title>
-                                <span text="msg://remainingJobsCard.title"
-                                      classNames="text-secondary text-xs font-normal" width="max-content"/>
+                                <span text="msg://remainingJobsCard.title" width="max-content"/>
                             </title>
                             <subtitle>
-                                <span id="remainingJobsValue" classNames="mt-s text-l font-semibold"/>
+                                <span id="remainingJobsValue"/>
                             </subtitle>
                         </card>
                     </formRow>

@@ -147,7 +147,7 @@ public class UserListViewActionsUiTest extends AbstractUiTest {
         listView.getShowRoleAssignmentsBtn().click();
 
         // then
-        webdriver().shouldHave(urlContaining("/sec/roleassignment/" + uiProperties.getAdminUsername()));
+        webdriver().shouldHave(urlContaining("/sec/role-assignment/" + uiProperties.getAdminUsername()));
 
         $j(RoleAssignmentView.class).exists().displayed();
     }
@@ -200,7 +200,7 @@ public class UserListViewActionsUiTest extends AbstractUiTest {
                 .click();
 
         // then
-        webdriver().shouldHave(urlContaining("/sec/usersubstitution/" + uiProperties.getAdminUsername()));
+        webdriver().shouldHave(urlContaining("/sec/user-substitution/" + uiProperties.getAdminUsername()));
 
         $j(UserSubstitutionView.class).exists().displayed();
     }

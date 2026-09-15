@@ -5,6 +5,7 @@
 
 package io.flowset.control.test_support.ui.view.processinstance;
 
+import com.codeborne.selenide.ElementsCollection;
 import io.flowset.control.test_support.ui.UiTestSupport;
 import io.flowset.control.test_support.ui.component.GridContextMenu;
 import io.flowset.control.test_support.ui.view.processinstance.detail.ProcessInstanceDetailView;
@@ -13,12 +14,14 @@ import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
 import io.jmix.masquerade.component.DataGrid;
+import io.jmix.masquerade.component.DropdownButton;
 import io.jmix.masquerade.sys.View;
 import lombok.Getter;
 import org.openqa.selenium.By;
 
 import static com.codeborne.selenide.Selenide.$;
 import static io.flowset.control.test_support.ui.UiTestSupport.getRowByCellContent;
+import static io.flowset.control.test_support.ui.UiTestSupport.getVisibleDropdownItems;
 import static io.flowset.control.test_support.ui.UiTestSupport.openGridContextMenu;
 import static io.jmix.masquerade.JConditions.VISIBLE;
 import static io.jmix.masquerade.JSelectors.byPath;
@@ -53,6 +56,9 @@ public class ProcessInstanceListView extends View<ProcessInstanceListView> {
     @TestComponent(path = "bulkActivateBtn")
     private Button bulkActivateBtn;
 
+    @TestComponent(path = "otherActions")
+    private DropdownButton otherActionsBtn;
+
     @TestComponent(path = "processInstancesGrid")
     private DataGrid processInstancesGrid;
 
@@ -70,6 +76,15 @@ public class ProcessInstanceListView extends View<ProcessInstanceListView> {
      */
     public GridContextMenu openInstancesGridContextActions() {
         return openGridContextMenu(processInstancesGrid);
+    }
+
+    /**
+     * Opens the Other actions dropdown button menu.
+     *
+     * @return collection of visible items in the dropdown
+     */
+    public ElementsCollection openOtherActionsDropdown() {
+        return getVisibleDropdownItems(otherActionsBtn.getDelegate());
     }
 
     /**

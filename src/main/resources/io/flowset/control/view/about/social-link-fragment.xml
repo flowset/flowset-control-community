@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <content>
+        <anchor id="root" target="BLANK" classNames="social-link">
+            <svgIcon id="iconField" size="1.5em"/>
+        </anchor>
+    </content>
+</fragment>

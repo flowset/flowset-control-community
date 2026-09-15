@@ -13,6 +13,7 @@ import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.entity.batch.BatchData;
 import io.flowset.control.entity.batch.BatchStatisticsData;
 import io.flowset.control.entity.filter.BatchFilter;
@@ -26,11 +27,13 @@ import io.flowset.control.view.batch.filter.*;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
+import io.jmix.core.metamodel.datatype.DatatypeFormatter;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.component.tabsheet.JmixTabSheet;
 import io.jmix.flowui.facet.Timer;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
@@ -66,6 +69,9 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     @Autowired
     protected UiComponents uiComponents;
     @Autowired
+    protected DatatypeFormatter datatypeFormatter;
+
+    @Autowired
     protected ApplicationContext applicationContext;
 
     @ViewComponent
@@ -74,6 +80,9 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     protected InstanceContainer<BatchFilter> activeBatchFilterDc;
     @ViewComponent
     protected DataGrid<BatchStatisticsData> activeBatchesDataGrid;
+
+    @ViewComponent("activeBatchesDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     @ViewComponent
     protected CollectionLoader<BatchData> completedBatchesDl;
@@ -93,6 +102,11 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     @ViewComponent
     protected HorizontalLayout lookupActions;
 
+    @ViewComponent
+    protected SimplePagination batchesPagination;
+    @ViewComponent
+    protected SimplePagination completedBatchesPagination;
+
     protected boolean completedTabFirstSelection = true;
 
     @Subscribe
@@ -105,13 +119,15 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
         initFilters();
         initDataGridHeaderRows();
 
-        urlQueryParameters.registerBinder(new ActiveBatchListQueryParamBinder(activeBatchesDataGrid, tabsheet, this::startLoadData));
-        urlQueryParameters.registerBinder(new CompletedBatchListQueryParamBinder(completedBatchesDataGrid, this::startLoadCompletedBatches));
+        registerQueryParamBinders();
 
         componentHelper.addNoDataGridStateComponents(completedBatchGridEmptyStateBox);
 
         setDefaultSort();
+        initActions();
     }
+
+
 
     @Subscribe
     public void onReady(final ReadyEvent event) {
@@ -142,6 +158,14 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
 
         completedBatchesDataGrid.sort(Collections.singletonList(new GridSortOrder<>(
                 completedBatchesDataGrid.getColumnByKey("startTime"), SortDirection.DESCENDING)));
+    }
+
+    protected void initActions() {
+        excelExportAction.addColumnValueProvider("progress", context -> {
+            BatchStatisticsData entity = context.getEntity();
+            int percent = entity.getProgressPercent();
+            return datatypeFormatter.formatInteger(percent) + "%";
+        });
     }
 
     @Install(to = "activeBatchesDl", target = Target.DATA_LOADER)
@@ -251,6 +275,14 @@ public class AllBatchListView extends AbstractListViewWithDelayedLoad<BatchStati
     @Override
     protected void loadData() {
         activeBatchesDl.load();
+    }
+
+    protected void registerQueryParamBinders() {
+        urlQueryParameters.registerBinder(new ActiveBatchListQueryParamBinder(activeBatchesDataGrid, tabsheet, this::startLoadData));
+        urlQueryParameters.registerBinder(new CompletedBatchListQueryParamBinder(completedBatchesDataGrid, this::startLoadCompletedBatches));
+        registerPaginationParameterBinder(batchesPagination);
+        registerPaginationParameterBinder(completedBatchesPagination, null, "completedFirstResult",
+                "completedMaxResults");
     }
 
     protected void initFilters() {

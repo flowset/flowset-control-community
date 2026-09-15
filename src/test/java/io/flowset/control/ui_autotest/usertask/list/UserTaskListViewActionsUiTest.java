@@ -56,6 +56,26 @@ public class UserTaskListViewActionsUiTest extends AbstractCamunda7UiTest {
     }
 
     @Test
+    @DisplayName("Excel action availability")
+    void givenLoggedInUser_whenOpenAllTasksView_thenExcelActionAvailable() {
+        // given
+        MainView mainView = loginAsAdmin();
+
+        // when
+        AllTasksListView listView = mainView.openUserTaskListView();
+
+        // then
+        listView.getExcelExportBtn()
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+
+        listView.openTasksGridContextMenu()
+                .find(text("Excel"))
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
+    }
+
+    @Test
     @DisplayName("Refresh action: data in data grid is updated")
     void givenLoggedInUser_whenClickRefresh_thenDataUpdated() {
         // given
@@ -148,8 +168,9 @@ public class UserTaskListViewActionsUiTest extends AbstractCamunda7UiTest {
         listView.getRefreshBtn().shouldBe(VISIBLE);
         listView.getCompleteTaskBtn().shouldBe(VISIBLE);
         listView.getReassignTaskBtn().shouldBe(VISIBLE);
+        listView.getExcelExportBtn().shouldBe(VISIBLE);
 
         listView.openTasksGridContextMenu()
-                .shouldHave(visibleItems("Refresh", "Complete", "Reassign"));
+                .shouldHave(visibleItems("Refresh", "Complete", "Reassign", "Excel"));
     }
 }

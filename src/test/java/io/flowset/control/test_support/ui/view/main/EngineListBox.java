@@ -5,13 +5,9 @@
 
 package io.flowset.control.test_support.ui.view.main;
 
-import com.codeborne.selenide.CheckResult;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
-import io.jmix.masquerade.condition.SpecificCondition;
-import io.jmix.masquerade.condition.UnsupportedConditionException;
-import io.jmix.masquerade.condition.Value;
-import io.jmix.masquerade.condition.ValueContains;
+import io.jmix.masquerade.condition.*;
 import io.jmix.masquerade.sys.Composite;
 import org.openqa.selenium.By;
 
@@ -41,7 +37,7 @@ public class EngineListBox extends Composite<EngineListBox> {
     }
 
     public EngineItemFragment findItemByEngineName(String engineName) {
-        By engineNameXPath = xpath(".//vaadin-item[.//*[@j-test-id='engineName'"
+        By engineNameXPath = xpath(".//vaadin-item[.//*[@data-testid='engineName'"
                 + " and starts-with(normalize-space(text()), '%s')]]".formatted(engineName));
 
         return $j(EngineItemFragment.class, byChained(by, engineNameXPath));
@@ -49,13 +45,13 @@ public class EngineListBox extends Composite<EngineListBox> {
 
 
     @Override
-    public CheckResult check(SpecificCondition condition) {
+    public SpecificCheck resolve(SpecificCondition condition) {
         if (condition instanceof Value valueCondition) {
             String currentValue = getSelectedEngineName();
-            return new CheckResult(valueCondition.getValue().equals(currentValue), currentValue);
+            return SpecificCheck.of(valueCondition.getValue().equals(currentValue), currentValue);
         } else if (condition instanceof ValueContains valueContainsCondition) {
             String currentValue = getSelectedEngineName();
-            return new CheckResult(currentValue.contains(valueContainsCondition.getValue()), currentValue);
+            return SpecificCheck.of(currentValue.contains(valueContainsCondition.getValue()), currentValue);
         }
 
         throw new UnsupportedConditionException(condition, this);

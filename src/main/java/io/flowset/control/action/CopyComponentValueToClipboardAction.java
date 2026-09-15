@@ -23,7 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static io.flowset.control.view.util.JsUtils.COPY_SCRIPT_TEXT;
 
 @ActionType(CopyComponentValueToClipboardAction.ID)
-public class CopyComponentValueToClipboardAction extends BaseAction implements TargetAction<HasValue<?, ?>> {
+public class CopyComponentValueToClipboardAction extends BaseAction<CopyComponentValueToClipboardAction>
+        implements TargetAction<HasValue<?, ?>> {
 
     public static final String ID = "control_copyComponentValueToClipboard";
 

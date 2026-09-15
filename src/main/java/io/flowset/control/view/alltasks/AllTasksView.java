@@ -19,6 +19,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.action.usertask.BulkCompleteUserTaskAction;
 import io.flowset.control.action.usertask.BulkReassignTaskAction;
 import io.flowset.control.facet.urlqueryparameters.AllUserTaskListQueryParamBinder;
@@ -36,6 +37,7 @@ import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.details.JmixDetails;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.component.radiobuttongroup.JmixRadioButtonGroup;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
@@ -56,7 +58,7 @@ import io.flowset.control.service.usertask.UserTaskService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -127,8 +129,12 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     protected JmixRadioButtonGroup<UserTaskStateFilterOption> stateTypeGroup;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
+    @ViewComponent
+    protected SimplePagination tasksPagination;
     @Autowired
     protected Fragments fragments;
+    @ViewComponent("tasksDataGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
 
     protected Map<String, ProcessDefinitionData> processDefinitionsMap = new HashMap<>();
     protected AllUserTaskListQueryParamBinder queryParamBinder;
@@ -152,14 +158,20 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
         stateTypeGroup.setItems(UserTaskStateFilterOption.class);
         stateTypeGroup.setValue(UserTaskStateFilterOption.ALL);
 
-        queryParamBinder = new AllUserTaskListQueryParamBinder(userTaskFilterDc, this::startLoadData,
-                processDefinitionService, filterFormLayout);
-        urlQueryParameters.registerBinder(queryParamBinder);
+        registerQueryParamBinders();
     }
+
 
     protected void initActions() {
         completeTaskAction.setAfterSaveHandler(this::startLoadData);
         reassignTaskAction.setAfterSaveHandler(this::startLoadData);
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            UserTaskData entity = context.getEntity();
+            String processDefinitionId = entity.getProcessDefinitionId();
+            ProcessDefinitionData processDefinition = processDefinitionsMap.get(processDefinitionId);
+
+            return processDefinition != null ? componentHelper.getProcessLabel(processDefinition) : processDefinitionId;
+        });
     }
 
     @Install(to = "processDefinitionLookup", subject = "itemsFetchCallback")
@@ -363,6 +375,13 @@ public class AllTasksView extends AbstractListViewWithDelayedLoad<UserTaskData> 
     @Override
     protected void loadData() {
         tasksDl.load();
+    }
+
+    protected void registerQueryParamBinders() {
+        queryParamBinder = new AllUserTaskListQueryParamBinder(userTaskFilterDc, this::startLoadData,
+                processDefinitionService, filterFormLayout);
+        urlQueryParameters.registerBinder(queryParamBinder);
+        registerPaginationParameterBinder(tasksPagination);
     }
 
     protected void setSuspendedTasksFilter() {

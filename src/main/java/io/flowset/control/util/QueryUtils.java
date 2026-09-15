@@ -24,7 +24,7 @@ import org.camunda.community.rest.client.model.HistoricProcessInstanceQueryDto;
 import org.camunda.community.rest.client.model.HistoricProcessInstanceQueryDtoSortingInner;
 import org.camunda.community.rest.client.model.ProcessInstanceQueryDto;
 import org.camunda.community.rest.client.model.TaskQueryDto;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class QueryUtils {
             return;
         }
 
-        addIfNotNull(filter.getProcessInstanceIds(), instanceIds -> processInstanceQuery.processInstanceIds(new HashSet<>(instanceIds)));
+        addIfNotEmpty(filter.getProcessInstanceIds(), instanceIds -> processInstanceQuery.processInstanceIds(new HashSet<>(instanceIds)));
         addIfStringNotEmpty(filter.getProcessDefinitionId(), processInstanceQuery::processDefinitionId);
         addIfStringNotEmpty(filter.getProcessDefinitionKey(), processInstanceQuery::processDefinitionKey);
         wrapAndAddStringIfNotEmpty(filter.getBusinessKeyLike(), processInstanceQuery::processInstanceBusinessKeyLike);
@@ -58,7 +58,7 @@ public class QueryUtils {
         addIfTrue(filter.getSuspended(), processInstanceQuery::suspended);
         addIfTrue(filter.getWithIncidents(), processInstanceQuery::withIncident);
 
-        addIfNotNull(filter.getActiveActivityIdIn(), activityList -> processInstanceQuery.activityIdIn(activityList.toArray(new String[0])));
+        addIfNotEmpty(filter.getActiveActivityIdIn(), activityList -> processInstanceQuery.activityIdIn(activityList.toArray(new String[0])));
     }
 
     public static void addRuntimeSort(ProcessInstanceQuery processInstanceQuery, @Nullable Sort sort) {
@@ -83,7 +83,7 @@ public class QueryUtils {
             return;
         }
 
-        addIfNotNull(filter.getProcessInstanceIds(), queryDto::processInstanceIds);
+        addIfNotEmpty(filter.getProcessInstanceIds(), queryDto::processInstanceIds);
         addIfStringNotEmpty(filter.getProcessDefinitionId(), queryDto::processDefinitionId);
         addIfStringNotEmpty(filter.getProcessDefinitionKey(), queryDto::processDefinitionKey);
         addIfStringNotEmpty(filter.getProcessInstanceId(), queryDto::processInstanceId);
@@ -103,7 +103,7 @@ public class QueryUtils {
         addIfNotNull(filter.getStartTimeBefore(), queryDto::startedBefore);
         addIfNotNull(filter.getEndTimeAfter(), queryDto::finishedAfter);
         addIfNotNull(filter.getEndTimeBefore(), queryDto::finishedBefore);
-        addIfNotNull(filter.getActiveActivityIdIn(), queryDto::activeActivityIdIn);
+        addIfNotEmpty(filter.getActiveActivityIdIn(), queryDto::activeActivityIdIn);
     }
 
     public static void addHistorySort(HistoricProcessInstanceQueryDto queryDto, @Nullable Sort sort) {
@@ -302,6 +302,12 @@ public class QueryUtils {
     public static <V> void addIfNotNull(V filterValue, Consumer<V> filterValueConsumer) {
         if (filterValue != null) {
             filterValueConsumer.accept(filterValue);
+        }
+    }
+
+    public static <C extends Collection<?>> void addIfNotEmpty(C filterValues, Consumer<C> filterValueConsumer) {
+        if (CollectionUtils.isNotEmpty(filterValues)) {
+            filterValueConsumer.accept(filterValues);
         }
     }
 

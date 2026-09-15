@@ -12,6 +12,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.action.ControlExcelExportAction;
 import io.flowset.control.action.processinstance.BulkActivateProcessInstanceAction;
 import io.flowset.control.action.processinstance.BulkSuspendProcessInstanceAction;
 import io.flowset.control.action.processinstance.BulkTerminateProcessInstanceAction;
@@ -23,6 +24,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.*;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.model.CollectionContainer;
@@ -75,10 +77,14 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
     protected BulkSuspendProcessInstanceAction bulkSuspend;
     @ViewComponent("processInstancesGrid.bulkTerminate")
     protected BulkTerminateProcessInstanceAction bulkTerminate;
+    @ViewComponent("processInstancesGrid.excelExport")
+    protected ControlExcelExportAction excelExportAction;
     @ViewComponent
     protected UrlQueryParametersFacet urlQueryParameters;
     @ViewComponent
     protected HorizontalLayout modeButtonsGroup;
+    @ViewComponent
+    protected SimplePagination processInstancePagination;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -88,6 +94,7 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         setDefaultSort();
         urlQueryParameters.registerBinder(new ProcessInstanceListQueryParamBinder(modeButtonsGroup, processInstanceFilterDc,
                 this::startLoadData, processInstancesGrid));
+        registerPaginationParameterBinder(processInstancePagination);
         setupBulkActions();
     }
 
@@ -95,6 +102,12 @@ public class ProcessInstanceListView extends AbstractListViewWithDelayedLoad<Pro
         bulkActivate.setAfterSaveHandler(this::startLoadData);
         bulkSuspend.setAfterSaveHandler(this::startLoadData);
         bulkTerminate.setAfterSaveHandler(this::startLoadData);
+
+        excelExportAction.addColumnValueProvider("processDefinitionId", context -> {
+            ProcessInstanceData entity = context.getEntity();
+
+            return getProcessDisplayName(entity);
+        });
     }
 
     protected void setDefaultSort() {

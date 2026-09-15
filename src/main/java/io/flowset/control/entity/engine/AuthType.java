@@ -6,13 +6,14 @@
 package io.flowset.control.entity.engine;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 
 public enum AuthType implements EnumClass<String> {
 
     BASIC("Basic"),
-    HTTP_HEADER("HTTP header");
+    HTTP_HEADER("HTTP header"),
+    OAUTH2("OAuth2");
 
     private final String id;
 

@@ -6,7 +6,11 @@
         </collection>
     </data>
     <actions>
-        <action id="markAsDefaultAction" type="control_markAsDefaultEngine"/>
+        <action id="markAsDefaultAction" type="control_markAsDefaultEngine">
+            <icon>
+                <svgIcon resource="icons/bookmark_check.svg"/>
+            </icon>
+        </action>
     </actions>
     <content>
         <hbox id="bpmEngineActionsBox" padding="false" themeNames="spacing-s" width="min-content" classNames="pt-s pb-s">

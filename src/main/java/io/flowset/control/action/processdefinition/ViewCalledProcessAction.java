@@ -16,7 +16,7 @@ import io.jmix.flowui.component.UiComponentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(ViewCalledProcessAction.ID)
-public class ViewCalledProcessAction extends SecuredBaseAction {
+public class ViewCalledProcessAction extends SecuredBaseAction<ViewCalledProcessAction> {
 
     public static final String ID = "control_viewCalledProcess";
 

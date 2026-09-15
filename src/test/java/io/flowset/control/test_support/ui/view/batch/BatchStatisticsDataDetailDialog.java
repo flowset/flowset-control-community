@@ -42,6 +42,6 @@ public class BatchStatisticsDataDetailDialog extends DialogWindow<BatchStatistic
     private Button closeBtn;
 
     public DataGrid getJobsDataGrid() {
-        return new DataGrid(cssSelector("vaadin-dialog-overlay vaadin-grid"));
+        return new DataGrid(cssSelector("vaadin-dialog[opened] vaadin-grid"));
     }
 }

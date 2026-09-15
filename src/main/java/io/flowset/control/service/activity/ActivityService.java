@@ -11,7 +11,7 @@ import io.flowset.control.entity.activity.HistoricActivityInstanceData;
 import io.flowset.control.entity.activity.ProcessActivityStatistics;
 import io.flowset.control.entity.filter.ActivityFilter;
 import io.flowset.control.security.SecuredEntityLoad;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

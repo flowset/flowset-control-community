@@ -75,6 +75,8 @@ You must have the following installed:
 2. Java 21 (JDK and JRE)
 3. PostgreSQL
 
+The project is built with Gradle 9, which is provided by the Gradle wrapper (`gradlew`), so no local Gradle installation is required.
+
 **Instructions:**
 
 1. Clone the repository:
@@ -248,7 +250,7 @@ and do not require a pre-prepared running instances for them.
 To run all integration tests in Flowset Control Community, use the following command:
 
 ```shell
-.\gradlew test -PintergationTests
+.\gradlew test -PintegrationTests
 ```
 
 By default, all integration tests related to the BPM engine features are performed on the Camunda Run (version 7.22) which
@@ -273,13 +275,13 @@ You can pass the values of these properties as environment variables or by using
 Using environment variables in PowerShell:
 
 ```shell
-  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_DOCKER_IMAGE=camunda/camunda-bpm-platform:run-7.21.0 .\gradlew test -PintergationTests
+  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_DOCKER_IMAGE=camunda/camunda-bpm-platform:run-7.21.0 .\gradlew test -PintegrationTests
 ```
 
 Using Gradle command properties:
 
 ```shell
-  .\gradlew test -PintergationTests -Dspring.profiles.include=test-engine -Dcontrol.testing.engine.docker-image=camunda/camunda-bpm-platform:run-7.21.0
+  .\gradlew test -PintegrationTests -Dspring.profiles.include=test-engine -Dflowset.control.testing.engine.docker-image=camunda/camunda-bpm-platform:run-7.21.0
 ```
 
 **Example 2: Run tests for the default engine (Camunda Run 7.22) with basic authentication configured**
@@ -287,13 +289,13 @@ Using Gradle command properties:
 Using environment variables in PowerShell:
 
 ```shell
-  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_AUTH_TYPE=Basic .\gradlew test -PintergationTests
+  SPRING_PROFILES_INCLUDE=test-engine;FLOWSET_CONTROL_TESTING_ENGINE_AUTH_TYPE=Basic .\gradlew test -PintegrationTests
 ```
 
 Using Gradle command properties:
 
 ```shell
-  .\gradlew test -PintergationTests -Dspring.profiles.include=test-engine -Dcontrol.testing.engine.auth-type=Basic
+  .\gradlew test -PintegrationTests -Dspring.profiles.include=test-engine -Dflowset.control.testing.engine.auth-type=Basic
 ```
 
 ### Running UI Tests <a name="running-ui-tests"></a>

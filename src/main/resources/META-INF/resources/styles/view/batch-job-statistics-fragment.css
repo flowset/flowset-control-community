@@ -1,0 +1,23 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+/* Card slotted title/subtitle typography is enforced with !important from the card's
+   shadow root, so it can be changed only via the --vaadin-card-* custom properties. */
+.jobs-stat-card {
+    --vaadin-card-title-color: var(--lumo-secondary-text-color);
+    --vaadin-card-title-font-size: var(--lumo-font-size-xs);
+    --vaadin-card-title-font-weight: 400;
+    --vaadin-card-subtitle-color: var(--lumo-body-text-color);
+    --vaadin-card-subtitle-font-size: var(--lumo-font-size-l);
+    --vaadin-card-subtitle-font-weight: 600;
+}
+
+.jobs-stat-card-success {
+    --vaadin-card-subtitle-color: var(--lumo-success-text-color);
+}
+
+.jobs-stat-card-error {
+    --vaadin-card-subtitle-color: var(--lumo-error-text-color);
+}

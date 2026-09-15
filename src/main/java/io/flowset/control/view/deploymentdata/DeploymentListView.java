@@ -15,6 +15,7 @@ import io.jmix.core.Metadata;
 import io.jmix.flowui.component.ComponentContainer;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.grid.DataGrid;
+import io.jmix.flowui.component.pagination.SimplePagination;
 import io.jmix.flowui.facet.UrlQueryParametersFacet;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -53,6 +54,8 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     protected DataGrid<DeploymentData> deploymentsDataGrid;
     @ViewComponent("deploymentsDataGrid.bulkRemove")
     protected BulkDeleteDeploymentAction bulkRemove;
+    @ViewComponent
+    protected SimplePagination pagination;
     private DeploymentListQueryParamBinder queryParamBinder;
 
     @Subscribe
@@ -61,8 +64,7 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         initFilterFormStyles();
         initFilter();
 
-        queryParamBinder = new DeploymentListQueryParamBinder(deploymentFilterDc, this::startLoadData, filterFormLayout);
-        urlQueryParameters.registerBinder(queryParamBinder);
+        registerQueryParamBinders();
 
         addFilterValueChangeListeners(filterFormLayout);
         bulkRemove.setAfterSaveHandler(this::startLoadData);
@@ -126,6 +128,12 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     private Integer paginationTotalCountDelegate(final DataLoadContext dataLoadContext) {
         DeploymentFilter filter = deploymentFilterDc.getItemOrNull();
         return (int) deploymentService.getCount(filter);
+    }
+
+    protected void registerQueryParamBinders() {
+        queryParamBinder = new DeploymentListQueryParamBinder(deploymentFilterDc, this::startLoadData, filterFormLayout);
+        urlQueryParameters.registerBinder(queryParamBinder);
+        registerPaginationParameterBinder(pagination);
     }
 
     protected void addFilterValueChangeListeners(ComponentContainer componentContainer) {

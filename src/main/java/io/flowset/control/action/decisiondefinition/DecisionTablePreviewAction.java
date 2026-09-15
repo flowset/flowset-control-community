@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @ActionType(DecisionTablePreviewAction.ID)
-public class DecisionTablePreviewAction extends SecuredBaseAction implements ExecutableAction {
+public class DecisionTablePreviewAction extends SecuredBaseAction<DecisionTablePreviewAction> implements ExecutableAction {
 
     public static final String ID = "control_decisionTablePreview";
 

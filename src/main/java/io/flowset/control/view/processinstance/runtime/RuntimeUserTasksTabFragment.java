@@ -30,7 +30,7 @@ import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.usertask.UserTaskLoadContext;
 import io.flowset.control.service.usertask.UserTaskService;
 import io.flowset.control.view.processinstance.event.UserTaskCountUpdateEvent;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -81,7 +81,7 @@ public class RuntimeUserTasksTabFragment extends Fragment<VerticalLayout> {
             return;
         }
 
-        if (!StringUtils.equals(this.selectedActivityInstanceId, selectedActivityInstanceId)) {
+        if (!Strings.CS.equals(this.selectedActivityInstanceId, selectedActivityInstanceId)) {
             this.selectedActivityInstanceId = selectedActivityInstanceId;
             filter.setActivityInstanceId(selectedActivityInstanceId);
             runtimeUserTasksDl.load();

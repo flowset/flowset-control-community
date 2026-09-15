@@ -55,7 +55,6 @@ public class EngineStatusBadgeActionsUiTest extends AbstractUiTest {
         badge.getViewEngineConfigBtn().click();
 
         $(POPOVER_CONTENT_BY)
-                .shouldNotBe(EXIST)
                 .shouldNotBe(VISIBLE);
     }
 

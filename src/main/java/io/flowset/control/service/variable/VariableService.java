@@ -12,7 +12,7 @@ import io.flowset.control.security.SecuredEntityLoad;
 import io.flowset.control.security.SecuredEntityOperation;
 import io.jmix.core.security.EntityOp;
 import org.springframework.core.io.Resource;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.io.File;
 import java.util.List;

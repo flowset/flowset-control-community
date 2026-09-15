@@ -6,7 +6,11 @@
 
 <menu-config xmlns="http://jmix.io/schema/flowui/menu">
     <!-- Main group -->
-    <item id="dashboard" view="MainView" title="msg://io.flowset.control/menu_config.dashboard.title"/>
+    <item id="dashboard" view="MainView" title="msg://io.flowset.control/menu_config.dashboard.title">
+        <icon>
+            <svgIcon resource="icons/dashboard.svg"/>
+        </icon>
+    </item>
     <item id="processDefinitions" view="bpm_ProcessDefinition.list"
           description="msg://io.flowset.control/menu_config.bpm_ProcessDefinition.list.description"
           title="msg://io.flowset.control/menu_config.bpm_ProcessDefinition.list.title" icon="SITEMAP"/>
@@ -19,11 +23,18 @@
 
     <!-- DMN group -->
     <item id="decisions" view="bpm_DecisionDefinition.list"
-          title="msg://io.flowset.control.view.decisiondefinition/decisionDefinitionListView.title"
-          icon="vaadin:table"/>
+          title="msg://io.flowset.control.view.decisiondefinition/decisionDefinitionListView.title">
+        <icon>
+            <svgIcon resource="icons/table.svg"/>
+        </icon>
+    </item>
     <item id="decisionInstances" view="DecisionInstanceData.list"
           description="msg://io.flowset.control/menu_config.decisionInstances.description"
-          title="msg://io.flowset.control/menu_config.decisionInstances.title"/>
+          title="msg://io.flowset.control/menu_config.decisionInstances.title">
+        <icon>
+            <svgIcon resource="icons/table_view.svg"/>
+        </icon>
+    </item>
 
     <!-- System group -->
     <item id="deployments" view="bpm_Deployment.list"

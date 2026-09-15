@@ -32,9 +32,9 @@ import io.jmix.flowui.*;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.view.*;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -229,7 +229,7 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     protected void initRootCauseIncidentFields() {
         String rootCauseIncidentLabel;
         String rootCauseIncidentId = getEditedEntity().getRootCauseIncidentId();
-        boolean isRootCauseIncident = StringUtils.equals(getEditedEntity().getIncidentId(), getEditedEntity().getRootCauseIncidentId());
+        boolean isRootCauseIncident = Strings.CS.equals(getEditedEntity().getIncidentId(), getEditedEntity().getRootCauseIncidentId());
         retryAction.setVisible(isRootCauseIncident && (getEditedEntity().isJobFailed()) || getEditedEntity().isExternalTaskFailed());
         if (isRootCauseIncident) {
             viewRootCauseIncidentBtn.setVisible(false);
@@ -246,7 +246,7 @@ public class IncidentDataDetailView extends StandardDetailView<IncidentData> {
     protected void initCauseIncidentFields() {
         String causeIncidentLabel;
         String causeIncidentId = getEditedEntity().getCauseIncidentId();
-        if (StringUtils.equals(getEditedEntity().getIncidentId(), causeIncidentId)) {
+        if (Strings.CS.equals(getEditedEntity().getIncidentId(), causeIncidentId)) {
             viewCauseIncidentBtn.setVisible(false);
             String relatedProcess = getEditedEntity().getProcessDefinitionId() != null ?
                     processDefinitionIdField.getTypedValue() : messageBundle.getMessage("withoutProcessLabel");

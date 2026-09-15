@@ -17,6 +17,8 @@ public class AboutProductMetadata {
     public static class ExternalLink {
         private String url;
         private String label;
+        private String icon;
+        private Boolean iconLink;
     }
 
     @Getter
