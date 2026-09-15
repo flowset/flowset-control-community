@@ -52,7 +52,7 @@ public interface EngineTimeService {
      * @return instant time or null if engine is not registered
      */
     @Nullable
-    Long getEngineTime(UUID engineId);
+    Long getEngineTimeInMillis(UUID engineId);
 
     /**
      * Return engine's time offset if engine is registered.
@@ -61,7 +61,7 @@ public interface EngineTimeService {
      * @return offset in ms
      */
     @Nullable
-    Long getEngineOffset(UUID engineId);
+    Long getEngineOffsetInMillis(UUID engineId);
 
 
     /**

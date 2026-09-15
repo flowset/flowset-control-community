@@ -19,27 +19,27 @@ import java.util.function.Supplier;
 public class EngineTimeServiceImpl implements EngineTimeService {
 
     private final EngineUiService engineUiService;
-    private final EngineTimeBean engineTimeBean;
+    private final EngineTimeResolver engineTimeResolver;
 
     @Override
     public void actualizeAllRegistered() {
-        engineTimeBean.actualizeAllRegistered(engineUiService::getVersion);
+        engineTimeResolver.actualizeAllRegistered(engineUiService::getVersion);
     }
 
     @Override
     public void actualizeEngineTime(UUID engineId) {
-        engineTimeBean.actualizeEngineTime(engineId, engineUiService::getVersion);
+        engineTimeResolver.actualizeEngineTime(engineId, engineUiService::getVersion);
     }
 
     @Override
     public <T> ResponseEntity<T> registerEngineTime(UUID engineId, Supplier<ResponseEntity<T>> requestBody) {
-        return engineTimeBean.registerEngineTime(engineId, requestBody);
+        return engineTimeResolver.registerEngineTime(engineId, requestBody);
     }
 
     @Override
     public String getEngineTimeDefaultFormat(UUID engineId) {
         try {
-            Long engineTime = getEngineTime(engineId);
+            Long engineTime = getEngineTimeInMillis(engineId);
             if (engineTime != null) {
                 OffsetDateTime offsetDateTime = OffsetDateTime.ofInstant(
                         Instant.ofEpochMilli(engineTime),
@@ -56,23 +56,23 @@ public class EngineTimeServiceImpl implements EngineTimeService {
 
     @Nullable
     @Override
-    public Long getEngineTime(UUID engineId) {
-        if (!engineTimeBean.isActual(engineId)) {
+    public Long getEngineTimeInMillis(UUID engineId) {
+        if (!engineTimeResolver.isActual(engineId)) {
             actualizeEngineTime(engineId);
         }
 
-        return engineTimeBean.getEngineTime(engineId);
+        return engineTimeResolver.getEngineTimeInMillis(engineId);
     }
 
     @Nullable
     @Override
-    public Long getEngineOffset(UUID engineId) {
+    public Long getEngineOffsetInMillis(UUID engineId) {
         try {
-            if (!engineTimeBean.isActual(engineId)) {
+            if (!engineTimeResolver.isActual(engineId)) {
                 actualizeEngineTime(engineId);
             }
 
-            return engineTimeBean.getEngineOffset(engineId);
+            return engineTimeResolver.getEngineOffsetInMillis(engineId);
         } catch (RuntimeException e) {
             return null;
         }
@@ -81,6 +81,6 @@ public class EngineTimeServiceImpl implements EngineTimeService {
 
     @Override
     public void unregisterEngine(UUID engineId) {
-        engineTimeBean.unregisterEngine(engineId);
+        engineTimeResolver.unregisterEngine(engineId);
     }
 }

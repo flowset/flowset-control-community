@@ -171,7 +171,7 @@ public class ComponentHelper {
         }
 
         EngineTimeService engineTimeService = applicationContext.getBean(EngineTimeService.class);
-        Long engineOffset = engineTimeService.getEngineOffset(selectedEngine.getId());
+        Long engineOffset = engineTimeService.getEngineOffsetInMillis(selectedEngine.getId());
         if (engineOffset == null) {
             return rawOffsetDateTime;
         }
@@ -200,7 +200,7 @@ public class ComponentHelper {
         }
 
         EngineTimeService engineTimeService = applicationContext.getBean(EngineTimeService.class);
-        Long engineOffset = engineTimeService.getEngineOffset(selectedEngine.getId());
+        Long engineOffset = engineTimeService.getEngineOffsetInMillis(selectedEngine.getId());
         if (engineOffset == null) {
             return formatOffsetDateTime(date, timeZone);
         }

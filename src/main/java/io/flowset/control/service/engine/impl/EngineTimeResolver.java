@@ -5,6 +5,7 @@ import io.flowset.control.property.EngineProperties;
 import io.flowset.control.service.engine.EngineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -16,9 +17,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * Internal bean manages engines time offsets.<br/>
+ * Engine time effectful service calls should be provided via parameter lambda actions.
+ */
 @RequiredArgsConstructor
-@Component("control_EngineTimeBean")
-public class EngineTimeBean {
+@Component("control_EngineTimeResolver")
+public class EngineTimeResolver {
 
     private final ConcurrentMap<UUID, OffsetRecord> offsets = new ConcurrentHashMap<>();
     private final ConcurrentMap<UUID, Boolean> skipMap = new ConcurrentHashMap<>();
@@ -27,12 +32,24 @@ public class EngineTimeBean {
 
     private final EngineProperties engineProperties;
 
+    /**
+     * Actualize all registered offset using effectful action (action should call #registerEngineTime(UUID, Supplier) at least once)
+     *
+     * @param actualizationAction effectful call action
+     * @see #registerEngineTime(UUID, Supplier)
+     */
     public void actualizeAllRegistered(Consumer<BpmEngine> actualizationAction) {
         for (UUID engineId : offsets.keySet()) {
             actualizeEngineTime(engineId, actualizationAction);
         }
     }
 
+    /**
+     * Actualize offset for engine with id using effectful action (action should call #registerEngineTime(UUID, Supplier) at least once)
+     *
+     * @param engineId            engine
+     * @param actualizationAction effectful call action
+     */
     public void actualizeEngineTime(UUID engineId, Consumer<BpmEngine> actualizationAction) {
         skipMap.putIfAbsent(engineId, false);
 
@@ -60,6 +77,14 @@ public class EngineTimeBean {
         }
     }
 
+    /**
+     * Calculate and register engine time offset with single HTTP call transparently.
+     *
+     * @param engineId    engine id
+     * @param requestBody HTTP call (as least extra actions as possible for precise RTT calculating)
+     * @param <T>         result type
+     * @return HTTP call result
+     */
     public <T> ResponseEntity<T> registerEngineTime(UUID engineId, Supplier<ResponseEntity<T>> requestBody) {
         try {
             long requestTime = System.currentTimeMillis();
@@ -69,7 +94,7 @@ public class EngineTimeBean {
             long rtt = (retrieveTime - requestTime);
             long engineServerDate = responseEntity.getHeaders().getDate();
             offsets.put(engineId, new OffsetRecord(
-                    computeOffset(engineServerDate, rtt, retrieveTime),
+                    computeOffsetInMillis(engineServerDate, rtt, retrieveTime),
                     rtt,
                     retrieveTime,
                     engineProperties.getOffsetLifetimeInMillis()
@@ -81,6 +106,11 @@ public class EngineTimeBean {
         }
     }
 
+    /**
+     * Remove engine from register.
+     *
+     * @param engineId engine
+     */
     public void unregisterEngine(UUID engineId) {
         skipMap.put(engineId, true);
 
@@ -88,6 +118,12 @@ public class EngineTimeBean {
         skipMap.remove(engineId);
     }
 
+    /**
+     * Check if engine's time offset is still actual.
+     *
+     * @param engineId engine
+     * @return true if offset is still actual
+     */
     public boolean isActual(UUID engineId) {
         OffsetRecord offsetRecord = offsets.get(engineId);
 
@@ -98,7 +134,14 @@ public class EngineTimeBean {
         return offsetRecord.isActualAt(System.currentTimeMillis());
     }
 
-    public Long getEngineOffset(UUID engineId) {
+    /**
+     * Returns offset registered for engine.
+     *
+     * @param engineId engine
+     * @return offset for engine or null if it is not registered
+     */
+    @Nullable
+    public Long getEngineOffsetInMillis(UUID engineId) {
         if (offsets.containsKey(engineId)) {
             return offsets.get(engineId).offset();
         }
@@ -106,7 +149,14 @@ public class EngineTimeBean {
         return null;
     }
 
-    public Long getEngineTime(UUID engineId) {
+    /**
+     * Returns engine time computed with registered offset.
+     *
+     * @param engineId engine
+     * @return engine time in millis
+     */
+    @Nullable
+    public Long getEngineTimeInMillis(UUID engineId) {
         if (offsets.containsKey(engineId)) {
             return offsets.get(engineId).offset() + System.currentTimeMillis();
         }
@@ -122,7 +172,7 @@ public class EngineTimeBean {
      * @param retrieveTimeInMs retrieveTime in ms
      * @return server offset
      */
-    protected long computeOffset(long engineServerDate, long rttInMs, long retrieveTimeInMs) {
+    protected long computeOffsetInMillis(long engineServerDate, long rttInMs, long retrieveTimeInMs) {
         long truncatedRetrieveTimeInMs = Instant.ofEpochMilli(retrieveTimeInMs).truncatedTo(ChronoUnit.SECONDS).toEpochMilli();
         long truncatedRtt = Duration.ofMillis(rttInMs).truncatedTo(ChronoUnit.SECONDS).toMillis();
 

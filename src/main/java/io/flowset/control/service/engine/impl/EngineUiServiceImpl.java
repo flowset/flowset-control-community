@@ -49,7 +49,7 @@ public class EngineUiServiceImpl implements EngineUiService {
     protected final CurrentAuthentication currentAuthentication;
     protected final EngineConnectionCheckProperties checkProperties;
     protected final EngineService engineService;
-    protected final EngineTimeBean engineTimeBean;
+    protected final EngineTimeResolver engineTimeResolver;
 
     protected Map<UUID, VersionApiClient> versionClientByEngineId = new ConcurrentHashMap<>();
 
@@ -61,7 +61,7 @@ public class EngineUiServiceImpl implements EngineUiService {
                                DataManager dataManager,
                                EngineConnectionCheckProperties checkProperties,
                                EngineService engineService,
-                               EngineTimeBean engineTimeBean) {
+                               EngineTimeResolver engineTimeResolver) {
         this.metadata = metadata;
         this.sessionDataProvider = sessionDataProvider;
         this.feignClientProvider = feignClientProvider;
@@ -70,7 +70,7 @@ public class EngineUiServiceImpl implements EngineUiService {
         this.dataManager = dataManager;
         this.checkProperties = checkProperties;
         this.engineService = engineService;
-        this.engineTimeBean = engineTimeBean;
+        this.engineTimeResolver = engineTimeResolver;
     }
 
 
@@ -88,7 +88,7 @@ public class EngineUiServiceImpl implements EngineUiService {
         VersionApiClient versionApiClient = versionClientByEngineId
                 .computeIfAbsent(bpmEngine.getId(), engineId -> createVersionApiClient(persistedEngine));
         try {
-            ResponseEntity<VersionDto> response = engineTimeBean.registerEngineTime(bpmEngine.getId(), versionApiClient::getRestAPIVersion);
+            ResponseEntity<VersionDto> response = engineTimeResolver.registerEngineTime(bpmEngine.getId(), versionApiClient::getRestAPIVersion);
             if (response.getStatusCode().is2xxSuccessful()) {
                 result.setSuccess(true);
 
@@ -118,7 +118,7 @@ public class EngineUiServiceImpl implements EngineUiService {
                     .setUrl(engine.getBaseUrl())
                     .setRequestInterceptor(createBpmEngineRequestInterceptor(engine)));
 
-            ResponseEntity<VersionDto> response = engineTimeBean.registerEngineTime(engine.getId(), camundaClient::getRestAPIVersion);
+            ResponseEntity<VersionDto> response = engineTimeResolver.registerEngineTime(engine.getId(), camundaClient::getRestAPIVersion);
             if (response.getStatusCode().is2xxSuccessful()) {
                 VersionDto versionDto = response.getBody();
                 return versionDto != null ? versionDto.getVersion() : "";
@@ -171,7 +171,7 @@ public class EngineUiServiceImpl implements EngineUiService {
                 || event.getType() == EntityChangedEvent.Type.UPDATED) {
             UUID engineId = (UUID) entityId.getValue();
 
-            engineTimeBean.unregisterEngine(engineId);
+            engineTimeResolver.unregisterEngine(engineId);
             versionClientByEngineId.remove(engineId);
         }
     }

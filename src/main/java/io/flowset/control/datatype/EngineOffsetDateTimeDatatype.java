@@ -67,7 +67,7 @@ public class EngineOffsetDateTimeDatatype extends AbstractTemporalDatatype<Offse
         }
 
         final EngineTimeService engineTimeService = engineTimeServiceProvider.getIfAvailable();
-        final Long engineOffset = engineTimeService.getEngineOffset(selectedEngine.getId());
+        final Long engineOffset = engineTimeService.getEngineOffsetInMillis(selectedEngine.getId());
         if (engineOffset == null) {
             return formatOffsetDateTime(date, locale, timeZone);
         }
