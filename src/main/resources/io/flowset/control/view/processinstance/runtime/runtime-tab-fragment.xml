@@ -54,10 +54,7 @@
                                     <action id="remove" type="list_remove"/>
                                 </actions>
                                 <columns resizable="true">
-                                    <column property="name" flexGrow="1" frozen="true">
-                                        <fragmentRenderer
-                                                class="io.flowset.control.view.processinstance.runtime.variable.VariableNameColumnFragment"/>
-                                    </column>
+                                    <column property="name" flexGrow="1" frozen="true"/>
                                     <column property="type" flexGrow="1"/>
                                     <column key="value" header="msg://variableValueHeader" flexGrow="1"
                                             sortable="false"/>

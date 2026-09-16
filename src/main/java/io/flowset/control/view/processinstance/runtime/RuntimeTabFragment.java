@@ -13,9 +13,11 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.provider.SortDirection;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.view.processinstance.runtime.variable.VariableNameColumnFragment;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -528,6 +530,17 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
                 .findFirst()
                 .orElse(null)
                 : null;
+    }
+
+    @Supply(to = "runtimeVariablesGrid.name", subject = "renderer")
+    private Renderer<VariableInstanceData> runtimeVariablesGridNameRenderer() {
+        return new ComponentRenderer<>(variableInstanceData -> {
+            VariableNameColumnFragment fragment = fragments.create(this, VariableNameColumnFragment.class);
+            fragment.setOpenMode(OpenMode.DIALOG);
+            fragment.setItem(variableInstanceData);
+            fragment.setAfterSaveHandler(() -> runtimeVariablesDl.load());
+            return fragment;
+        });
     }
 
 }
