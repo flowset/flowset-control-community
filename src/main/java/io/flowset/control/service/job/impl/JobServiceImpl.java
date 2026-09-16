@@ -256,6 +256,7 @@ public class JobServiceImpl implements JobService {
         if (filter != null) {
             jobQueryDto.processInstanceId(filter.getProcessInstanceId());
             jobQueryDto.jobDefinitionId(filter.getJobDefinitionId());
+            jobQueryDto.activityId(filter.getActivityId());
         }
 
         return jobQueryDto;

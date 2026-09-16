@@ -168,7 +168,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         } else if (Strings.CS.equals(tabId, JOBS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof JobsTabFragment jobsTabFragment) {
-                jobsTabFragment.refreshIfRequired();
+                jobsTabFragment.refreshIfChanged(getSelectedActivityId());
             }
         } else if (Strings.CS.equals(tabId, EXTERNAL_TASKS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
@@ -354,6 +354,12 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
                     userTasksFragment.refreshIfChanged(getSelectedActivityInstanceId());
                 }
             }
+            case JOBS_TAB_IDX -> {
+                Component tabContent = getTabContent(runtimeTabsheet.getSelectedTab());
+                if (tabContent instanceof JobsTabFragment jobsTabFragment) {
+                    jobsTabFragment.refreshIfChanged(getSelectedActivityId());
+                }
+            }
             case INCIDENTS_TAB_IDX -> {
                 Component tabContent = getTabContent(runtimeTabsheet.getSelectedTab());
                 if (tabContent instanceof RuntimeIncidentsTabFragment incidentsTabFragment) {
@@ -374,6 +380,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         loadAndUpdateVariablesCount();
         loadAndUpdateIncidentsCount();
         loadAndUpdateExternalTasksCount();
+        loadAndUpdateJobsCount();
     }
 
     protected void loadAndUpdateVariablesCount() {
@@ -384,6 +391,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
 
     protected void loadAndUpdateJobsCount() {
         JobFilter jobFilter = metadata.create(JobFilter.class);
+        jobFilter.setActivityId(getSelectedActivityId());
         jobFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
         long jobsCount = jobService.getCount(jobFilter);

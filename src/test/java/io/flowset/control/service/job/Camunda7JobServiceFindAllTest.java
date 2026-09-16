@@ -81,7 +81,7 @@ public class Camunda7JobServiceFindAllTest extends AbstractCamunda7IntegrationTe
                 .deploy("test_support/testTimerJob.bpmn")
                 .startByKey("testTimerJob", 2);
 
-        String instanceId = sampleDataManager.getStartedInstances("testTimerJob").get(0);
+        String instanceId = sampleDataManager.getStartedInstances("testTimerJob").getFirst();
 
         JobFilter jobFilter = dataManager.create(JobFilter.class);
         jobFilter.setProcessInstanceId(instanceId);
@@ -98,6 +98,37 @@ public class Camunda7JobServiceFindAllTest extends AbstractCamunda7IntegrationTe
                 .satisfies(jobData -> {
                     assertThat(jobData.getProcessInstanceId()).isEqualTo(instanceId);
                     assertThat(jobData.getProcessDefinitionKey()).isEqualTo("testTimerJob");
+                });
+    }
+
+    @Test
+    @DisplayName("Only jobs of the activity returned if context has a filter by activity id")
+    void givenActiveJobsAndContextWithFilter_whenFindAllByActivityId_thenOnlyJobsForActivityReturned() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager
+                .deploy("test_support/testJobsListLoad.bpmn")
+                .startByKey("testJobsListLoad");
+
+        String instanceId = sampleDataManager.getStartedInstances("testJobsListLoad").getFirst();
+
+        JobFilter jobFilter = dataManager.create(JobFilter.class);
+        jobFilter.setProcessInstanceId(instanceId);
+        jobFilter.setActivityId("timerEvent");
+
+        JobLoadContext loadContext = new JobLoadContext()
+                .setFilter(jobFilter);
+
+        //when
+        List<JobData> jobs = jobService.findAll(loadContext);
+
+        //then
+        assertThat(jobs)
+                .hasSize(1)
+                .first()
+                .satisfies(jobData -> {
+                    assertThat(jobData.getProcessInstanceId()).isEqualTo(instanceId);
+                    assertThat(jobData.getPriority()).isEqualTo(20L);
                 });
     }
 

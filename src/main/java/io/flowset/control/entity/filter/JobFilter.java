@@ -21,6 +21,16 @@ public class JobFilter {
 
     protected String jobDefinitionId;
 
+    protected String activityId;
+
+    public String getActivityId() {
+        return activityId;
+    }
+
+    public void setActivityId(String activityId) {
+        this.activityId = activityId;
+    }
+
     public String getProcessInstanceId() {
         return processInstanceId;
     }

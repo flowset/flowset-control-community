@@ -37,6 +37,7 @@ import io.flowset.control.service.job.JobLoadContext;
 import io.flowset.control.service.job.JobService;
 import io.flowset.control.view.processinstance.event.JobCountUpdateEvent;
 import io.flowset.control.view.processinstance.event.JobRetriesUpdateEvent;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -72,20 +73,29 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
     protected JobFilter filter;
+    protected String selectedActivityId;
     protected boolean initialized = false;
     @Autowired
     private UiComponents uiComponents;
     @Autowired
     private Fragments fragments;
 
-
-    public void refreshIfRequired() {
+    public void refreshIfChanged(String selectedActivityId) {
         if (!initialized) {
+            this.selectedActivityId = selectedActivityId;
             this.filter = metadata.create(JobFilter.class);
             this.filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+            this.filter.setActivityId(selectedActivityId);
 
             runtimeJobsDl.load();
             this.initialized = true;
+            return;
+        }
+
+        if (!Strings.CS.equals(this.selectedActivityId, selectedActivityId)) {
+            this.selectedActivityId = selectedActivityId;
+            filter.setActivityId(selectedActivityId);
+            runtimeJobsDl.load();
         }
     }
 
