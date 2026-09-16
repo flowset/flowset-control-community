@@ -49,19 +49,24 @@
                                       width="100%"
                                       selectionMode="MULTI">
                                 <actions>
-                                    <action id="create" type="list_create"/>
-                                    <action id="edit" type="list_edit" visible="false"/>
+                                    <action id="create" type="list_create">
+                                        <properties>
+                                            <property name="openMode" value="DIALOG"/>
+                                        </properties>
+                                    </action>
+                                    <action id="edit" type="list_edit" visible="false">
+                                        <properties>
+                                            <property name="openMode" value="DIALOG"/>
+                                        </properties>
+                                    </action>
                                     <action id="remove" type="list_remove"/>
                                 </actions>
                                 <columns resizable="true">
-                                    <column property="name" flexGrow="1" frozen="true">
-                                        <fragmentRenderer
-                                                class="io.flowset.control.view.processinstance.runtime.variable.VariableNameColumnFragment"/>
-                                    </column>
+                                    <column property="name" flexGrow="1" frozen="true"/>
                                     <column property="type" flexGrow="1"/>
                                     <column key="value" header="msg://variableValueHeader" flexGrow="1"
                                             sortable="false"/>
-                                    <column property="activityInstanceId" header="msg://scopeValueHeader"/>
+                                    <column key="scope" header="msg://scopeValueHeader" sortable="false"/>
                                 </columns>
                             </dataGrid>
                         </vbox>

@@ -9,6 +9,7 @@ import com.codeborne.selenide.SelenideElement;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.Checkbox;
 import io.jmix.masquerade.component.ComboBox;
 import io.jmix.masquerade.component.TextField;
 import io.jmix.masquerade.sys.DialogWindow;
@@ -30,6 +31,12 @@ public class VariableInstanceDataDetailDialog extends DialogWindow<VariableInsta
     @TestComponent(path = "nameField")
     private TextField nameField;
 
+    @TestComponent(path = "localField")
+    private Checkbox localField;
+
+    @TestComponent(path = "scopeField")
+    private TextField scopeField;
+
     @TestComponent(path = "typeComboBox")
     private ComboBox typeComboBox;
 
@@ -44,6 +51,9 @@ public class VariableInstanceDataDetailDialog extends DialogWindow<VariableInsta
 
     @TestComponent(path = "okBtn")
     private Button okBtn;
+
+    @TestComponent(path = "closeAction")
+    private Button closeBtn;
 
     /**
      * Returns the value component as the given wrapper class.

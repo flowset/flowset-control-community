@@ -69,6 +69,7 @@ public class RuntimeVariablesTabFragment extends Composite<RuntimeVariablesTabFr
         getRowByVariableName(variableName)
                 .getCellByIndex(CHECKBOX_COLUMN_INDEX) // multiple select enabled: select using checkbox
                 .getCellContent()
+                .scrollIntoView("{block: \"center\"}")
                 .shouldBe(VISIBLE)
                 .click();
     }

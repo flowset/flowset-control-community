@@ -21,7 +21,9 @@ import io.flowset.control.service.variable.VariableLoadContext;
 import io.flowset.control.service.variable.VariableService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.camunda.community.rest.client.api.ExecutionApiClient;
 import org.camunda.community.rest.client.api.HistoryApiClient;
 import org.camunda.community.rest.client.api.ProcessInstanceApiClient;
 import org.camunda.community.rest.client.api.VariableInstanceApiClient;
@@ -47,6 +49,7 @@ public class VariableServiceImpl implements VariableService {
     protected final RemoteRuntimeService remoteRuntimeService;
     protected final VariableInstanceApiClient variableInstanceApiClient;
     protected final ProcessInstanceApiClient processInstanceApiClient;
+    protected final ExecutionApiClient executionApiClient;
     protected final EntityStates entityStates;
     protected final EngineService engineService;
     protected final EngineRestClient engineRestClient;
@@ -57,6 +60,7 @@ public class VariableServiceImpl implements VariableService {
                                RemoteRuntimeService remoteRuntimeService,
                                VariableInstanceApiClient variableInstanceApiClient,
                                ProcessInstanceApiClient processInstanceApiClient,
+                               ExecutionApiClient executionApiClient,
                                EntityStates entityStates,
                                EngineService engineService,
                                EngineRestClient engineRestClient, EngineTenantProvider engineTenantProvider) {
@@ -65,6 +69,7 @@ public class VariableServiceImpl implements VariableService {
         this.remoteRuntimeService = remoteRuntimeService;
         this.variableInstanceApiClient = variableInstanceApiClient;
         this.processInstanceApiClient = processInstanceApiClient;
+        this.executionApiClient = executionApiClient;
         this.entityStates = entityStates;
         this.engineService = engineService;
         this.engineRestClient = engineRestClient;
@@ -198,7 +203,8 @@ public class VariableServiceImpl implements VariableService {
 
     @Override
     public void updateVariableLocal(VariableInstanceData variableInstanceData) {
-        Objects.requireNonNull(variableInstanceData.getExecutionId(), "executionId can not be null");
+        String executionId = variableInstanceData.getExecutionId();
+        Objects.requireNonNull(executionId, "executionId can not be null");
 
         try {
             VariableValueDto variableValueDto = new VariableValueDto();
@@ -214,7 +220,13 @@ public class VariableServiceImpl implements VariableService {
             }
             variableValueDto.value(variableInstanceData.getValue());
 
-            processInstanceApiClient.setProcessInstanceVariable(variableInstanceData.getExecutionId(), variableInstanceData.getName(), variableValueDto);
+            if (BooleanUtils.isTrue(variableInstanceData.getLocal())) {
+                // Writes the variable into the scope of the given execution without propagating it upwards.
+                executionApiClient.putLocalExecutionVariable(executionId, variableInstanceData.getName(), variableValueDto);
+            } else {
+                // Resolves the variable in the process instance scope, propagating upwards if declared there.
+                processInstanceApiClient.setProcessInstanceVariable(executionId, variableInstanceData.getName(), variableValueDto);
+            }
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (isConnectionError(rootCause)) {
@@ -246,19 +258,27 @@ public class VariableServiceImpl implements VariableService {
     }
 
     @Override
-    public void removeVariablesLocal(String executionId, Set<VariableInstanceData> variableItems) {
-        Objects.requireNonNull(executionId, "executionId can not be null");
+    public void removeVariablesLocal(Set<VariableInstanceData> variableItems) {
+        // A variable exists only in the scope of its own execution, so the items are removed
+        // per execution instead of all at once from the process instance scope.
+        Map<String, List<String>> namesByExecutionId = new HashMap<>();
+        for (VariableInstanceData variableItem : variableItems) {
+            String executionId = variableItem.getExecutionId();
+            Objects.requireNonNull(executionId, "executionId can not be null");
+
+            namesByExecutionId.computeIfAbsent(executionId, key -> new ArrayList<>())
+                    .add(variableItem.getName());
+        }
 
         try {
-            List<String> nameList = variableItems.stream()
-                    .map(VariableInstanceData::getName)
-                    .toList();
-
-            remoteRuntimeService.removeVariablesLocal(executionId, nameList);
+            for (Map.Entry<String, List<String>> entry : namesByExecutionId.entrySet()) {
+                remoteRuntimeService.removeVariablesLocal(entry.getKey(), entry.getValue());
+            }
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (isConnectionError(rootCause)) {
-                log.error("Unable remove local variables for execution {} because of connection error: ", executionId, e);
+                log.error("Unable remove local variables for executions {} because of connection error: ",
+                        namesByExecutionId.keySet(), e);
                 throw new EngineConnectionFailedException(e.getMessage(), -1, e.getMessage());
             }
 
@@ -351,6 +371,9 @@ public class VariableServiceImpl implements VariableService {
             }
             if (StringUtils.isNotBlank(filter.getProcessInstanceId())) {
                 variableInstanceQueryDto.addProcessInstanceIdInItem(filter.getProcessInstanceId());
+            }
+            if (StringUtils.isNotBlank(filter.getExecutionId())) {
+                variableInstanceQueryDto.addExecutionIdInItem(filter.getExecutionId());
             }
             if (StringUtils.isNotBlank(filter.getVariableName())) {
                 variableInstanceQueryDto.setVariableName(filter.getVariableName());

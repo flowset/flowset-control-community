@@ -22,8 +22,18 @@
     </actions>
     <layout spacing="false">
         <formLayout id="form" dataContainer="variableInstanceDc">
-            <textField id="activityInstanceIdField" property="activityInstanceId" visible="false" readOnly="true"/>
             <textField id="nameField" property="name" required="true"/>
+            <vbox id="localBox" padding="false" themeNames="spacing-xs" classNames="mt-m"
+                  visible="false" width="AUTO">
+                <hbox spacing="false" alignItems="CENTER">
+                    <checkbox id="localField" property="local" dataContainer="variableInstanceDc"
+                              label="msg://io.flowset.control.entity.variable/VariableInstanceData.local"/>
+                    <icon id="localContextHelp" icon="QUESTION_CIRCLE" size="1em" classNames="text-secondary">
+                        <tooltip text="msg://localField.tooltip" position="BOTTOM_START"/>
+                    </icon>
+                </hbox>
+            </vbox>
+            <textField id="scopeField" label="msg://scopeField.label" visible="false" readOnly="true"/>
             <comboBox id="typeComboBox" label="msg://valueType"/>
             <textField id="objectTypeInfoField" property="valueInfo.object.objectTypeName" visible="false"/>
             <textField id="serializationDataFormatField" property="valueInfo.object.serializationDataFormat"

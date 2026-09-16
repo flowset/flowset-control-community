@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 @Mapper(componentModel = "spring")
 public abstract class VariableMapper {
@@ -40,7 +41,13 @@ public abstract class VariableMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "variableInstanceId", source = "id")
     @Mapping(target = "valueInfo", expression = "java(createValueInfo(source.getValueInfo()))")
+    @Mapping(target = "local", expression = "java(isLocal(source))")
     public abstract VariableInstanceData fromVariableDto(VariableInstanceDto source);
+
+    boolean isLocal(VariableInstanceDto source) {
+        return source.getExecutionId() != null
+                && !Objects.equals(source.getExecutionId(), source.getProcessInstanceId());
+    }
 
 
     VariableInstanceData runtimeVariableTargetClassFactory() {

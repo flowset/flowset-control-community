@@ -81,6 +81,10 @@ public interface VariableService {
 
     /**
      * Updates the value of the specified process variable to the specified value.
+     * <p>
+     * The scope is defined by the {@link VariableInstanceData#getLocal()} flag: when it is set,
+     * the variable is written into the scope of {@link VariableInstanceData#getExecutionId()}
+     * without propagating upwards; otherwise the variable is resolved in the process instance scope.
      *
      * @param variableInstanceData variable instance data containing new value
      */
@@ -105,14 +109,15 @@ public interface VariableService {
     void removeVariableLocal(VariableInstanceData variableInstanceData);
 
     /**
-     * Removes the specified set of process variable instances
-     * from the engine runtime data within the given execution context.
+     * Removes the specified set of process variable instances from the engine runtime data.
+     * <p>
+     * Every instance is removed from the scope of its own {@link VariableInstanceData#getExecutionId()},
+     * so local variables are removed from the executions they belong to.
      *
-     * @param executionId   identifier of the process execution context
      * @param variableItems set of process variable instances to be removed
      */
     @SecuredEntityOperation(entityClass = VariableInstanceData.class, entityOp = EntityOp.DELETE)
-    void removeVariablesLocal(String executionId, Set<VariableInstanceData> variableItems);
+    void removeVariablesLocal(Set<VariableInstanceData> variableItems);
 
     /**
      * Updates the binary value of the specified process variable instance

@@ -10,8 +10,10 @@ import io.jmix.masquerade.component.DataGrid;
 import io.jmix.masquerade.component.TabSheet;
 import io.jmix.masquerade.sys.Composite;
 import lombok.Getter;
+import org.openqa.selenium.By;
 
 import static io.flowset.control.test_support.ui.UiTestSupport.getRowByCellContent;
+import static io.jmix.masquerade.JConditions.VISIBLE;
 
 /**
  * Wrapper for the Runtime tab fragment of the Process instance detail view.
@@ -21,6 +23,14 @@ import static io.flowset.control.test_support.ui.UiTestSupport.getRowByCellConte
 public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
 
     public static final int ACTIVITY_ID_COLUMN_INDEX = 0;
+
+    /**
+     * Activity name element inside the hierarchy column. Clicking the tree toggle only expands or collapses
+     * the node, so a row is selected by clicking this element.
+     *
+     * @see io.flowset.control.uicomponent.treedatagrid.NoClickTreeGrid
+     */
+    public static final By ACTIVITY_NAME_BY = By.cssSelector(".no-click-tree-item-name");
 
     @TestComponent(path = "runtimeTabFragmentActivityInstancesTree")
     private DataGrid activityInstancesTree;
@@ -36,5 +46,19 @@ public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
      */
     public DataGrid.Row getRowByActivityId(String activityId) {
         return getRowByCellContent(activityInstancesTree, ACTIVITY_ID_COLUMN_INDEX, activityId);
+    }
+
+    /**
+     * Selects the row in the activity tree by the specified BPMN activity identifier.
+     *
+     * @param activityId an activity identifier from BPMN XML
+     */
+    public void selectRowByActivityId(String activityId) {
+        getRowByActivityId(activityId)
+                .getCellByIndex(ACTIVITY_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ACTIVITY_NAME_BY)
+                .shouldBe(VISIBLE)
+                .click();
     }
 }

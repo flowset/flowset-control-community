@@ -6,6 +6,7 @@
 package io.flowset.control.service.variable;
 
 import io.jmix.core.DataManager;
+import io.flowset.control.entity.filter.VariableFilter;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
@@ -16,6 +17,7 @@ import io.flowset.control.test_support.camunda7.CamundaRestTestHelper;
 import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.camunda7.dto.request.StartProcessDto;
 import io.flowset.control.test_support.camunda7.dto.request.VariableValueDto;
+import io.flowset.control.test_support.camunda7.dto.response.ExecutionDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -100,6 +102,167 @@ public class Camunda7VariableServiceFindAllTest extends AbstractCamunda7Integrat
 
         //then
         assertThat(runtimeVariables).hasSize(expectedCount);
+    }
+
+    @Test
+    @DisplayName("Local flag is set for variable of a user task running in a sub-process")
+    void givenTaskLocalVariable_whenFindRuntimeVariables_thenLocalFlagSet() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess");
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+        String taskId = camundaRestTestHelper.getUserTasksByInstanceIds(camunda7, processInstanceId).getFirst();
+
+        camundaRestTestHelper.putLocalTaskVariable(camunda7, taskId, "taskVariable",
+                new VariableValueDto("String", "taskValue"));
+
+        VariableFilter filter = dataManager.create(VariableFilter.class);
+        filter.setProcessInstanceId(processInstanceId);
+
+        //when
+        List<VariableInstanceData> variables = variableService.findRuntimeVariables(
+                new VariableLoadContext().setFilter(filter));
+
+        //then
+        assertThat(variables)
+                .extracting(VariableInstanceData::getName, VariableInstanceData::getExecutionId,
+                        VariableInstanceData::getLocal)
+                .containsExactly(tuple("taskVariable", subProcessExecutionId, true));
+    }
+
+    @Test
+    @DisplayName("Return only variables of the sub-process execution")
+    void givenLocalAndGlobalVariables_whenFindRuntimeVariablesByExecutionId_thenOnlyExecutionScopeVariablesReturned() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("globalVariable", new VariableValueDto("String", "globalValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        camundaRestTestHelper.putLocalExecutionVariable(camunda7, subProcessExecutionId, "localVariable",
+                new VariableValueDto("String", "localValue"));
+
+        VariableFilter filter = dataManager.create(VariableFilter.class);
+        filter.setExecutionId(subProcessExecutionId);
+
+        //when
+        List<VariableInstanceData> variables = variableService.findRuntimeVariables(
+                new VariableLoadContext().setFilter(filter));
+
+        //then
+        assertThat(variables)
+                .extracting(VariableInstanceData::getName)
+                .containsExactly("localVariable");
+    }
+
+    @Test
+    @DisplayName("Variables of a sub-process execution are not returned for the process instance execution")
+    void givenProcessInstanceExecutionId_whenFindRuntimeVariablesByExecutionId_thenOnlyProcessScopeVariablesReturned() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("globalVariable", new VariableValueDto("String", "globalValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        camundaRestTestHelper.putLocalExecutionVariable(camunda7, subProcessExecutionId, "localVariable",
+                new VariableValueDto("String", "localValue"));
+
+        VariableFilter filter = dataManager.create(VariableFilter.class);
+        filter.setExecutionId(processInstanceId);
+
+        //when
+        List<VariableInstanceData> variables = variableService.findRuntimeVariables(
+                new VariableLoadContext().setFilter(filter));
+
+        //then
+        assertThat(variables)
+                .extracting(VariableInstanceData::getName)
+                .containsExactly("globalVariable");
+    }
+
+    @Test
+    @DisplayName("The same variable name is counted once in each scope")
+    void givenSameNameInTwoScopes_whenGetRuntimeVariablesCount_thenCountIsOnePerScope() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("sharedName", new VariableValueDto("String", "globalValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        camundaRestTestHelper.putLocalExecutionVariable(camunda7, subProcessExecutionId, "sharedName",
+                new VariableValueDto("String", "localValue"));
+
+        VariableFilter processScopeFilter = dataManager.create(VariableFilter.class);
+        processScopeFilter.setExecutionId(processInstanceId);
+        processScopeFilter.setVariableName("sharedName");
+
+        VariableFilter localScopeFilter = dataManager.create(VariableFilter.class);
+        localScopeFilter.setExecutionId(subProcessExecutionId);
+        localScopeFilter.setVariableName("sharedName");
+
+        //when
+        long processScopeCount = variableService.getRuntimeVariablesCount(processScopeFilter);
+        long localScopeCount = variableService.getRuntimeVariablesCount(localScopeFilter);
+
+        //then
+        assertThat(processScopeCount).isEqualTo(1);
+        assertThat(localScopeCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Zero returned when the scope has no variable with the specified name")
+    void givenExecutionIdAndVariableNameFilters_whenGetRuntimeVariablesCount_thenZeroReturned() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("globalVariable", new VariableValueDto("String", "globalValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        VariableFilter filter = dataManager.create(VariableFilter.class);
+        filter.setExecutionId(subProcessExecutionId);
+        filter.setVariableName("globalVariable");
+
+        //when
+        long variablesCount = variableService.getRuntimeVariablesCount(filter);
+
+        //then
+        assertThat(variablesCount).isZero();
+    }
+
+    String findSubProcessExecutionId(String processInstanceId) {
+        return camundaRestTestHelper.findExecutions(camunda7, processInstanceId)
+                .stream()
+                .map(ExecutionDto::getId)
+                .filter(executionId -> !executionId.equals(processInstanceId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No child execution found for " + processInstanceId));
     }
 
     static Stream<Arguments> provideValidPaginationData() {

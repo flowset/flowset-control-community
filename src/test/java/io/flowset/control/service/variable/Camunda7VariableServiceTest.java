@@ -5,7 +5,9 @@
 
 package io.flowset.control.service.variable;
 
+import io.flowset.control.entity.filter.VariableFilter;
 import io.flowset.control.exception.EngineConnectionFailedException;
+import io.flowset.control.test_support.camunda7.dto.response.ExecutionDto;
 import io.flowset.control.test_support.camunda7.dto.response.ProcessVariablesMapDto;
 import io.jmix.core.DataManager;
 import io.flowset.control.entity.variable.VariableInstanceData;
@@ -30,6 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -175,7 +180,7 @@ public class Camunda7VariableServiceTest extends AbstractCamunda7IntegrationTest
         variableInstanceData.setExecutionId(processInstanceId);
 
         //when
-        variableService.removeVariablesLocal(processInstanceId, Set.of(variableInstanceData));
+        variableService.removeVariablesLocal(Set.of(variableInstanceData));
 
         //then
         ProcessVariablesMapDto myVariablesMap = camundaRestTestHelper.getVariablesByProcess(camunda7, processInstanceId);
@@ -205,8 +210,201 @@ public class Camunda7VariableServiceTest extends AbstractCamunda7IntegrationTest
         camunda7.stop();
 
         //when and then
-        assertThatThrownBy(() -> variableService.removeVariablesLocal(processInstanceId, Set.of(variableInstanceData)))
+        assertThatThrownBy(() -> variableService.removeVariablesLocal(Set.of(variableInstanceData)))
                 .isInstanceOf(EngineConnectionFailedException.class);
+    }
+
+    @Test
+    @DisplayName("Local flag is set for variable of sub-process execution")
+    void givenGlobalAndLocalVariables_whenLoadingVariables_thenLocalFlagSetForLocalVariable() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("globalVariable", new VariableValueDto("String", "globalValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        camundaRestTestHelper.putLocalExecutionVariable(camunda7, subProcessExecutionId, "localVariable",
+                new VariableValueDto("String", "localValue"));
+
+        VariableFilter filter = dataManager.create(VariableFilter.class);
+        filter.setProcessInstanceId(processInstanceId);
+
+        //when
+        List<VariableInstanceData> variables = variableService.findRuntimeVariables(
+                new VariableLoadContext().setFilter(filter));
+
+        //then
+        assertThat(variables)
+                .extracting(VariableInstanceData::getName, VariableInstanceData::getLocal)
+                .containsExactlyInAnyOrder(
+                        tuple("globalVariable", false),
+                        tuple("localVariable", true));
+    }
+
+    @Test
+    @DisplayName("Create local variable in sub-process execution")
+    void givenLocalFlagSet_whenUpdateVariableLocal_thenVariableCreatedInExecutionScope() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess");
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myLocalVariable");
+        variableInstanceData.setType("String");
+        variableInstanceData.setValue("localValue");
+        variableInstanceData.setExecutionId(subProcessExecutionId);
+        variableInstanceData.setLocal(true);
+
+        //when
+        variableService.updateVariableLocal(variableInstanceData);
+
+        //then
+        assertThat(camundaRestTestHelper.getVariables(camunda7, "myLocalVariable"))
+                .singleElement()
+                .extracting(VariableInstanceDto::getExecutionId, VariableInstanceDto::getValue)
+                .containsExactly(subProcessExecutionId, "localValue");
+    }
+
+    @Test
+    @DisplayName("Local variable does not change global variable with the same name")
+    void givenGlobalVariable_whenUpdateVariableLocalWithSameName_thenGlobalVariableUnchanged() {
+        //given
+        StartProcessDto startProcessDto = StartProcessDto.builder()
+                .variable("sharedName", new VariableValueDto("String", "globalValue"))
+                .build();
+
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess", startProcessDto);
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("sharedName");
+        variableInstanceData.setType("String");
+        variableInstanceData.setValue("localValue");
+        variableInstanceData.setExecutionId(subProcessExecutionId);
+        variableInstanceData.setLocal(true);
+
+        //when
+        variableService.updateVariableLocal(variableInstanceData);
+
+        //then
+        assertThat(camundaRestTestHelper.getVariables(camunda7, "sharedName"))
+                .hasSize(2)
+                .extracting(VariableInstanceDto::getExecutionId, VariableInstanceDto::getValue)
+                .containsExactlyInAnyOrder(
+                        tuple(processInstanceId, "globalValue"),
+                        tuple(subProcessExecutionId, "localValue"));
+    }
+
+    @Test
+    @DisplayName("Create non-local variable in process instance")
+    void givenLocalFlagNotSet_whenUpdateVariableLocal_thenVariableCreatedInProcessInstanceScope() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess");
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myGlobalVariable");
+        variableInstanceData.setType("String");
+        variableInstanceData.setValue("globalValue");
+        variableInstanceData.setExecutionId(processInstanceId);
+
+        //when
+        variableService.updateVariableLocal(variableInstanceData);
+
+        //then
+        assertThat(camundaRestTestHelper.getVariables(camunda7, "myGlobalVariable"))
+                .singleElement()
+                .extracting(VariableInstanceDto::getExecutionId, VariableInstanceDto::getValue)
+                .containsExactly(processInstanceId, "globalValue");
+    }
+
+    @Test
+    @DisplayName("Create local binary variable in sub-process execution")
+    void givenLocalFlagSetAndBinaryVariable_whenUpdateVariableBinary_thenVariableCreatedInExecutionScope() throws IOException {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess");
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        File dataFile = File.createTempFile("localBinaryVariable", ".txt");
+        dataFile.deleteOnExit();
+        Files.writeString(dataFile.toPath(), "binary content");
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myLocalBinaryVariable");
+        variableInstanceData.setType("Bytes");
+        variableInstanceData.setExecutionId(subProcessExecutionId);
+        variableInstanceData.setLocal(true);
+
+        //when
+        variableService.updateVariableBinary(variableInstanceData, dataFile);
+
+        //then
+        assertThat(camundaRestTestHelper.getVariables(camunda7, "myLocalBinaryVariable"))
+                .singleElement()
+                .extracting(VariableInstanceDto::getExecutionId)
+                .isEqualTo(subProcessExecutionId);
+    }
+
+    @Test
+    @DisplayName("Create local file variable in sub-process execution")
+    void givenLocalFlagSetAndFileVariable_whenUpdateVariableBinary_thenVariableCreatedInExecutionScope() throws IOException {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess");
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        File dataFile = File.createTempFile("localFileVariable", ".txt");
+        dataFile.deleteOnExit();
+        Files.writeString(dataFile.toPath(), "file content");
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myLocalFileVariable");
+        variableInstanceData.setType("File");
+        variableInstanceData.setExecutionId(subProcessExecutionId);
+        variableInstanceData.setLocal(true);
+
+        //when
+        variableService.updateVariableBinary(variableInstanceData, dataFile);
+
+        //then
+        assertThat(camundaRestTestHelper.getVariables(camunda7, "myLocalFileVariable"))
+                .singleElement()
+                .extracting(VariableInstanceDto::getExecutionId, VariableInstanceDto::getType,
+                        variable -> variable.getValueInfo().get("filename"))
+                .containsExactly(subProcessExecutionId, "File", dataFile.getName());
+    }
+
+    protected String findSubProcessExecutionId(String processInstanceId) {
+        return camundaRestTestHelper.findExecutions(camunda7, processInstanceId)
+                .stream()
+                .map(ExecutionDto::getId)
+                .filter(executionId -> !executionId.equals(processInstanceId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No child execution found for " + processInstanceId));
     }
 
     static Stream<Arguments> provideNonNullPrimitiveExistingVariables() {

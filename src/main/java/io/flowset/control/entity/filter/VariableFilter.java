@@ -21,6 +21,8 @@ public class VariableFilter {
 
     protected String activityInstanceId;
 
+    protected String executionId;
+
     protected String variableName;
 
     public String getActivityInstanceId() {
@@ -29,6 +31,14 @@ public class VariableFilter {
 
     public void setActivityInstanceId(String activityInstanceId) {
         this.activityInstanceId = activityInstanceId;
+    }
+
+    public String getExecutionId() {
+        return executionId;
+    }
+
+    public void setExecutionId(String executionId) {
+        this.executionId = executionId;
     }
 
     public String getProcessInstanceId() {
