@@ -9,6 +9,6 @@ import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.test_support.AbstractUiTest;
 import io.flowset.control.test_support.EnabledOnEngine;
 
-@EnabledOnEngine({EngineType.CAMUNDA_7, EngineType.OPERATON})
+@EnabledOnEngine({EngineType.CAMUNDA_7, EngineType.OPERATON, EngineType.CIB_SEVEN})
 public class AbstractCamunda7UiTest extends AbstractUiTest {
 }
