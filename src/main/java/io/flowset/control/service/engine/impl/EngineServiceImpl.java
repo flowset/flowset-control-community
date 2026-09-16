@@ -5,6 +5,7 @@
 
 package io.flowset.control.service.engine.impl;
 
+import io.flowset.control.service.engine.auth.EngineAuthStateService;
 import io.jmix.core.*;
 import io.jmix.core.impl.session.ThreadLocalSessionData;
 import io.jmix.core.querycondition.PropertyCondition;
@@ -33,18 +34,24 @@ public class EngineServiceImpl implements EngineService {
     protected final DataManager dataManager;
     protected final UiEventPublisher uiEventPublisher;
     protected final CurrentAuthentication currentAuthentication;
+    protected final EngineAuthStateService engineAuthStateService;
+    protected final EntityStates entityStates;
 
     public EngineServiceImpl(Metadata metadata,
                              ObjectProvider<SessionData> sessionDataProvider,
                              UiEventPublisher uiEventPublisher,
-                             CurrentAuthentication currentAuthentication, DataManager dataManager) {
+                             CurrentAuthentication currentAuthentication,
+                             DataManager dataManager,
+                             EngineAuthStateService engineAuthStateService,
+                             EntityStates entityStates) {
         this.metadata = metadata;
         this.sessionDataProvider = sessionDataProvider;
         this.uiEventPublisher = uiEventPublisher;
         this.currentAuthentication = currentAuthentication;
         this.dataManager = dataManager;
+        this.engineAuthStateService = engineAuthStateService;
+        this.entityStates = entityStates;
     }
-
 
     @Override
     public BpmEngine getSelectedEngine() {
@@ -107,7 +114,9 @@ public class EngineServiceImpl implements EngineService {
             });
         }
 
-        return dataManager.save(saveContext);
+        Set<Object> savedEntities = dataManager.save(saveContext);
+
+        return savedEntities;
     }
 
     @Override

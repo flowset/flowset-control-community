@@ -16,6 +16,7 @@ import io.flowset.control.restsupport.DynamicEngineUrlRequestInterceptor;
 import io.flowset.control.restsupport.FeignClientProvider;
 import io.flowset.control.restsupport.ObjectToStringConverter;
 import io.flowset.control.restsupport.camunda.CamundaFeignErrorDecoder;
+import io.flowset.control.service.engine.auth.EngineAuthenticator;
 import io.flowset.control.service.engine.EngineService;
 import org.camunda.community.rest.EnableCamundaRestClient;
 import org.camunda.community.rest.client.FeignClientConfiguration;
@@ -46,15 +47,15 @@ public class CamundaFeignConfiguration {
     }
 
     @Bean("control_DynamicEngineUrlRequestInterceptor")
-    public RequestInterceptor dynamicUrlInterceptor(EngineService engineService) {
-        return new DynamicEngineUrlRequestInterceptor(engineService);
+    public RequestInterceptor dynamicUrlInterceptor(EngineService engineService,
+                                                    EngineAuthenticator engineAuthenticator) {
+        return new DynamicEngineUrlRequestInterceptor(engineService, engineAuthenticator);
     }
 
     @Bean("control_ObjectToStringConverter")
     public ObjectToStringConverter objectToStringConverter() {
         return new ObjectToStringConverter();
     }
-
 
     @Bean("control_CamundaFeignErrorDecoder")
     @Primary

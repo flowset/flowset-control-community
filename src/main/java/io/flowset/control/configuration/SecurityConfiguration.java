@@ -22,7 +22,7 @@ public class SecurityConfiguration {
     @Bean
     @Order(JmixSecurityFilterChainOrder.CUSTOM)
     public SecurityFilterChain publicResourcesFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/themes/**", "/icons/**", "/lumo/**")
+        http.securityMatcher("/themes/**", "/icons/**", "/lumo/**", "/styles/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
         return http.build();

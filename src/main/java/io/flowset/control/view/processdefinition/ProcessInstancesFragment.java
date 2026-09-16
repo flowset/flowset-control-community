@@ -143,7 +143,7 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
         selectedActivityContainer.removeAll();
 
         Span activityBadge = new Span(messageBundle.formatMessage("selectedActivityBadge.text", elementId));
-        activityBadge.getElement().getThemeList().add("badge pill primary small");
+        activityBadge.getElement().getThemeList().add("badge pill primary warning small");
         activityBadge.setHeight("min-content");
 
         Tooltip tooltip = Tooltip.forComponent(activityBadge);
@@ -152,7 +152,7 @@ public class ProcessInstancesFragment extends Fragment<VerticalLayout> {
         JmixButton clearBtn = uiComponents.create(JmixButton.class);
         clearBtn.setIcon(VaadinIcon.CLOSE_SMALL.create());
         clearBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        clearBtn.addClassNames(LumoUtility.TextColor.PRIMARY_CONTRAST);
+        clearBtn.addClassNames(LumoUtility.TextColor.WARNING_CONTRAST);
         clearBtn.addClickListener(clickEvent -> {
             clearActivity();
             uiEventPublisher.publishEventForCurrentUI(new ResetActivityEvent(this, elementId));

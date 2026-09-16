@@ -32,7 +32,12 @@
                         </vbox>
                     </div>
                     <div id="externalLinksRootDiv" classNames="bordered-container" width="100%">
-                        <vbox id="externalLinksBox"/>
+                        <vbox id="externalLinkParentBox" width="100%" themeNames="spacing-s">
+                            <h3 id="externalLinksHeader" text="msg://externalLinksHeader.text"/>
+                            <vbox id="externalLinksBox" padding="false" themeNames="spacing-s"/>
+                            <flexLayout id="iconLinksBox" width="100%"
+                                        flexWrap="WRAP" alignItems="CENTER" classNames="gap-s"/>
+                        </vbox>
                     </div>
                     <div classNames="bordered-container" width="100%">
                         <vbox width="100%" themeNames="spacing-s">

@@ -74,8 +74,10 @@ public class RuntimeUserTasksTabFragment extends Fragment<VerticalLayout> {
 
     public void refreshIfChanged(String selectedActivityInstanceId) {
         if (!initialized) {
+            this.selectedActivityInstanceId = selectedActivityInstanceId;
             this.filter = metadata.create(UserTaskFilter.class);
             filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+            filter.setActivityInstanceId(selectedActivityInstanceId);
             runtimeUserTasksDl.load();
             this.initialized = true;
             return;

@@ -74,8 +74,10 @@ public class RuntimeIncidentsTabFragment extends Fragment<VerticalLayout> {
 
     public void refreshIfChanged(String selectedActivityId) {
         if (!initialized) {
+            this.selectedActivityId = selectedActivityId;
             this.filter = metadata.create(IncidentFilter.class);
             filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+            filter.setActivityId(selectedActivityId);
             runtimeIncidentsDl.load();
             this.initialized = true;
             return;

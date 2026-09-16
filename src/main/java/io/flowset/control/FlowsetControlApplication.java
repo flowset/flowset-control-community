@@ -37,7 +37,7 @@ import javax.sql.DataSource;
 @StyleSheet(Lumo.UTILITY_STYLESHEET)
 @StyleSheet(JmixLumo.STYLESHEET)
 @StyleSheet("themes/flowset/styles.css") // flowset-theme dependency
-@StyleSheet("themes/flowset-control/styles.css") // project sources
+@StyleSheet("styles/styles.css") // project sources
 public class FlowsetControlApplication
         extends SpringBootServletInitializer
         implements AppShellConfigurator {

@@ -12,6 +12,7 @@ import io.jmix.masquerade.sys.Composite;
 import lombok.Getter;
 
 import static io.flowset.control.test_support.ui.UiTestSupport.getRowByCellContent;
+import static io.jmix.masquerade.JConditions.VISIBLE;
 
 /**
  * Wrapper for the Runtime tab fragment of the Process instance detail view.
@@ -36,5 +37,28 @@ public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
      */
     public DataGrid.Row getRowByActivityId(String activityId) {
         return getRowByCellContent(activityInstancesTree, ACTIVITY_ID_COLUMN_INDEX, activityId);
+    }
+
+    /**
+     * Selects the row in the activity tree related to the specified BPMN activity identifier.
+     *
+     * @param activityId an activity identifier from BPMN XML
+     */
+    public void selectRowByActivityId(String activityId) {
+        getRowByActivityId(activityId)
+                .getCellByIndex(ACTIVITY_ID_COLUMN_INDEX)
+                .getCellContent()
+                .scrollIntoView("{block: \"center\"}")
+                .shouldBe(VISIBLE)
+                .click();
+    }
+
+    /**
+     * Clears the activity tree selection by clicking the currently selected row again.
+     *
+     * @param activityId an activity identifier of the selected row
+     */
+    public void deselectRowByActivityId(String activityId) {
+        selectRowByActivityId(activityId);
     }
 }

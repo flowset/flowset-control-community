@@ -8,6 +8,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import io.jmix.core.Messages;
@@ -26,6 +27,8 @@ import io.flowset.control.service.analytics.AnalyticsService;
 import io.flowset.control.service.analytics.AnalyticsSettingsManager;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
@@ -70,6 +73,8 @@ public class AboutProductView extends StandardView {
 
     @ViewComponent
     protected VerticalLayout externalLinksBox;
+    @ViewComponent
+    protected FlexLayout iconLinksBox;
     @ViewComponent
     protected VerticalLayout productsBox;
     @ViewComponent
@@ -138,18 +143,27 @@ public class AboutProductView extends StandardView {
 
     protected void initExternalLinks(List<AboutProductMetadata.ExternalLink> externalLinksList) {
         externalLinksBox.removeAll();
+        iconLinksBox.removeAll();
 
-        H3 externalLinkHeader = uiComponents.create(H3.class);
-        externalLinkHeader.setText(messages.getMessage(getClass(), "externalLinksHeader.text"));
-        externalLinksBox.add(externalLinkHeader);
+        externalLinksList.forEach(externalLink -> {
+            if (BooleanUtils.isTrue(externalLink.getIconLink()) && StringUtils.isNotEmpty(externalLink.getIcon())) {
+                addIconExternalLink(externalLink);
+            } else {
+                addTextExternalLink(externalLink);
+            }
+        });
+    }
 
-        if (CollectionUtils.isNotEmpty(externalLinksList)) {
-            externalLinksList.forEach(externalLink -> {
-                ExternalLinkFragment externalLinkFragment = fragments.create(this, ExternalLinkFragment.class);
-                externalLinkFragment.setLink(externalLink.getLabel(), externalLink.getUrl());
-                externalLinksBox.add(externalLinkFragment);
-            });
-        }
+    protected void addTextExternalLink(AboutProductMetadata.ExternalLink externalLink) {
+        ExternalLinkFragment externalLinkFragment = fragments.create(this, ExternalLinkFragment.class);
+        externalLinkFragment.setLink(externalLink.getLabel(), externalLink.getUrl());
+        externalLinksBox.add(externalLinkFragment);
+    }
+
+    protected void addIconExternalLink(AboutProductMetadata.ExternalLink externalLink) {
+        IconLinkFragment iconLinkFragment = fragments.create(this, IconLinkFragment.class);
+        iconLinkFragment.setLink(externalLink);
+        iconLinksBox.add(iconLinkFragment);
     }
 
     @Nullable

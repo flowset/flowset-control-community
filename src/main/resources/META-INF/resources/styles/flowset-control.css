@@ -8,7 +8,6 @@
 }
 
 html {
-    --bpmn-history-activity-color: rgba(162, 224, 172, 0.45);
     --dashboard-background-color: hsla(214, 61%, 25%, 0.02);
     --toggle-button-group-bg-color: var(--lumo-primary-color-10pct);
     --toggle-button-active-bg-color: var(--lumo-primary-color);

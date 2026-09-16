@@ -1,0 +1,16 @@
+{
+  "realm": "control-test",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "control-test-client",
+      "secret": "control-secret",
+      "enabled": true,
+      "publicClient": false,
+      "serviceAccountsEnabled": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ]
+}
