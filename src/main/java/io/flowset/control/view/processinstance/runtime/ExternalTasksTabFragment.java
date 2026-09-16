@@ -84,8 +84,10 @@ public class ExternalTasksTabFragment extends Fragment<VerticalLayout> {
 
     public void refreshIfChanged(String selectedActivityId) {
         if (!initialized) {
+            this.selectedActivityId = selectedActivityId;
             this.filter = metadata.create(ExternalTaskFilter.class);
             this.filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+            this.filter.setActivityId(selectedActivityId);
             retryAction.setAfterSaveHandler(this::reloadExternalTasks);
             runtimeExternalTasksDl.load();
             this.initialized = true;
