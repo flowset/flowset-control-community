@@ -5,8 +5,10 @@
 
 package io.flowset.control.entity.batch;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.BooleanUtils;
@@ -17,8 +19,11 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class BatchData extends RuntimeBatchData {
+
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime endTime;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime removalTime;
 
     @JmixProperty

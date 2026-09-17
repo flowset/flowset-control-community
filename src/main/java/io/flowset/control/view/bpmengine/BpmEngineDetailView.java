@@ -11,6 +11,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import io.flowset.control.service.engine.auth.EngineAuthStateService;
+import io.flowset.control.service.engine.EngineTimeService;
 import io.jmix.core.EntityStates;
 import io.jmix.core.SaveContext;
 import io.jmix.flowui.DialogWindows;
@@ -55,6 +56,8 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     @Autowired
     protected EntityStates entityStates;
     @Autowired
+    protected EngineTimeService engineTimeService;
+    @Autowired
     protected BuildProperties buildProperties;
     @Autowired
     protected EngineAuthStateService engineAuthStateService;
@@ -82,6 +85,10 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     protected JmixButton unlockBtn;
     @ViewComponent
     protected JmixComboBox<EnvironmentType> environmentTypeField;
+    @ViewComponent
+    protected TypedTextField<String> dateTimeField;
+    @ViewComponent
+    protected VerticalLayout dateTimeBox;
 
     protected boolean oauth2Changed = false;
 
@@ -102,6 +109,8 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     public void onBeforeShow(final BeforeShowEvent event) {
         BpmEngine engine = getEditedEntity();
         testConnectionAction.setEngine(engine);
+        testConnectionAction.addAfterActionHandler(this::updateTimeField);
+        updateTimeField();
         initAuthBox(engine.getAuthEnabled());
 
         if (BooleanUtils.isTrue(engine.getIsDefault()) && !entityStates.isNew(engine)) {
@@ -251,5 +260,16 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
                 && getEditedEntity().getAuthType() == AuthType.OAUTH2;
 
         authStateBox.setVisible(isOAuth2Enabled && !entityStates.isNew(getEditedEntity()));
+    }
+
+    protected void updateTimeField() {
+        if (getEditedEntity().getId() != null) {
+            String engineTime = engineTimeService.getEngineTimeDefaultFormat(getEditedEntity().getId());
+
+            dateTimeBox.setVisible(engineTime != null);
+            if (engineTime != null) {
+                dateTimeField.setTypedValue(engineTime);
+            }
+        }
     }
 }

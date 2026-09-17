@@ -5,9 +5,11 @@
 
 package io.flowset.control.entity.filter;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -32,8 +34,10 @@ public class IncidentFilter {
 
     protected String incidentMessageLike;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime incidentTimestampAfter;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime incidentTimestampBefore;
 
     public void setIncidentTimestampBefore(OffsetDateTime incidentTimestampBefore) {

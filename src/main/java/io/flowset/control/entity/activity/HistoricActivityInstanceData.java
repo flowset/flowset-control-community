@@ -5,14 +5,16 @@
 
 package io.flowset.control.entity.activity;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @JmixEntity
 public class HistoricActivityInstanceData {
@@ -42,11 +44,13 @@ public class HistoricActivityInstanceData {
 
     protected String assignee;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date startTime;
+    protected OffsetDateTime startTime;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date endTime;
+    protected OffsetDateTime endTime;
 
     protected Long durationInMillis;
 
@@ -158,19 +162,19 @@ public class HistoricActivityInstanceData {
         this.assignee = assignee;
     }
 
-    public Date getStartTime() {
+    public OffsetDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
+    public void setStartTime(OffsetDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public Date getEndTime() {
+    public OffsetDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
+    public void setEndTime(OffsetDateTime endTime) {
         this.endTime = endTime;
     }
 
