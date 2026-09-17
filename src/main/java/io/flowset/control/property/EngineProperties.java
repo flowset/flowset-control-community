@@ -29,12 +29,19 @@ public class EngineProperties {
      */
     private AuthProperties auth;
 
+    /**
+     * Lifetime to store offsets in millis.
+     */
+    private Long offsetLifetimeInMillis;
+
     public EngineProperties(String baseUrl,
                             @DefaultValue("Camunda") String name,
-                            AuthProperties auth) {
+                            AuthProperties auth,
+                            @DefaultValue("10000") Long offsetLifetimeInMillis) {
         this.baseUrl = baseUrl;
         this.name = name;
         this.auth = auth;
+        this.offsetLifetimeInMillis = offsetLifetimeInMillis;
     }
 
     @Getter

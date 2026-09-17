@@ -7,6 +7,7 @@ package io.flowset.control.view.decisioninstance.filter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
@@ -25,7 +26,9 @@ public class EvaluationTimeHeaderFilter
 
     protected TypedDateTimePicker<LocalDateTime> evaluatedAfter;
     protected TypedDateTimePicker<LocalDateTime> evaluatedBefore;
-    
+
+    protected ComponentHelper componentHelper;
+
     protected final Runnable loadDelegate;
 
     public EvaluationTimeHeaderFilter(DataGrid<HistoricDecisionInstanceShortData> dataGrid,
@@ -36,22 +39,29 @@ public class EvaluationTimeHeaderFilter
     }
 
     @Override
+    protected void autowireDependencies() {
+        super.autowireDependencies();
+
+        this.componentHelper = applicationContext.getBean(ComponentHelper.class);
+    }
+
+    @Override
     public void apply() {
         LocalDateTime startTimeBefore = this.evaluatedBefore.getValue();
         DecisionInstanceFilter decisionInstanceFilter = filterDc.getItem();
         
         if (startTimeBefore != null) {
             ZoneId zoneId = this.evaluatedBefore.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            decisionInstanceFilter.setEvaluatedBefore(startTimeBefore.atZone(zone).toOffsetDateTime());
+
+            decisionInstanceFilter.setEvaluatedBefore(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(startTimeBefore, zoneId));
         } else {
             decisionInstanceFilter.setEvaluatedBefore(null);
         }
         LocalDateTime startTimeAfter = this.evaluatedAfter.getValue();
         if (startTimeAfter != null) {
             ZoneId zoneId = this.evaluatedAfter.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            decisionInstanceFilter.setEvaluatedAfter(startTimeAfter.atZone(zone).toOffsetDateTime());
+
+            decisionInstanceFilter.setEvaluatedAfter(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(startTimeAfter, zoneId));
         } else {
             decisionInstanceFilter.setEvaluatedAfter(null);
         }

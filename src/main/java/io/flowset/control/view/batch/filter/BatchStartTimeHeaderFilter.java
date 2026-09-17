@@ -12,6 +12,7 @@ import com.vaadin.flow.router.QueryParameters;
 import io.flowset.control.entity.batch.BatchStatisticsData;
 import io.flowset.control.entity.filter.BatchFilter;
 import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.grid.DataGridColumn;
 import io.jmix.flowui.model.InstanceContainer;
@@ -64,9 +65,11 @@ public class BatchStartTimeHeaderFilter extends BatchHeaderFilter implements Has
 
     @Override
     public void apply() {
+        final ComponentHelper componentHelper = applicationContext.getBean(ComponentHelper.class);
+
         BatchFilter filter = filterDc.getItem();
-        OffsetDateTime startedAfter = toOffsetDateTime(startedAfterField.getValue(), startedAfterField.getZoneId());
-        OffsetDateTime startedBefore = toOffsetDateTime(startedBeforeField.getValue(), startedBeforeField.getZoneId());
+        OffsetDateTime startedAfter = componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(startedAfterField.getValue(), startedAfterField.getZoneId());
+        OffsetDateTime startedBefore = componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(startedBeforeField.getValue(), startedBeforeField.getZoneId());
 
         filter.setStartedAfter(startedAfter);
         filter.setStartedBefore(startedBefore);

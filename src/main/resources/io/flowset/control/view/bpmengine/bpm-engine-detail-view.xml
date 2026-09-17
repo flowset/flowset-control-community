@@ -110,6 +110,11 @@
                                 </hbox>
                             </details>
                         </vbox>
+                        <vbox id="dateTimeBox" padding="false" width="100%" themeNames="spacing-xs" visible="false">
+                            <textField id="dateTimeField" datatype="string" label="msg://engineTime.title" width="100%" readOnly="true">
+                                <tooltip text="msg://dateTimeField.tooltip"/>
+                            </textField>
+                        </vbox>
                     </vbox>
 <!--                </tab>
             </tabSheet>-->

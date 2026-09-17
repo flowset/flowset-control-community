@@ -11,6 +11,7 @@ import com.vaadin.flow.router.QueryParameters;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
@@ -52,12 +53,13 @@ public class StartTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter i
 
     @Override
     public void apply() {
+        final ComponentHelper componentHelper = applicationContext.getBean(ComponentHelper.class);
+
         LocalDateTime startTimeBefore = startTimeBeforeField.getValue();
         ProcessInstanceFilter instanceFilter = filterDc.getItem();
         if (startTimeBefore != null) {
             ZoneId zoneId = startTimeBeforeField.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            instanceFilter.setStartTimeBefore(startTimeBefore.atZone(zone).toOffsetDateTime());
+            instanceFilter.setStartTimeBefore(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(startTimeBefore, zoneId));
         } else {
             instanceFilter.setStartTimeBefore(null);
         }
@@ -65,8 +67,7 @@ public class StartTimeHeaderFilter extends ProcessInstanceDataGridHeaderFilter i
         LocalDateTime startTimeAfter = startTimeAfterField.getValue();
         if (startTimeAfter != null) {
             ZoneId zoneId = startTimeAfterField.getZoneId();
-            ZoneId zone = zoneId != null ? zoneId : ZoneId.systemDefault();
-            instanceFilter.setStartTimeAfter(startTimeAfter.atZone(zone).toOffsetDateTime());
+            instanceFilter.setStartTimeAfter(componentHelper.convertCurrentEngineOffsetDateTimeFilterValue(startTimeAfter, zoneId));
         } else {
             instanceFilter.setStartTimeAfter(null);
         }

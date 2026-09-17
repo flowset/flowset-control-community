@@ -5,10 +5,12 @@
 
 package io.flowset.control.entity.deployment;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 
 import java.time.OffsetDateTime;
 
@@ -26,6 +28,7 @@ public class DeploymentData {
     @InstanceName
     protected String name;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime deploymentTime;
 
     protected String tenantId;
