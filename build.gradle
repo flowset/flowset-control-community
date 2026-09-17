@@ -105,9 +105,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-aspectj'
 
     // Amplitude (anonymous product analytics)
-    implementation 'com.amplitude:java-sdk:1.12.4'
+    implementation 'com.amplitude:java-sdk'
     // org.json is used on the Amplitude Event API surface (Event.eventProperties)
-    implementation 'org.json:json:20231013'
+    implementation 'org.json:json'
 
     // Camunda
     implementation "io.holunda.c7:c7-rest-client-spring-boot-starter-4"
