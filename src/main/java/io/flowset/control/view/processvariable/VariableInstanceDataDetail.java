@@ -188,7 +188,14 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
         if (saveEnabled) {
             String type = variableInstanceData.getType();
             if (CamundaVariableType.FILE.getId().equals(type) || CamundaVariableType.BYTES.getId().equals(type)) {
-                variableService.updateVariableBinary(variableInstanceData, (File) variableInstanceData.getValue());
+                // The entity value contains a File only after a new upload (see handleFileUpload).
+                // If the variable is reopened and saved without changes, there is nothing to send to the engine.
+                if (variableInstanceData.getValue() instanceof File file) {
+                    variableService.updateVariableBinary(variableInstanceData, file);
+                } else {
+                    log.debug("Binary variable '{}' has no newly uploaded file, skipping binary update",
+                            variableInstanceData.getName());
+                }
             } else {
                 variableService.updateVariableLocal(variableInstanceData);
             }
@@ -306,7 +313,12 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
     }
 
     protected void handleFileUpload(FileUploadSucceededEvent<FileUploadField, byte[]> event) {
-        VariableValueInfo valueInfo = getEditedEntity().getValueInfo();
+        VariableInstanceData variableInstanceData = getEditedEntity();
+        VariableValueInfo valueInfo = variableInstanceData.getValueInfo();
+        if (valueInfo == null) {
+            valueInfo = metadata.create(VariableValueInfo.class);
+            variableInstanceData.setValueInfo(valueInfo);
+        }
         valueInfo.setFilename(event.getFileName());
         valueInfo.setMimeType(event.getMimeType());
 
