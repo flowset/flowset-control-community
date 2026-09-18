@@ -47,6 +47,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Set;
 
@@ -389,14 +390,14 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
         TypedDateTimePicker<V> component = uiComponents.create(TypedDateTimePicker.class);
         component.setDatatype(datatypeRegistry.get(clazz));
 
-        if (getEditedEntity().getValue() == null) {
-            component.setValue(LocalDateTime.now());
-        }
-
         component.addTypedValueChangeListener(event -> {
             V value = event.getValue();
             getEditedEntity().setValue(value);
         });
+        
+        if (getEditedEntity().getValue() == null) {
+            component.setValue(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+        }
         return component;
     }
 

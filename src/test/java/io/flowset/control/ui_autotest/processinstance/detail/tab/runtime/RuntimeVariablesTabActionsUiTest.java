@@ -6,9 +6,11 @@
 package io.flowset.control.ui_autotest.processinstance.detail.tab.runtime;
 
 import io.flowset.control.test_support.camunda7.AbstractCamunda7UiTest;
+import io.flowset.control.test_support.camunda7.CamundaRestTestHelper;
 import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.camunda7.dto.request.StartProcessDto;
 import io.flowset.control.test_support.camunda7.dto.request.VariableValueDto;
+import io.flowset.control.test_support.camunda7.dto.response.VariableInstanceDto;
 import io.flowset.control.test_support.engine.external.ExternalEngine;
 import io.flowset.control.test_support.engine.external.RunningExternalEngine;
 import io.flowset.control.test_support.engine.external.WithRunningExternalEngine;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import static com.codeborne.selenide.Condition.text;
+import static org.assertj.core.api.Assertions.assertThat;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.*;
 import static io.flowset.control.test_support.ui.view.processinstance.detail.tab.RuntimeVariablesTabFragment.*;
 import static io.jmix.masquerade.JConditions.*;
@@ -290,6 +293,52 @@ public class RuntimeVariablesTabActionsUiTest extends AbstractCamunda7UiTest {
         variablesTab.getRuntimeVariablesGrid()
                 .shouldHave(visibleBodyRowCount(1))
                 .shouldHave(anyBodyRowHaveCellElementText(NAME_COLUMN_INDEX, NAME_BUTTON_BY, "newVariable"));
+    }
+
+    @Test
+    @DisplayName("Create action: Date variable with untouched default value is sent to the engine")
+    void givenExistingProcessInstance_whenCreateDateVariableWithDefaultValue_thenValueSentToEngine() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUpdateVariable.bpmn")
+                .startByKey("testUpdateVariable");
+        String instanceId = dataManager.getStartedInstances("testUpdateVariable").get(0);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        RuntimeVariablesTabFragment variablesTab = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .openRuntimeVariablesTab();
+
+        variablesTab.getCreateButton().click();
+
+        VariableInstanceDataDetailDialog dialog = $j(VariableInstanceDataDetailDialog.class)
+                .exists()
+                .displayed();
+        dialog.getNameField()
+                .shouldBe(VISIBLE)
+                .setValue("newDateVariable");
+        dialog.getTypeComboBox()
+                .shouldBe(VISIBLE)
+                .setValue("Date");
+        // the value component is pre-filled with the current date - save without touching it
+        dialog.getSaveBtn().click();
+
+        dialog.shouldNotBe(VISIBLE);
+
+        // then
+        variablesTab.getRuntimeVariablesGrid()
+                .shouldHave(visibleBodyRowCount(1))
+                .shouldHave(anyBodyRowHaveCellElementText(NAME_COLUMN_INDEX, NAME_BUTTON_BY, "newDateVariable"));
+
+        VariableInstanceDto createdVariable = applicationContext.getBean(CamundaRestTestHelper.class)
+                .getVariable(camunda7, "newDateVariable");
+        assertThat(createdVariable).isNotNull();
+        assertThat(createdVariable.getType()).isEqualTo("Date");
+        assertThat(createdVariable.getValue())
+                .as("default date value must reach the engine, not null")
+                .isNotNull();
     }
 
     @Test

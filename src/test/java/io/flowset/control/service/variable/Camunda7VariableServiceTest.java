@@ -30,6 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -129,6 +132,35 @@ public class Camunda7VariableServiceTest extends AbstractCamunda7IntegrationTest
                 .hasSize(1)
                 .extracting(HistoricDetailDto::getExecutionId, HistoricDetailDto::getVariableName, HistoricDetailDto::getValue)
                 .contains(tuple(processInstanceId, "myNewVariable", newValue));
+    }
+
+    @Test
+    @DisplayName("Set new Date variable for existing process")
+    void givenExistingExecutionIdAndNewDateVariable_whenUpdateVariableLocal_thenVariableUpdated() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUpdateVariable.bpmn")
+                .startByKey("testUpdateVariable");
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testUpdateVariable").get(0);
+
+        Date newValue = Date.from(OffsetDateTime.of(2026, 9, 18, 10, 51, 0, 0, ZoneOffset.ofHours(4)).toInstant());
+
+        VariableInstanceData variableInstanceData = dataManager.create(VariableInstanceData.class);
+        variableInstanceData.setName("myDateVariable");
+        variableInstanceData.setType("Date");
+        variableInstanceData.setValue(newValue);
+        variableInstanceData.setExecutionId(processInstanceId);
+
+        //when
+        variableService.updateVariableLocal(variableInstanceData);
+
+        //then
+        VariableInstanceDto updatedRuntimeVariable = camundaRestTestHelper.getVariable(camunda7, "myDateVariable");
+        assertThat(updatedRuntimeVariable).isNotNull();
+        assertThat(updatedRuntimeVariable.getExecutionId()).isEqualTo(processInstanceId);
+        assertThat(updatedRuntimeVariable.getType()).isEqualTo("Date");
+        assertThat(VariableUtils.parseDateValue(updatedRuntimeVariable.getValue())).isEqualTo(newValue);
     }
 
     @Test
