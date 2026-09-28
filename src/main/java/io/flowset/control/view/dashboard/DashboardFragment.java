@@ -157,16 +157,26 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
             urlTextBox.setVisible(true);
             urlText.setText(selectedEngine.getBaseUrl());
 
-            String engineTime = engineTimeService.getEngineTimeDefaultFormat(selectedEngine.getId());
-            if (engineTime != null) {
-                timeLabel.setVisible(true);
-                timeText.setVisible(true);
+            uiAsyncTasks.runnableConfigurer(() -> {
+                                String engineTime = engineTimeService.getEngineTimeDefaultFormat(selectedEngine.getId());
+                                if (engineTime != null) {
+                                    timeLabel.setVisible(true);
+                                    timeText.setVisible(true);
 
-                timeText.setText(engineTime);
-            } else {
-                timeLabel.setVisible(false);
-                timeText.setVisible(false);
-            }
+                                    timeText.setText(engineTime);
+                                } else {
+                                    timeLabel.setVisible(false);
+                                    timeText.setVisible(false);
+                                }
+                            }
+                    )
+                    .withTimeout(uiProperties.getEngineTimeLoadTimeoutSec(), TimeUnit.SECONDS)
+                    .withExceptionHandler(throwable -> {
+                        log.error("Error occurs on dashboard engine time loading", throwable);
+                        timeLabel.setVisible(false);
+                        timeText.setVisible(false);
+                    })
+                    .runAsync();
         } else {
             urlTextBox.setVisible(false);
         }

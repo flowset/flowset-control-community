@@ -3,15 +3,21 @@ package io.flowset.control.view.main.selectenginepopover;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.property.UiProperties;
 import io.flowset.control.service.engine.EngineTimeService;
 import io.flowset.control.view.bpmengine.EngineEnvironmentBadgeFragment;
 import io.jmix.core.Messages;
+import io.jmix.flowui.asynctask.UiAsyncTasks;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.fragmentrenderer.FragmentRenderer;
 import io.jmix.flowui.fragmentrenderer.RendererItemContainer;
 import io.jmix.flowui.view.ViewComponent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
 @FragmentDescriptor("engine-item-fragment.xml")
 @RendererItemContainer("bpmEngineDc")
 public class EngineItemFragment extends FragmentRenderer<HorizontalLayout, BpmEngine> {
@@ -27,6 +33,12 @@ public class EngineItemFragment extends FragmentRenderer<HorizontalLayout, BpmEn
     @ViewComponent
     protected Span engineTime;
 
+    @Autowired
+    private UiProperties uiProperties;
+
+    @Autowired
+    private UiAsyncTasks uiAsyncTasks;
+
     @Override
     public void setItem(BpmEngine item) {
         super.setItem(item);
@@ -34,13 +46,22 @@ public class EngineItemFragment extends FragmentRenderer<HorizontalLayout, BpmEn
         String engineNameValue = "%s (%s)".formatted(item.getName(), messages.getMessage(item.getType()));
         engineName.setText(engineNameValue);
 
-        String time = engineTimeService.getEngineTimeDefaultFormat(item.getId());
-        if (time != null) {
-            engineTime.setVisible(true);
-            engineTime.setText(time);
-        } else {
-            engineTime.setVisible(false);
-        }
+        uiAsyncTasks.runnableConfigurer(() -> {
+                            String time = engineTimeService.getEngineTimeDefaultFormat(item.getId());
+                            if (time != null) {
+                                engineTime.setVisible(true);
+                                engineTime.setText(time);
+                            } else {
+                                engineTime.setVisible(false);
+                            }
+                        }
+                )
+                .withTimeout(uiProperties.getEngineTimeLoadTimeoutSec(), TimeUnit.SECONDS)
+                .withExceptionHandler(throwable -> {
+                    log.error("Error occurs on engine fragment engine time loading", throwable);
+                    engineTime.setVisible(false);
+                })
+                .runAsync();
 
         envField.setItem(item);
     }
