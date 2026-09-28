@@ -34,10 +34,9 @@ public class EngineItemFragment extends FragmentRenderer<HorizontalLayout, BpmEn
     protected Span engineTime;
 
     @Autowired
-    private UiProperties uiProperties;
-
+    protected UiProperties uiProperties;
     @Autowired
-    private UiAsyncTasks uiAsyncTasks;
+    protected UiAsyncTasks uiAsyncTasks;
 
     @Override
     public void setItem(BpmEngine item) {
