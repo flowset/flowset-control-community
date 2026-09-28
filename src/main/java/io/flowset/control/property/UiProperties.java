@@ -20,6 +20,12 @@ public class UiProperties {
      */
     private final int dashboardLoadTimeoutSec;
 
+
+    /**
+     * A timeout (in seconds) for asynchronously loading engine time to show in screens if engine is not available.
+     */
+    private final int engineTimeLoadTimeoutSec;
+
     /**
      * A maximum number of records loaded for the Recent activity chart. The value is applied for started and completed process instances.
      */
@@ -35,10 +41,12 @@ public class UiProperties {
 
     public UiProperties(@DefaultValue("300") int dashboardLoadTimeoutSec,
                         @DefaultValue("500") int recentActivityMaxResults,
-                        @DefaultValue("7") int recentActivityDays) {
+                        @DefaultValue("7") int recentActivityDays,
+                        @DefaultValue("300") int engineTimeLoadTimeoutSec) {
         this.dashboardLoadTimeoutSec = dashboardLoadTimeoutSec;
         this.recentActivityMaxResults = recentActivityMaxResults;
         this.recentActivityDays = recentActivityDays;
+        this.engineTimeLoadTimeoutSec = engineTimeLoadTimeoutSec;
     }
 
     /**
@@ -61,5 +69,12 @@ public class UiProperties {
      */
     public int getRecentActivityDays() {
         return recentActivityDays;
+    }
+
+    /**
+     * @return a timeout for asynchronously loading engine time for screens
+     */
+    public int getEngineTimeLoadTimeoutSec() {
+        return engineTimeLoadTimeoutSec;
     }
 }
