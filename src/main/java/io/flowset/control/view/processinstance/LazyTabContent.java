@@ -29,11 +29,7 @@ public class LazyTabContent extends Div implements ApplicationContextAware, Init
     }
 
     protected void initComponent(SerializableSupplier<? extends Component> supplier) {
-        addAttachListener(event -> {
-            if (getElement().getChildCount() == 0) {
-                add(supplier.get());
-            }
-        });
+        addAttachListener(event -> init());
     }
 
     public void init() {
