@@ -13,17 +13,24 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Optional;
+import java.util.Set;
 
 public class UrlUtils {
+
+    /**
+     * Schemes that HTTP clients used for BPM engine communication are able to handle.
+     */
+    protected static final Set<String> SUPPORTED_SCHEMES = Set.of("http", "https");
 
     public static boolean isValidUrl(@Nullable String url) {
         if (Strings.isNullOrEmpty(url)) {
             return false;
         }
         try {
-            //noinspection ResultOfMethodCallIgnored
-            new URI(url).toURL();
-            return true;
+            URL parsedUrl = new URI(url).toURL();
+            // URL normalizes the scheme to the lower case.
+            return SUPPORTED_SCHEMES.contains(parsedUrl.getProtocol())
+                    && !Strings.isNullOrEmpty(parsedUrl.getHost());
         } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             return false;
         }

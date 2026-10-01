@@ -59,8 +59,13 @@
                             <textField id="baseUrlField" width="100%" colspan="2"
                                        label="msg://io.flowset.control.entity.engine/BpmEngine.baseUrl"
                                        valueChangeMode="ON_BLUR"
-                                       property="baseUrl"
-                                       classNames="pt-s"/>
+                                       property="baseUrl" required="true"
+                                       classNames="pt-s">
+                                <validators>
+                                    <notEmpty/>
+                                    <custom bean="control_UrlValidator"/>
+                                </validators>
+                            </textField>
                             <hbox padding="false" maxWidth="20em">
                                 <comboBox id="environmentTypeField"
                                           label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType"
