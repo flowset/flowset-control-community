@@ -20,7 +20,6 @@ public class UiProperties {
      */
     private final int dashboardLoadTimeoutSec;
 
-
     /**
      * A timeout (in seconds) for asynchronously loading engine time to show in screens if engine is not available.
      */
@@ -39,14 +38,30 @@ public class UiProperties {
     @PositiveOrZero
     private final int recentActivityDays;
 
+    /**
+     * A maximum number of files that can be uploaded to a single deployment in the Upload deployment view.
+     */
+    @Positive
+    private final int deploymentUploadMaxFiles;
+
+    /**
+     * A maximum size (in bytes) of a single file uploaded in the Upload deployment view.
+     */
+    @Positive
+    private final long deploymentUploadMaxFileSizeBytes;
+
     public UiProperties(@DefaultValue("300") int dashboardLoadTimeoutSec,
                         @DefaultValue("500") int recentActivityMaxResults,
                         @DefaultValue("7") int recentActivityDays,
-                        @DefaultValue("300") int engineTimeLoadTimeoutSec) {
+                        @DefaultValue("300") int engineTimeLoadTimeoutSec,
+                        @DefaultValue("50") int deploymentUploadMaxFiles,
+                        @DefaultValue("10485760") long deploymentUploadMaxFileSizeBytes) {
         this.dashboardLoadTimeoutSec = dashboardLoadTimeoutSec;
         this.recentActivityMaxResults = recentActivityMaxResults;
         this.recentActivityDays = recentActivityDays;
         this.engineTimeLoadTimeoutSec = engineTimeLoadTimeoutSec;
+        this.deploymentUploadMaxFiles = deploymentUploadMaxFiles;
+        this.deploymentUploadMaxFileSizeBytes = deploymentUploadMaxFileSizeBytes;
     }
 
     /**
@@ -55,7 +70,6 @@ public class UiProperties {
     public int getDashboardLoadTimeoutSec() {
         return dashboardLoadTimeoutSec;
     }
-
 
     /**
      * @return a maximum number of records loaded for the Recent activity chart
@@ -76,5 +90,19 @@ public class UiProperties {
      */
     public int getEngineTimeLoadTimeoutSec() {
         return engineTimeLoadTimeoutSec;
+    }
+
+    /**
+     * @return a maximum number of files that can be uploaded to a single deployment
+     */
+    public int getDeploymentUploadMaxFiles() {
+        return deploymentUploadMaxFiles;
+    }
+
+    /**
+     * @return a maximum size (in bytes) of a single uploaded deployment file
+     */
+    public long getDeploymentUploadMaxFileSizeBytes() {
+        return deploymentUploadMaxFileSizeBytes;
     }
 }
