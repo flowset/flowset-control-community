@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://deploymentUploadView.title">
+    <data>
+        <keyValueCollection id="filesDc">
+            <properties idProperty="id">
+                <property name="id" datatype="uuid"/>
+                <property name="fileName" datatype="string"/>
+                <property name="type" datatype="string"/>
+                <property name="keys" datatype="string"/>
+                <property name="size" datatype="long"/>
+                <property name="status" datatype="string"/>
+                <property name="details" datatype="string"/>
+            </properties>
+        </keyValueCollection>
+        <keyValueCollection id="referencesDc">
+            <properties idProperty="id">
+                <property name="id" datatype="uuid"/>
+                <property name="fileName" datatype="string"/>
+                <property name="element" datatype="string"/>
+                <property name="kind" datatype="string"/>
+                <property name="key" datatype="string"/>
+                <property name="binding" datatype="string"/>
+                <property name="location" datatype="string"/>
+                <property name="message" datatype="string"/>
+            </properties>
+        </keyValueCollection>
+    </data>
+    <layout expand="filesSplit">
+        <split id="filesSplit"
+               orientation="HORIZONTAL"
+               width="100%"
+               splitterPosition="45"
+               themeNames="splitter-spacing">
+            <vbox id="filesPanel" padding="false" height="100%">
+                <formLayout id="deploymentForm" width="100%">
+                    <responsiveSteps>
+                        <responsiveStep minWidth="0" columns="1"/>
+                        <responsiveStep minWidth="40em" columns="2"/>
+                    </responsiveSteps>
+                    <textField id="deploymentNameField"
+                               label="msg://deploymentNameField.label"
+                               clearButtonVisible="true"/>
+                    <checkbox id="skipUnchangedField"
+                              label="msg://skipUnchangedField.label"
+                              helperText="msg://skipUnchangedField.helperText"/>
+                </formLayout>
+                <span id="tenantInfo"
+                      classNames="text-secondary text-s"
+                      visible="false"/>
+
+                <upload id="filesUpload"
+                        width="100%"
+                        dropAllowed="true"
+                        uploadHandlerType="IN_MEMORY"
+                        uploadText="msg://filesUpload.uploadText"
+                        uploadIcon="UPLOAD"/>
+                <span id="filesUploadHelperText"
+                      classNames="text-secondary text-s"/>
+                <span id="noDeployPermissionInfo"
+                      classNames="text-secondary text-s"
+                      text="msg://noDeployPermission"
+                      visible="false"/>
+
+                <hbox id="filesButtonsPanel" classNames="buttons-panel">
+                    <button id="removeFileBtn" action="filesDataGrid.remove"/>
+                    <button id="errorsBtn" visible="false"
+                            themeNames="badge error pill tertiary-inline has-icon">
+                        <prefix>
+                            <icon id="deploymentErrorsIcon" icon="WARNING"/>
+                        </prefix>
+                    </button>
+                </hbox>
+                <dataGrid id="filesDataGrid"
+                          width="100%"
+                          minHeight="10em"
+                          selectionMode="SINGLE"
+                          dataContainer="filesDc">
+                    <actions>
+                        <action id="remove" type="list_itemTracking" text="msg://removeFile" icon="TRASH"/>
+                    </actions>
+                    <columns resizable="true">
+                        <column property="fileName" header="msg://fileName" flexGrow="1"/>
+                        <column property="type" header="msg://type" autoWidth="true"/>
+                        <column property="keys" header="msg://keys" autoWidth="true"/>
+                        <column property="size" header="msg://size" autoWidth="true"/>
+                        <column property="status" header="msg://status" autoWidth="true" sortable="false"/>
+                        <column property="details" header="msg://details" flexGrow="1"/>
+                    </columns>
+                </dataGrid>
+                <span id="referencesHeader"
+                      classNames="font-semibold"
+                      text="msg://references"
+                      visible="false"/>
+                <dataGrid id="referencesDataGrid"
+                          width="100%"
+                          minHeight="8em"
+                          selectionMode="NONE"
+                          visible="false"
+                          dataContainer="referencesDc">
+                    <columns resizable="true">
+                        <column property="fileName" header="msg://fileName" autoWidth="true"/>
+                        <column property="element" header="msg://referenceElement" autoWidth="true"/>
+                        <column property="kind" header="msg://referenceKind" autoWidth="true"/>
+                        <column property="key" header="msg://referenceKey" autoWidth="true"/>
+                        <column property="binding" header="msg://referenceBinding" autoWidth="true"/>
+                        <column property="location" header="msg://referenceLocation" autoWidth="true"
+                                sortable="false"/>
+                        <column property="message" header="msg://referenceMessage" flexGrow="1"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
+            <vbox id="previewPanel" padding="false" height="100%">
+                <fragment id="resourcePreviewFragment"
+                          class="io.flowset.control.view.deploymentresource.DeploymentResourcePreviewFragment"/>
+            </vbox>
+        </split>
+
+        <hbox>
+            <button id="okBtn" text="msg://deploy" icon="ROCKET"
+                    themeNames="primary" enabled="false"/>
+            <button id="cancelBtn" text="msg:///actions.Cancel" icon="BAN"/>
+        </hbox>
+    </layout>
+</view>

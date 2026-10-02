@@ -20,7 +20,9 @@ import io.flowset.control.service.deployment.DeploymentLoadContext;
 import io.flowset.control.service.deployment.DeploymentService;
 import io.flowset.control.service.engine.EngineTenantProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.repository.Deployment;
+import org.camunda.bpm.engine.repository.DeploymentBuilder;
 import org.camunda.bpm.engine.repository.DeploymentQuery;
 import org.camunda.bpm.engine.repository.DeploymentWithDefinitions;
 import org.camunda.community.rest.client.api.DeploymentApiClient;
@@ -67,15 +69,29 @@ public class DeploymentServiceImpl implements DeploymentService {
 
         String tenant = engineTenantProvider.getCurrentUserTenantId();
         try {
-            return deployment
+            DeploymentBuilder builder = deployment
                     .tenantId(tenant)
-                    .source(FLOWSET_CONTROL_SOURCE)
-                    .addInputStream(context.getResourceName(), context.getResourceContent())
-                    .deployWithResult();
+                    .source(FLOWSET_CONTROL_SOURCE);
+
+            if (StringUtils.isNotBlank(context.getDeploymentName())) {
+                builder.name(context.getDeploymentName());
+            }
+            if (context.isSkipUnchangedResources()) {
+                // sends both enable-duplicate-filtering=true and deploy-changed-only=true
+                builder.enableDuplicateFiltering(true);
+            }
+            if (context.getResourceName() != null && context.getResourceContent() != null) {
+                builder.addInputStream(context.getResourceName(), context.getResourceContent());
+            }
+            if (context.getResources() != null) {
+                context.getResources().forEach(builder::addInputStream);
+            }
+
+            return builder.deployWithResult();
         } catch (Exception e) {
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (isConnectionError(rootCause)) {
-                log.error("Unable to deployment '{}' because of connection error: ", context.getResourceName(), e);
+                log.error("Unable to deployment '{}' because of connection error: ", getDeploymentLogName(context), e);
                 throw new EngineConnectionFailedException(e.getMessage(), 1, e.getMessage());
             }
             throw e;
@@ -218,6 +234,16 @@ public class DeploymentServiceImpl implements DeploymentService {
             }
             throw e;
         }
+    }
+
+    protected String getDeploymentLogName(DeploymentContext context) {
+        if (StringUtils.isNotBlank(context.getDeploymentName())) {
+            return context.getDeploymentName();
+        }
+        if (context.getResourceName() != null) {
+            return context.getResourceName();
+        }
+        return context.getResources() != null ? String.join(", ", context.getResources().keySet()) : "";
     }
 
     protected DeploymentQuery createDeploymentQuery(@Nullable DeploymentFilter filter, @Nullable Sort sort) {
