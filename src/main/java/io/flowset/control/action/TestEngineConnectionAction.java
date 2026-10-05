@@ -33,6 +33,8 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import static io.flowset.control.util.ExceptionUtils.isConnectionError;
 import static io.flowset.control.util.UrlUtils.isValidUrl;
+import java.util.ArrayList;
+import java.util.List;
 
 @ActionType(TestEngineConnectionAction.ID)
 public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConnectionAction> {
@@ -47,6 +49,8 @@ public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConn
     protected Metadata metadata;
     protected AccessManager accessManager;
 
+    protected List<Runnable> afterActionHandlers = new ArrayList<>();
+
     public TestEngineConnectionAction() {
         super(ID);
     }
@@ -59,6 +63,10 @@ public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConn
 
     public void setEngine(BpmEngine engine) {
         this.engine = engine;
+    }
+
+    public void addAfterActionHandler(Runnable afterActionHandler) {
+        afterActionHandlers.add(afterActionHandler);
     }
 
     @Autowired
@@ -99,12 +107,14 @@ public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConn
                                     Strings.nullToEmpty(engine.getBaseUrl())))
                     .withType(Notifications.Type.ERROR)
                     .show();
+            afterActionHandlers.forEach(Runnable::run);
             return;
         }
 
         if (BooleanUtils.isTrue(engine.getAuthEnabled()) && engine.getAuthType() != null) {
             boolean valid = validateAuthFields();
             if (!valid) {
+                afterActionHandlers.forEach(Runnable::run);
                 return;
             }
         }
@@ -114,6 +124,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConn
             notifications.create(messages.formatMessage("", "engineAvailable", engine.getBaseUrl()))
                     .withType(Notifications.Type.SUCCESS)
                     .show();
+            afterActionHandlers.forEach(Runnable::run);
         } catch (EngineConnectionFailedException e) {
             if (e.getStatusCode() > 0) {
                 notifications.create(messages.getMessage("engineNotAvailable.title"),
@@ -127,6 +138,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConn
                         .withType(Notifications.Type.ERROR)
                         .show();
             }
+            afterActionHandlers.forEach(Runnable::run);
         } catch (OAuth2AuthorizationException | AccessTokenConnectException e) {
             log.error("Error during getting access token authorization", e);
 
@@ -136,6 +148,7 @@ public class TestEngineConnectionAction extends SecuredBaseAction<TestEngineConn
                             messages.formatMessage("", "oauth2AuthorizationFailure.descriptionWithError", errorMessage))
                     .withType(Notifications.Type.ERROR)
                     .show();
+            afterActionHandlers.forEach(Runnable::run);
         }
     }
 

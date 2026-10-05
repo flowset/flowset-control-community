@@ -52,6 +52,7 @@
                 </column>
                 <column property="baseUrl" flexGrow="2" autoWidth="true"/>
                 <column property="type" autoWidth="true"/>
+                <column key="engineTime" header="msg://engineTime.title"/>
                <column key="actions" sortable="false" autoWidth="true" flexGrow="0"/>
             </columns>
         </dataGrid>

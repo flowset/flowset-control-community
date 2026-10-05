@@ -13,7 +13,8 @@ public enum EngineType implements EnumClass<String> {
 
     CAMUNDA_7("Camunda 7"),
     OPERATON("OPERATON"),
-    FLUXNOVA("FLUXNOVA");
+    FLUXNOVA("FLUXNOVA"),
+    CIB_SEVEN("CIB_SEVEN");
 
     private final String id;
 

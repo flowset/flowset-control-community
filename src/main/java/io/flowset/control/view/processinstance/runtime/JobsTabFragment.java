@@ -14,6 +14,7 @@ import io.flowset.control.action.job.ActivateJobGridAction;
 import io.flowset.control.action.job.RetryJobGridAction;
 import io.flowset.control.action.job.SuspendJobGridAction;
 import io.flowset.control.view.job.column.JobIdColumnFragment;
+import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
@@ -37,6 +38,7 @@ import io.flowset.control.service.job.JobLoadContext;
 import io.flowset.control.service.job.JobService;
 import io.flowset.control.view.processinstance.event.JobCountUpdateEvent;
 import io.flowset.control.view.processinstance.event.JobRetriesUpdateEvent;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
@@ -55,7 +57,7 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
     @Autowired
     protected DialogWindows dialogWindows;
     @Autowired
-    protected DatatypeFormatter datatypeFormatter;
+    protected ComponentHelper componentHelper;
 
     @ViewComponent
     protected CollectionLoader<JobData> runtimeJobsDl;
@@ -72,20 +74,29 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
     protected JobFilter filter;
+    protected String selectedActivityId;
     protected boolean initialized = false;
     @Autowired
     private UiComponents uiComponents;
     @Autowired
     private Fragments fragments;
 
-
-    public void refreshIfRequired() {
+    public void refreshIfChanged(String selectedActivityId) {
         if (!initialized) {
+            this.selectedActivityId = selectedActivityId;
             this.filter = metadata.create(JobFilter.class);
             this.filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+            this.filter.setActivityId(selectedActivityId);
 
             runtimeJobsDl.load();
             this.initialized = true;
+            return;
+        }
+
+        if (!Strings.CS.equals(this.selectedActivityId, selectedActivityId)) {
+            this.selectedActivityId = selectedActivityId;
+            filter.setActivityId(selectedActivityId);
+            runtimeJobsDl.load();
         }
     }
 
@@ -158,8 +169,7 @@ public class JobsTabFragment extends Fragment<VerticalLayout> {
 
     @Install(to = "runtimeJobsGrid.createTime", subject = "tooltipGenerator")
     protected String runtimeJobsGridCreateTimeTooltipGenerator(final JobData jobData) {
-        Date createTime = jobData.getCreateTime();
-        return datatypeFormatter.formatDateTime(createTime);
+        return componentHelper.formatCurrentEngineOffsetDateTime(jobData.getCreateTime());
     }
 
     @Supply(to = "runtimeJobsGrid.jobId", subject = "renderer")

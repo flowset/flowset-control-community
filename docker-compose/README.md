@@ -7,12 +7,12 @@ The following Docker Compose files are provided:
     - **Flowset Control**
     - PostgresQL which is used by **Flowset Control**
 
-   **Note:** This Docker Compose is suitable for cases when you need to connect to already running external Camunda 7 engines.
+   **Note:** This Docker Compose is suitable for cases when you need to connect to already running external Operaton engines.
 2. [docker-compose-full.yaml](docker-compose-full.yaml) which contains these components:
     - **Flowset Control**
     - PostgresQL which is used by **Flowset Control**
-    - Camunda 7 as the external BPM engine - an engine that runs on the `8082` port by default.
-    - PostgresQL which is used by Camunda 7
+    - Operaton as the external BPM engine - an engine that runs on the `8082` port by default.
+    - PostgresQL which is used by Operaton
 
 ## Running using Docker Compose
 
@@ -33,7 +33,7 @@ The following Docker Compose files are provided:
    cd docker-compose
    ```
 5. Execute the following commands:
-     - **Flowset Control only:** If you want to run Flowset Control without the Camunda 7 engine, use:
+     - **Flowset Control only:** If you want to run Flowset Control without the Operaton engine, use:
         ```shell
         docker compose -f docker-compose-core.yaml up -d
         ```
@@ -41,26 +41,26 @@ The following Docker Compose files are provided:
         ```shell
         docker container ls -f "name=flowset-control-app" -f "name=flowset-control-database"
         ```
-    - **Flowset Control + external Camunda 7:** If you want to run not only Flowset Control, but also the Camunda 7 engine, use
+    - **Flowset Control + external Operaton:** If you want to run not only Flowset Control, but also the Operaton engine, use
       ```shell
       docker compose -f docker-compose-full.yaml up -d
       ```
       To check container statuses:
       ```shell
-      docker container ls -f "name=flowset-control-app" -f "name=flowset-control-database" -f "name=camunda7-bpm-platform" -f "name=camunda7-bpm-platform-database"
+      docker container ls -f "name=flowset-control-app" -f "name=flowset-control-database" -f "name=operaton-bpm-platform" -f "name=operaton-bpm-platform-database"
       ```
 6. Open Flowset Control in your browser using the link [http://localhost:8081](http://localhost:8081) and login as `admin/admin`.
-7. Configure your first connection to the Camunda 7 engine. 
+7. Configure your first connection to the Operaton engine. 
    
-   If you are running Camunda 7 using `docker-compose-full.yaml`, enter the following data:
+   If you are running Operaton using `docker-compose-full.yaml`, enter the following data:
    - **Name**: any short name for the configuring engine, e.g. `Dev stand`
-   - **Base URL**: `http://camunda7-bpm-platform:8082/engine-rest`
+   - **Base URL**: `http://operaton-bpm-platform:8082/engine-rest`
    - **Authentication**: Enabled
    - **Authentication type**: Basic
    - **Username:** `admin`
    - **Password:** `admin`
 8. Click the **Test connection** to check that values are correct and the BPM engine is available.
-9. Save the Camunda 7 connection configuration.
+9. Save the Operaton connection configuration.
 
 Now you can deploy processes to the configured BPM engine and manage process instances running on this engine.
 

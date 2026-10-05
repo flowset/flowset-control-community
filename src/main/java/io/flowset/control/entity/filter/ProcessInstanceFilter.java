@@ -5,10 +5,12 @@
 
 package io.flowset.control.entity.filter;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,12 +36,16 @@ public class ProcessInstanceFilter {
 
     protected String processDefinitionKey;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime startTimeAfter;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime startTimeBefore;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime endTimeAfter;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime endTimeBefore;
 
     protected Boolean withIncidents;

@@ -5,14 +5,16 @@
 
 package io.flowset.control.entity;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.Date;
+import java.time.OffsetDateTime;
 
 @JmixEntity
 public class ExternalTaskData {
@@ -28,8 +30,9 @@ public class ExternalTaskData {
 
     protected String errorMessage;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     @Temporal(TemporalType.TIMESTAMP)
-    protected Date lockExpirationTime;
+    protected OffsetDateTime lockExpirationTime;
 
     protected String processDefinitionId;
 
@@ -49,11 +52,11 @@ public class ExternalTaskData {
 
     protected String businessKey;
 
-    public void setLockExpirationTime(Date lockExpirationTime) {
+    public void setLockExpirationTime(OffsetDateTime lockExpirationTime) {
         this.lockExpirationTime = lockExpirationTime;
     }
 
-    public Date getLockExpirationTime() {
+    public OffsetDateTime getLockExpirationTime() {
         return lockExpirationTime;
     }
 

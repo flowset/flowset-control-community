@@ -49,7 +49,7 @@ public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
     }
 
     /**
-     * Selects the row in the activity tree by the specified BPMN activity identifier.
+     * Selects the row in the activity tree related to the specified BPMN activity identifier.
      *
      * @param activityId an activity identifier from BPMN XML
      */
@@ -58,7 +58,17 @@ public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
                 .getCellByIndex(ACTIVITY_ID_COLUMN_INDEX)
                 .getCellContent()
                 .find(ACTIVITY_NAME_BY)
+                .scrollIntoView("{block: \"center\"}")
                 .shouldBe(VISIBLE)
                 .click();
+    }
+
+    /**
+     * Clears the activity tree selection by clicking the currently selected row again.
+     *
+     * @param activityId an activity identifier of the selected row
+     */
+    public void deselectRowByActivityId(String activityId) {
+        selectRowByActivityId(activityId);
     }
 }

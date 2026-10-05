@@ -5,9 +5,9 @@
 
 package io.flowset.control.mapper;
 
-import io.jmix.core.Metadata;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.incident.IncidentData;
+import io.jmix.core.Metadata;
 import org.camunda.community.rest.client.model.HistoricIncidentDto;
 import org.camunda.community.rest.client.model.IncidentDto;
 import org.mapstruct.Mapper;

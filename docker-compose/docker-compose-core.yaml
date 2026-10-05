@@ -3,8 +3,8 @@
 # Use is subject to license terms.
 #
 
-# This is a lightweight configuration with Flowset control application + database that does not include Camunda 7.
-# See docker-compose-full.yml for a full configuration that includes external Camunda 7.
+# This is a lightweight configuration with Flowset control application + database that does not include Operaton.
+# See docker-compose-full.yml for a full configuration that includes external Operaton.
 
 services:
   flowset-control-app: # Flowset Сontrol web application exposed on the configured port (by default 8081)

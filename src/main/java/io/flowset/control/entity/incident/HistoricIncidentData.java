@@ -5,8 +5,10 @@
 
 package io.flowset.control.entity.incident;
 
+import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.PropertyDatatype;
 import org.apache.commons.lang3.Strings;
 import org.camunda.bpm.engine.runtime.Incident;
 
@@ -28,8 +30,10 @@ public class HistoricIncidentData {
 
     protected String processInstanceId;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime createTime;
 
+    @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime endTime;
 
     protected Boolean open;

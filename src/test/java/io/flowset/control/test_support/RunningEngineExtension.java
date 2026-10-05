@@ -11,6 +11,7 @@ import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.test_support.camunda7.CamundaRunContainer;
+import io.flowset.control.test_support.camunda7.CibSevenContainer;
 import io.flowset.control.test_support.camunda7.OperatonContainer;
 import io.flowset.control.test_support.testcontainers.ContainerWrapper;
 import io.flowset.control.test_support.testcontainers.EngineContainer;
@@ -233,6 +234,8 @@ public class RunningEngineExtension implements BeforeAllCallback, BeforeEachCall
             return new CamundaRunContainer(imageName);
         } else if (imageName.isCompatibleWith(OperatonContainer.DEFAULT_IMAGE_NAME)) {
             return new OperatonContainer(imageName);
+        } else if (imageName.isCompatibleWith(CibSevenContainer.DEFAULT_IMAGE_NAME)) {
+            return new CibSevenContainer(imageName);
         }
 
         throw new ExtensionConfigurationException("RunningEngineExtension is supported only for known docker images of BPM engines");

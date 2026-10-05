@@ -18,7 +18,13 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.filter.VariableFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.entity.variable.CamundaVariableType;
+import io.flowset.control.entity.variable.VariableInstanceData;
+import io.flowset.control.entity.variable.VariableValueInfo;
+import io.flowset.control.service.variable.VariableService;
+import io.flowset.control.service.variable.VariableUtils;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.flowui.Actions;
@@ -35,12 +41,6 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.kit.component.upload.event.FileUploadSucceededEvent;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
-import io.flowset.control.entity.filter.VariableFilter;
-import io.flowset.control.entity.variable.CamundaVariableType;
-import io.flowset.control.entity.variable.VariableInstanceData;
-import io.flowset.control.entity.variable.VariableValueInfo;
-import io.flowset.control.service.variable.VariableService;
-import io.flowset.control.service.variable.VariableUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -52,6 +52,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Set;
 import java.util.function.Function;
@@ -248,7 +249,14 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
         if (saveEnabled) {
             String type = variableInstanceData.getType();
             if (CamundaVariableType.FILE.getId().equals(type) || CamundaVariableType.BYTES.getId().equals(type)) {
-                variableService.updateVariableBinary(variableInstanceData, (File) variableInstanceData.getValue());
+                // The entity value contains a File only after a new upload (see handleFileUpload).
+                // If the variable is reopened and saved without changes, there is nothing to send to the engine.
+                if (variableInstanceData.getValue() instanceof File file) {
+                    variableService.updateVariableBinary(variableInstanceData, file);
+                } else {
+                    log.debug("Binary variable '{}' has no newly uploaded file, skipping binary update",
+                            variableInstanceData.getName());
+                }
             } else {
                 variableService.updateVariableLocal(variableInstanceData);
             }
@@ -366,7 +374,12 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
     }
 
     protected void handleFileUpload(FileUploadSucceededEvent<FileUploadField, byte[]> event) {
-        VariableValueInfo valueInfo = getEditedEntity().getValueInfo();
+        VariableInstanceData variableInstanceData = getEditedEntity();
+        VariableValueInfo valueInfo = variableInstanceData.getValueInfo();
+        if (valueInfo == null) {
+            valueInfo = metadata.create(VariableValueInfo.class);
+            variableInstanceData.setValueInfo(valueInfo);
+        }
         valueInfo.setFilename(event.getFileName());
         valueInfo.setMimeType(event.getMimeType());
 
@@ -436,15 +449,14 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
         TypedDateTimePicker<V> component = uiComponents.create(TypedDateTimePicker.class);
         component.setDatatype(datatypeRegistry.get(clazz));
 
-        if (getEditedEntity().getValue() == null) {
-            component.setValue(LocalDateTime.now());
-            getEditedEntity().setValue(component.getTypedValue());
-        }
-
         component.addTypedValueChangeListener(event -> {
             V value = event.getValue();
             getEditedEntity().setValue(value);
         });
+        
+        if (getEditedEntity().getValue() == null) {
+            component.setValue(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+        }
         return component;
     }
 

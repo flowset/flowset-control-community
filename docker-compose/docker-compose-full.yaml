@@ -3,8 +3,8 @@
 # Use is subject to license terms.
 #
 
-# This is a full configuration with Flowset control application + database and external Camunda 7 + database
-# See docker-compose-core.yml for a lightweight configuration that does not include Camunda 7.
+# This is a full configuration with Flowset control application + database and external Operaton + database
+# See docker-compose-core.yml for a lightweight configuration that does not include Operaton.
 
 services:
   flowset-control-app: # Flowset Сontrol web application exposed on configured port (by default 8081)
@@ -54,24 +54,24 @@ services:
     networks:
       - flowset-control-platform-net
 
-  camunda7-bpm-platform: # Camunda 7 included REST API and web apps exposed on configured port (by default 8082)
-    container_name: camunda7-bpm-platform
-    image: camunda/camunda-bpm-platform:run-${CAMUNDA_RUN_VERSION}
+  operaton-bpm-platform: # Operaton included REST API and web apps exposed on configured port (by default 8082)
+    container_name: operaton-bpm-platform
+    image: operaton/operaton:${OPERATON_RUN_VERSION}
     environment:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.postgresql.Driver"
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://camunda7-bpm-platform-database:5432/${CAMUNDA7_DB_NAME}"
-      SPRING_DATASOURCE_USERNAME: "${CAMUNDA7_DB_USERNAME}"
-      SPRING_DATASOURCE_PASSWORD: "${CAMUNDA7_DB_PASSWORD}"
-      SERVER_PORT: "${CAMUNDA7_SERVER_PORT}"
-      CAMUNDA_BPM_RUN_AUTH_ENABLED: "true"
-      CAMUNDA_BPM_ADMIN_USER_ID: "${CAMUNDA7_UI_ADMIN_USERNAME}"
-      CAMUNDA_BPM_ADMIN_USER_PASSWORD: "${CAMUNDA7_UI_ADMIN_PASSWORD}"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://operaton-bpm-platform-database:5432/${OPERATON_DB_NAME}"
+      SPRING_DATASOURCE_USERNAME: "${OPERATON_DB_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${OPERATON_DB_PASSWORD}"
+      SERVER_PORT: "${OPERATON_SERVER_PORT}"
+      OPERATON_BPM_RUN_AUTH_ENABLED: "true"
+      OPERATON_BPM_ADMIN_USER_ID: "${OPERATON_UI_ADMIN_USERNAME}"
+      OPERATON_BPM_ADMIN_USER_PASSWORD: "${OPERATON_UI_ADMIN_PASSWORD}"
     ports:
-      - "${CAMUNDA7_SERVER_PORT}:${CAMUNDA7_SERVER_PORT}"
+      - "${OPERATON_SERVER_PORT}:${OPERATON_SERVER_PORT}"
     depends_on:
-      camunda7-bpm-platform-database:
+      operaton-bpm-platform-database:
         condition: service_started
-    command: ./camunda.sh --rest --webapps
+#    command: ./operaton.sh --rest --webapps
     healthcheck:
       test: curl --fail --silent http://localhost:$$SERVER_PORT/engine-rest/engine | grep default  || exit 1
       interval: 30s
@@ -81,17 +81,17 @@ services:
     networks:
       - flowset-control-platform-net
 
-  camunda7-bpm-platform-database: # PostgresQL database used by Camunda 7
+  operaton-bpm-platform-database: # PostgresQL database used by Operaton
       image: postgres:16.3
-      container_name: camunda7-bpm-platform-database
+      container_name: operaton-bpm-platform-database
       ports:
         - "5433:5432"
       environment:
-        - POSTGRES_USER=${CAMUNDA7_DB_USERNAME}
-        - POSTGRES_PASSWORD=${CAMUNDA7_DB_PASSWORD}
-        - POSTGRES_DB=${CAMUNDA7_DB_NAME}
+        - POSTGRES_USER=${OPERATON_DB_USERNAME}
+        - POSTGRES_PASSWORD=${OPERATON_DB_PASSWORD}
+        - POSTGRES_DB=${OPERATON_DB_NAME}
       volumes:
-        - camunda7-bpm-platform-database_data:/var/lib/postgresql/data
+        - operaton-bpm-platform-database_data:/var/lib/postgresql/data
       healthcheck:
         test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
         interval: 10s
@@ -103,7 +103,7 @@ services:
 
 volumes:
   flowset-control-database_data:
-  camunda7-bpm-platform-database_data:
+  operaton-bpm-platform-database_data:
 
 networks:
   flowset-control-platform-net:

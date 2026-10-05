@@ -85,7 +85,9 @@ public class CamundaDataCleaner implements EngineDataCleaner<HasRunningEngineDat
     @Override
     public boolean supports(HasRunningEngineData engineContainer) {
         EngineType engineType = engineContainer.getEngineType();
-        return engineType == EngineType.CAMUNDA_7 || engineType == EngineType.OPERATON;
+        return engineType == EngineType.CAMUNDA_7
+                || engineType == EngineType.OPERATON
+                || engineType == EngineType.CIB_SEVEN;
     }
 
     private void logDataCleanResult(HasRunningEngineData camunda) {
