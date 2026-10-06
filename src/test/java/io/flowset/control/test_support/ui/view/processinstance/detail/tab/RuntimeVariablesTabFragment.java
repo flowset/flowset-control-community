@@ -9,6 +9,7 @@ import io.flowset.control.test_support.ui.component.GridContextMenu;
 import io.flowset.control.test_support.ui.component.SimplePagination;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.Checkbox;
 import io.jmix.masquerade.component.DataGrid;
 import io.jmix.masquerade.sys.Composite;
 import lombok.Getter;
@@ -38,6 +39,9 @@ public class RuntimeVariablesTabFragment extends Composite<RuntimeVariablesTabFr
 
     @TestComponent(path = "runtimeTabFragmentRuntimeVariableRemoveBtn")
     private Button removeButton;
+
+    @TestComponent(path = "runtimeTabFragmentExecutionVariablesCheckbox")
+    private Checkbox executionVariablesCheckbox;
 
     @TestComponent(path = "runtimeTabFragmentRuntimeVariablesGrid")
     private DataGrid runtimeVariablesGrid;

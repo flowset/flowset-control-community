@@ -34,11 +34,22 @@
                 <tabSheet id="runtimeTabsheet" width="100%" height="100%" themeNames="small bordered">
                     <tab id="runtimeVariablesTab">
                         <vbox id="runtimeVariablesTabContent" height="100%" padding="false" themeNames="spacing-s">
-                            <hbox id="runtimeVariableGridActionsPanel" classNames="buttons-panel" padding="false">
+                            <hbox id="runtimeVariableGridActionsPanel" classNames="buttons-panel" padding="false"
+                                  alignItems="CENTER">
                                 <button id="runtimeVariableCreateBtn" action="runtimeVariablesGrid.create"
                                         themeNames="primary small"/>
                                 <button id="runtimeVariableRemoveBtn" action="runtimeVariablesGrid.remove"
                                         themeNames="small"/>
+                                <hbox id="executionVariablesBox" spacing="false" alignItems="CENTER"
+                                      visible="false">
+                                    <checkbox id="executionVariablesCheckbox"
+                                              label="msg://executionVariablesCheckbox.label"/>
+                                    <icon id="executionVariablesContextHelp" icon="QUESTION_CIRCLE" size="1em"
+                                          classNames="text-secondary">
+                                        <tooltip text="msg://executionVariablesCheckbox.tooltip"
+                                                 position="BOTTOM_START"/>
+                                    </icon>
+                                </hbox>
                                 <simplePagination id="runtimeVariablesPagination" dataLoader="runtimeVariablesDl"/>
                             </hbox>
                             <dataGrid id="runtimeVariablesGrid"

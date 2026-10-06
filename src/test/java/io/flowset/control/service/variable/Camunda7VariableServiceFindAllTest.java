@@ -18,6 +18,7 @@ import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.camunda7.dto.request.StartProcessDto;
 import io.flowset.control.test_support.camunda7.dto.request.VariableValueDto;
 import io.flowset.control.test_support.camunda7.dto.response.ExecutionDto;
+import io.flowset.control.test_support.camunda7.dto.response.JobDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -254,6 +255,74 @@ public class Camunda7VariableServiceFindAllTest extends AbstractCamunda7Integrat
 
         //then
         assertThat(variablesCount).isZero();
+    }
+
+    @Test
+    @DisplayName("Runtime variables of execution returned if context has a filter by variable scope id")
+    void givenExecutionAndProcessVariables_whenFindRuntimeVariablesByVariableScopeId_thenOnlyExecutionVariablesReturned() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testJobsListLoad.bpmn")
+                .startByKey("testJobsListLoad", StartProcessDto.builder()
+                        .variable("cardToken", new VariableValueDto("String", "tok_old"))
+                        .build())
+                .waitJobsExecution();
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testJobsListLoad").getFirst();
+        String failedTaskExecutionId = findFailedJobExecutionId(processInstanceId);
+
+        camundaRestTestHelper.putLocalExecutionVariable(camunda7, failedTaskExecutionId, "cardToken",
+                new VariableValueDto("String", "tok_new"));
+
+        VariableFilter filter = dataManager.create(VariableFilter.class);
+        filter.setProcessInstanceId(processInstanceId);
+        filter.setVariableScopeId(failedTaskExecutionId);
+
+        //when
+        List<VariableInstanceData> variables = variableService.findRuntimeVariables(
+                new VariableLoadContext().setFilter(filter));
+
+        //then
+        assertThat(variables)
+                .extracting(VariableInstanceData::getName, VariableInstanceData::getValue,
+                        VariableInstanceData::getExecutionId)
+                .containsExactly(tuple("cardToken", "tok_new", failedTaskExecutionId));
+    }
+
+    @Test
+    @DisplayName("Get count of runtime variables by variable scope id")
+    void givenExecutionAndProcessVariables_whenGetRuntimeVariablesCountByVariableScopeId_thenOnlyExecutionVariablesCounted() {
+        //given
+        CamundaSampleDataManager camundaSampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testJobsListLoad.bpmn")
+                .startByKey("testJobsListLoad", StartProcessDto.builder()
+                        .variable("orderId", new VariableValueDto("String", "order-42"))
+                        .build())
+                .waitJobsExecution();
+
+        String processInstanceId = camundaSampleDataManager.getStartedInstances("testJobsListLoad").getFirst();
+        String failedTaskExecutionId = findFailedJobExecutionId(processInstanceId);
+
+        camundaRestTestHelper.putLocalExecutionVariable(camunda7, failedTaskExecutionId, "cardToken",
+                new VariableValueDto("String", "tok_new"));
+
+        VariableFilter filter = dataManager.create(VariableFilter.class);
+        filter.setProcessInstanceId(processInstanceId);
+        filter.setVariableScopeId(failedTaskExecutionId);
+
+        //when
+        long count = variableService.getRuntimeVariablesCount(filter);
+
+        //then
+        assertThat(count).isEqualTo(1);
+    }
+
+    String findFailedJobExecutionId(String processInstanceId) {
+        return camundaRestTestHelper.getFailedJobs(camunda7, List.of(processInstanceId))
+                .stream()
+                .map(JobDto::getExecutionId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No failed job found for " + processInstanceId));
     }
 
     String findSubProcessExecutionId(String processInstanceId) {

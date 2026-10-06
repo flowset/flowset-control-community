@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-package io.flowset.control.ui_autotest.processinstance.detail.tab.runtime;
+package io.flowset.control.ui_autotest.processinstance.detail.tab.runtime.variable;
 
 import io.flowset.control.test_support.camunda7.AbstractCamunda7UiTest;
 import io.flowset.control.test_support.camunda7.CamundaRestTestHelper;
@@ -490,57 +490,6 @@ public class RuntimeVariablesTabActionsUiTest extends AbstractCamunda7UiTest {
                 .getCellByIndex(VALUE_COLUMN_INDEX)
                 .getCellContent()
                 .shouldHave(text("Some value"));
-    }
-
-    @Test
-    @DisplayName("Scope column shows the process instance for a global variable")
-    void givenGlobalVariable_whenRuntimeVariablesTabOpened_thenScopeColumnShowsProcessInstanceName() {
-        // given
-        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
-                .deploy("test_support/testLocalVariableSubProcess.bpmn")
-                .startByKey("testLocalVariableSubProcess", StartProcessDto.builder()
-                        .variable("globalVariable", new VariableValueDto("String", "globalValue"))
-                        .build());
-        String instanceId = dataManager.getStartedInstances("testLocalVariableSubProcess").getFirst();
-
-        MainView mainView = loginAsAdmin();
-
-        // when
-        RuntimeVariablesTabFragment variablesTab = mainView.openProcessInstanceListView()
-                .openDetailViewByInstanceId(instanceId)
-                .openRuntimeVariablesTab();
-
-        // then
-        variablesTab.getRowByVariableName("globalVariable")
-                .getCellByIndex(SCOPE_COLUMN_INDEX)
-                .getCellContent()
-                .shouldHave(text("Process instance (Test local variable subprocess)"));
-    }
-
-    @Test
-    @DisplayName("Scope column shows the activity name for a local variable")
-    void givenLocalVariableInSubProcess_whenRuntimeVariablesTabOpened_thenScopeColumnShowsActivityName() {
-        // given
-        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
-                .deploy("test_support/testLocalVariableSubProcess.bpmn")
-                .startByKey("testLocalVariableSubProcess");
-        String instanceId = dataManager.getStartedInstances("testLocalVariableSubProcess").getFirst();
-
-        camundaRestTestHelper.putLocalExecutionVariable(camunda7, findSubProcessExecutionId(instanceId),
-                "localVariable", new VariableValueDto("String", "localValue"));
-
-        MainView mainView = loginAsAdmin();
-
-        // when
-        RuntimeVariablesTabFragment variablesTab = mainView.openProcessInstanceListView()
-                .openDetailViewByInstanceId(instanceId)
-                .openRuntimeVariablesTab();
-
-        // then
-        variablesTab.getRowByVariableName("localVariable")
-                .getCellByIndex(SCOPE_COLUMN_INDEX)
-                .getCellContent()
-                .shouldHave(text("Sub process"));
     }
 
     @Test

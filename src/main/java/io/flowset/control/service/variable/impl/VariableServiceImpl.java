@@ -375,6 +375,9 @@ public class VariableServiceImpl implements VariableService {
             if (StringUtils.isNotBlank(filter.getExecutionId())) {
                 variableInstanceQueryDto.addExecutionIdInItem(filter.getExecutionId());
             }
+            if (StringUtils.isNotBlank(filter.getVariableScopeId())) {
+                variableInstanceQueryDto.addVariableScopeIdInItem(filter.getVariableScopeId());
+            }
             if (StringUtils.isNotBlank(filter.getVariableName())) {
                 variableInstanceQueryDto.setVariableName(filter.getVariableName());
             }

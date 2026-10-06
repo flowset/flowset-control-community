@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-package io.flowset.control.ui_autotest.processinstance.detail.tab.runtime;
+package io.flowset.control.ui_autotest.processinstance.detail.tab.runtime.job;
 
 import io.flowset.control.test_support.ControlTestDataCreator;
 import io.flowset.control.test_support.ui.component.GridContextMenu;
