@@ -33,6 +33,8 @@
                             <span id="urlText" classNames="text-secondary"/>
                             <span id="timeLabel" text="msg://timeLabel" classNames="text-body"/>
                             <span id="timeText" classNames="text-secondary"/>
+                            <icon id="timeHelpIcon" icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em"
+                                  visible="false"/>
                         </hbox>
                     </endSlot>
                 </hbox>

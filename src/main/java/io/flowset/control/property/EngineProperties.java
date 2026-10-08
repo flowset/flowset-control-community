@@ -34,14 +34,21 @@ public class EngineProperties {
      */
     private Long offsetLifetimeInMillis;
 
+    /**
+     * Lifetime of the cached engine server time zone offset in millis.
+     */
+    private Long zoneOffsetLifetimeInMillis;
+
     public EngineProperties(String baseUrl,
                             @DefaultValue("Camunda") String name,
                             AuthProperties auth,
-                            @DefaultValue("10000") Long offsetLifetimeInMillis) {
+                            @DefaultValue("10000") Long offsetLifetimeInMillis,
+                            @DefaultValue("3600000") Long zoneOffsetLifetimeInMillis) {
         this.baseUrl = baseUrl;
         this.name = name;
         this.auth = auth;
         this.offsetLifetimeInMillis = offsetLifetimeInMillis;
+        this.zoneOffsetLifetimeInMillis = zoneOffsetLifetimeInMillis;
     }
 
     @Getter

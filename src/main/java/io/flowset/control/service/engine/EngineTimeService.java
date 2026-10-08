@@ -37,13 +37,16 @@ public interface EngineTimeService {
     <T> ResponseEntity<T> registerEngineTime(UUID engineId, Supplier<ResponseEntity<T>> requestCall);
 
     /**
-     * Return engine's time formatted as offset date&time.
+     * Returns the current engine time formatted for display (e.g. {@code 06.10.2026 22:07:41 UTC+04:00}):
+     * in the time zone of the engine server and in the time zone of the current user.
+     * The engine time is obtained from the HTTP {@code Date} header with second precision,
+     * so milliseconds are not displayed.
      *
      * @param engineId engine id
-     * @return formatted time or null if engine is not registered
+     * @return formatted engine time or null if the engine is not available
      */
     @Nullable
-    String getEngineTimeDefaultFormat(UUID engineId);
+    EngineTimeView getEngineTimeView(UUID engineId);
 
     /**
      * Return engine's time if engine is registered.

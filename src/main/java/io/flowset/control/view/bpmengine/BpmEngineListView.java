@@ -11,6 +11,7 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.router.Route;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.service.engine.EngineTimeService;
+import io.flowset.control.service.engine.EngineTimeView;
 import io.jmix.core.Messages;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.UiComponents;
@@ -58,11 +59,11 @@ public class BpmEngineListView extends StandardListView<BpmEngine> {
     protected Renderer<BpmEngine> bpmEnginesDataGridEngineTimeRenderer() {
         return new ComponentRenderer<>(bpmEngine -> {
             Span span = uiComponents.create(Span.class);
-            String engineTime = engineTimeService.getEngineTimeDefaultFormat(bpmEngine.getId());
+            EngineTimeView engineTime = engineTimeService.getEngineTimeView(bpmEngine.getId());
             if (engineTime != null) {
-                span.setText(engineTime);
+                span.setText(engineTime.serverTime());
             }
             return span;
-        }); 
+        });
     }
 }

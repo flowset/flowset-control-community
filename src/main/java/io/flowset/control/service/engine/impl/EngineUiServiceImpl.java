@@ -46,6 +46,7 @@ public class EngineUiServiceImpl implements EngineUiService {
     protected final EngineService engineService;
     protected final EngineAuthenticator engineAuthenticator;
     protected final EngineTimeResolver engineTimeResolver;
+    protected final EngineZoneOffsetResolver engineZoneOffsetResolver;
 
     protected Map<UUID, VersionApiClient> versionClientByEngineId = new ConcurrentHashMap<>();
 
@@ -56,7 +57,8 @@ public class EngineUiServiceImpl implements EngineUiService {
                                CurrentAuthentication currentAuthentication, DataManager dataManager,
                                EngineConnectionCheckProperties checkProperties, EngineService engineService,
                                EngineAuthenticator engineAuthenticator,
-                               EngineTimeResolver engineTimeResolver) {
+                               EngineTimeResolver engineTimeResolver,
+                               EngineZoneOffsetResolver engineZoneOffsetResolver) {
         this.metadata = metadata;
         this.sessionDataProvider = sessionDataProvider;
         this.feignClientProvider = feignClientProvider;
@@ -67,6 +69,7 @@ public class EngineUiServiceImpl implements EngineUiService {
         this.engineService = engineService;
         this.engineAuthenticator = engineAuthenticator;
         this.engineTimeResolver = engineTimeResolver;
+        this.engineZoneOffsetResolver = engineZoneOffsetResolver;
     }
 
 
@@ -153,6 +156,7 @@ public class EngineUiServiceImpl implements EngineUiService {
             UUID engineId = (UUID) entityId.getValue();
 
             engineTimeResolver.unregisterEngine(engineId);
+            engineZoneOffsetResolver.invalidate(engineId);
             versionClientByEngineId.remove(engineId);
         }
     }

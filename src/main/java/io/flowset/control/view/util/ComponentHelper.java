@@ -22,6 +22,7 @@ import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
+import io.flowset.control.security.UserTimeZoneResolver;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.EngineTimeService;
 import io.flowset.control.view.processinstance.LazyTabContent;
@@ -135,7 +136,7 @@ public class ComponentHelper {
             return null;
         }
 
-        TimeZone timeZone = currentAuthentication.getTimeZone();
+        TimeZone timeZone = applicationContext.getBean(UserTimeZoneResolver.class).getTimeZone();
         Locale locale = currentAuthentication.getLocale();
         return formatCurrentEngineOffsetDateTime(dateTime, timeZone);
     }
@@ -153,7 +154,7 @@ public class ComponentHelper {
             return null;
         }
 
-        TimeZone timeZone = currentAuthentication.getTimeZone();
+        TimeZone timeZone = applicationContext.getBean(UserTimeZoneResolver.class).getTimeZone();
 
         if (zoneId == null) {
             zoneId = timeZone.toZoneId();

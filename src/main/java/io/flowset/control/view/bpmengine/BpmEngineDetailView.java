@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import io.flowset.control.service.engine.auth.EngineAuthStateService;
-import io.flowset.control.service.engine.EngineTimeService;
 import io.jmix.core.EntityStates;
 import io.jmix.core.SaveContext;
 import io.jmix.flowui.DialogWindows;
@@ -30,6 +29,8 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.action.TestEngineConnectionAction;
 import io.flowset.control.entity.engine.*;
 import io.flowset.control.service.engine.EngineService;
+import io.flowset.control.service.engine.EngineTimeService;
+import io.flowset.control.service.engine.EngineTimeView;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
@@ -264,11 +265,11 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
 
     protected void updateTimeField() {
         if (getEditedEntity().getId() != null) {
-            String engineTime = engineTimeService.getEngineTimeDefaultFormat(getEditedEntity().getId());
+            EngineTimeView engineTime = engineTimeService.getEngineTimeView(getEditedEntity().getId());
 
             dateTimeBox.setVisible(engineTime != null);
             if (engineTime != null) {
-                dateTimeField.setTypedValue(engineTime);
+                dateTimeField.setTypedValue(engineTime.serverTime());
             }
         }
     }

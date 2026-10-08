@@ -9,6 +9,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import io.flowset.control.entity.ProcessExecutionGraphEntry;
@@ -18,8 +19,10 @@ import io.flowset.control.property.UiProperties;
 import io.flowset.control.service.dashboard.DashboardService;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.EngineTimeService;
+import io.flowset.control.service.engine.EngineTimeView;
 import io.flowset.control.service.engine.EngineUiService;
 import io.flowset.control.view.bpmengine.BpmEngineDetailView;
+import io.jmix.core.Messages;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.asynctask.UiAsyncTasks;
@@ -36,6 +39,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +50,9 @@ import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 @Slf4j
 @FragmentDescriptor("dashboard-fragment.xml")
 public class DashboardFragment extends Fragment<VerticalLayout> {
+
+    protected static final String ENGINE_TIME_LOADING_TEXT = "…";
+    protected static final String ENGINE_TIME_UNAVAILABLE_TEXT = "—";
     @ViewComponent
     protected H3 welcomeMessage;
     @ViewComponent
@@ -60,6 +67,8 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
     protected EngineService engineService;
     @Autowired
     protected EngineTimeService engineTimeService;
+    @Autowired
+    protected Messages messages;
     @ViewComponent
     protected Div dashboardContainer;
     @ViewComponent
@@ -93,6 +102,8 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
     protected Span timeLabel;
     @ViewComponent
     protected Span timeText;
+    @ViewComponent
+    protected Icon timeHelpIcon;
 
     @Subscribe
     public void onReady(final ReadyEvent event) {
@@ -157,28 +168,48 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
             urlTextBox.setVisible(true);
             urlText.setText(selectedEngine.getBaseUrl());
 
-            uiAsyncTasks.supplierConfigurer(() -> engineTimeService.getEngineTimeDefaultFormat(selectedEngine.getId()))
+            showEngineTimeLoading();
+
+            uiAsyncTasks.supplierConfigurer(() -> engineTimeService.getEngineTimeView(selectedEngine.getId()))
                     .withTimeout(uiProperties.getEngineTimeLoadTimeoutSec(), TimeUnit.SECONDS)
                     .withResultHandler(engineTime -> {
                         if (engineTime != null) {
-                            timeLabel.setVisible(true);
-                            timeText.setVisible(true);
-
-                            timeText.setText(engineTime);
+                            showEngineTime(engineTime);
                         } else {
-                            timeLabel.setVisible(false);
-                            timeText.setVisible(false);
+                            showEngineTimeUnavailable();
                         }
                     })
                     .withExceptionHandler(throwable -> {
                         log.error("Error occurs on dashboard engine time loading", throwable);
-                        timeLabel.setVisible(false);
-                        timeText.setVisible(false);
+                        showEngineTimeUnavailable();
                     })
                     .supplyAsync();
         } else {
             urlTextBox.setVisible(false);
         }
+    }
+
+    protected void showEngineTimeLoading() {
+        setEngineTimeText(ENGINE_TIME_LOADING_TEXT, null);
+    }
+
+    protected void showEngineTime(EngineTimeView engineTime) {
+        String tooltip = messages.getMessage("engineTime.serverTime").formatted(engineTime.serverTime());
+        setEngineTimeText(engineTime.userTime(), tooltip);
+    }
+
+    protected void showEngineTimeUnavailable() {
+        setEngineTimeText(ENGINE_TIME_UNAVAILABLE_TEXT, null);
+    }
+
+    protected void setEngineTimeText(String text, @Nullable String tooltip) {
+        timeLabel.setVisible(true);
+        timeText.setVisible(true);
+        timeText.setText(text);
+
+        // The tooltip contains the current engine server time, so it is set at runtime
+        timeHelpIcon.setVisible(tooltip != null);
+        timeHelpIcon.setTooltipText(tooltip);
     }
 
     @Subscribe("createBpmEngineAction")

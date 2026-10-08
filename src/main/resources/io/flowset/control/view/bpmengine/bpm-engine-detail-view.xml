@@ -30,13 +30,10 @@
 <!--            <tabSheet id="tabsheet" width="100%" height="100%">
                 <tab id="generalTab" label="msg://generalTab.label">-->
                     <vbox id="generalBox" padding="false">
-                        <formLayout id="form" dataContainer="bpmEngineDc" width="100%">
+                        <formLayout id="form" dataContainer="bpmEngineDc" width="100%" maxWidth="60em">
                             <responsiveSteps>
                                 <responsiveStep minWidth="0" columns="1"/>
-                                <responsiveStep minWidth="20em" columns="2"/>
-                                <responsiveStep minWidth="50em" columns="2"/>
-                                <responsiveStep minWidth="60em" columns="3"/>
-                                <responsiveStep minWidth="80em" columns="4"/>
+                                <responsiveStep minWidth="30em" columns="2"/>
                             </responsiveSteps>
                             <textField id="nameField" property="name" width="100%" classNames="pt-0"
                                        label="msg://io.flowset.control.entity.engine/BpmEngine.name" maxLength="50"/>
@@ -55,8 +52,7 @@
 
                             </hbox>
 
-                            <div colspan="2" classNames="pt-0"/>
-                            <textField id="baseUrlField" width="100%" colspan="2"
+                            <textField id="baseUrlField" width="100%"
                                        label="msg://io.flowset.control.entity.engine/BpmEngine.baseUrl"
                                        valueChangeMode="ON_BLUR"
                                        property="baseUrl" required="true"
@@ -66,15 +62,23 @@
                                     <custom bean="control_UrlValidator"/>
                                 </validators>
                             </textField>
-                            <hbox padding="false" maxWidth="20em">
-                                <comboBox id="environmentTypeField"
-                                          label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType"
-                                          required="false"
-                                          property="environmentType" width="100%" clearButtonVisible="true"/>
-                            </hbox>
+                            <comboBox id="environmentTypeField"
+                                      label="msg://io.flowset.control.entity.engine/BpmEngine.environmentType"
+                                      required="false" classNames="pt-s"
+                                      property="environmentType" width="100%" clearButtonVisible="true"/>
+                            <vbox id="dateTimeBox" padding="false" width="100%" themeNames="spacing-xs" visible="false">
+                                <textField id="dateTimeField" datatype="string" label="msg://engineTime.title"
+                                           width="100%" readOnly="true" classNames="pt-s">
+                                    <suffix>
+                                        <icon icon="QUESTION_CIRCLE" classNames="text-secondary" size="0.8em">
+                                            <tooltip text="msg://dateTimeField.tooltip"/>
+                                        </icon>
+                                    </suffix>
+                                </textField>
+                            </vbox>
                         </formLayout>
                         <vbox id="details" padding="false"
-                              width="100%" themeNames="spacing-xs">
+                              width="100%" maxWidth="60em" themeNames="spacing-xs">
                             <h4 text="msg://authPropertiesAccordionPanel.label"/>
                             <vbox padding="false" themeNames="spacing-xs">
                                 <checkbox id="authEnabledField" classNames="pt-s"
@@ -114,11 +118,6 @@
                                                     classNames="pt-s"/>
                                 </hbox>
                             </details>
-                        </vbox>
-                        <vbox id="dateTimeBox" padding="false" width="100%" themeNames="spacing-xs" visible="false">
-                            <textField id="dateTimeField" datatype="string" label="msg://engineTime.title" width="100%" readOnly="true">
-                                <tooltip text="msg://dateTimeField.tooltip"/>
-                            </textField>
                         </vbox>
                     </vbox>
 <!--                </tab>

@@ -1,6 +1,7 @@
 package io.flowset.control.datatype;
 
 import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.security.UserTimeZoneResolver;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.EngineTimeService;
 import io.jmix.core.metamodel.annotation.DatatypeDef;
@@ -32,6 +33,8 @@ public class EngineOffsetDateTimeDatatype extends AbstractTemporalDatatype<Offse
     protected ObjectProvider<EngineService> engineServiceProvider;
     @Autowired
     protected ObjectProvider<EngineTimeService> engineTimeServiceProvider;
+    @Autowired
+    protected ObjectProvider<UserTimeZoneResolver> userTimeZoneResolverProvider;
 
     public EngineOffsetDateTimeDatatype() {
         super(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -42,7 +45,9 @@ public class EngineOffsetDateTimeDatatype extends AbstractTemporalDatatype<Offse
         if (timeZone == null || value == null) {
             return format(value, locale);
         }
-        return formatCurrentEngineOffsetDateTime((OffsetDateTime) value, locale, timeZone);
+        // The user time zone or, if it is not set, the Flowset Control server time zone
+        TimeZone userTimeZone = userTimeZoneResolverProvider.getObject().getTimeZone();
+        return formatCurrentEngineOffsetDateTime((OffsetDateTime) value, locale, userTimeZone);
     }
 
 

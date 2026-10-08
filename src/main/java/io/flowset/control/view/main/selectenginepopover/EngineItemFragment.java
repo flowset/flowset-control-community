@@ -45,12 +45,12 @@ public class EngineItemFragment extends FragmentRenderer<HorizontalLayout, BpmEn
         String engineNameValue = "%s (%s)".formatted(item.getName(), messages.getMessage(item.getType()));
         engineName.setText(engineNameValue);
 
-        uiAsyncTasks.supplierConfigurer(() -> engineTimeService.getEngineTimeDefaultFormat(item.getId()))
+        uiAsyncTasks.supplierConfigurer(() -> engineTimeService.getEngineTimeView(item.getId()))
                 .withTimeout(uiProperties.getEngineTimeLoadTimeoutSec(), TimeUnit.SECONDS)
                 .withResultHandler(time -> {
                     if (time != null) {
                         engineTime.setVisible(true);
-                        engineTime.setText(time);
+                        engineTime.setText(time.serverTime());
                     } else {
                         engineTime.setVisible(false);
                     }
