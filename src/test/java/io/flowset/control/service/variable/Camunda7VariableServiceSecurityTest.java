@@ -14,6 +14,7 @@ import io.flowset.control.test_support.camunda7.CamundaRestTestHelper;
 import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.camunda7.dto.request.StartProcessDto;
 import io.flowset.control.test_support.camunda7.dto.request.VariableValueDto;
+import io.flowset.control.test_support.camunda7.dto.response.ExecutionDto;
 import io.flowset.control.test_support.camunda7.dto.response.ProcessVariablesMapDto;
 import io.flowset.control.test_support.camunda7.dto.response.VariableInstanceDto;
 import io.flowset.control.test_support.security.AuthenticatedAsUser;
@@ -98,10 +99,75 @@ public class Camunda7VariableServiceSecurityTest extends AbstractCamunda7Integra
         variableInstance.setExecutionId(processInstanceId);
 
         //when
-        variableService.removeVariablesLocal(processInstanceId, Set.of(variableInstance));
+        variableService.removeVariablesLocal(Set.of(variableInstance));
 
         //then
         ProcessVariablesMapDto variablesMap = camundaRestTestHelper.getVariablesByProcess(camunda7, processInstanceId);
         assertThat(variablesMap).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Local variable is updated if user has update permission")
+    @WithTestUser(username = "test-user-secured-variable-update", roles = TestVariableUpdatePermissionRole.class)
+    @AuthenticatedAsUser(username = "test-user-secured-variable-update")
+    void givenUserWithVariableUpdatePermission_whenUpdateVariableLocalWithLocalFlag_thenVariableUpdated() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager.deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess");
+        String processInstanceId = sampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        VariableInstanceData variableInstance = dataManager.create(VariableInstanceData.class);
+        variableInstance.setName("myLocalVariable");
+        variableInstance.setType("String");
+        variableInstance.setValue("localValue");
+        variableInstance.setExecutionId(subProcessExecutionId);
+        variableInstance.setLocal(true);
+
+        //when
+        variableService.updateVariableLocal(variableInstance);
+
+        //then
+        assertThat(camundaRestTestHelper.getVariables(camunda7, "myLocalVariable"))
+                .singleElement()
+                .extracting(VariableInstanceDto::getExecutionId, VariableInstanceDto::getValue)
+                .containsExactly(subProcessExecutionId, "localValue");
+    }
+
+    @Test
+    @DisplayName("Local variable is removed if user has remove permission")
+    @WithTestUser(username = "test-user-secured-variable-remove", roles = TestVariableRemovePermissionRole.class)
+    @AuthenticatedAsUser(username = "test-user-secured-variable-remove")
+    void givenUserWithVariableRemovePermission_whenRemoveVariablesLocalForLocalVariable_thenVariableRemoved() {
+        //given
+        CamundaSampleDataManager sampleDataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7);
+        sampleDataManager.deploy("test_support/testLocalVariableSubProcess.bpmn")
+                .startByKey("testLocalVariableSubProcess");
+        String processInstanceId = sampleDataManager.getStartedInstances("testLocalVariableSubProcess").get(0);
+        String subProcessExecutionId = findSubProcessExecutionId(processInstanceId);
+
+        camundaRestTestHelper.putLocalExecutionVariable(camunda7, subProcessExecutionId, "myLocalVariable",
+                new VariableValueDto("String", "localValue"));
+
+        VariableInstanceData variableInstance = dataManager.create(VariableInstanceData.class);
+        variableInstance.setName("myLocalVariable");
+        variableInstance.setType("String");
+        variableInstance.setExecutionId(subProcessExecutionId);
+
+        //when
+        variableService.removeVariablesLocal(Set.of(variableInstance));
+
+        //then
+        assertThat(camundaRestTestHelper.getVariables(camunda7, "myLocalVariable")).isEmpty();
+    }
+
+    String findSubProcessExecutionId(String processInstanceId) {
+        return camundaRestTestHelper.findExecutions(camunda7, processInstanceId)
+                .stream()
+                .map(ExecutionDto::getId)
+                .filter(executionId -> !executionId.equals(processInstanceId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No child execution found for " + processInstanceId));
     }
 }

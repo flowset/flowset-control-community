@@ -264,17 +264,39 @@ public class CamundaRestTestHelper {
     public VariableInstanceDto getVariable(HasRunningEngineData camunda, String name) {
         try {
             List<VariableInstanceDto> variables = restHelper.getList(camunda, "/variable-instance?variableName=" + name, VariableInstanceDto.class);
-            return CollectionUtils.isNotEmpty(variables) ? variables.get(0) : null;
+            return CollectionUtils.isNotEmpty(variables) ? variables.getFirst() : null;
         } catch (HttpClientErrorException e) {
             return null;
         }
+    }
+
+    public List<VariableInstanceDto> getVariables(HasRunningEngineData camunda, String name) {
+        try {
+            return restHelper.getList(camunda, "/variable-instance?variableName=" + name, VariableInstanceDto.class);
+        } catch (HttpClientErrorException e) {
+            return List.of();
+        }
+    }
+
+    public List<ExecutionDto> findExecutions(HasRunningEngineData camunda, String processInstanceId) {
+        return restHelper.getList(camunda, "/execution?processInstanceId=" + processInstanceId, ExecutionDto.class);
+    }
+
+    public void putLocalExecutionVariable(HasRunningEngineData camunda, String executionId, String name,
+                                          VariableValueDto value) {
+        restHelper.putVoid(camunda, "/execution/" + executionId + "/localVariables/" + name, value);
+    }
+
+    public void putLocalTaskVariable(HasRunningEngineData camunda, String taskId, String name,
+                                     VariableValueDto value) {
+        restHelper.putVoid(camunda, "/task/" + taskId + "/localVariables/" + name, value);
     }
 
     @Nullable
     public HistoricUserTaskDto findHistoryUserTask(HasRunningEngineData camunda, String taskId) {
         List<HistoricUserTaskDto> tasks = restHelper.getList(camunda, "/history/task?taskId=" + taskId, HistoricUserTaskDto.class);
 
-        return CollectionUtils.isNotEmpty(tasks) ? tasks.get(0) : null;
+        return CollectionUtils.isNotEmpty(tasks) ? tasks.getFirst() : null;
     }
 
 

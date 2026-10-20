@@ -5,6 +5,7 @@ import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.auth.EngineAuthenticator;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -52,7 +53,11 @@ public class EngineRestClient {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
         String name = variableInstanceData.getName();
-        String url = engine.getBaseUrl() + "/process-instance/" + variableInstanceData.getExecutionId() + "/variables/" + name + "/data";
+        String executionId = variableInstanceData.getExecutionId();
+
+        String url = BooleanUtils.isTrue(variableInstanceData.getLocal())
+                ? engine.getBaseUrl() + "/execution/" + executionId + "/localVariables/" + name + "/data"
+                : engine.getBaseUrl() + "/process-instance/" + executionId + "/variables/" + name + "/data";
 
         ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
 

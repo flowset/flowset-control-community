@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-package io.flowset.control.ui_autotest.processinstance.detail.tab.runtime;
+package io.flowset.control.ui_autotest.processinstance.detail.tab.runtime.externaltask;
 
 import io.flowset.control.test_support.camunda7.AbstractCamunda7UiTest;
 import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;

@@ -6,9 +6,11 @@
 package io.flowset.control.view.processvariable;
 
 
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -17,6 +19,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.filter.VariableFilter;
+import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.variable.CamundaVariableType;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.entity.variable.VariableValueInfo;
@@ -26,6 +29,7 @@ import io.jmix.core.*;
 import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.flowui.Actions;
 import io.jmix.flowui.UiComponents;
+import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
@@ -37,7 +41,8 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.kit.component.upload.event.FileUploadSucceededEvent;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
-import org.apache.commons.lang3.Strings;
+import org.apache.commons.lang3.BooleanUtils;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +55,9 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Set;
+import java.util.function.Function;
 
+@SuppressWarnings("LombokSetterMayBeUsed")
 @Route(value = "bpm/variableinstancedata", layout = DefaultMainViewParent.class)
 @ViewController("bpm_VariableInstanceData.detail")
 @ViewDescriptor("variable-instance-data-detail.xml")
@@ -95,36 +102,54 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
     @ViewComponent
     protected JmixButton okBtn;
     @ViewComponent
-    protected TypedTextField<String> activityInstanceIdField;
+    protected TypedTextField<String> scopeField;
+    @ViewComponent
+    protected JmixCheckbox localField;
+    @ViewComponent
+    protected VerticalLayout localBox;
 
     protected Component valueComponent;
-    protected String processInstanceId;
+    protected ProcessInstanceData processInstance;
     protected VariableInstanceData originalVariableInstanceData;
+    protected Function<VariableInstanceData, String> scopeLabelProvider;
+    protected String localExecutionId;
+
 
     protected boolean newVariable = false;
     protected boolean saveEnabled = false;
 
     protected boolean validationEnabled = false;
+    protected boolean localFlagEnabled = false;
 
-    @SuppressWarnings("LombokSetterMayBeUsed")
+
     public void setSaveEnabled(boolean saveVisible) {
         this.saveEnabled = saveVisible;
     }
 
-    @SuppressWarnings("LombokSetterMayBeUsed")
     public void setNewVariable(boolean editable) {
         this.newVariable = editable;
     }
 
-    @SuppressWarnings("LombokSetterMayBeUsed")
-    public void setProcessInstanceId(String processInstanceId) {
-        this.processInstanceId = processInstanceId;
+    public void setProcessInstance(ProcessInstanceData processInstance) {
+        this.processInstance = processInstance;
     }
 
-    @SuppressWarnings("LombokSetterMayBeUsed")
     public void setValidationEnabled(boolean validationEnabled) {
         this.validationEnabled = validationEnabled;
     }
+
+    public void setLocalFlagEnabled(boolean localFlagEnabled) {
+        this.localFlagEnabled = localFlagEnabled;
+    }
+
+    public void setLocalExecutionId(String localExecutionId) {
+        this.localExecutionId = localExecutionId;
+    }
+
+    public void setScopeLabelProvider(Function<VariableInstanceData, String> scopeLabelProvider) {
+        this.scopeLabelProvider = scopeLabelProvider;
+    }
+
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -141,8 +166,43 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
     protected void initVisibleComponents() {
         if (!newVariable) {
-            activityInstanceIdField.setVisible(true);
             nameField.setReadOnly(true);
+        }
+
+        if (!newVariable || localFlagEnabled) {
+            localBox.setVisible(true);
+            localField.setReadOnly(!newVariable);
+        }
+
+        updateScopeField();
+    }
+
+    @Subscribe("localField")
+    public void onLocalFieldComponentValueChange(final ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
+        if (newVariable) {
+            updateExecutionIdValue(event.getValue());
+        }
+    }
+
+    protected void updateScopeField() {
+        // A new variable has no scope yet: its scope is defined by the "Local" flag being edited.
+        if (newVariable) {
+            scopeField.setVisible(false);
+            return;
+        }
+
+        String scopeName = scopeLabelProvider != null ? scopeLabelProvider.apply(getEditedEntity()) : null;
+
+        scopeField.setValue(scopeName != null ? scopeName : "");
+        scopeField.setVisible(true);
+    }
+
+    protected void updateExecutionIdValue(@Nullable Boolean local) {
+        if (BooleanUtils.isTrue(local)) {
+            getEditedEntity().setExecutionId(localExecutionId);
+        } else {
+            String processInstanceId = processInstance != null ? processInstance.getInstanceId() : null;
+            getEditedEntity().setExecutionId(processInstanceId);
         }
     }
 
@@ -156,22 +216,22 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
     @Subscribe
     public void onValidation(final ValidationEvent event) {
-        VariableInstanceData variableInstanceData = getEditedEntity();
-
-        if (!validationEnabled) {
+        // Name and scope of an existing variable are read-only, so a duplicate can appear
+        // only when a new variable is created.
+        if (!validationEnabled || !newVariable) {
             return;
         }
 
-        if (newVariable || !Strings.CS.equals(variableInstanceData.getName(), originalVariableInstanceData.getName())) {
-            VariableFilter variableFilter = metadata.create(VariableFilter.class);
-            variableFilter.setProcessInstanceId(processInstanceId);
-            variableFilter.setVariableName(variableInstanceData.getName());
+        VariableInstanceData variableInstanceData = getEditedEntity();
 
-            long runtimeVariablesCount = variableService.getRuntimeVariablesCount(variableFilter);
-            if (runtimeVariablesCount > 0) {
-                event.getErrors().add(nameField, messageBundle.getMessage("variableNameAlreadyExistsError"));
-                nameField.setInvalid(true);
-            }
+        VariableFilter variableFilter = metadata.create(VariableFilter.class);
+        variableFilter.setExecutionId(variableInstanceData.getExecutionId());
+        variableFilter.setVariableName(variableInstanceData.getName());
+
+        long runtimeVariablesCount = variableService.getRuntimeVariablesCount(variableFilter);
+        if (runtimeVariablesCount > 0) {
+            event.getErrors().add(nameField, messageBundle.getMessage("variableNameAlreadyExistsError"));
+            nameField.setInvalid(true);
         }
     }
 
@@ -327,8 +387,7 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
         File dir = new File(tempDir);
         if (!dir.exists() && !dir.mkdirs()) {
-            throw new FileStorageException(FileStorageException.Type.IO_EXCEPTION,
-                    "Cannot create temp directory: " + dir.getAbsolutePath());
+            throw new FileStorageException(FileStorageException.Type.IO_EXCEPTION, "Cannot create temp directory: " + dir.getAbsolutePath());
         }
 
         File outputFile = new File(tempDir, event.getFileName());

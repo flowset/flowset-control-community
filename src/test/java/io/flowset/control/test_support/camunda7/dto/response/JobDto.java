@@ -15,4 +15,5 @@ public class JobDto extends IdDto {
     private Integer retries;
     private String jobDefinitionId;
     private Boolean suspended;
+    private String executionId;
 }

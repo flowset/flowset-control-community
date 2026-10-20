@@ -10,6 +10,7 @@ import io.jmix.masquerade.component.DataGrid;
 import io.jmix.masquerade.component.TabSheet;
 import io.jmix.masquerade.sys.Composite;
 import lombok.Getter;
+import org.openqa.selenium.By;
 
 import static io.flowset.control.test_support.ui.UiTestSupport.getRowByCellContent;
 import static io.jmix.masquerade.JConditions.VISIBLE;
@@ -22,6 +23,14 @@ import static io.jmix.masquerade.JConditions.VISIBLE;
 public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
 
     public static final int ACTIVITY_ID_COLUMN_INDEX = 0;
+
+    /**
+     * Activity name element inside the hierarchy column. Clicking the tree toggle only expands or collapses
+     * the node, so a row is selected by clicking this element.
+     *
+     * @see io.flowset.control.uicomponent.treedatagrid.NoClickTreeGrid
+     */
+    public static final By ACTIVITY_NAME_BY = By.cssSelector(".no-click-tree-item-name");
 
     @TestComponent(path = "runtimeTabFragmentActivityInstancesTree")
     private DataGrid activityInstancesTree;
@@ -48,6 +57,7 @@ public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
         getRowByActivityId(activityId)
                 .getCellByIndex(ACTIVITY_ID_COLUMN_INDEX)
                 .getCellContent()
+                .find(ACTIVITY_NAME_BY)
                 .scrollIntoView("{block: \"center\"}")
                 .shouldBe(VISIBLE)
                 .click();

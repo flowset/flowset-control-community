@@ -47,6 +47,7 @@ public abstract class ActivityMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "parentActivityInstance", ignore = true)
     @Mapping(target = "transition", constant = "true")
+    @Mapping(target = "executionIds", expression = "java(java.util.Collections.singletonList(source.getExecutionId()))")
     public abstract ActivityInstanceTreeItem fromRuntimeTransitionDto(TransitionInstanceDto source);
 
     ActivityShortData targetClassFactory() {

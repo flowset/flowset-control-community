@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - Copyright (c) Haulmont 2026. All Rights Reserved.
+  - Use is subject to license terms.
+  -->
+
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_scopeColumnUnnamed" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="testScopeColumnUnnamedElements" isExecutable="true" camunda:historyTimeToLive="15">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_toFork</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_toFork" sourceRef="StartEvent_1" targetRef="forkGateway" />
+    <bpmn:parallelGateway id="forkGateway">
+      <bpmn:incoming>Flow_toFork</bpmn:incoming>
+      <bpmn:outgoing>Flow_toSubProcess</bpmn:outgoing>
+      <bpmn:outgoing>Flow_toFailedTask</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_toSubProcess" sourceRef="forkGateway" targetRef="unnamedSubProcess" />
+    <bpmn:subProcess id="unnamedSubProcess">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="subProcessLocalVariable">localValue</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_toSubProcess</bpmn:incoming>
+      <bpmn:outgoing>Flow_fromSubProcess</bpmn:outgoing>
+      <bpmn:startEvent id="SubProcessStartEvent">
+        <bpmn:outgoing>Flow_toUserTask</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="Flow_toUserTask" sourceRef="SubProcessStartEvent" targetRef="waitUserTask" />
+      <bpmn:userTask id="waitUserTask" name="Wait user task">
+        <bpmn:incoming>Flow_toUserTask</bpmn:incoming>
+        <bpmn:outgoing>Flow_toSubProcessEnd</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:sequenceFlow id="Flow_toSubProcessEnd" sourceRef="waitUserTask" targetRef="SubProcessEndEvent" />
+      <bpmn:endEvent id="SubProcessEndEvent">
+        <bpmn:incoming>Flow_toSubProcessEnd</bpmn:incoming>
+      </bpmn:endEvent>
+    </bpmn:subProcess>
+    <bpmn:sequenceFlow id="Flow_fromSubProcess" sourceRef="unnamedSubProcess" targetRef="joinGateway" />
+    <bpmn:sequenceFlow id="Flow_toFailedTask" sourceRef="forkGateway" targetRef="unnamedFailedTask" />
+    <bpmn:scriptTask id="unnamedFailedTask" camunda:asyncBefore="true" camunda:exclusive="false" scriptFormat="groovy">
+      <bpmn:extensionElements>
+        <camunda:failedJobRetryTimeCycle>R0/PT5S</camunda:failedJobRetryTimeCycle>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_toFailedTask</bpmn:incoming>
+      <bpmn:outgoing>Flow_fromFailedTask</bpmn:outgoing>
+      <bpmn:script>throw new RuntimeException("Some external service not available")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_fromFailedTask" sourceRef="unnamedFailedTask" targetRef="joinGateway" />
+    <bpmn:parallelGateway id="joinGateway">
+      <bpmn:incoming>Flow_fromSubProcess</bpmn:incoming>
+      <bpmn:incoming>Flow_fromFailedTask</bpmn:incoming>
+      <bpmn:outgoing>Flow_toEnd</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_toEnd" sourceRef="joinGateway" targetRef="EndEvent_1" />
+    <bpmn:endEvent id="EndEvent_1">
+      <bpmn:incoming>Flow_toEnd</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="testScopeColumnUnnamedElements">
+      <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="forkGateway_di" bpmnElement="forkGateway">
+        <dc:Bounds x="235" y="215" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="unnamedSubProcess_di" bpmnElement="unnamedSubProcess" isExpanded="true">
+        <dc:Bounds x="340" y="60" width="350" height="160" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcessStartEvent_di" bpmnElement="SubProcessStartEvent">
+        <dc:Bounds x="372" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="waitUserTask_di" bpmnElement="waitUserTask">
+        <dc:Bounds x="465" y="100" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SubProcessEndEvent_di" bpmnElement="SubProcessEndEvent">
+        <dc:Bounds x="622" y="122" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="unnamedFailedTask_di" bpmnElement="unnamedFailedTask">
+        <dc:Bounds x="465" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="joinGateway_di" bpmnElement="joinGateway">
+        <dc:Bounds x="745" y="215" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
+        <dc:Bounds x="852" y="222" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_toFork_di" bpmnElement="Flow_toFork">
+        <di:waypoint x="188" y="240" />
+        <di:waypoint x="235" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_toSubProcess_di" bpmnElement="Flow_toSubProcess">
+        <di:waypoint x="260" y="215" />
+        <di:waypoint x="260" y="140" />
+        <di:waypoint x="340" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_toUserTask_di" bpmnElement="Flow_toUserTask">
+        <di:waypoint x="408" y="140" />
+        <di:waypoint x="465" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_toSubProcessEnd_di" bpmnElement="Flow_toSubProcessEnd">
+        <di:waypoint x="565" y="140" />
+        <di:waypoint x="622" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_fromSubProcess_di" bpmnElement="Flow_fromSubProcess">
+        <di:waypoint x="690" y="140" />
+        <di:waypoint x="770" y="140" />
+        <di:waypoint x="770" y="215" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_toFailedTask_di" bpmnElement="Flow_toFailedTask">
+        <di:waypoint x="260" y="265" />
+        <di:waypoint x="260" y="320" />
+        <di:waypoint x="465" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_fromFailedTask_di" bpmnElement="Flow_fromFailedTask">
+        <di:waypoint x="565" y="320" />
+        <di:waypoint x="770" y="320" />
+        <di:waypoint x="770" y="265" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_toEnd_di" bpmnElement="Flow_toEnd">
+        <di:waypoint x="795" y="240" />
+        <di:waypoint x="852" y="240" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

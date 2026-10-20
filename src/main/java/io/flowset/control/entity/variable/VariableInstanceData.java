@@ -45,8 +45,19 @@ public class VariableInstanceData implements CopyingSystemState<VariableInstance
     @JmixProperty
     protected String errorMessage;
 
+    @JmixProperty
+    protected Boolean local;
+
     @Transient
     protected Object value;
+
+    public Boolean getLocal() {
+        return local;
+    }
+
+    public void setLocal(Boolean local) {
+        this.local = local;
+    }
 
     public String getErrorMessage() {
         return errorMessage;

@@ -5,6 +5,7 @@
 
 package io.flowset.control.view.processinstance.runtime;
 
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -17,7 +18,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import io.flowset.control.view.processinstance.runtime.variable.VariableNameColumnFragment;
 import io.flowset.control.view.util.ComponentHelper;
 import io.jmix.core.DataLoadContext;
 import io.jmix.core.LoadContext;
@@ -27,6 +27,7 @@ import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Dialogs;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.action.DialogAction;
+import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.TreeDataGrid;
 import io.jmix.flowui.component.tabsheet.JmixTabSheet;
@@ -53,7 +54,10 @@ import io.flowset.control.service.variable.VariableLoadContext;
 import io.flowset.control.service.variable.VariableService;
 import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
+import io.flowset.control.view.processinstance.runtime.variable.VariableNameColumnFragment;
 import io.flowset.control.view.processvariable.VariableInstanceDataDetail;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -63,11 +67,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 
 @FragmentDescriptor("runtime-tab-fragment.xml")
 public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
 
+    public static final String VARIABLES_TAB_ID = "runtimeVariablesTab";
     public static final String USER_TASKS_TAB_ID = "userTasksTab";
     public static final String JOBS_TAB_ID = "jobsTab";
     public static final String EXTERNAL_TASKS_TAB_ID = "externalTasksTab";
@@ -96,9 +100,9 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     @Autowired
     protected IncidentService incidentService;
     @Autowired
-    private Dialogs dialogs;
+    protected Dialogs dialogs;
     @Autowired
-    private Messages messages;
+    protected Messages messages;
     @Autowired
     protected ComponentHelper componentHelper;
 
@@ -119,8 +123,13 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     protected JmixTabSheet runtimeTabsheet;
     @ViewComponent
     protected VerticalLayout activityTreeContainer;
+    @ViewComponent
+    protected HorizontalLayout executionVariablesBox;
+    @ViewComponent
+    protected JmixCheckbox executionVariablesCheckbox;
 
     protected VariableFilter variableFilter;
+    protected boolean variablesReloadRequired;
 
     @Subscribe
     public void onReady(ReadyEvent event) {
@@ -162,7 +171,12 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     public void onRuntimeTabsheetSelectedChange(final JmixTabSheet.SelectedChangeEvent event) {
         Tab selectedTab = event.getSelectedTab();
         String tabId = selectedTab != null ? selectedTab.getId().orElse(null) : null;
-        if (Strings.CS.equals(tabId, USER_TASKS_TAB_ID)) {
+        if (Strings.CS.equals(tabId, VARIABLES_TAB_ID)) {
+            if (variablesReloadRequired) {
+                variablesReloadRequired = false;
+                runtimeVariablesDl.load();
+            }
+        } else if (Strings.CS.equals(tabId, USER_TASKS_TAB_ID)) {
             Component tabContent = getTabContent(selectedTab);
             if (tabContent instanceof RuntimeUserTasksTabFragment userTasksFragment) {
                 userTasksFragment.refreshIfChanged(getSelectedActivityInstanceId());
@@ -240,53 +254,98 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         return getVariableValueColumnText(variableInstanceData);
     }
 
-    @Subscribe("runtimeVariablesGrid.create")
-    public void onRuntimeVariablesGridCreate(final ActionPerformedEvent event) {
-        dialogWindows.detail(getCurrentView(), VariableInstanceData.class)
-                .withViewClass(VariableInstanceDataDetail.class)
-                .withViewConfigurer(view -> {
-                    view.setNewVariable(true);
-                    view.setSaveEnabled(true);
-                    view.setValidationEnabled(true);
-                    view.setProcessInstanceId(processInstanceDataDc.getItem().getId());
-                })
-                .newEntity()
-                .withInitializer(variableInstanceData -> {
-                    VariableValueInfo variableValueInfo = metadata.create(VariableValueInfo.class);
-                    ObjectTypeInfo objectTypeInfo = metadata.create(ObjectTypeInfo.class);
-                    variableValueInfo.setObject(objectTypeInfo);
-                    variableInstanceData.setValueInfo(variableValueInfo);
-                    variableInstanceData.setExecutionId(processInstanceDataDc.getItem().getInstanceId());
-                })
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        runtimeVariablesDl.load();
-                    }
-                })
-                .build()
-                .open();
+    @Supply(to = "runtimeVariablesGrid.name", subject = "renderer")
+    protected Renderer<VariableInstanceData> runtimeVariablesGridNameRenderer() {
+        return new ComponentRenderer<>(variableInstanceData -> {
+            VariableNameColumnFragment fragment = fragments.create(this, VariableNameColumnFragment.class);
+            fragment.setItem(variableInstanceData);
+            fragment.setSaveEnabled(true);
+            fragment.setProcessInstance(processInstanceDataDc.getItem());
+            fragment.setScopeLabelProvider(this::getVariableScopeColumnText);
+            fragment.setAfterSaveHandler(runtimeVariablesDl::load);
+            return fragment;
+        });
     }
 
-    @Subscribe("runtimeVariablesGrid.edit")
-    public void onRuntimeVariablesGridEdit(final ActionPerformedEvent event) {
+    @Supply(to = "runtimeVariablesGrid.scope", subject = "renderer")
+    protected Renderer<VariableInstanceData> runtimeVariablesGridScopeRenderer() {
+        return new TextRenderer<>(this::getVariableScopeColumnText);
+    }
+
+    @Install(to = "runtimeVariablesGrid.scope", subject = "tooltipGenerator")
+    protected String runtimeVariablesGridScopeTooltipGenerator(final VariableInstanceData variableInstanceData) {
+        String executionId = variableInstanceData.getExecutionId();
+        if (variableInstanceData.getActivityInstanceId() != null || executionId == null) {
+            return getVariableScopeColumnText(variableInstanceData);
+        }
+
+        ActivityInstanceTreeItem transitionItem = findTransitionInstance(executionId);
+        if (transitionItem == null) {
+            return messageBundle.formatMessage("executionScopeTooltip.execution", executionId);
+        }
+
+        String activityLabel = getActivityLabel(transitionItem, "%s (%s)");
+
+        return messageBundle.formatMessage("executionScopeTooltip.executionWithActivity", executionId, activityLabel);
+    }
+
+    @Install(to = "runtimeVariablesGrid.create", subject = "viewConfigurer")
+    protected void runtimeVariablesGridCreateViewConfigurer(final VariableInstanceDataDetail view) {
+        ActivityInstanceTreeItem selectedItem = activityInstancesTree.getSingleSelectedItem();
+        String processInstanceId = processInstanceDataDc.getItem().getInstanceId();
+
+        String selectedExecutionId = selectedItem != null ? selectedItem.getScopeExecutionId() : null;
+        String scopeExecutionId = StringUtils.defaultIfEmpty(selectedExecutionId, processInstanceId);
+
+        view.setNewVariable(true);
+        view.setSaveEnabled(true);
+        view.setValidationEnabled(true);
+        view.setProcessInstance(processInstanceDataDc.getItem());
+        view.setLocalFlagEnabled(!Strings.CS.equals(scopeExecutionId, processInstanceId));
+        view.setLocalExecutionId(scopeExecutionId);
+    }
+
+    @Install(to = "runtimeVariablesGrid.create", subject = "afterSaveHandler")
+    protected void runtimeVariablesGridCreateAfterSaveHandler(final VariableInstanceData variableInstanceData) {
+        ActivityInstanceTreeItem selectedItem = activityInstancesTree.getSingleSelectedItem();
+
+        // Show execution variables so that the created local variable is visible in the grid.
+        if (selectedItem != null && isExecutionVariablesAvailable(selectedItem)
+                && Strings.CS.equals(variableInstanceData.getExecutionId(), selectedItem.getScopeExecutionId())) {
+            executionVariablesCheckbox.setValue(true);
+            updateVariableFilter(selectedItem, true);
+        }
+
+        runtimeVariablesDl.load();
+        loadAndUpdateVariablesCount();
+    }
+
+    @Install(to = "runtimeVariablesGrid.create", subject = "initializer")
+    protected void runtimeVariablesGridCreateInitializer(final VariableInstanceData variableInstanceData) {
+        VariableValueInfo variableValueInfo = metadata.create(VariableValueInfo.class);
+        ObjectTypeInfo objectTypeInfo = metadata.create(ObjectTypeInfo.class);
+        variableValueInfo.setObject(objectTypeInfo);
+        variableInstanceData.setValueInfo(variableValueInfo);
+        variableInstanceData.setExecutionId(processInstanceDataDc.getItem().getInstanceId());
+    }
+
+    @Install(to = "runtimeVariablesGrid.edit", subject = "viewConfigurer")
+    protected void runtimeVariablesGridEditViewConfigurer(final VariableInstanceDataDetail view) {
         VariableInstanceData variableInstanceData = runtimeVariablesGrid.getSingleSelectedItem();
         if (variableInstanceData == null) {
             return;
         }
-        dialogWindows.detail(getCurrentView(), VariableInstanceData.class)
-                .editEntity(variableInstanceData)
-                .withViewClass(VariableInstanceDataDetail.class)
-                .withViewConfigurer(view -> {
-                    view.setSaveEnabled(true);
-                    view.setValidationEnabled(true);
-                })
-                .withAfterCloseListener(afterCloseEvent -> {
-                    if (afterCloseEvent.closedWith(StandardOutcome.SAVE)) {
-                        runtimeVariablesDl.load();
-                    }
-                })
-                .build()
-                .open();
+
+        view.setSaveEnabled(true);
+        view.setValidationEnabled(true);
+        view.setLocalFlagEnabled(true);
+        view.setProcessInstance(processInstanceDataDc.getItem());
+        view.setScopeLabelProvider(this::getVariableScopeColumnText);
+    }
+
+    @Install(to = "runtimeVariablesGrid.edit", subject = "afterSaveHandler")
+    protected void runtimeVariablesGridEditAfterSaveHandler(final VariableInstanceData variableInstanceData) {
+        runtimeVariablesDl.load();
     }
 
     @Subscribe("runtimeVariablesGrid.remove")
@@ -304,10 +363,9 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
                                 .withText(messages.getMessage("actions.Remove"))
                                 .withVariant(ActionVariant.PRIMARY)
                                 .withHandler(actionPerformedEvent -> {
-                                    ProcessInstanceData processInstanceData = processInstanceDataDc.getItem();
-
-                                    variableService.removeVariablesLocal(processInstanceData.getInstanceId(), variableItems);
+                                    variableService.removeVariablesLocal(variableItems);
                                     runtimeVariablesDl.load();
+                                    loadAndUpdateVariablesCount();
                                 }),
                         new DialogAction(DialogAction.Type.CANCEL))
                 .open();
@@ -345,9 +403,12 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     @Subscribe(id = "runtimeActivityInstancesDc", target = Target.DATA_CONTAINER)
     public void onRuntimeActivityInstancesDcItemChange(InstanceContainer.ItemChangeEvent<ActivityInstanceTreeItem> event) {
         ActivityInstanceTreeItem treeItem = event.getItem();
-        this.variableFilter.setActivityInstanceId(treeItem != null ? treeItem.getActivityInstanceId() : null);
+        updateExecutionVariableCheckBox(treeItem);
+        updateVariableFilter(treeItem, false);
 
         int selectedTabIdx = runtimeTabsheet.getSelectedIndex();
+
+        variablesReloadRequired = selectedTabIdx != VARIABLES_TAB_IDX;
         switch (selectedTabIdx) {
             case VARIABLES_TAB_IDX -> runtimeVariablesDl.load();
             case USER_TASKS_TAB_IDX -> {
@@ -383,6 +444,48 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         loadAndUpdateIncidentsCount();
         loadAndUpdateExternalTasksCount();
         loadAndUpdateJobsCount();
+    }
+
+    protected void updateExecutionVariableCheckBox(ActivityInstanceTreeItem treeItem) {
+        executionVariablesBox.setVisible(isExecutionVariablesAvailable(treeItem));
+        executionVariablesCheckbox.clear();
+    }
+
+    @Subscribe("executionVariablesCheckbox")
+    public void onExecutionVariablesCheckboxComponentValueChange(final ComponentValueChangeEvent<JmixCheckbox, Boolean> event) {
+        if (event.isFromClient()) {
+            updateVariableFilter(activityInstancesTree.getSingleSelectedItem(), BooleanUtils.isTrue(event.getValue()));
+
+            runtimeVariablesDl.load();
+            loadAndUpdateVariablesCount();
+        }
+    }
+
+    protected void updateVariableFilter(@Nullable ActivityInstanceTreeItem treeItem, boolean loadExecutionVariables) {
+        if (treeItem == null) {
+            variableFilter.setActivityInstanceId(null);
+            variableFilter.setVariableScopeId(null);
+            return;
+        }
+
+        if (loadExecutionVariables && isExecutionVariablesAvailable(treeItem)) {
+            variableFilter.setActivityInstanceId(null);
+            variableFilter.setVariableScopeId(treeItem.getScopeExecutionId());
+        } else {
+            variableFilter.setActivityInstanceId(treeItem.getActivityInstanceId());
+            variableFilter.setVariableScopeId(null);
+        }
+    }
+
+    protected boolean isExecutionVariablesAvailable(@Nullable ActivityInstanceTreeItem treeItem) {
+        if (treeItem == null || BooleanUtils.isNotTrue(treeItem.getTransition())) {
+            return false;
+        }
+
+        // Variables of a transition instance running on the process instance execution are shown for the root item
+        String executionId = treeItem.getScopeExecutionId();
+        return executionId != null
+                && !Strings.CS.equals(executionId, processInstanceDataDc.getItem().getInstanceId());
     }
 
     protected void loadAndUpdateVariablesCount() {
@@ -437,6 +540,77 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     protected String getSelectedActivityId() {
         ActivityInstanceTreeItem item = activityInstancesTree.getSingleSelectedItem();
         return item != null ? item.getActivityId() : null;
+    }
+
+    protected String getProcessScopeName() {
+        ProcessInstanceData processInstanceData = processInstanceDataDc.getItem();
+        String processName = StringUtils.defaultIfEmpty(processInstanceData.getProcessDefinitionName(),
+                processInstanceData.getProcessDefinitionKey());
+
+        return StringUtils.isNotEmpty(processName)
+                ? messageBundle.formatMessage("processInstanceScopeWithName", processName)
+                : messageBundle.getMessage("processInstanceScope");
+    }
+
+    protected String getVariableScopeColumnText(VariableInstanceData variableInstanceData) {
+        String activityInstanceId = variableInstanceData.getActivityInstanceId();
+        if (activityInstanceId == null) {
+            // Transition activity instance execution has no activity instance id, use execution id instead to show scope
+            String executionId = variableInstanceData.getExecutionId();
+            if (executionId == null) {
+                return "";
+            }
+
+            ActivityInstanceTreeItem transitionItem = findTransitionInstance(executionId);
+            String executionLabel = transitionItem != null ? getActivityLabel(transitionItem, "%s: %s") : executionId;
+
+            return messageBundle.formatMessage("executionScope", executionLabel);
+        }
+
+        ActivityInstanceTreeItem item = findActivityInstance(activityInstanceId);
+
+        return item != null ? getActivityInstanceScopeName(item) : activityInstanceId;
+    }
+
+    protected String getActivityInstanceScopeName(ActivityInstanceTreeItem item) {
+        // The root activity instance is not a BPMN element, so it is labeled as the process instance itself.
+        if (item.getParentActivityInstance() == null) {
+            return getProcessScopeName();
+        }
+
+        return getActivityLabel(item, "%s (%s)");
+    }
+
+    protected String getActivityLabel(ActivityInstanceTreeItem item, String typeAndIdFormat) {
+        String activityName = item.getActivityName();
+        if (StringUtils.isNotEmpty(activityName)) {
+            return activityName;
+        }
+
+        String activityType = item.getActivityType();
+
+        return StringUtils.isNotEmpty(activityType)
+                ? String.format(typeAndIdFormat, activityType, item.getActivityId())
+                : item.getActivityId();
+    }
+
+    @Nullable
+    protected ActivityInstanceTreeItem findTransitionInstance(String executionId) {
+        return runtimeActivityInstancesDc.getItems()
+                .stream()
+                .filter(item -> BooleanUtils.isTrue(item.getTransition())
+                        && Strings.CS.equals(item.getScopeExecutionId(), executionId))
+                .findAny()
+                .orElse(null);
+    }
+
+    @Nullable
+    protected ActivityInstanceTreeItem findActivityInstance(String activityInstanceId) {
+        return runtimeActivityInstancesDc.getItems()
+                .stream()
+                .filter(item -> Strings.CS.equals(item.getActivityInstanceId(), activityInstanceId))
+                .findAny()
+                .orElse(null);
     }
 
     protected void setVariablesDefaultSort() {
@@ -530,17 +704,6 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
                 .findFirst()
                 .orElse(null)
                 : null;
-    }
-
-    @Supply(to = "runtimeVariablesGrid.name", subject = "renderer")
-    private Renderer<VariableInstanceData> runtimeVariablesGridNameRenderer() {
-        return new ComponentRenderer<>(variableInstanceData -> {
-            VariableNameColumnFragment fragment = fragments.create(this, VariableNameColumnFragment.class);
-            fragment.setOpenMode(OpenMode.DIALOG);
-            fragment.setItem(variableInstanceData);
-            fragment.setAfterSaveHandler(() -> runtimeVariablesDl.load());
-            return fragment;
-        });
     }
 
 }

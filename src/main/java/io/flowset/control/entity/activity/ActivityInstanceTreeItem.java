@@ -8,7 +8,11 @@ package io.flowset.control.entity.activity;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
+import org.apache.commons.collections4.CollectionUtils;
+import org.jspecify.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 
 @JmixEntity
@@ -30,6 +34,8 @@ public class ActivityInstanceTreeItem {
     protected String processInstanceId;
 
     protected String processDefinitionId;
+
+    protected List<String> executionIds;
 
     protected Boolean transition;
 
@@ -55,6 +61,14 @@ public class ActivityInstanceTreeItem {
 
     public void setProcessDefinitionId(String processDefinitionId) {
         this.processDefinitionId = processDefinitionId;
+    }
+
+    public List<String> getExecutionIds() {
+        return executionIds;
+    }
+
+    public void setExecutionIds(List<String> executionIds) {
+        this.executionIds = executionIds;
     }
 
     public String getProcessInstanceId() {
@@ -103,5 +117,11 @@ public class ActivityInstanceTreeItem {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    @JmixProperty
+    @Nullable
+    public String getScopeExecutionId() {
+        return CollectionUtils.isNotEmpty(executionIds) ? executionIds.getFirst() : null;
     }
 }
