@@ -51,6 +51,7 @@
         </hbox>
         <hbox id="buttonsPanel" classNames="buttons-panel">
             <button id="refreshBtn" action="deploymentsDataGrid.refresh" themeNames="primary success"/>
+            <button id="uploadBtn" action="deploymentsDataGrid.upload"/>
             <button id="bulkRemoveBtn" action="deploymentsDataGrid.bulkRemove"/>
             <button id="excelExportBtn" action="deploymentsDataGrid.excelExport"/>
             <simplePagination id="pagination" dataLoader="deploymentDatasDl"/>
@@ -63,6 +64,7 @@
                   selectionMode="MULTI">
             <actions>
                 <action id="refresh" type="list_refresh"/>
+                <action id="upload" type="control_uploadDeployment" icon="UPLOAD" text="msg://upload"/>
                 <action id="bulkRemove" type="control_bulkDeleteDeployment" icon="TRASH"
                         actionVariant="DANGER"/>
                 <action id="view" type="list_edit" visible="false"/>

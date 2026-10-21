@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <content>
+        <vbox id="root" padding="false" width="100%" height="100%">
+            <tabSheet id="resourceTabSheet" width="100%" height="100%" visible="false"/>
+            <div id="emptyResourceMessageContainer"
+                 width="100%"
+                 height="100%"
+                 css="display:flex;justify-content:center;align-items:center;"
+                 visible="true">
+                <span text="msg://selectResourceMessage"/>
+            </div>
+        </vbox>
+    </content>
+</fragment>
