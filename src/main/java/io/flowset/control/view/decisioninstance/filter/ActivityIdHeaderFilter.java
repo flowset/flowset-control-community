@@ -38,11 +38,15 @@ public class ActivityIdHeaderFilter
 
     @Override
     public void apply() {
+        updateFilterState();
+
+        this.loadDelegate.run();
+    }
+
+    protected void updateFilterState() {
         String value = activityIdField.getTypedValue();
         filterDc.getItem().setActivityId(value);
         filterButton.getElement().setAttribute(COLUMN_FILTER_BUTTON_ACTIVATED_ATTRIBUTE_NAME, value != null);
-
-        this.loadDelegate.run();
     }
 
     @Override
@@ -70,6 +74,8 @@ public class ActivityIdHeaderFilter
     public void updateComponents(QueryParameters queryParameters) {
         String activityParamValue = getStringParam(queryParameters, ACTIVITY_ID_FILTER_PARAM);
         activityIdField.setTypedValue(activityParamValue);
+
+        updateFilterState();
     }
 
     @Override
