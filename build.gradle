@@ -92,6 +92,9 @@ dependencies {
     // Apache POI
     implementation 'org.apache.poi:poi-ooxml'
 
+    // jsoup (safety checks of uploaded HTML forms and SVG images), version managed by the Spring Boot / Vaadin BOM
+    implementation 'org.jsoup:jsoup'
+
     // Spring
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation "org.springframework.cloud:spring-cloud-dependencies"
