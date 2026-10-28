@@ -66,6 +66,8 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     protected Notifications notifications;
     @Autowired
     protected DialogWindows dialogWindows;
+    @Autowired
+    protected ViewValidation viewValidation;
     @ViewComponent
     protected MessageBundle messageBundle;
     @ViewComponent
@@ -92,6 +94,8 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     protected VerticalLayout dateTimeBox;
 
     protected boolean oauth2Changed = false;
+    /** the auth settings fragment currently placed into {@code authBox}, {@code null} when no auth type is selected */
+    protected Fragment<VerticalLayout> authFragment;
 
 
     @Subscribe
@@ -194,30 +198,42 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
     public void onAuthTypeGroupComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixRadioButtonGroup<AuthType>, AuthType> event) {
         AuthType type = event.getValue();
 
-        Fragment<VerticalLayout> authFragment = null;
+        Fragment<VerticalLayout> fragment = null;
 
         if (type != null) {
             switch (type) {
                 case BASIC:
-                    authFragment = fragments.create(this, BasicAuthFragment.class);
+                    fragment = fragments.create(this, BasicAuthFragment.class);
                     break;
                 case HTTP_HEADER:
-                    authFragment = fragments.create(this, HttpHeaderAuthFragment.class);
+                    fragment = fragments.create(this, HttpHeaderAuthFragment.class);
                     break;
                 case OAUTH2:
-                    authFragment = fragments.create(this, OAuth2AuthFragment.class);
+                    fragment = fragments.create(this, OAuth2AuthFragment.class);
                     break;
                 default:
-                    authFragment = null;
+                    fragment = null;
                     break;
             }
         }
 
         authBox.removeAll();
-        if (authFragment != null) {
-            authBox.add(authFragment);
+        if (fragment != null) {
+            authBox.add(fragment);
         }
+        authFragment = fragment;
         updateAuthStateFields();
+    }
+
+    /**
+     * The auth settings fields live in a fragment placed into {@code authBox}; the standard view validation
+     * does not descend into fragments, so their required and URL constraints are checked here explicitly.
+     */
+    @Subscribe
+    public void onValidation(final ValidationEvent event) {
+        if (authFragment != null) {
+            event.getErrors().addAll(viewValidation.validateUiComponents(authFragment.getContent()));
+        }
     }
 
     @Subscribe("baseUrlField")

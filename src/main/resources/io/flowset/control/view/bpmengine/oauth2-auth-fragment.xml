@@ -29,9 +29,9 @@
                     </validators>
                 </textField>
                 <div colspan="2"/>
-                <textField property="oauth2ClientId" required="true"
+                <textField id="oauth2ClientIdField" property="oauth2ClientId" required="true"
                            label="msg://oauth2ClientId" classNames="pt-xs"/>
-                <passwordField property="oauth2ClientSecret" required="true"
+                <passwordField id="oauth2ClientSecretField" property="oauth2ClientSecret" required="true"
                                label="msg://oauth2ClientSecret" classNames="pt-xs"/>
                 <div colspan="2"/>
                 <textField property="oauth2Scope" label="msg://oauth2Scope" classNames="pt-xs" colspan="2" dataContainer="bpmEngineDc"
