@@ -40,12 +40,14 @@ import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.activity.ActivityInstanceTreeItem;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.filter.*;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import io.flowset.control.entity.variable.ObjectTypeInfo;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.entity.variable.VariableValueInfo;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.externaltask.ExternalTaskService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.job.JobService;
@@ -63,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -78,10 +81,6 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     public static final String INCIDENTS_TAB_ID = "incidentsTab";
 
     public static final int VARIABLES_TAB_IDX = 0;
-    public static final int USER_TASKS_TAB_IDX = 1;
-    public static final int JOBS_TAB_IDX = 2;
-    public static final int EXTERNAL_TASKS_TAB_IDX = 3;
-    public static final int INCIDENTS_TAB_IDX = 4;
 
     @Autowired
     protected Metadata metadata;
@@ -105,6 +104,8 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     protected Messages messages;
     @Autowired
     protected ComponentHelper componentHelper;
+    @Autowired
+    protected EngineService engineService;
 
 
     @ViewComponent
@@ -130,6 +131,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
 
     protected VariableFilter variableFilter;
     protected boolean variablesReloadRequired;
+    protected List<RuntimeTabType> tabTypes = new ArrayList<>();
 
     @Subscribe
     public void onReady(ReadyEvent event) {
@@ -145,11 +147,11 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
 
             setVariablesDefaultSort();
 
+            tabTypes = resolveTabTypes(engineService.getSelectedEngineType());
+            for (int i = 0; i < tabTypes.size(); i++) {
+                initTab(tabTypes.get(i), i);
+            }
             updateVariablesTabCaption(VARIABLES_TAB_IDX);
-            initUserTasksTab();
-            initJobsTab();
-            initExternalTasksTab();
-            initIncidentsTab();
 
             activityInstancesTree.expand(runtimeActivityInstancesDc.getItems());
             runtimeVariablesDl.load();
@@ -162,9 +164,37 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         }
     }
 
-    protected void initIncidentsTab() {
+    /**
+     * Returns the runtime tabs shown for the engine type, in the order of the tab sheet.
+     *
+     * @param engineType the type of the selected engine, or {@code null} if no engine is selected
+     * @return the tab types
+     */
+    protected List<RuntimeTabType> resolveTabTypes(@Nullable EngineType engineType) {
+        List<RuntimeTabType> types = new ArrayList<>(List.of(RuntimeTabType.VARIABLES, RuntimeTabType.USER_TASKS,
+                RuntimeTabType.JOBS));
+        if (engineType == null || engineType.isCamunda7Compatible()) {
+            types.add(RuntimeTabType.EXTERNAL_TASKS);
+            types.add(RuntimeTabType.INCIDENTS);
+        }
+        return types;
+    }
+
+    protected void initTab(RuntimeTabType type, int idx) {
+        switch (type) {
+            case VARIABLES -> {
+                // Declared in the descriptor.
+            }
+            case USER_TASKS -> initUserTasksTab(idx);
+            case JOBS -> initJobsTab(idx);
+            case EXTERNAL_TASKS -> initExternalTasksTab(idx);
+            case INCIDENTS -> initIncidentsTab(idx);
+        }
+    }
+
+    protected void initIncidentsTab(int idx) {
         Tab incidentsTab = createTab(INCIDENTS_TAB_ID, "incidentsTabCaption", VaadinIcon.WARNING);
-        runtimeTabsheet.add(incidentsTab, componentHelper.createLazyTabContent(this::createIncidentsFragment), INCIDENTS_TAB_IDX);
+        runtimeTabsheet.add(incidentsTab, componentHelper.createLazyTabContent(this::createIncidentsFragment), idx);
     }
 
     @Subscribe("runtimeTabsheet")
@@ -406,30 +436,35 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         updateExecutionVariableCheckBox(treeItem);
         updateVariableFilter(treeItem, false);
 
-        int selectedTabIdx = runtimeTabsheet.getSelectedIndex();
+        Tab selectedTab = runtimeTabsheet.getSelectedTab();
+        RuntimeTabType runtimeTabType = selectedTab != null
+                ? RuntimeTabType.fromId(selectedTab.getId().orElse(null))
+                : null;
 
-        variablesReloadRequired = selectedTabIdx != VARIABLES_TAB_IDX;
-        switch (selectedTabIdx) {
-            case VARIABLES_TAB_IDX -> runtimeVariablesDl.load();
-            case USER_TASKS_TAB_IDX -> {
+        variablesReloadRequired = runtimeTabType != RuntimeTabType.VARIABLES;
+        switch (runtimeTabType) {
+            case null -> {
+            }
+            case VARIABLES -> runtimeVariablesDl.load();
+            case USER_TASKS -> {
                 Component tabContent = getTabContent(runtimeTabsheet.getSelectedTab());
                 if (tabContent instanceof RuntimeUserTasksTabFragment userTasksFragment) {
                     userTasksFragment.refreshIfChanged(getSelectedActivityInstanceId());
                 }
             }
-            case JOBS_TAB_IDX -> {
+            case JOBS -> {
                 Component tabContent = getTabContent(runtimeTabsheet.getSelectedTab());
                 if (tabContent instanceof JobsTabFragment jobsTabFragment) {
                     jobsTabFragment.refreshIfChanged(getSelectedActivityId());
                 }
             }
-            case INCIDENTS_TAB_IDX -> {
+            case INCIDENTS -> {
                 Component tabContent = getTabContent(runtimeTabsheet.getSelectedTab());
                 if (tabContent instanceof RuntimeIncidentsTabFragment incidentsTabFragment) {
                     incidentsTabFragment.refreshIfChanged(getSelectedActivityId());
                 }
             }
-            case EXTERNAL_TASKS_TAB_IDX -> {
+            case EXTERNAL_TASKS -> {
                 Component tabContent = getTabContent(runtimeTabsheet.getSelectedTab());
                 if (tabContent instanceof ExternalTasksTabFragment externalTasksTabFragment) {
                     externalTasksTabFragment.refreshIfChanged(getSelectedActivityId());
@@ -489,45 +524,55 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
     }
 
     protected void loadAndUpdateVariablesCount() {
-        int runtimeVariablesCount = (int) variableService.getRuntimeVariablesCount(variableFilter);
+        if (tabTypes.contains(RuntimeTabType.VARIABLES)) {
+            int runtimeVariablesCount = (int) variableService.getRuntimeVariablesCount(variableFilter);
 
-        updateVariablesTabCaption(runtimeVariablesCount);
+            updateVariablesTabCaption(runtimeVariablesCount);
+        }
     }
 
     protected void loadAndUpdateJobsCount() {
-        JobFilter jobFilter = metadata.create(JobFilter.class);
-        jobFilter.setActivityId(getSelectedActivityId());
-        jobFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (tabTypes.contains(RuntimeTabType.JOBS)) {
+            JobFilter jobFilter = metadata.create(JobFilter.class);
+            jobFilter.setActivityId(getSelectedActivityId());
+            jobFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long jobsCount = jobService.getCount(jobFilter);
-        updateJobsTabCaption(jobsCount);
+            long jobsCount = jobService.getCount(jobFilter);
+            updateJobsTabCaption(jobsCount);
+        }
     }
 
     protected void loadAndUpdateUserTasksCount() {
-        UserTaskFilter userTaskFilter = metadata.create(UserTaskFilter.class);
-        userTaskFilter.setActivityInstanceId(getSelectedActivityInstanceId());
-        userTaskFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (tabTypes.contains(RuntimeTabType.USER_TASKS)) {
+            UserTaskFilter userTaskFilter = metadata.create(UserTaskFilter.class);
+            userTaskFilter.setActivityInstanceId(getSelectedActivityInstanceId());
+            userTaskFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long runtimeTasksCount = userTaskService.getRuntimeTasksCount(userTaskFilter);
-        updateUserTasksTabCaption(runtimeTasksCount);
+            long runtimeTasksCount = userTaskService.getRuntimeTasksCount(userTaskFilter);
+            updateUserTasksTabCaption(runtimeTasksCount);
+        }
     }
 
     protected void loadAndUpdateExternalTasksCount() {
-        ExternalTaskFilter filter = metadata.create(ExternalTaskFilter.class);
-        filter.setActivityId(getSelectedActivityId());
-        filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (tabTypes.contains(RuntimeTabType.EXTERNAL_TASKS)) {
+            ExternalTaskFilter filter = metadata.create(ExternalTaskFilter.class);
+            filter.setActivityId(getSelectedActivityId());
+            filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long tasksCount = externalTaskService.getRunningTasksCount(filter);
-        updateExternalTasksTabCaption(tasksCount);
+            long tasksCount = externalTaskService.getRunningTasksCount(filter);
+            updateExternalTasksTabCaption(tasksCount);
+        }
     }
 
     protected void loadAndUpdateIncidentsCount() {
-        IncidentFilter filter = metadata.create(IncidentFilter.class);
-        filter.setActivityId(getSelectedActivityId());
-        filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (tabTypes.contains(RuntimeTabType.INCIDENTS)) {
+            IncidentFilter filter = metadata.create(IncidentFilter.class);
+            filter.setActivityId(getSelectedActivityId());
+            filter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long runtimeIncidentsCount = incidentService.getRuntimeIncidentCount(filter);
-        updateIncidentsTabCaption(runtimeIncidentsCount);
+            long runtimeIncidentsCount = incidentService.getRuntimeIncidentCount(filter);
+            updateIncidentsTabCaption(runtimeIncidentsCount);
+        }
     }
 
     @Nullable
@@ -619,42 +664,57 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
         runtimeVariablesGrid.sort(gridSortOrders);
     }
 
-    protected void initUserTasksTab() {
+    protected void initUserTasksTab(int idx) {
         Tab userTasksTab = createTab(USER_TASKS_TAB_ID, "tasksTabCaption", VaadinIcon.USER_CARD);
         runtimeTabsheet.add(userTasksTab, componentHelper.createLazyTabContent(this::createUserTasksFragment),
-                USER_TASKS_TAB_IDX);
+                idx);
     }
 
-    protected void initJobsTab() {
+    protected void initJobsTab(int idx) {
         Tab jobsTab = createTab(JOBS_TAB_ID, "jobsTabCaption", VaadinIcon.COGS);
         runtimeTabsheet.add(jobsTab, componentHelper.createLazyTabContent(() ->
-                fragments.create(getParentController(), JobsTabFragment.class)), JOBS_TAB_IDX);
+                fragments.create(getParentController(), JobsTabFragment.class)), idx);
     }
 
-    protected void initExternalTasksTab() {
+    protected void initExternalTasksTab(int idx) {
         Tab externalTasksTab = createTab(EXTERNAL_TASKS_TAB_ID, "externalTasksTabCaption", VaadinIcon.CLUSTER);
         runtimeTabsheet.add(externalTasksTab, componentHelper.createLazyTabContent(() ->
-                fragments.create(getParentController(), ExternalTasksTabFragment.class)), EXTERNAL_TASKS_TAB_IDX);
+                fragments.create(getParentController(), ExternalTasksTabFragment.class)), idx);
     }
 
     protected void updateUserTasksTabCaption(long userTasksCount) {
-        updateTabCaption(USER_TASKS_TAB_IDX, "tasksTabCaption", userTasksCount, VaadinIcon.USER_CARD);
+        int tabIndex = tabTypes.indexOf(RuntimeTabType.USER_TASKS);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex, "tasksTabCaption", userTasksCount, VaadinIcon.USER_CARD);
+        }
     }
 
     protected void updateExternalTasksTabCaption(long externalTaskCount) {
-        updateTabCaption(EXTERNAL_TASKS_TAB_IDX, "externalTasksTabCaption", externalTaskCount, VaadinIcon.CLUSTER);
+        int tabIndex = tabTypes.indexOf(RuntimeTabType.EXTERNAL_TASKS);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex, "externalTasksTabCaption", externalTaskCount, VaadinIcon.CLUSTER);
+        }
     }
 
     protected void updateIncidentsTabCaption(long incidentCount) {
-        updateTabCaption(INCIDENTS_TAB_IDX, "incidentsTabCaption", incidentCount, VaadinIcon.WARNING);
+        int tabIndex = tabTypes.indexOf(RuntimeTabType.INCIDENTS);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex, "incidentsTabCaption", incidentCount, VaadinIcon.WARNING);
+        }
     }
 
     protected void updateJobsTabCaption(long jobsCount) {
-        updateTabCaption(JOBS_TAB_IDX, "jobsTabCaption", jobsCount, VaadinIcon.COGS);
+        int tabIndex = tabTypes.indexOf(RuntimeTabType.JOBS);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex, "jobsTabCaption", jobsCount, VaadinIcon.COGS);
+        }
     }
 
     protected void updateVariablesTabCaption(int runtimeVariablesCount) {
-        updateTabCaption(VARIABLES_TAB_IDX, "variablesTabCaption", runtimeVariablesCount, VaadinIcon.CURLY_BRACKETS);
+        int tabIndex = tabTypes.indexOf(RuntimeTabType.VARIABLES);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex, "variablesTabCaption", runtimeVariablesCount, VaadinIcon.CURLY_BRACKETS);
+        }
     }
 
 

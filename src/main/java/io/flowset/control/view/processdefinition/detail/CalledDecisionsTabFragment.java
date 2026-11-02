@@ -10,8 +10,10 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisiondefinition.DecisionReferenceData;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.security.SecuritySupport;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.uicomponent.viewer.handler.BusinessRuleTaskOverlayClickHandler;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -39,6 +41,16 @@ public class CalledDecisionsTabFragment extends Fragment<VerticalLayout> {
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
     @ViewComponent
     protected DataGrid<DecisionReferenceData> decisionsGrid;
+    @Autowired
+    protected EngineService engineService;
+
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        if (!isVersionBindingAvailableByEngineType()) {
+            decisionsGrid.removeColumnByKey("version");
+            decisionsGrid.removeColumnByKey("versionTag");
+        }
+    }
 
     @Supply(to = "decisionsGrid.binding", subject = "renderer")
     protected Renderer<DecisionReferenceData> decisionsGridBindingRenderer() {
@@ -64,5 +76,10 @@ public class CalledDecisionsTabFragment extends Fragment<VerticalLayout> {
                 processDefinitionDataDc.getItem(),
                 selectedItem,
                 UiComponentUtils.isComponentAttachedToDialog(this));
+    }
+
+    protected boolean isVersionBindingAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

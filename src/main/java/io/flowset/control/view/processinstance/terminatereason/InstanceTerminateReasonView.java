@@ -4,6 +4,7 @@ package io.flowset.control.view.processinstance.terminatereason;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -18,9 +19,11 @@ import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
 import io.flowset.control.action.ViewProcessInstanceAction;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.filter.IncidentFilter;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.incident.IncidentLoadContext;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.view.util.ComponentHelper;
@@ -43,6 +46,8 @@ public class InstanceTerminateReasonView extends StandardView {
     protected DialogWindows dialogWindows;
     @Autowired
     protected ComponentHelper componentHelper;
+    @Autowired
+    protected EngineService engineService;
 
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDc;
@@ -50,6 +55,8 @@ public class InstanceTerminateReasonView extends StandardView {
     protected CollectionLoader<HistoricIncidentData> incidentsDl;
     @ViewComponent
     protected DataGrid<HistoricIncidentData> incidentsGrid;
+    @ViewComponent
+    protected VerticalLayout incidentsGroup;
     @ViewComponent
     protected ViewProcessInstanceAction viewInstanceAction;
 
@@ -65,7 +72,12 @@ public class InstanceTerminateReasonView extends StandardView {
         filter = dataManager.create(IncidentFilter.class);
         filter.setProcessInstanceId(processInstance.getInstanceId());
         viewInstanceAction.setEntityId(processInstance.getInstanceId());
-        incidentsDl.load();
+
+        boolean incidentsAvailable = isIncidentsAvailableByEngineType();
+        incidentsGroup.setVisible(incidentsAvailable);
+        if (incidentsAvailable) {
+            incidentsDl.load();
+        }
     }
 
     @Subscribe("incidentsGrid.view")
@@ -131,5 +143,10 @@ public class InstanceTerminateReasonView extends StandardView {
     @Subscribe("incidentsGrid")
     public void onHistoryTasksGridGridSort(final SortEvent<DataGrid<HistoricIncidentData>, GridSortOrder<DataGrid<HistoricIncidentData>>> event) {
         incidentsDl.load();
+    }
+
+    protected boolean isIncidentsAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

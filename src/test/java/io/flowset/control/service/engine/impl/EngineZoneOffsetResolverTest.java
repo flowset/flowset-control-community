@@ -6,14 +6,20 @@
 package io.flowset.control.service.engine.impl;
 
 import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.property.EngineConnectionCheckProperties;
 import io.flowset.control.property.EngineProperties;
+import io.flowset.control.restsupport.FeignClientProvider;
+import io.flowset.control.service.engine.EngineOperationServiceProvider;
 import io.flowset.control.service.engine.EngineService;
+import io.flowset.control.service.engine.ZoneOffsetSource;
 import io.flowset.control.service.engine.auth.EngineAuthenticator;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -32,21 +38,30 @@ class EngineZoneOffsetResolverTest {
     private final Map<String, String> responses = new HashMap<>();
     private final AtomicInteger requestCount = new AtomicInteger();
 
+    private EngineService engineService;
     private TestEngineZoneOffsetResolver resolver;
 
     @BeforeEach
     void setUp() {
         BpmEngine engine = mock(BpmEngine.class);
         when(engine.getBaseUrl()).thenReturn("http://localhost:8080/engine-rest");
+        when(engine.getType()).thenReturn(EngineType.CAMUNDA_7);
 
-        EngineService engineService = mock(EngineService.class);
+        engineService = mock(EngineService.class);
         when(engineService.findEngineByUuid(engineId)).thenReturn(engine);
 
         EngineProperties engineProperties = new EngineProperties(null, "Camunda", null, 10_000L, 3_600_000L);
         EngineConnectionCheckProperties checkProperties = new EngineConnectionCheckProperties(30, 1000, 1000, 1, 100);
 
+        EngineOperationServiceProvider engineOperationServiceProvider = mock(EngineOperationServiceProvider.class);
+        when(engineOperationServiceProvider.getConnectionProvider(EngineType.CAMUNDA_7))
+                .thenReturn(new Camunda7EngineConnectionProvider(mock(FeignClientProvider.class), checkProperties,
+                        mock(EngineAuthenticator.class), mock(EngineTimeResolver.class)));
+        when(engineOperationServiceProvider.getConnectionProvider(null))
+                .thenReturn(new NoopEngineConnectionProvider());
+
         resolver = new TestEngineZoneOffsetResolver(engineService, mock(EngineAuthenticator.class),
-                engineProperties, checkProperties);
+                engineProperties, checkProperties, engineOperationServiceProvider);
     }
 
     @Test
@@ -100,12 +115,54 @@ class EngineZoneOffsetResolverTest {
         assertThat(requestCount.get()).isZero();
     }
 
+    @Test
+    void givenEngineOfUnknownType_whenGetZoneOffset_thenEmpty() {
+        responses.put(DEPLOYMENTS_PATH, "[{\"deploymentTime\":\"2026-10-06T16:40:13.533+0400\"}]");
+        UUID unknownTypeEngineId = UUID.randomUUID();
+        when(engineService.findEngineByUuid(unknownTypeEngineId)).thenReturn(mock(BpmEngine.class));
+
+        assertThat(resolver.getZoneOffset(unknownTypeEngineId)).isEmpty();
+        assertThat(requestCount.get()).isZero();
+    }
+
+    @Test
+    @DisplayName("Offset of ISO date")
+    void givenIsoDateSource_whenExtractOffset_thenOffsetReturned() {
+        //given
+        ZoneOffsetSource source = new ZoneOffsetSource()
+                .setDateField("deploymentTime")
+                .setDateFormatter(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        //when
+        ZoneOffset offset = resolver.extractOffset("[{\"deploymentTime\":\"2026-10-06T16:40:13.533+04:00\"}]", source);
+
+        //then
+        assertThat(offset).isEqualTo(ZoneOffset.ofHours(4));
+    }
+
+    @Test
+    @DisplayName("Offset of ISO date in UTC")
+    void givenIsoUtcDateSource_whenExtractOffset_thenUtcReturned() {
+        //given
+        ZoneOffsetSource source = new ZoneOffsetSource()
+                .setDateField("deploymentTime")
+                .setDateFormatter(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+
+        //when
+        ZoneOffset offset = resolver.extractOffset("[{\"deploymentTime\":\"2026-10-06T16:40:13.533Z\"}]", source);
+
+        //then
+        assertThat(offset).isEqualTo(ZoneOffset.UTC);
+    }
+
     private class TestEngineZoneOffsetResolver extends EngineZoneOffsetResolver {
 
         TestEngineZoneOffsetResolver(EngineService engineService, EngineAuthenticator engineAuthenticator,
                                      EngineProperties engineProperties,
-                                     EngineConnectionCheckProperties connectionCheckProperties) {
-            super(engineService, engineAuthenticator, engineProperties, connectionCheckProperties);
+                                     EngineConnectionCheckProperties connectionCheckProperties,
+                                     EngineOperationServiceProvider engineOperationServiceProvider) {
+            super(engineService, engineAuthenticator, engineProperties, connectionCheckProperties,
+                    engineOperationServiceProvider);
         }
 
         @Override

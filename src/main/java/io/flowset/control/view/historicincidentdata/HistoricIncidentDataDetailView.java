@@ -14,7 +14,7 @@ import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.view.*;
 import io.flowset.control.entity.incident.HistoricIncidentData;
 import io.flowset.control.service.incident.IncidentService;
-import io.flowset.control.service.job.impl.JobServiceImpl;
+import io.flowset.control.service.job.JobService;
 import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,7 +38,7 @@ public class HistoricIncidentDataDetailView extends StandardDetailView<HistoricI
     @Autowired
     protected DialogWindows dialogWindows;
     @Autowired
-    protected JobServiceImpl jobService;
+    protected JobService jobService;
 
     @Subscribe
     public void onInit(final InitEvent event) {

@@ -306,7 +306,7 @@ public class ProcessInstanceDetailViewActionSecurityUiTest extends AbstractCamun
         viewerFragment.getZoomInButton().shouldBe(VISIBLE).shouldBe(ENABLED);
         viewerFragment.getZoomOutButton().shouldBe(VISIBLE).shouldBe(ENABLED);
         viewerFragment.getResetZoomButton().shouldBe(VISIBLE).shouldBe(ENABLED);
-        viewerFragment.getViewActivityStatisticsButton().shouldNotBe(EXIST).shouldNotBe(VISIBLE);
+        viewerFragment.getViewActivityStatisticsButton().shouldBe(VISIBLE).shouldBe(ENABLED);
         viewerFragment.getViewDocumentationButton().shouldNotBe(EXIST).shouldNotBe(VISIBLE);
     }
 

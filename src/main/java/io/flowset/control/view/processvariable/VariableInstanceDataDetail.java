@@ -11,30 +11,26 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.NumberField;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.filter.VariableFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.variable.CamundaVariableType;
+import io.flowset.control.entity.variable.ProcessVariableType;
 import io.flowset.control.entity.variable.VariableInstanceData;
 import io.flowset.control.entity.variable.VariableValueInfo;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.variable.VariableService;
 import io.flowset.control.service.variable.VariableUtils;
+import io.flowset.control.view.util.VariableTypeFieldGenerator;
 import io.jmix.core.*;
-import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.flowui.Actions;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.formlayout.JmixFormLayout;
-import io.jmix.flowui.component.select.JmixSelect;
-import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.component.upload.FileUploadField;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -51,11 +47,12 @@ import org.springframework.core.io.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Set;
 import java.util.function.Function;
+
+import static io.flowset.control.util.ProcessVariableUtils.getAllVariableTypes;
+import static io.flowset.control.util.ProcessVariableUtils.isBinaryType;
+import static io.flowset.control.util.ProcessVariableUtils.resolveVariableType;
 
 @SuppressWarnings("LombokSetterMayBeUsed")
 @Route(value = "bpm/variableinstancedata", layout = DefaultMainViewParent.class)
@@ -69,8 +66,6 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
     protected static final Logger log = LoggerFactory.getLogger(VariableInstanceDataDetail.class);
 
     @Autowired
-    protected DatatypeRegistry datatypeRegistry;
-    @Autowired
     protected Metadata metadata;
     @Autowired
     protected UiComponents uiComponents;
@@ -80,11 +75,15 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
     protected VariableService variableService;
     @Autowired
     private CoreProperties coreProperties;
+    @Autowired
+    protected VariableTypeFieldGenerator variableTypeFieldGenerator;
+    @Autowired
+    protected EngineService engineService;
 
     @ViewComponent
     protected MessageBundle messageBundle;
     @ViewComponent
-    protected JmixComboBox<CamundaVariableType> typeComboBox;
+    protected JmixComboBox<ProcessVariableType> typeComboBox;
     @ViewComponent
     protected TypedTextField<String> nameField;
     @ViewComponent
@@ -120,6 +119,7 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
     protected boolean validationEnabled = false;
     protected boolean localFlagEnabled = false;
+    protected EngineType selectedEngineType;
 
 
     public void setSaveEnabled(boolean saveVisible) {
@@ -158,6 +158,8 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        selectedEngineType = engineService.getSelectedEngineType();
+
         initTypeLookup();
         initActions();
         initValueComponent();
@@ -248,7 +250,7 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
         if (saveEnabled) {
             String type = variableInstanceData.getType();
-            if (CamundaVariableType.FILE.getId().equals(type) || CamundaVariableType.BYTES.getId().equals(type)) {
+            if (isBinaryType(selectedEngineType, type)) {
                 // The entity value contains a File only after a new upload (see handleFileUpload).
                 // If the variable is reopened and saved without changes, there is nothing to send to the engine.
                 if (variableInstanceData.getValue() instanceof File file) {
@@ -266,8 +268,8 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
     }
 
     protected void initTypeLookup() {
-        typeComboBox.setItems(CamundaVariableType.class);
-        typeComboBox.setItemLabelGenerator(CamundaVariableType::getId);
+        typeComboBox.setItems(getAllVariableTypes(selectedEngineType));
+        typeComboBox.setItemLabelGenerator(ProcessVariableType::getId);
         typeComboBox.setRequired(true);
         typeComboBox.addValueChangeListener(event -> {
             getEditedEntity().setType(event.getValue().getId());
@@ -276,9 +278,11 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
         String type = getEditedEntity().getType();
         if (type != null) {
-            CamundaVariableType camundaVariableType = CamundaVariableType.fromId(type);
-            typeComboBox.setValue(camundaVariableType);
-            updateComponentsVisibility(camundaVariableType);
+            ProcessVariableType variableType = resolveVariableType(selectedEngineType, type);
+            if (variableType != null) {
+                typeComboBox.setValue(variableType);
+                updateComponentsVisibility(variableType);
+            }
         }
     }
 
@@ -319,58 +323,34 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
     protected Component createComponent(VariableInstanceData variableInstance) {
         String typeName = variableInstance.getType();
-        CamundaVariableType type = CamundaVariableType.fromId(typeName);
 
-        if (type == null) {
-            return createTextField(String.class);
+        if (selectedEngineType == null || selectedEngineType.isCamunda7Compatible()) {
+            CamundaVariableType type = CamundaVariableType.fromId(typeName);
+            if (type == null || type.isPrimitive()) {
+                return variableTypeFieldGenerator.createPrimitiveCamundaField(type, o -> getEditedEntity().setValue(o),
+                        () -> getEditedEntity().getValue());
+            }
+            return createCamundaComponent(type);
         }
 
-        return switch (type) {
-            case LONG -> createTextField(Long.class);
-            case SHORT -> createTextField(Short.class);
-            case INTEGER -> createIntegerField();
-            case DOUBLE -> createNumberField();
-            case DATE -> createDateField(Date.class);
-            case BOOLEAN -> createBooleanField();
-            case BYTES, FILE -> createFileField();
-            case OBJECT -> createObjectField();
-            default -> createTextField(String.class);
-        };
+        throw new IllegalStateException("Unsupported engine type: " + selectedEngineType);
     }
 
-    protected TextArea createObjectField() {
-        JmixTextArea textArea = uiComponents.create(JmixTextArea.class);
-        textArea.setValueChangeMode(ValueChangeMode.ON_BLUR);
-        textArea.addClassName("resizable-vertical");
-        textArea.setMinHeight("9,5em");
-        textArea.addValueChangeListener(event -> {
-            String value = event.getValue();
-            getEditedEntity().setValue(value);
-        });
-
-        return textArea;
+    protected Component createCamundaComponent(CamundaVariableType type) {
+        return switch (type) {
+            case BYTES, FILE -> createFileField();
+            default -> variableTypeFieldGenerator.createObjectField(value -> getEditedEntity().setValue(value));
+        };
     }
 
     protected FileUploadField createFileField() {
         VariableInstanceData variableInstanceData = getEditedEntity();
 
-        FileUploadField fileUploadField = uiComponents.create(FileUploadField.class);
-        fileUploadField.setDropAllowed(true);
-        fileUploadField.setFileNameVisible(true);
-        fileUploadField.setClearButtonVisible(true);
-        fileUploadField.setRequired(true);
-
         VariableValueInfo variableValueInfo = variableInstanceData.getValueInfo();
-        if (variableValueInfo != null) {
-            fileUploadField.setFileName(variableValueInfo.getFilename());
-        }
+        String fileName = variableValueInfo != null ? variableValueInfo.getFilename() : null;
 
-        fileUploadField.addFileUploadSucceededListener(this::handleFileUpload);
-
-        byte[] binaryValue = loadBinaryValue(variableInstanceData);
-        fileUploadField.setValue(binaryValue);
-
-        return fileUploadField;
+        return variableTypeFieldGenerator.createFileFieldField(fileName, loadBinaryValue(variableInstanceData),
+                this::handleFileUpload);
     }
 
     protected void handleFileUpload(FileUploadSucceededEvent<FileUploadField, byte[]> event) {
@@ -401,8 +381,11 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
 
     protected byte[] loadBinaryValue(VariableInstanceData variableInstanceData) {
         String type = variableInstanceData.getType();
-        if (!newVariable && (type.equals(CamundaVariableType.FILE.getId()) || type.equals(CamundaVariableType.BYTES.getId()))) {
+        if (!newVariable && isBinaryType(selectedEngineType, type)) {
             Resource resource = variableService.getVariableInstanceBinary(variableInstanceData.getVariableInstanceId());
+            if (resource == null) {
+                return null;
+            }
             try {
                 return resource.getContentAsByteArray();
             } catch (IOException e) {
@@ -412,73 +395,14 @@ public class VariableInstanceDataDetail extends StandardDetailView<VariableInsta
         return null;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    protected Select<Boolean> createBooleanField() {
-        JmixSelect<Boolean> jmixSelect = uiComponents.create(JmixSelect.class);
-        jmixSelect.setEmptySelectionAllowed(true);
-        jmixSelect.setItems(Boolean.FALSE, Boolean.TRUE);
-        jmixSelect.addValueChangeListener(event -> {
-            getEditedEntity().setValue(event.getValue());
-        });
-        return jmixSelect;
-    }
+    protected <V extends ProcessVariableType> void updateComponentsVisibility(V type) {
+        if (type instanceof CamundaVariableType camundaVariableType) {
+            boolean isObjectType = camundaVariableType == CamundaVariableType.OBJECT;
+            objectTypeInfoField.setVisible(isObjectType);
+            serializationDataFormatField.setVisible(isObjectType);
 
-
-    protected NumberField createNumberField() {
-        NumberField numberField = uiComponents.create(NumberField.class);
-        numberField.setValueChangeMode(ValueChangeMode.ON_BLUR);
-        numberField.addValueChangeListener(event -> {
-            getEditedEntity().setValue(event.getValue());
-        });
-        return numberField;
-    }
-
-
-    protected IntegerField createIntegerField() {
-        IntegerField integerField = uiComponents.create(IntegerField.class);
-        integerField.setValueChangeMode(ValueChangeMode.ON_BLUR);
-        integerField.addValueChangeListener(event -> {
-            getEditedEntity().setValue(event.getValue());
-        });
-        return integerField;
-    }
-
-
-    @SuppressWarnings("unchecked")
-    protected <V extends Comparable<?>> TypedDateTimePicker<V> createDateField(Class<V> clazz) {
-        TypedDateTimePicker<V> component = uiComponents.create(TypedDateTimePicker.class);
-        component.setDatatype(datatypeRegistry.get(clazz));
-
-        component.addTypedValueChangeListener(event -> {
-            V value = event.getValue();
-            getEditedEntity().setValue(value);
-        });
-        
-        if (getEditedEntity().getValue() == null) {
-            component.setValue(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES));
+            boolean nullType = camundaVariableType == CamundaVariableType.NULL;
+            valueForm.setVisible(!nullType);
         }
-        return component;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected <V> TypedTextField<V> createTextField(Class<V> clazz) {
-        TypedTextField<V> component = uiComponents.create(TypedTextField.class);
-        component.setDatatype(datatypeRegistry.get(clazz));
-        component.setValueChangeMode(ValueChangeMode.ON_BLUR);
-        component.addTypedValueChangeListener(event -> {
-            V value = event.getValue();
-            getEditedEntity().setValue(value);
-        });
-
-        return component;
-    }
-
-    protected void updateComponentsVisibility(CamundaVariableType camundaVariableType) {
-        boolean isObjectType = camundaVariableType == CamundaVariableType.OBJECT;
-        objectTypeInfoField.setVisible(isObjectType);
-        serializationDataFormatField.setVisible(isObjectType);
-
-        boolean nullType = camundaVariableType == CamundaVariableType.NULL;
-        valueForm.setVisible(!nullType);
     }
 }

@@ -37,4 +37,14 @@ public class ProcessInstanceGeneralPanel extends Composite<ProcessInstanceGenera
 
     @TestComponent(path = "generalPanelUpperPanel")
     private ProcessInstancePropertiesPanel propertiesPanel;
+
+    /**
+     * Clicks the Refresh button. Scrolls it into view first: when a runtime tab is opened, the view scrolls down and the
+     * header covers the button.
+     */
+    public void clickRefreshBtn() {
+        refreshBtn.getDelegate()
+                .scrollIntoView("{block: \"center\"}")
+                .click();
+    }
 }

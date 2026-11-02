@@ -5,7 +5,9 @@
 
 package io.flowset.control.entity.filter;
 
+import io.flowset.control.annotation.EngineProperty;
 import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -48,6 +50,7 @@ public class ProcessInstanceFilter {
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime endTimeBefore;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected Boolean withIncidents;
 
     protected Boolean unfinished;

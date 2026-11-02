@@ -5,12 +5,12 @@
 
 package io.flowset.control.entity;
 
+import io.flowset.control.annotation.EngineProperty;
 import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.*;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 
 import java.time.OffsetDateTime;
 
@@ -56,27 +56,24 @@ public class UserTaskData {
     protected Boolean suspended;
 
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
-    @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime startTime;
 
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
-    @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime createTime;
 
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
-    @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime dueDate;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
-    @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime followUpDate;
 
     protected String tenantId;
 
     protected String delegationState;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
-    @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime lastUpdateDate;
 
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)

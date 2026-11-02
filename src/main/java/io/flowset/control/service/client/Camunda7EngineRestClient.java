@@ -18,16 +18,16 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.util.Collections;
 
-@Component("control_EngineRestClient")
-public class EngineRestClient {
+@Component("control_Camunda7EngineRestClient")
+public class Camunda7EngineRestClient {
 
-    protected static final Logger log = LoggerFactory.getLogger(EngineRestClient.class);
+    protected static final Logger log = LoggerFactory.getLogger(Camunda7EngineRestClient.class);
 
     protected final RestTemplate restTemplate;
     protected final EngineService engineService;
     protected final EngineAuthenticator engineAuthenticator;
 
-    public EngineRestClient(EngineService engineService,
+    public Camunda7EngineRestClient(EngineService engineService,
                             EngineAuthenticator engineAuthenticator) {
         this.engineService = engineService;
         this.engineAuthenticator = engineAuthenticator;

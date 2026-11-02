@@ -15,13 +15,13 @@ import io.flowset.control.action.deployment.ViewDeploymentAction;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.service.deployment.DeploymentService;
-import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
 import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.model.InstanceContainer;
 import io.jmix.flowui.view.*;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @FragmentDescriptor("general-panel-fragment.xml")
@@ -44,17 +44,13 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     @ViewComponent
     protected TypedTextField<String> idField;
     @ViewComponent
-    protected TypedTextField<Object> deploymentIdField;
-    @ViewComponent
-    protected TypedTextField<Object> deploymentSourceField;
-    @ViewComponent
-    protected TypedDateTimePicker<Comparable> deploymentTimeField;
-    @ViewComponent
     protected CopyComponentValueToClipboardAction copyIdAction;
     @ViewComponent
     protected CopyComponentValueToClipboardAction copyKeyAction;
     @ViewComponent
     protected ViewDeploymentAction viewDeploymentAction;
+    @ViewComponent
+    protected InstanceContainer<DeploymentData> deploymentDc;
 
     @Subscribe(target = Target.HOST_CONTROLLER)
     public void onHostBeforeShow(View.BeforeShowEvent event) {
@@ -89,11 +85,13 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
         String deploymentId = decisionDefinitionDc.getItem().getDeploymentId();
         viewDeploymentAction.setDeploymentId(deploymentId);
 
-        DeploymentData deployment = deploymentService.findById(deploymentId);
-        if (deployment != null) {
-            deploymentIdField.setTypedValue(deployment.getDeploymentId());
-            deploymentSourceField.setTypedValue(deployment.getSource());
-            deploymentTimeField.setTypedValue(deployment.getDeploymentTime());
-        }
+        DeploymentData deployment = loadDeployment(deploymentId);
+
+        deploymentDc.setItem(deployment);
+    }
+
+    @Nullable
+    protected DeploymentData loadDeployment(String deploymentId) {
+        return deploymentService.findById(deploymentId);
     }
 }

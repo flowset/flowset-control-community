@@ -32,6 +32,7 @@ import io.jmix.flowui.kit.component.button.JmixButton;
 import io.jmix.flowui.kit.component.upload.event.FileUploadSucceededEvent;
 import io.jmix.flowui.view.*;
 import io.flowset.control.dto.BpmProcessDefinition;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.exception.RemoteEngineParseException;
@@ -39,6 +40,7 @@ import io.flowset.control.exception.RemoteProcessEngineException;
 import io.flowset.control.restsupport.camunda.ResourceReport;
 import io.flowset.control.service.deployment.DeploymentContext;
 import io.flowset.control.service.deployment.DeploymentService;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.view.AbstractResourceDeploymentView;
@@ -91,6 +93,8 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
     protected Fragments fragments;
     @Autowired
     protected SecuritySupport securitySupport;
+    @Autowired
+    protected EngineService engineService;
 
     @ViewComponent
     protected VerticalLayout previewVBox;
@@ -127,6 +131,9 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
         initProcessInfoHBoxStyles();
         initDeploymentErrorsButton();
         initActions();
+
+        EngineType engineType = engineService.getSelectedEngineType();
+        viewerFragment.setEngineType(engineType != null ? engineType.name() : null);
     }
 
     @Subscribe(id = "okBtn", subject = "clickListener")
@@ -285,7 +292,7 @@ public class NewProcessDeploymentView extends AbstractResourceDeploymentView {
             tooltip.setText(processDefinitionsString);
             processCountLabel.setText(messageBundle.formatMessage("collaborationProcessesLabel", String.valueOf(processDefinitions.size())));
         } else {
-            processIdLabel.setText(processDefinitions.get(0).getKey());
+            processIdLabel.setText(processDefinitions.getFirst().getKey());
         }
 
         processInfoHBox.setVisible(true);

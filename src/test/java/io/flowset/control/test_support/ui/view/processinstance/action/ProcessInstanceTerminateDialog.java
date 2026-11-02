@@ -8,6 +8,7 @@ package io.flowset.control.test_support.ui.view.processinstance.action;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.Checkbox;
 import io.jmix.masquerade.sys.DialogWindow;
 import lombok.Getter;
 
@@ -18,6 +19,15 @@ import lombok.Getter;
 @Getter
 @TestView(id = "ProcessInstanceTerminateView")
 public class ProcessInstanceTerminateDialog extends DialogWindow<ProcessInstanceTerminateDialog> {
+
+    @TestComponent(path = "skipIoMappingsField")
+    private Checkbox skipIoMappingsField;
+
+    @TestComponent(path = "skipCustomListenersField")
+    private Checkbox skipCustomListenersField;
+
+    @TestComponent(path = "skipSubprocessesField")
+    private Checkbox skipSubprocessesField;
 
     @TestComponent(path = "terminateBtn")
     private Button terminateBtn;

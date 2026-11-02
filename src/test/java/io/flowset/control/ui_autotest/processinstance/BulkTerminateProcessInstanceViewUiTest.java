@@ -1,0 +1,106 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+package io.flowset.control.ui_autotest.processinstance;
+
+import io.flowset.control.test_support.camunda7.AbstractCamunda7UiTest;
+import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
+import io.flowset.control.test_support.engine.external.ExternalEngine;
+import io.flowset.control.test_support.engine.external.RunningExternalEngine;
+import io.flowset.control.test_support.engine.external.WithRunningExternalEngine;
+import io.flowset.control.test_support.ui.view.MainView;
+import io.flowset.control.test_support.ui.view.processinstance.ProcessInstanceListView;
+import io.flowset.control.test_support.ui.view.processinstance.action.BulkTerminateProcessInstanceDialog;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+
+import static io.jmix.masquerade.JConditions.CHECKED;
+import static io.jmix.masquerade.JConditions.VISIBLE;
+import static io.jmix.masquerade.Masquerade.$j;
+
+@WithRunningExternalEngine
+@DisplayName("Bulk terminate process instances dialog")
+public class BulkTerminateProcessInstanceViewUiTest extends AbstractCamunda7UiTest {
+
+    @RunningExternalEngine
+    ExternalEngine camunda7;
+
+    @Autowired
+    ApplicationContext applicationContext;
+
+    @Test
+    @DisplayName("Skip I/O mappings field is checked by default")
+    void givenActiveProcessInstance_whenClickBulkTerminate_thenSkipIoMappingsFieldChecked() {
+        // given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/vacationApproval.bpmn")
+                .startByKey("vacation_approval");
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        ProcessInstanceListView listView = mainView.openProcessInstanceListView();
+        listView.getProcessInstancesGrid().clickSelectAll();
+        listView.getBulkTerminateBtn().click();
+
+        // then
+        $j(BulkTerminateProcessInstanceDialog.class)
+                .exists()
+                .displayed()
+                .getSkipIoMappingsField()
+                .shouldBe(VISIBLE)
+                .shouldBe(CHECKED);
+    }
+
+    @Test
+    @DisplayName("Skip custom listeners field is checked by default")
+    void givenActiveProcessInstance_whenClickBulkTerminate_thenSkipCustomListenersFieldChecked() {
+        // given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/vacationApproval.bpmn")
+                .startByKey("vacation_approval");
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        ProcessInstanceListView listView = mainView.openProcessInstanceListView();
+        listView.getProcessInstancesGrid().clickSelectAll();
+        listView.getBulkTerminateBtn().click();
+
+        // then
+        $j(BulkTerminateProcessInstanceDialog.class)
+                .exists()
+                .displayed()
+                .getSkipCustomListenersField()
+                .shouldBe(VISIBLE)
+                .shouldBe(CHECKED);
+    }
+
+    @Test
+    @DisplayName("Skip subprocesses field is unchecked by default")
+    void givenActiveProcessInstance_whenClickBulkTerminate_thenSkipSubprocessesFieldNotChecked() {
+        // given
+        applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/vacationApproval.bpmn")
+                .startByKey("vacation_approval");
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        ProcessInstanceListView listView = mainView.openProcessInstanceListView();
+        listView.getProcessInstancesGrid().clickSelectAll();
+        listView.getBulkTerminateBtn().click();
+
+        // then
+        $j(BulkTerminateProcessInstanceDialog.class)
+                .exists()
+                .displayed()
+                .getSkipSubprocessesField()
+                .shouldBe(VISIBLE)
+                .shouldNotBe(CHECKED);
+    }
+}

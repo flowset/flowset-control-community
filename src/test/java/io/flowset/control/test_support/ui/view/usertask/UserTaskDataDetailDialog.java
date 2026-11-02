@@ -8,6 +8,7 @@ package io.flowset.control.test_support.ui.view.usertask;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.DateTimePicker;
 import io.jmix.masquerade.component.TextField;
 import io.jmix.masquerade.sys.DialogWindow;
 import lombok.Getter;
@@ -31,6 +32,15 @@ public class UserTaskDataDetailDialog extends DialogWindow<UserTaskDataDetailDia
 
     @TestComponent(path = "priorityField")
     private TextField priorityField;
+
+    @TestComponent(path = "endTimeField")
+    private DateTimePicker endTimeField;
+
+    @TestComponent(path = "lastUpdatedField")
+    private DateTimePicker lastUpdatedField;
+
+    @TestComponent(path = "followUpField")
+    private DateTimePicker followUpField;
 
     @TestComponent(path = "taskIdField")
     private TextField taskIdField;

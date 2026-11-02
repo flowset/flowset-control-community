@@ -56,6 +56,42 @@ public class CamundaRestTestHelper {
     }
 
     /**
+     * Creates one deployment of several classpath resources, e.g. a process with the processes and decisions it calls.
+     *
+     * @param camunda            running engine
+     * @param resourceClassPaths classpath paths of the resources to deploy
+     * @return created deployment
+     */
+    public DeploymentResultDto createDeployment(HasRunningEngineData camunda, List<String> resourceClassPaths) {
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("deployment-name", FilenameUtils.getName(resourceClassPaths.getFirst()));
+        resourceClassPaths.forEach(resourceClassPath ->
+                parts.add(FilenameUtils.getName(resourceClassPath), new ClassPathResource(resourceClassPath)));
+
+        return restHelper.postOne(camunda, "/deployment/create", parts, DeploymentResultDto.class);
+    }
+
+    /**
+     * Creates a deployment of the classpath resource with the specified deployment source.
+     *
+     * @param camunda           running engine
+     * @param resourceClassPath classpath path of the resource to deploy
+     * @param source            deployment source
+     * @return created deployment
+     */
+    public DeploymentResultDto createDeploymentWithSource(HasRunningEngineData camunda, String resourceClassPath,
+                                                          String source) {
+        String name = FilenameUtils.getName(resourceClassPath);
+
+        MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
+        parts.add("deployment-name", name);
+        parts.add("deployment-source", source);
+        parts.add(name, new ClassPathResource(resourceClassPath));
+
+        return restHelper.postOne(camunda, "/deployment/create", parts, DeploymentResultDto.class);
+    }
+
+    /**
      * Iterates entries of the zip archive on the classpath and creates a separate Camunda deployment
      * for each non-directory entry.
      *
@@ -530,6 +566,10 @@ public class CamundaRestTestHelper {
 
     public void completeTaskById(HasRunningEngineData camunda, String taskId) {
         restHelper.postOne(camunda, "/task/" + taskId + "/complete", new CompleteUserTaskDto(), ProcessVariablesMapDto.class);
+    }
+
+    public void setTaskAssignee(HasRunningEngineData camunda, String taskId, String assignee) {
+        restHelper.postVoid(camunda, "/task/" + taskId + "/assignee", Map.of("userId", assignee));
     }
 
     public RuntimeUserTaskDto createUserTask(HasRunningEngineData camunda, String name, String assignee) {

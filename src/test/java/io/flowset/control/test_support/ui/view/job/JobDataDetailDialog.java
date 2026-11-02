@@ -8,6 +8,7 @@ package io.flowset.control.test_support.ui.view.job;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.CodeEditor;
 import io.jmix.masquerade.component.DateTimePicker;
 import io.jmix.masquerade.component.TextArea;
 import io.jmix.masquerade.component.TextField;
@@ -66,6 +67,9 @@ public class JobDataDetailDialog extends DialogWindow<JobDataDetailDialog> {
 
     @TestComponent(path = "copyErrorBtn")
     private Button copyErrorBtn;
+
+    @TestComponent(path = "stackTraceField")
+    private CodeEditor stackTraceField;
 
     @TestComponent(path = "retryBtn")
     private Button retryBtn;

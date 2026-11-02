@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import io.flowset.control.entity.ProcessExecutionGraphEntry;
 import io.flowset.control.entity.dashboard.ProcessDefinitionStatistics;
 import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.property.UiProperties;
 import io.flowset.control.service.dashboard.DashboardService;
 import io.flowset.control.service.engine.EngineService;
@@ -39,7 +40,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,6 +127,8 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
     }
 
     protected void updateDashboardCards() {
+        updateCardsByEngineType();
+
         deployedProcessesCard.setLoading();
         processInstancesCard.setLoading();
         userTasksCard.setLoading();
@@ -152,6 +155,14 @@ public class DashboardFragment extends Fragment<VerticalLayout> {
                 })
                 .supplyAsync();
 
+    }
+
+    protected void updateCardsByEngineType() {
+        BpmEngine selectedEngine = selectedEngineDc.getItemOrNull();
+        EngineType selectedEngineType = selectedEngine != null ? selectedEngine.getType() : null;
+
+        boolean camunda7Selected = selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
+        runningInstancesAndIncidentsCard.setVisible(camunda7Selected);
     }
 
     public void setLoading() {

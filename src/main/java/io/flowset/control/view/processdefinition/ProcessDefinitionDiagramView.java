@@ -10,7 +10,9 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.view.DefaultMainViewParent;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
@@ -33,6 +35,8 @@ public class ProcessDefinitionDiagramView extends StandardView {
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDc;
     @Autowired
     protected CallActivityOverlayClickHandler callActivityClickHandler;
+    @Autowired
+    protected EngineService engineService;
 
     @SuppressWarnings("LombokSetterMayBeUsed")
     public void setProcessDefinition(ProcessDefinitionData processDefinitionId) {
@@ -50,6 +54,8 @@ public class ProcessDefinitionDiagramView extends StandardView {
         processDefinitionDc.setItem(processDefinition);
 
         String bpmnXml = processDefinitionService.getBpmnXml(processDefinition.getProcessDefinitionId());
+        EngineType engineType = engineService.getSelectedEngineType();
+        viewerFragment.setEngineType(engineType != null ? engineType.name() : null);
         viewerFragment.initViewer(bpmnXml);
         viewerFragment.showCalledProcessOverlays();
         viewerFragment.addCalledProcessOverlayClickListener(callActivityOverlayClickEvent -> {

@@ -5,7 +5,9 @@
 
 package io.flowset.control.entity.filter;
 
+import io.flowset.control.annotation.EngineProperty;
 import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
@@ -32,12 +34,15 @@ public class DeploymentFilter {
     @InstanceName
     protected String nameLike;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime deploymentAfter;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime deploymentBefore;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String source;
 
     protected List<String> tenantIdIn;

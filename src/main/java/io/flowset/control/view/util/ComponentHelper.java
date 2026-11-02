@@ -28,7 +28,6 @@ import io.flowset.control.service.engine.EngineTimeService;
 import io.flowset.control.view.processinstance.LazyTabContent;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.DatatypeFormatter;
-import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
@@ -47,7 +46,6 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.TimeZone;
 import java.util.function.Function;
@@ -61,7 +59,6 @@ public class ComponentHelper {
     protected final UiComponents uiComponents;
     protected final Messages messages;
     protected final DatatypeFormatter datatypeFormatter;
-    protected final CurrentAuthentication currentAuthentication;
     protected final ApplicationContext applicationContext;
 
     public Span createProcessInstanceStateBadge(ProcessInstanceState state) {
@@ -137,7 +134,6 @@ public class ComponentHelper {
         }
 
         TimeZone timeZone = applicationContext.getBean(UserTimeZoneResolver.class).getTimeZone();
-        Locale locale = currentAuthentication.getLocale();
         return formatCurrentEngineOffsetDateTime(dateTime, timeZone);
     }
 

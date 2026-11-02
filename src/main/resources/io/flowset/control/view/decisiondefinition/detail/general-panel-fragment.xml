@@ -8,6 +8,7 @@
     <data>
         <instance id="decisionDefinitionDc"
                   class="io.flowset.control.entity.decisiondefinition.DecisionDefinitionData" provided="true"/>
+        <instance id="deploymentDc" class="io.flowset.control.entity.deployment.DeploymentData" />
     </data>
     <actions>
         <action id="copyIdAction" type="control_copyComponentValueToClipboard">
@@ -53,6 +54,7 @@
                                  classNames="pt-s">
                             <vbox padding="false" width="100%" themeNames="spacing-xs">
                                 <textField id="deploymentIdField" readOnly="true" width="100%"
+                                           dataContainer="decisionDefinitionDc" property="deploymentId"
                                            label="msg://io.flowset.control.view.decisiondefinition/deploymentId">
                                     <suffix>
                                         <button id="viewDeployment" themeNames="tertiary-inline" action="viewDeploymentAction"/>
@@ -60,8 +62,10 @@
                                 </textField>
 
                                 <dateTimePicker id="deploymentTimeField" readOnly="true" width="100%"
+                                                dataContainer="deploymentDc" property="deploymentTime"
                                                 label="msg://io.flowset.control.view.decisiondefinition/deploymentTime" step="1ms"/>
                                 <textField id="deploymentSourceField" readOnly="true" width="100%"
+                                           dataContainer="deploymentDc" property="source"
                                            label="msg://io.flowset.control.view.decisiondefinition/deploymentSource"/>
                             </vbox>
                         </details>

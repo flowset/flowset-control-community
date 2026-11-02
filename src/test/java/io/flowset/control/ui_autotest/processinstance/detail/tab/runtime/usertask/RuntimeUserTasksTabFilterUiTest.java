@@ -12,12 +12,14 @@ import io.flowset.control.test_support.engine.external.RunningExternalEngine;
 import io.flowset.control.test_support.engine.external.WithRunningExternalEngine;
 import io.flowset.control.test_support.ui.view.MainView;
 import io.flowset.control.test_support.ui.view.processinstance.detail.ProcessInstanceDetailView;
+import io.flowset.control.test_support.ui.view.processinstance.detail.tab.RuntimeTabFragment;
 import io.flowset.control.test_support.ui.view.processinstance.detail.tab.RuntimeUserTasksTabFragment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import static com.codeborne.selenide.Condition.text;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.allBodyRowsHaveCellText;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.anyBodyRowHaveCellText;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.visibleBodyRowCount;
@@ -169,5 +171,34 @@ public class RuntimeUserTasksTabFilterUiTest extends AbstractCamunda7UiTest {
                 .shouldHave(visibleBodyRowCount(2))
                 .shouldHave(anyBodyRowHaveCellText(TASK_DEFINITION_KEY_COLUMN_INDEX, "firstApprovalTask"))
                 .shouldHave(anyBodyRowHaveCellText(TASK_DEFINITION_KEY_COLUMN_INDEX, "secondApprovalTask"));
+    }
+
+    @Test
+    @DisplayName("User tasks tab caption shows the count of user tasks of the selected activity")
+    void givenParallelUserTasks_whenSelectActivity_thenUserTasksTabCaptionShowsFilteredCount() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testParallelUserTasks.bpmn")
+                .startByKey("testParallelUserTasks");
+        String instanceId = dataManager.getStartedInstances("testParallelUserTasks").getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        RuntimeTabFragment runtimeTab = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .openRuntimeTab();
+        runtimeTab.selectRowByActivityId("firstApprovalTask");
+
+        // then
+        runtimeTab.getTabsheet()
+                .getTabById("userTasksTab")
+                .shouldHave(text("User tasks (1)"));
+
+        runtimeTab.deselectRowByActivityId("firstApprovalTask");
+
+        runtimeTab.getTabsheet()
+                .getTabById("userTasksTab")
+                .shouldHave(text("User tasks (2)"));
     }
 }

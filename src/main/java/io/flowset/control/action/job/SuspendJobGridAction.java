@@ -5,8 +5,10 @@
 
 package io.flowset.control.action.job;
 
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobState;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.job.SuspendJobView;
 import io.flowset.control.security.accesscontext.job.JobSuspendAccessContext;
 import io.jmix.core.Messages;
@@ -24,6 +26,7 @@ public class SuspendJobGridAction extends ListDataComponentAction<SuspendJobGrid
     public static final String ID = "control_suspendGridJob";
 
     protected DialogWindows dialogWindows;
+    protected EngineService engineService;
     protected Runnable afterSaveHandler;
 
     protected boolean visibleByActionUiPermission;
@@ -47,6 +50,11 @@ public class SuspendJobGridAction extends ListDataComponentAction<SuspendJobGrid
     @Autowired
     public void setDialogWindows(DialogWindows dialogWindows) {
         this.dialogWindows = dialogWindows;
+    }
+
+    @Autowired
+    public void setEngineService(EngineService engineService) {
+        this.engineService = engineService;
     }
 
     @Autowired
@@ -80,7 +88,7 @@ public class SuspendJobGridAction extends ListDataComponentAction<SuspendJobGrid
     public void refreshState() {
         super.refreshState();
 
-        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission);
+        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isAvailableByEngineType());
     }
 
     @Override
@@ -89,5 +97,10 @@ public class SuspendJobGridAction extends ListDataComponentAction<SuspendJobGrid
         return super.isApplicable()
                 && selectedJob != null
                 && selectedJob.getState() == JobState.ACTIVE;
+    }
+
+    protected boolean isAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

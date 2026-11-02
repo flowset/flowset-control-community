@@ -10,6 +10,7 @@
                   class="io.flowset.control.entity.processdefinition.ProcessDefinitionData" provided="true"/>
         <collection id="processInstanceDataDc"
                     class="io.flowset.control.entity.processinstance.ProcessInstanceData" provided="true"/>
+        <instance id="deploymentDc" class="io.flowset.control.entity.deployment.DeploymentData"/>
     </data>
     <actions>
         <action id="copyIdAction" type="control_copyComponentValueToClipboard">
@@ -63,6 +64,7 @@
                                  classNames="pt-s">
                             <vbox padding="false" width="100%" themeNames="spacing-xs">
                                 <textField id="deploymentIdField" readOnly="true" width="100%"
+                                           dataContainer="processDefinitionDataDc" property="deploymentId"
                                            label="msg://io.flowset.control.view.processdefinition/deploymentId">
                                     <suffix>
                                         <button id="viewDeployment" themeNames="tertiary-inline" action="viewDeploymentAction"/>
@@ -70,8 +72,10 @@
                                 </textField>
 
                                 <dateTimePicker id="deploymentTimeField" readOnly="true" width="100%"
+                                                dataContainer="deploymentDc" property="deploymentTime"
                                                 label="msg://io.flowset.control.view.processdefinition/deploymentTime" step="1ms"/>
                                 <textField id="deploymentSourceField" readOnly="true" width="100%"
+                                           dataContainer="deploymentDc" property="source"
                                            label="msg://io.flowset.control.view.processdefinition/deploymentSource"/>
                             </vbox>
                         </details>

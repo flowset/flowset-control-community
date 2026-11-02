@@ -36,10 +36,12 @@ import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processdefinition.CalledProcessReferenceData;
 import io.flowset.control.entity.decisiondefinition.DecisionDefinitionData;
 import io.flowset.control.entity.decisiondefinition.DecisionReferenceData;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.entity.processinstance.RuntimeProcessInstanceData;
 import io.flowset.control.security.SecuritySupport;
 import io.flowset.control.service.activity.ActivityService;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceLoadContext;
@@ -129,6 +131,8 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     protected ProcessDefinitionService processDefinitionService;
     @Autowired
     protected ActivityService activityService;
+    @Autowired
+    protected EngineService engineService;
 
     @ViewComponent
     protected CollectionContainer<ProcessActivityStatistics> activityStatisticsDc;
@@ -169,6 +173,9 @@ public class ProcessDefinitionDetailView extends StandardDetailView<ProcessDefin
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
         initProcessInstanceFilter();
+
+        EngineType engineType = engineService.getSelectedEngineType();
+        viewerFragment.setEngineType(engineType != null ? engineType.name() : null);
 
         processDefinitionDataDl.load();
         initVersionLookup(getEditedEntity());

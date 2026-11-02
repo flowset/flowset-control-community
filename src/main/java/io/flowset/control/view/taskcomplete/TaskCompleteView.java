@@ -6,6 +6,8 @@
 package io.flowset.control.view.taskcomplete;
 
 
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.TextRenderer;
 import io.flowset.control.entity.UserTaskData;
 import io.flowset.control.entity.variable.ObjectTypeInfo;
 import io.flowset.control.entity.variable.VariableInstanceData;
@@ -48,6 +50,11 @@ public class TaskCompleteView extends StandardView {
 
     public void setUserTask(UserTaskData userTask) {
         this.userTask = userTask;
+    }
+
+    @Supply(to = "variablesGrid.value", subject = "renderer")
+    public Renderer<VariableInstanceData> variableValueRenderer() {
+        return new TextRenderer<>(e -> e.getValue() != null ? e.getValue().toString() : null);
     }
 
     @Subscribe("completeTaskAction")

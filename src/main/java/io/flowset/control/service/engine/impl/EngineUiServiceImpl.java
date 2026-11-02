@@ -5,7 +5,6 @@
 
 package io.flowset.control.service.engine.impl;
 
-import feign.FeignException;
 import io.jmix.core.*;
 import io.jmix.core.event.EntityChangedEvent;
 import io.jmix.core.security.CurrentAuthentication;
@@ -14,24 +13,15 @@ import io.jmix.flowui.UiEventPublisher;
 import io.flowset.control.entity.EngineConnectionCheckResult;
 import io.flowset.control.entity.engine.BpmEngine;
 import io.flowset.control.event.UserEngineSelectEvent;
-import io.flowset.control.exception.EngineConnectionFailedException;
-import io.flowset.control.property.EngineConnectionCheckProperties;
-import io.flowset.control.restsupport.FeignClientCreationContext;
-import io.flowset.control.restsupport.FeignClientProvider;
-import io.flowset.control.service.engine.auth.EngineAuthenticator;
+import io.flowset.control.service.engine.EngineOperationServiceProvider;
 import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.engine.EngineUiService;
 import lombok.extern.slf4j.Slf4j;
-import org.camunda.community.rest.client.api.VersionApiClient;
-import org.camunda.community.rest.client.model.VersionDto;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.http.ResponseEntity;
-import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service("control_EngineUiService")
 @Slf4j
@@ -39,37 +29,30 @@ public class EngineUiServiceImpl implements EngineUiService {
     protected final Metadata metadata;
     protected final ObjectProvider<SessionData> sessionDataProvider;
     protected final DataManager dataManager;
-    protected final FeignClientProvider feignClientProvider;
     protected final UiEventPublisher uiEventPublisher;
     protected final CurrentAuthentication currentAuthentication;
-    protected final EngineConnectionCheckProperties checkProperties;
     protected final EngineService engineService;
-    protected final EngineAuthenticator engineAuthenticator;
     protected final EngineTimeResolver engineTimeResolver;
     protected final EngineZoneOffsetResolver engineZoneOffsetResolver;
-
-    protected Map<UUID, VersionApiClient> versionClientByEngineId = new ConcurrentHashMap<>();
+    protected final EngineOperationServiceProvider engineOperationServiceProvider;
 
     public EngineUiServiceImpl(Metadata metadata,
                                ObjectProvider<SessionData> sessionDataProvider,
-                               FeignClientProvider feignClientProvider,
                                UiEventPublisher uiEventPublisher,
                                CurrentAuthentication currentAuthentication, DataManager dataManager,
-                               EngineConnectionCheckProperties checkProperties, EngineService engineService,
-                               EngineAuthenticator engineAuthenticator,
+                               EngineService engineService,
                                EngineTimeResolver engineTimeResolver,
-                               EngineZoneOffsetResolver engineZoneOffsetResolver) {
+                               EngineZoneOffsetResolver engineZoneOffsetResolver,
+                               EngineOperationServiceProvider engineOperationServiceProvider) {
         this.metadata = metadata;
         this.sessionDataProvider = sessionDataProvider;
-        this.feignClientProvider = feignClientProvider;
         this.uiEventPublisher = uiEventPublisher;
         this.currentAuthentication = currentAuthentication;
         this.dataManager = dataManager;
-        this.checkProperties = checkProperties;
         this.engineService = engineService;
-        this.engineAuthenticator = engineAuthenticator;
         this.engineTimeResolver = engineTimeResolver;
         this.engineZoneOffsetResolver = engineZoneOffsetResolver;
+        this.engineOperationServiceProvider = engineOperationServiceProvider;
     }
 
 
@@ -84,50 +67,13 @@ public class EngineUiServiceImpl implements EngineUiService {
             return result;
         }
 
-        VersionApiClient versionApiClient = versionClientByEngineId
-                .computeIfAbsent(bpmEngine.getId(), engineId -> createVersionApiClient(persistedEngine));
-        try {
-            ResponseEntity<VersionDto> response = engineTimeResolver.registerEngineTime(bpmEngine.getId(), versionApiClient::getRestAPIVersion);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                result.setSuccess(true);
-
-                VersionDto versionDto = response.getBody();
-                if (versionDto != null) {
-                    result.setVersion(versionDto.getVersion());
-                } else {
-                    log.warn("Empty response is returned while engine version loading, status code {}", response.getStatusCode());
-                    result.setVersion("");
-                }
-            } else {
-                log.error("Error while engine version loading, status code {}", response.getStatusCode());
-                result.setSuccess(false);
-            }
-        } catch (FeignException e) {
-            log.error("Error while engine version loading: {} ", e.getMessage());
-            result.setSuccess(false);
-        }
-
+        engineOperationServiceProvider.getConnectionProvider(persistedEngine.getType()).check(persistedEngine, result);
         return result;
     }
 
     @Override
     public String getVersion(BpmEngine engine) {
-        try {
-            VersionApiClient camundaClient = feignClientProvider.createCamundaClient(new FeignClientCreationContext<>(VersionApiClient.class)
-                    .setUrl(engine.getBaseUrl())
-                    .setRequestInterceptor(engineAuthenticator.createStatelessAuthInterceptor(engine)));
-
-            ResponseEntity<VersionDto> response = engineTimeResolver.registerEngineTime(engine.getId(), camundaClient::getRestAPIVersion);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                VersionDto versionDto = response.getBody();
-                return versionDto != null ? versionDto.getVersion() : "";
-            }
-
-            throw new EngineConnectionFailedException(response.getStatusCode().value(), "Unable to get an engine version");
-        } catch (FeignException e) {
-            log.error("Error on loading the version from engine  '{}'", engine.getBaseUrl(), e);
-            throw new EngineConnectionFailedException(e.status(), e.getMessage());
-        }
+        return engineOperationServiceProvider.getConnectionProvider(engine.getType()).getVersion(engine);
     }
 
     @Override
@@ -136,16 +82,6 @@ public class EngineUiServiceImpl implements EngineUiService {
         log.debug("User '{}' selects engine '{} (name: '{}', url: '{}')'", username, engine.getId(), engine.getName(), engine.getBaseUrl());
         engineService.setSelectedEngine(engine);
         uiEventPublisher.publishEvent(new UserEngineSelectEvent(this, engine, username));
-    }
-
-    protected VersionApiClient createVersionApiClient(BpmEngine engine) {
-        return feignClientProvider.createCamundaClient(new FeignClientCreationContext<>(VersionApiClient.class)
-                .setUrl(engine.getBaseUrl())
-                .setMaxRetries(checkProperties.getMaxRetries())
-                .setRetryTimeout(checkProperties.getRetryTimeout())
-                .setConnectTimeout(checkProperties.getConnectTimeout())
-                .setReadTimeout(checkProperties.getReadTimeout())
-                .setRequestInterceptor(engineAuthenticator.createLockAwareAuthInterceptor(engine)));
     }
 
     @TransactionalEventListener
@@ -157,7 +93,6 @@ public class EngineUiServiceImpl implements EngineUiService {
 
             engineTimeResolver.unregisterEngine(engineId);
             engineZoneOffsetResolver.invalidate(engineId);
-            versionClientByEngineId.remove(engineId);
         }
     }
 

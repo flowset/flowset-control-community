@@ -5,7 +5,9 @@
 
 package io.flowset.control.entity.deployment;
 
+import io.flowset.control.annotation.EngineProperty;
 import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -23,6 +25,7 @@ public class DeploymentData {
 
     protected String deploymentId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String source;
 
     @InstanceName

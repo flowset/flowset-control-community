@@ -17,11 +17,14 @@ import io.flowset.control.test_support.ui.view.MainView;
 import io.flowset.control.test_support.ui.view.decisiondefinition.detail.DecisionDefinitionDetailView;
 import io.flowset.control.test_support.ui.view.processdefinition.detail.ProcessDefinitionDetailView;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.Notification;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+
+import java.util.List;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.sleep;
@@ -193,6 +196,238 @@ public class ProcessDefinitionDiagramActionsUiTest extends AbstractCamunda7UiTes
         $j(DecisionDefinitionDetailView.class)
                 .exists()
                 .displayed();
+    }
+
+    @Test
+    @DisplayName("Called process overlay with version binding opens the bound version")
+    void givenProcessCallingByVersion_whenClickCalledProcessOverlay_thenBoundVersionDetailViewOpened() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/binding/testCalledByVersion.bpmn")
+                .deploy("test_support/binding/testCalledByVersion.bpmn")
+                .deploy("test_support/binding/testCalledByVersion.bpmn")
+                .deploy("test_support/testVersionBindings.bpmn");
+        String boundVersionId = dataManager.getDeployedProcessVersions("testCalledByVersion").get(1);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testVersionBindings")
+                .getBpmnViewerFragment()
+                .getCalledProcessOverlay("callByVersionTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        webdriver().shouldHave(urlContaining("/bpm/process-definitions/" + boundVersionId));
+
+        $j(ProcessDefinitionDetailView.class)
+                .exists()
+                .displayed();
+    }
+
+    @Test
+    @DisplayName("Called process overlay with versionTag binding opens the version with the tag")
+    void givenProcessCallingByVersionTag_whenClickCalledProcessOverlay_thenTaggedVersionDetailViewOpened() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/binding/testCalledByVersionTagV1.bpmn")
+                .deploy("test_support/binding/testCalledByVersionTagV2.bpmn")
+                .deploy("test_support/testVersionBindings.bpmn");
+        String taggedVersionId = dataManager.getDeployedProcessVersions("testCalledByVersionTag").getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testVersionBindings")
+                .getBpmnViewerFragment()
+                .getCalledProcessOverlay("callByVersionTagTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        webdriver().shouldHave(urlContaining("/bpm/process-definitions/" + taggedVersionId));
+
+        $j(ProcessDefinitionDetailView.class)
+                .exists()
+                .displayed();
+    }
+
+    @Test
+    @DisplayName("Called process overlay with deployment binding opens the version from the same deployment")
+    void givenProcessCallingByDeployment_whenClickCalledProcessOverlay_thenSameDeploymentVersionDetailViewOpened() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy(List.of("test_support/binding/testDeploymentBindings.bpmn",
+                        "test_support/binding/testCalledByDeployment.bpmn"))
+                .deploy("test_support/binding/testCalledByDeployment.bpmn");
+        String sameDeploymentVersionId = dataManager.getDeployedProcessVersions("testCalledByDeployment").getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testDeploymentBindings")
+                .getBpmnViewerFragment()
+                .getCalledProcessOverlay("callByDeploymentTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        webdriver().shouldHave(urlContaining("/bpm/process-definitions/" + sameDeploymentVersionId));
+
+        $j(ProcessDefinitionDetailView.class)
+                .exists()
+                .displayed();
+    }
+
+    @Test
+    @DisplayName("Called process overlay with version binding to a missing version shows warning")
+    void givenProcessCallingMissingVersion_whenClickCalledProcessOverlay_thenWarningShown() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/binding/testCalledByVersion.bpmn")
+                .deploy("test_support/testVersionBindings.bpmn");
+        String parentProcessId = dataManager.getDeployedProcessVersions("testVersionBindings").getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testVersionBindings")
+                .getBpmnViewerFragment()
+                .getCalledProcessOverlay("callByVersionTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        $j(Notification.class)
+                .shouldBe(VISIBLE)
+                .shouldHave(notificationTheme(Notification.Theme.WARNING))
+                .shouldHave(text("Called process 'testCalledByVersion' not found"))
+                .shouldHave(text("Binding: version"))
+                .shouldHave(text("Version: 2"));
+
+        webdriver().shouldHave(urlContaining("/bpm/process-definitions/" + parentProcessId));
+    }
+
+    @Test
+    @DisplayName("Decision overlay with version binding opens the bound version")
+    void givenProcessEvaluatingByVersion_whenClickDecisionOverlay_thenBoundVersionDetailViewOpened() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/binding/testDecisionCalledByVersion.dmn")
+                .deploy("test_support/binding/testDecisionCalledByVersion.dmn")
+                .deploy("test_support/binding/testDecisionCalledByVersion.dmn")
+                .deploy("test_support/binding/testDecisionCalledByVersion.dmn")
+                .deploy("test_support/testVersionBindings.bpmn");
+        String boundVersionId = dataManager.getDeployedDecisionVersions("decision_calledByVersion").get(2);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testVersionBindings")
+                .getBpmnViewerFragment()
+                .getDecisionOverlay("evaluateByVersionTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        webdriver().shouldHave(urlContaining("/bpm/decision-definitions/" + boundVersionId));
+
+        $j(DecisionDefinitionDetailView.class)
+                .exists()
+                .displayed();
+    }
+
+    @Test
+    @DisplayName("Decision overlay with versionTag binding opens the version with the tag")
+    void givenProcessEvaluatingByVersionTag_whenClickDecisionOverlay_thenTaggedVersionDetailViewOpened() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/binding/testDecisionCalledByVersionTagV1.dmn")
+                .deploy("test_support/binding/testDecisionCalledByVersionTagV2.dmn")
+                .deploy("test_support/testVersionBindings.bpmn");
+        String taggedVersionId = dataManager.getDeployedDecisionVersions("decision_calledByVersionTag").getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testVersionBindings")
+                .getBpmnViewerFragment()
+                .getDecisionOverlay("evaluateByVersionTagTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        webdriver().shouldHave(urlContaining("/bpm/decision-definitions/" + taggedVersionId));
+
+        $j(DecisionDefinitionDetailView.class)
+                .exists()
+                .displayed();
+    }
+
+    @Test
+    @DisplayName("Decision overlay with deployment binding opens the version from the same deployment")
+    void givenProcessEvaluatingByDeployment_whenClickDecisionOverlay_thenSameDeploymentVersionDetailViewOpened() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy(List.of("test_support/binding/testDeploymentBindings.bpmn",
+                        "test_support/binding/testDecisionCalledByDeployment.dmn"))
+                .deploy("test_support/binding/testDecisionCalledByDeployment.dmn");
+        String sameDeploymentVersionId = dataManager.getDeployedDecisionVersions("decision_calledByDeployment")
+                .getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testDeploymentBindings")
+                .getBpmnViewerFragment()
+                .getDecisionOverlay("evaluateByDeploymentTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        webdriver().shouldHave(urlContaining("/bpm/decision-definitions/" + sameDeploymentVersionId));
+
+        $j(DecisionDefinitionDetailView.class)
+                .exists()
+                .displayed();
+    }
+
+    @Test
+    @DisplayName("Decision overlay with version binding to a missing version shows warning")
+    void givenProcessEvaluatingMissingVersion_whenClickDecisionOverlay_thenWarningShown() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/binding/testDecisionCalledByVersion.dmn")
+                .deploy("test_support/testVersionBindings.bpmn");
+        String parentProcessId = dataManager.getDeployedProcessVersions("testVersionBindings").getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        mainView.openProcessListView()
+                .openDetailViewByKey("testVersionBindings")
+                .getBpmnViewerFragment()
+                .getDecisionOverlay("evaluateByVersionTask")
+                .shouldBe(visible)
+                .click();
+
+        // then
+        $j(Notification.class)
+                .shouldBe(VISIBLE)
+                .shouldHave(notificationTheme(Notification.Theme.WARNING))
+                .shouldHave(text("Decision table not found"))
+                .shouldHave(text("Binding: version"))
+                .shouldHave(text("Version: 3"));
+
+        webdriver().shouldHave(urlContaining("/bpm/process-definitions/" + parentProcessId));
     }
 
     @Test

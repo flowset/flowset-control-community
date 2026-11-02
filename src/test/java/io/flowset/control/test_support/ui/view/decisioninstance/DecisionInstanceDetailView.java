@@ -5,9 +5,11 @@
 
 package io.flowset.control.test_support.ui.view.decisioninstance;
 
+import io.flowset.control.test_support.ui.component.DmnViewerFragment;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
+import io.jmix.masquerade.component.DateTimePicker;
 import io.jmix.masquerade.sys.View;
 import lombok.Getter;
 
@@ -36,4 +38,10 @@ public class DecisionInstanceDetailView extends View<DecisionInstanceDetailView>
 
     @TestComponent(path = "openProcessDefinitionEditorBtn")
     private Button openProcessDefinitionEditorBtn;
+
+    @TestComponent(path = "evaluationTimeField")
+    private DateTimePicker evaluationTimeField;
+
+    @TestComponent(path = "dmnViewerFragmentViewerVBox")
+    private DmnViewerFragment dmnViewerFragment;
 }

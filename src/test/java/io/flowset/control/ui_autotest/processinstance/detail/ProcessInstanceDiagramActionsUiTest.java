@@ -45,8 +45,8 @@ public class ProcessInstanceDiagramActionsUiTest extends AbstractCamunda7UiTest 
     CamundaRestTestHelper camundaRestTestHelper;
 
     @Test
-    @DisplayName("Activity statistics action is hidden on process instance detail view")
-    void givenExistingProcessInstance_whenOpenDetailView_thenActivityStatisticsActionNotAvailable() {
+    @DisplayName("Activity statistics action is shown on process instance detail view")
+    void givenExistingProcessInstance_whenOpenDetailView_thenActivityStatisticsActionAvailable() {
         // given
         CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
                 .deploy("test_support/vacationApproval.bpmn")
@@ -62,8 +62,8 @@ public class ProcessInstanceDiagramActionsUiTest extends AbstractCamunda7UiTest 
         // then
         detailView.getBpmnViewerFragment()
                 .getViewActivityStatisticsButton()
-                .shouldNotBe(EXIST)
-                .shouldNotBe(VISIBLE);
+                .shouldBe(VISIBLE)
+                .shouldBe(ENABLED);
     }
 
     @Test
