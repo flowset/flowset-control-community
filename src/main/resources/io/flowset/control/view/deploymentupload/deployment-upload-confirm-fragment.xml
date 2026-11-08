@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<fragment xmlns="http://jmix.io/schema/flowui/fragment">
+    <content>
+        <vbox id="rootBox" padding="false">
+            <span id="confirmText" text="msg://confirmDialog.text"/>
+            <span id="summaryText" classNames="font-semibold"/>
+            <vbox id="deploymentInfoBox" padding="false" spacing="false">
+                <span id="deploymentNameText" classNames="text-s"/>
+                <span id="skipUnchangedText" classNames="text-s"/>
+            </vbox>
+            <hbox id="existingDefinitionsUnknownBox"
+                  visible="false"
+                  alignItems="CENTER"
+                  themeNames="spacing-s"
+                  width="100%">
+                <icon id="unknownWarningIcon" icon="WARNING" size="1.25em"/>
+                <span id="existingDefinitionsUnknownText" text="msg://existingDefinitionsUnknown"/>
+            </hbox>
+            <vbox id="sectionsBox" padding="false" width="100%"/>
+        </vbox>
+    </content>
+</fragment>

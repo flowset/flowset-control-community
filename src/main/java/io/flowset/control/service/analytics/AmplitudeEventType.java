@@ -1,6 +1,5 @@
 package io.flowset.control.service.analytics;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.jspecify.annotations.Nullable;
 
@@ -38,6 +37,7 @@ public enum AmplitudeEventType {
     // Actions
     CONTROL_START_PROCESS("control_start_process"),
     CONTROL_DEPLOY_PROCESS("control_deploy_process"),
+    CONTROL_UPLOAD_DEPLOYMENT("control_upload_deployment"),
     CONTROL_SUSPEND_PROCESS("control_suspend_process"),
     CONTROL_ACTIVATE_PROCESS("control_activate_process"),
     CONTROL_REFRESH_PROCESS_LIST("control_refresh_process_list"),

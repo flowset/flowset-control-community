@@ -17,10 +17,10 @@ import io.flowset.control.entity.deployment.ResourceValidationError;
 import io.flowset.control.entity.deployment.ValidationErrorType;
 import io.flowset.control.restsupport.camunda.ResourceReport;
 import io.flowset.control.view.deploymenterror.DeploymentErrorDialogView;
+import io.flowset.control.view.deploymenterror.ResourceDeploymentReportFactory;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractResourceDeploymentView extends StandardView {
@@ -35,6 +35,9 @@ public abstract class AbstractResourceDeploymentView extends StandardView {
 
     @Autowired
     protected DialogWindows dialogWindows;
+
+    @Autowired
+    protected ResourceDeploymentReportFactory resourceDeploymentReportFactory;
 
     @ViewComponent
     protected JmixButton errorsBtn;
@@ -68,16 +71,7 @@ public abstract class AbstractResourceDeploymentView extends StandardView {
 
 
     protected ResourceDeploymentReport createResourceReport(ResourceReport report, String uploadedFileName) {
-        ResourceDeploymentReport deploymentReport = dataManager.create(ResourceDeploymentReport.class);
-        deploymentReport.setFilename(uploadedFileName);
-
-        List<ResourceValidationError> errors = new ArrayList<>();
-        addValidationErrors(report.getErrors(), ValidationErrorType.ERROR, errors);
-        addValidationErrors(report.getWarnings(), ValidationErrorType.WARNING, errors);
-
-        deploymentReport.setValidationErrors(errors);
-
-        return deploymentReport;
+        return resourceDeploymentReportFactory.createReport(report, uploadedFileName);
     }
 
     protected void openValidationErrorDialogsView() {
@@ -89,24 +83,10 @@ public abstract class AbstractResourceDeploymentView extends StandardView {
     }
 
     protected void addValidationErrors(List<ResourceReport.ProblemDetails> problemDetailsList, ValidationErrorType warning, List<ResourceValidationError> result) {
-        if (problemDetailsList != null) {
-            problemDetailsList.forEach(problemDetails -> {
-                ResourceValidationError resourceValidationError = createValidationError(warning, problemDetails);
-
-                result.add(resourceValidationError);
-            });
-        }
+        resourceDeploymentReportFactory.addValidationErrors(problemDetailsList, warning, result);
     }
 
     protected ResourceValidationError createValidationError(ValidationErrorType error, ResourceReport.ProblemDetails problemDetails) {
-        ResourceValidationError resourceValidationError = dataManager.create(ResourceValidationError.class);
-        resourceValidationError.setType(error);
-
-        resourceValidationError.setMessage(problemDetails.getMessage());
-        resourceValidationError.setColumn(problemDetails.getColumn());
-        resourceValidationError.setMainElementId(problemDetails.getMainElementId());
-        resourceValidationError.setLine(problemDetails.getLine());
-
-        return resourceValidationError;
+        return resourceDeploymentReportFactory.createValidationError(error, problemDetails);
     }
 }

@@ -39,6 +39,7 @@ Flowset Control Community is built using the open-source [Jmix](https://www.jmix
    - [Connecting to BPM Engines](#connecting-to-bpm-engines)
    - [Working with Processes](#working-with-processes)
      - [Deploying a Process](#deploying-a-process)
+     - [Uploading a Deployment](#uploading-a-deployment)
      - [Starting a Process](#starting-a-process)
    - [Managing Process Instances](#managing-process-instances)
    - [User Tasks](#user-tasks)
@@ -154,6 +155,55 @@ Clicking the **Deploy** button opens the **New process deployment** view.
 
 To upload a BPMN 2.0 file, click the **Upload** button and select the process to be deployed.
 After uploading, you can preview the diagram of the uploaded process and click the **OK** button to deploy to the BPM engine.
+
+#### Uploading a Deployment <a name="uploading-a-deployment"></a>
+A deployment with several resources (processes, decisions, forms, scripts, images) can be created at once using the **Upload** button in the **Deployments** view.
+Clicking the button opens the **Upload deployment** view.
+
+![deployment-upload-view.png](img/deployment-upload-view.png)
+
+**Files.** Drop the files to the upload area or click **Upload files**. The following file types are supported:
+
+| Type | Extensions |
+|------|------------|
+| BPMN | `.bpmn`, `.bpmn20.xml` |
+| DMN | `.dmn`, `.dmn11.xml` |
+| Camunda Form | `.form` |
+| HTML form | `.html`, `.htm` |
+| Script | `.js`, `.groovy`, `.py`, `.rb` |
+| Image | `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg` |
+
+The number and the size of the files, as well as the structure of the uploaded XML files, are limited by the following application properties:
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `flowset.control.ui.deployment-upload-max-files` | `50` | Maximum number of files in a single deployment |
+| `flowset.control.ui.deployment-upload-max-file-size-bytes` | `10485760` | Maximum size of a single file, in bytes |
+| `flowset.control.resource-validation.xml-max-depth` | `64` | Maximum nesting depth of the elements of the BPMN, DMN and SVG files |
+| `flowset.control.resource-validation.xml-max-elements` | `100000` | Maximum number of elements of the BPMN, DMN and SVG files |
+
+The deployment name is set to the name of the first BPMN file by default and can be changed. If **Skip unchanged resources** is selected, a resource is deployed only if it differs from the latest deployed version with the same name.
+Select a file in the grid to preview its content (diagram, decision table, form, image or source).
+
+**Validation.** Each file is validated when it is uploaded, and gets one of the statuses:
+- **OK**: no problems found.
+- **Warning**: the file can be deployed, but something may not work as expected, e.g. a referenced resource cannot be checked.
+- **Error**: the file cannot be deployed, e.g. it is not a valid BPMN 2.0 model, contains no executable process, has a duplicate name or key, is too large, or you are not permitted to deploy it. Fix or remove such files to deploy.
+
+**References.** The references of the BPMN files (called processes, decisions, Camunda Forms, HTML forms and external scripts) are listed in the **References** grid with the location of the referenced resource:
+- **This deployment**: the resource is one of the uploaded files.
+- **Engine**: the resource is not uploaded, but is already deployed to the selected engine.
+- **Missing**: the resource is found neither in the uploaded files nor in the engine.
+- **Not checked**: the reference cannot be checked, e.g. it is defined by an expression, or the engine is unavailable or does not respond within the timeout.
+
+A missing resource referenced with the `deployment` binding is an error, as it must be a part of the same deployment. Missing resources with other bindings are warnings.
+
+**Confirmation.** Clicking **Deploy** opens a confirmation dialog that shows the deployment name, the **Skip unchanged resources** option, a summary and the resources to be deployed grouped by type: processes, decisions, forms and other resources. Each process and decision is marked as a **New definition** or a **New version** of a definition that already exists in the engine. Camunda Forms cannot be looked up in the engine, so they are marked as **Deployed** only. If the engine cannot be checked, the dialog shows a corresponding note.
+
+**Result.** The engine creates a deployment only if it accepts all its files. If the engine rejects any file, nothing is deployed: the rejected files get the **Error** status, the problems reported by the engine are shown in the **Details** column, and the **Errors** button opens the full report for the selected file.
+After a successful deployment, the details of the created deployment are opened and a notification shows the number of the deployed processes, decisions and forms.
+
+**Permissions.** The **Upload** button is available to users permitted to deploy processes or decisions. BPMN files require the permission to deploy processes, DMN files require the permission to deploy decisions; other resources can be deployed with either of them.
 
 #### Starting a Process <a name="starting-a-process"></a>
 
