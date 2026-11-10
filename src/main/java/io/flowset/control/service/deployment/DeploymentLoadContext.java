@@ -13,7 +13,8 @@ import io.flowset.control.service.ItemListLoadContext;
  * A context that contains the following options to load incidents:
  * <ul>
  *     <li>Pagination options: first and max results</li>
- *     <li>Sort options: property and direction to sort. Supported properties:  "name", "time", "source".</li>
+ *     <li>Sort options: property and direction to sort. Supported properties: "deploymentId" (or "id"), "name",
+ *     "deploymentTime" (or "time"), "tenantId". Other properties are ignored.</li>
  *     <li>Filtering options</li>
  * </ul>
  * <p>

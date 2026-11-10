@@ -92,6 +92,8 @@ dependencies {
     // Apache POI
     implementation 'org.apache.poi:poi-ooxml'
 
+    implementation 'org.jsoup:jsoup'
+
     // Spring
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation "org.springframework.cloud:spring-cloud-dependencies"
