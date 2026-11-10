@@ -9,6 +9,7 @@ import io.jmix.core.DataManager;
 import io.flowset.control.entity.EngineConnectionCheckResult;
 import io.flowset.control.entity.engine.AuthType;
 import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.exception.EngineConnectionFailedException;
 import io.flowset.control.test_support.AbstractIntegrationTest;
 import io.flowset.control.test_support.AuthenticatedAsAdmin;
 import io.flowset.control.test_support.RunningEngine;
@@ -134,6 +135,33 @@ public class EngineUiServiceTest extends AbstractIntegrationTest {
         assertThat(result).isNotNull();
         assertThat(result.getSuccess()).isFalse();
         assertThat(result.getVersion()).isNull();
+    }
+
+    @Test
+    @DisplayName("Connection check fails for engine of unknown type")
+    void givenExistingEngineOfUnknownType_whenTestConnection_thenResultIsNotSuccessful() {
+        //given
+        BpmEngine bpmEngine = dataManager.save(createBpmEngineFromContainer());
+        jdbcTemplate.update("UPDATE control_bpm_engine SET TYPE_ = 'UNKNOWN' WHERE ID = ?", bpmEngine.getId());
+
+        //when
+        EngineConnectionCheckResult result = engineUiService.checkConnection(bpmEngine);
+
+        //then
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccess()).isFalse();
+        assertThat(result.getVersion()).isNull();
+    }
+
+    @Test
+    @DisplayName("EngineConnectionFailedException is thrown when get version of engine without type")
+    void givenNewEngineWithoutType_whenGetVersion_thenEngineConnectionFailedExceptionThrown() {
+        //given
+        BpmEngine bpmEngine = createBpmEngineFromContainer();
+        bpmEngine.setType(null);
+
+        //when and then
+        assertThatThrownBy(() -> engineUiService.getVersion(bpmEngine)).isInstanceOf(EngineConnectionFailedException.class);
     }
 
     private BpmEngine createBpmEngineFromContainer() {

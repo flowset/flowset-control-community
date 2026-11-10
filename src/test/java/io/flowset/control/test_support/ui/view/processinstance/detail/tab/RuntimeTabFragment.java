@@ -5,6 +5,7 @@
 
 package io.flowset.control.test_support.ui.view.processinstance.detail.tab;
 
+import com.codeborne.selenide.ElementsCollection;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.component.DataGrid;
 import io.jmix.masquerade.component.TabSheet;
@@ -32,11 +33,22 @@ public class RuntimeTabFragment extends Composite<RuntimeTabFragment> {
      */
     public static final By ACTIVITY_NAME_BY = By.cssSelector(".no-click-tree-item-name");
 
+    public static final By TAB_BY = By.xpath("./vaadin-tabs/vaadin-tab");
+
     @TestComponent(path = "runtimeTabFragmentActivityInstancesTree")
     private DataGrid activityInstancesTree;
 
     @TestComponent(path = "runtimeTabFragmentRuntimeTabsheet")
     private TabSheet tabsheet;
+
+    /**
+     * Returns the tabs of the runtime tab sheet in the displayed order.
+     *
+     * @return the collection of tab elements
+     */
+    public ElementsCollection getTabs() {
+        return tabsheet.getDelegate().$$(TAB_BY);
+    }
 
     /**
      * Finds the row in the activity tree related to the specified BPMN activity identifier.

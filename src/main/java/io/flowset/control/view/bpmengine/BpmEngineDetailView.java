@@ -21,6 +21,7 @@ import io.jmix.flowui.component.checkbox.JmixCheckbox;
 import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.details.JmixDetails;
 import io.jmix.flowui.component.radiobuttongroup.JmixRadioButtonGroup;
+import io.jmix.flowui.component.select.JmixSelect;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.kit.component.button.JmixButton;
@@ -34,6 +35,7 @@ import io.flowset.control.service.engine.EngineTimeView;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,11 +124,7 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
             defaultField.setEnabled(false);
         }
 
-        String buildType = buildProperties.get("buildType");
-        String hostExample = Strings.CS.equals(buildType, "docker") ? "http://host.docker.internal:8080/engine-rest"
-                : "http://localhost:8080/engine-rest";
-
-        baseUrlField.setHelperText(messageBundle.formatMessage("baseUrlField.helperText", hostExample));
+        updateBaseUrlHelpText(engine.getType());
 
         loadEngineAuthState();
         updateAuthStateFields();
@@ -194,6 +192,11 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
         updateAuthStateFields();
     }
 
+    @Subscribe("typeField")
+    public void onTypeFieldComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixSelect<EngineType>, EngineType> event) {
+        updateBaseUrlHelpText(event.getValue());
+    }
+
     @Subscribe("authTypeGroup")
     public void onAuthTypeGroupComponentValueChange(final AbstractField.ComponentValueChangeEvent<JmixRadioButtonGroup<AuthType>, AuthType> event) {
         AuthType type = event.getValue();
@@ -234,6 +237,14 @@ public class BpmEngineDetailView extends StandardDetailView<BpmEngine> {
         if (authFragment != null) {
             event.getErrors().addAll(viewValidation.validateUiComponents(authFragment.getContent()));
         }
+    }
+
+    protected void updateBaseUrlHelpText(@Nullable EngineType engineType) {
+        String buildType = buildProperties.get("buildType");
+        String hostExample = Strings.CS.equals(buildType, "docker") ? "http://host.docker.internal:8080/engine-rest"
+                : "http://localhost:8080/engine-rest";
+
+        baseUrlField.setHelperText(messageBundle.formatMessage("baseUrlField.helperText", hostExample));
     }
 
     @Subscribe("baseUrlField")

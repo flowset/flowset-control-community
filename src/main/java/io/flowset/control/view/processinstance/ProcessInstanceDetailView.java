@@ -36,6 +36,7 @@ import io.flowset.control.dto.ElementStatisticsData;
 import io.flowset.control.entity.activity.ActivityInstanceTreeItem;
 import io.flowset.control.entity.activity.ActivityShortData;
 import io.flowset.control.entity.decisioninstance.HistoricDecisionInstanceShortData;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.filter.DecisionInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
@@ -44,6 +45,7 @@ import io.flowset.control.exception.ViewEngineConnectionFailedException;
 import io.flowset.control.service.activity.ActivityService;
 import io.flowset.control.service.decisioninstance.DecisionInstanceLoadContext;
 import io.flowset.control.service.decisioninstance.DecisionInstanceService;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.incident.IncidentService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
@@ -104,6 +106,8 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
     protected DecisionInstanceService decisionInstanceService;
     @Autowired
     protected Metadata metadata;
+    @Autowired
+    protected EngineService engineService;
 
     @ViewComponent
     protected JmixTabSheet relatedEntitiesTabSheet;
@@ -233,6 +237,8 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
                 (processInstanceDataDc.getItem().getProcessDefinitionId());
         if (!Strings.isNullOrEmpty(processBpmnXml)) {
             emptyDiagramBox.setVisible(false);
+            EngineType engineType = engineService.getSelectedEngineType();
+            viewerFragment.setEngineType(engineType != null ? engineType.name() : null);
             viewerFragment.initViewer(processBpmnXml);
             viewerFragment.showBpmnModelColorsButton(true);
             viewerFragment.showStatisticsButton(true);
@@ -449,7 +455,7 @@ public class ProcessInstanceDetailView extends StandardDetailView<ProcessInstanc
                 decisionInstanceService.findAllHistoryDecisionInstances(loadContext);
 
         if (CollectionUtils.isNotEmpty(allHistoryDecisionInstances)) {
-            return allHistoryDecisionInstances.get(0).getDecisionInstanceId();
+            return allHistoryDecisionInstances.getFirst().getDecisionInstanceId();
         }
         return null;
     }

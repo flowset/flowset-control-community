@@ -6,6 +6,8 @@
 package io.flowset.control.test_support.ui.view.deployment;
 
 import io.flowset.control.test_support.ui.TagNames;
+import io.flowset.control.test_support.ui.component.BpmnViewerFragment;
+import io.flowset.control.test_support.ui.component.DmnViewerFragment;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.*;
@@ -47,6 +49,12 @@ public class DeploymentDetailView extends View<DeploymentDetailView> {
 
     @TestComponent(path = "contentCodeEditor")
     private CodeEditor contentCodeEditor;
+
+    @TestComponent(path = "viewerFragmentViewerVBox")
+    private BpmnViewerFragment bpmnViewerFragment;
+
+    @TestComponent(path = "dmnViewerFragmentViewerVBox")
+    private DmnViewerFragment dmnViewerFragment;
 
     @TestComponent(path = "downloadResourceButton")
     private Button downloadResourceButton;

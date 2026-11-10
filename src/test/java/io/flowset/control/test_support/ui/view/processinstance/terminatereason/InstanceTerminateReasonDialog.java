@@ -21,6 +21,8 @@ import lombok.Getter;
 @TestView(id = "InstanceTerminateReasonView")
 public class InstanceTerminateReasonDialog extends DialogWindow<InstanceTerminateReasonDialog> {
 
+    public static final int ACTIVITY_ID_COLUMN_INDEX = 1;
+
     @TestComponent(path = "instanceId")
     private TextField instanceIdField;
 

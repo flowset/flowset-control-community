@@ -24,6 +24,9 @@ public class DashboardFragment extends Composite<DashboardFragment> {
     @TestComponent(path = "dashboardFragmentNoEnginesContainer")
     private Unknown noEnginesContainer;
 
+    @TestComponent(path = "dashboardFragmentDashboardContainer")
+    private Unknown dashboardContainer;
+
     @TestComponent(path = "deployedProcessesCard")
     private DeployedProcessesCard deployedProcessesCard;
 
@@ -33,14 +36,14 @@ public class DashboardFragment extends Composite<DashboardFragment> {
     @TestComponent(path = "userTasksCard")
     private UserTasksCard userTasksCard;
 
-    @TestComponent(path = "recentActivityCard")
+    @TestComponent(path = "cartBox")
     private Unknown recentActivityCard;
 
     @TestComponent(path = {"runningInstancesAndIncidentsCard", "runningInstancesCard"})
     private RunningInstancesCard runningInstancesCard;
 
     @TestComponent(path = {"runningInstancesAndIncidentsCard", "incidentsCard"})
-    private RunningInstancesCard incidentsCard;
+    private IncidentsCard incidentsCard;
 
     @TestComponent(path = "dashboardFragmentRefreshBtn")
     private Button refreshBtn;

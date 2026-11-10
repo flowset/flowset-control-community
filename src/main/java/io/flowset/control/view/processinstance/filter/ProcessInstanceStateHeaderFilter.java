@@ -17,11 +17,15 @@ import io.jmix.flowui.component.combobox.JmixComboBox;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.grid.DataGridColumn;
 import io.jmix.flowui.kit.component.button.JmixButton;
+import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.flowui.model.InstanceContainer;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.filter.ProcessInstanceFilter;
 import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.entity.processinstance.ProcessInstanceState;
 import io.flowset.control.facet.urlqueryparameters.HasFilterUrlParamHeaderFilter;
+import io.flowset.control.flowui.EnginePropertyResolver;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.processinstance.ProcessInstanceViewMode;
 import io.flowset.control.view.util.ComponentHelper;
 import org.apache.commons.lang3.BooleanUtils;
@@ -40,6 +44,8 @@ public class ProcessInstanceStateHeaderFilter extends ProcessInstanceDataGridHea
     private JmixComboBox<ProcessInstanceState> stateComboBox;
     private JmixCheckbox withIncidentsCheckBox;
     private ComponentHelper componentHelper;
+    private EngineService engineService;
+    private EnginePropertyResolver enginePropertyResolver;
     private ProcessInstanceViewMode viewMode;
 
     public ProcessInstanceStateHeaderFilter(DataGrid<ProcessInstanceData> dataGrid, DataGridColumn<ProcessInstanceData> column,
@@ -54,12 +60,23 @@ public class ProcessInstanceStateHeaderFilter extends ProcessInstanceDataGridHea
         this.componentHelper = componentHelper;
     }
 
+    @Autowired
+    public void setEngineService(EngineService engineService) {
+        this.engineService = engineService;
+    }
+
+    @Autowired
+    public void setEnginePropertyResolver(EnginePropertyResolver enginePropertyResolver) {
+        this.enginePropertyResolver = enginePropertyResolver;
+    }
+
     @Override
     protected Component createFilterComponent() {
         VerticalLayout verticalLayout = uiComponents.create(VerticalLayout.class);
         verticalLayout.setPadding(false);
 
         stateComboBox = uiComponents.create(JmixComboBox.class);
+        stateComboBox.setId("stateComboBox");
         stateComboBox.setItems(List.of(ProcessInstanceState.ACTIVE, ProcessInstanceState.SUSPENDED));
         stateComboBox.setRenderer(new ComponentRenderer<>(componentHelper::createProcessInstanceStateBadge));
         stateComboBox.setLabel(messages.getMessage(getClass(), "stateLabel"));
@@ -68,10 +85,18 @@ public class ProcessInstanceStateHeaderFilter extends ProcessInstanceDataGridHea
         stateComboBox.setPlaceholder(messages.getMessage(getClass(), "selectState"));
 
         withIncidentsCheckBox = uiComponents.create(JmixCheckbox.class);
+        withIncidentsCheckBox.setId("withIncidentsCheckBox");
         withIncidentsCheckBox.setLabel(messages.getMessage(ProcessInstanceFilter.class, "ProcessInstanceFilter.withIncidents"));
+        withIncidentsCheckBox.setVisible(isWithIncidentsSupported());
 
         verticalLayout.add(stateComboBox, withIncidentsCheckBox);
         return verticalLayout;
+    }
+
+    protected boolean isWithIncidentsSupported() {
+        MetaProperty withIncidentsProperty = filterDc.getEntityMetaClass().getProperty("withIncidents");
+        EngineType engineType = engineService.getSelectedEngineType();
+        return enginePropertyResolver.isSupported(withIncidentsProperty, engineType);
     }
 
     @Override

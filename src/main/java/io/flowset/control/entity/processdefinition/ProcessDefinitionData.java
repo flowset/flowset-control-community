@@ -5,6 +5,8 @@
 
 package io.flowset.control.entity.processdefinition;
 
+import io.flowset.control.annotation.EngineProperty;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.InstanceName;
@@ -20,6 +22,7 @@ public class ProcessDefinitionData {
 
     protected String processDefinitionId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String versionTag;
 
     protected String name;
@@ -32,8 +35,10 @@ public class ProcessDefinitionData {
 
     protected Boolean suspended;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected Integer historyTimeToLive;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected Boolean startableInTaskList;
 
     protected String resourceName;

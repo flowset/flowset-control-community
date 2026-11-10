@@ -11,12 +11,15 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.batch.BatchData;
+import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
 import io.flowset.control.view.batch.notification.BatchNotificationContentFragment;
 import io.jmix.flowui.Fragments;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
+import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.view.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.jspecify.annotations.Nullable;
@@ -38,9 +41,13 @@ public class BulkTerminateProcessInstanceView extends StandardView {
 
     @Autowired
     protected ProcessInstanceService processInstanceService;
+    @Autowired
+    protected EngineService engineService;
 
     @ViewComponent
     protected TextArea reasonTextArea;
+    @ViewComponent
+    protected JmixFormLayout skipOptionsForm;
     @ViewComponent
     protected JmixCheckbox skipIoMappingsField;
     @ViewComponent
@@ -62,6 +69,7 @@ public class BulkTerminateProcessInstanceView extends StandardView {
 
         skipIoMappingsField.setValue(true);
         skipCustomListenersField.setValue(true);
+        skipOptionsForm.setVisible(isSkipOptionsAvailableByEngineType());
     }
 
     @Subscribe("okBtn")
@@ -94,5 +102,10 @@ public class BulkTerminateProcessInstanceView extends StandardView {
                 .build();
         notification.setDuration(BatchNotificationContentFragment.DEFAULT_DURATION);
         notification.open();
+    }
+
+    protected boolean isSkipOptionsAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

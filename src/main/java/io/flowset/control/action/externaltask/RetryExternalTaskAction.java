@@ -7,7 +7,9 @@ package io.flowset.control.action.externaltask;
 
 import com.vaadin.flow.component.Component;
 import io.flowset.control.entity.ExternalTaskData;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.security.accesscontext.externaltask.ExternalTaskRetryAccessContext;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.incidentdata.RetryExternalTaskView;
 import io.jmix.core.AccessManager;
 import io.jmix.core.Messages;
@@ -26,6 +28,7 @@ public class RetryExternalTaskAction extends SecuredBaseAction<RetryExternalTask
     public static final String ID = "control_retryExternalTask";
 
     protected DialogWindows dialogWindows;
+    protected EngineService engineService;
 
     protected ExternalTaskData externalTaskData;
     protected Runnable afterSaveHandler;
@@ -54,6 +57,11 @@ public class RetryExternalTaskAction extends SecuredBaseAction<RetryExternalTask
     }
 
     @Autowired
+    public void setEngineService(EngineService engineService) {
+        this.engineService = engineService;
+    }
+
+    @Autowired
     public void setMessages(Messages messages) {
         this.text = messages.getMessage("actions.Retry");
     }
@@ -71,7 +79,8 @@ public class RetryExternalTaskAction extends SecuredBaseAction<RetryExternalTask
     public void refreshState() {
         super.refreshState();
 
-        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isVisibleByState());
+        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isVisibleByState()
+                && isAvailableByEngineType());
     }
 
     @Override
@@ -95,5 +104,10 @@ public class RetryExternalTaskAction extends SecuredBaseAction<RetryExternalTask
     protected boolean isVisibleByState() {
         return externalTaskData != null && externalTaskData.getRetries() != null
                 && externalTaskData.getRetries() == 0;
+    }
+
+    protected boolean isAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

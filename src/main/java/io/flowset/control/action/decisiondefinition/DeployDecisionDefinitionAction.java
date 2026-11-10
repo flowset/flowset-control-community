@@ -6,7 +6,9 @@
 package io.flowset.control.action.decisiondefinition;
 
 import com.vaadin.flow.component.Component;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.security.accesscontext.decisiondefinition.DecisionDefinitionDeployAccessContext;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.decisiondeployment.DecisionDeploymentView;
 import io.jmix.core.AccessManager;
 import io.jmix.flowui.ViewNavigators;
@@ -22,6 +24,7 @@ public class DeployDecisionDefinitionAction extends SecuredBaseAction<DeployDeci
     public static final String ID = "control_deployDecisionDefinition";
 
     protected ViewNavigators viewNavigators;
+    protected EngineService engineService;
 
     protected boolean visibleByActionUiPermission;
 
@@ -46,11 +49,16 @@ public class DeployDecisionDefinitionAction extends SecuredBaseAction<DeployDeci
         this.viewNavigators = viewNavigators;
     }
 
+    @Autowired
+    public void setEngineService(EngineService engineService) {
+        this.engineService = engineService;
+    }
+
     @Override
     public void refreshState() {
         super.refreshState();
 
-        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission);
+        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isAvailableByEngineType());
     }
 
     @Override
@@ -63,5 +71,10 @@ public class DeployDecisionDefinitionAction extends SecuredBaseAction<DeployDeci
     @Override
     public void actionPerform(Component component) {
         execute();
+    }
+
+    protected boolean isAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

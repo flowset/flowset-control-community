@@ -54,6 +54,25 @@ public class CamundaSampleDataManager {
      */
     public CamundaSampleDataManager deploy(String resourcePath) {
         DeploymentResultDto deployment = camundaRestTestHelper.createDeployment(camunda7, resourcePath);
+        addDeployedDefinitions(deployment, resourcePath);
+
+        return this;
+    }
+
+    /**
+     * Deploys the provided resources located in the classpath to engine container as one deployment.
+     *
+     * @param resourcePaths resources to deploy in engine, e.g. a process with the processes and decisions it calls
+     * @return current instance of bean
+     */
+    public CamundaSampleDataManager deploy(List<String> resourcePaths) {
+        DeploymentResultDto deployment = camundaRestTestHelper.createDeployment(camunda7, resourcePaths);
+        addDeployedDefinitions(deployment, String.join(", ", resourcePaths));
+
+        return this;
+    }
+
+    private void addDeployedDefinitions(DeploymentResultDto deployment, String resourcePath) {
         Map<String, ProcessDefinitionDto> deployedProcessDefinitions = deployment.getDeployedProcessDefinitions();
 
         if (deployedProcessDefinitions != null) {
@@ -77,8 +96,6 @@ public class CamundaSampleDataManager {
                 deployedDecisionsByKey.put(decisionDefinitionDto.getKey(), ids);
             });
         }
-
-        return this;
     }
 
     /**

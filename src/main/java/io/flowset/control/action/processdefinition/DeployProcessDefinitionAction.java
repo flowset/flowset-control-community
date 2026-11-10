@@ -6,7 +6,9 @@
 package io.flowset.control.action.processdefinition;
 
 import com.vaadin.flow.component.Component;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.security.accesscontext.processdefinition.ProcessDefinitionDeployAccessContext;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.newprocessdeployment.NewProcessDeploymentView;
 import io.jmix.core.AccessManager;
 import io.jmix.flowui.ViewNavigators;
@@ -23,6 +25,7 @@ public class DeployProcessDefinitionAction extends SecuredBaseAction<DeployProce
     public static final String ID = "control_deployProcessDefinition";
 
     protected ViewNavigators viewNavigators;
+    protected EngineService engineService;
 
     protected boolean visibleByActionUiPermission;
 
@@ -47,6 +50,11 @@ public class DeployProcessDefinitionAction extends SecuredBaseAction<DeployProce
         this.viewNavigators = viewNavigators;
     }
 
+    @Autowired
+    public void setEngineService(EngineService engineService) {
+        this.engineService = engineService;
+    }
+
     @Override
     public void execute() {
         viewNavigators.view(getCurrentView(), NewProcessDeploymentView.class)
@@ -63,6 +71,11 @@ public class DeployProcessDefinitionAction extends SecuredBaseAction<DeployProce
     public void refreshState() {
         super.refreshState();
 
-        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission);
+        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isAvailableByEngineType());
+    }
+
+    protected boolean isAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

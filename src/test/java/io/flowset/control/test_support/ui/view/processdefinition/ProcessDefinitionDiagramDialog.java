@@ -5,6 +5,7 @@
 
 package io.flowset.control.test_support.ui.view.processdefinition;
 
+import io.flowset.control.test_support.ui.component.BpmnViewerFragment;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.TextField;
@@ -24,4 +25,7 @@ public class ProcessDefinitionDiagramDialog extends DialogWindow<ProcessDefiniti
 
     @TestComponent(path = "versionField")
     private TextField versionField;
+
+    @TestComponent(path = "viewerFragmentViewerVBox")
+    private BpmnViewerFragment bpmnViewerFragment;
 }

@@ -6,6 +6,8 @@ import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.component.validation.ValidationErrors;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
+import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.job.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +24,8 @@ public class RetryJobView extends StandardView {
     @Autowired
     protected JobService jobService;
     @Autowired
+    protected EngineService engineService;
+    @Autowired
     protected Notifications notifications;
 
     @ViewComponent
@@ -36,6 +40,7 @@ public class RetryJobView extends StandardView {
     @Subscribe
     public void onBeforeShow(final BeforeShowEvent event) {
         retriesField.setTypedValue(1);
+        retriesField.setVisible(isRetriesAvailableByEngineType());
     }
 
     @Subscribe("retryAction")
@@ -62,5 +67,10 @@ public class RetryJobView extends StandardView {
     @Subscribe("cancelAction")
     public void onCancelAction(final ActionPerformedEvent event) {
         close(StandardOutcome.CLOSE);
+    }
+
+    protected boolean isRetriesAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

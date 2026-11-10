@@ -13,11 +13,13 @@ import io.flowset.control.test_support.engine.external.WithRunningExternalEngine
 import io.flowset.control.test_support.ui.view.MainView;
 import io.flowset.control.test_support.ui.view.processinstance.detail.ProcessInstanceDetailView;
 import io.flowset.control.test_support.ui.view.processinstance.detail.tab.ExternalTasksTabFragment;
+import io.flowset.control.test_support.ui.view.processinstance.detail.tab.RuntimeTabFragment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import static com.codeborne.selenide.Condition.text;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.allBodyRowsHaveCellText;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.anyBodyRowHaveCellText;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.visibleBodyRowCount;
@@ -169,5 +171,34 @@ public class ExternalTasksTabFilterUiTest extends AbstractCamunda7UiTest {
                 .shouldHave(visibleBodyRowCount(2))
                 .shouldHave(anyBodyRowHaveCellText(ACTIVITY_ID_COLUMN_INDEX, "firstExternalTask"))
                 .shouldHave(anyBodyRowHaveCellText(ACTIVITY_ID_COLUMN_INDEX, "secondExternalTask"));
+    }
+
+    @Test
+    @DisplayName("External tasks tab caption shows the count of external tasks of the selected activity")
+    void givenParallelExternalTasks_whenSelectActivity_thenExternalTasksTabCaptionShowsFilteredCount() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testParallelExternalTasks.bpmn")
+                .startByKey("testParallelExternalTasks");
+        String instanceId = dataManager.getStartedInstances("testParallelExternalTasks").getFirst();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        RuntimeTabFragment runtimeTab = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .openRuntimeTab();
+        runtimeTab.selectRowByActivityId("firstExternalTask");
+
+        // then
+        runtimeTab.getTabsheet()
+                .getTabById("externalTasksTab")
+                .shouldHave(text("External tasks (1)"));
+
+        runtimeTab.deselectRowByActivityId("firstExternalTask");
+
+        runtimeTab.getTabsheet()
+                .getTabById("externalTasksTab")
+                .shouldHave(text("External tasks (2)"));
     }
 }

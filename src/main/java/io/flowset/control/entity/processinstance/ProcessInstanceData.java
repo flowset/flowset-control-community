@@ -5,7 +5,9 @@
 
 package io.flowset.control.entity.processinstance;
 
+import io.flowset.control.annotation.EngineProperty;
 import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.annotation.*;
 import lombok.Getter;
@@ -28,6 +30,7 @@ public class ProcessInstanceData extends RuntimeProcessInstanceData {
 
     protected Integer processDefinitionVersion;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String rootProcessInstanceId;
 
     protected String superProcessInstanceId;
@@ -40,8 +43,10 @@ public class ProcessInstanceData extends RuntimeProcessInstanceData {
 
     protected Boolean complete = false;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected Boolean internallyTerminated = false;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected Boolean externallyTerminated = false;
 
     public Boolean getFinished() {

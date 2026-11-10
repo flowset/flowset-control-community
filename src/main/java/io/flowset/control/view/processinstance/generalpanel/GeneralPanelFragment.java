@@ -92,7 +92,9 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
         boolean hasEndTime = processInstanceData.getEndTime() != null;
         endTimeField.setVisible(hasEndTime);
         deleteReasonField.setVisible(hasEndTime);
-        externallyTerminatedField.setVisible(hasEndTime);
+        if (externallyTerminatedField.isVisible()) { // Can be hidden by the engine type.
+            externallyTerminatedField.setVisible(hasEndTime && processInstanceData.getExternallyTerminated() != null);
+        }
 
         initActionButtons();
     }

@@ -8,17 +8,25 @@ package io.flowset.control.uicomponent.menu;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Span;
+import io.flowset.control.entity.engine.EngineFamily;
+import io.flowset.control.entity.engine.EngineType;
 import io.jmix.flowui.component.main.JmixListMenu;
 import io.jmix.flowui.kit.component.main.ListMenu;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jspecify.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Side menu component.
@@ -26,6 +34,52 @@ import java.util.List;
 public class ControlListMenu extends JmixListMenu {
     public static final String MENU_GROUP_LABEL_CLASS = "menu-group-label";
     private static final Logger log = LoggerFactory.getLogger(ControlListMenu.class);
+
+    protected static final Map<String, Set<EngineFamily>> ALLOWED_MENU_ITEMS_BY_ENGINE_FAMILY = Map.ofEntries(
+            Map.entry("incidents", Set.of(EngineFamily.CAMUNDA_7)),
+            Map.entry("batches", Set.of(EngineFamily.CAMUNDA_7))
+    );
+
+    protected Set<String> hiddenMenuItemIds = new HashSet<>();
+    protected EngineFamily currentEngineFamily;
+
+    /**
+     * Shows only the menu items allowed for the engine family of the given engine type, Camunda 7 if no engine is
+     * selected.
+     *
+     * @param engineType the type of the selected engine
+     */
+    public void applyEngineVisibility(@Nullable EngineType engineType) {
+        EngineFamily newEngineFamily = engineType != null ? engineType.getFamily() : EngineFamily.CAMUNDA_7;
+        if (newEngineFamily == currentEngineFamily) {
+            return;
+        }
+        currentEngineFamily = newEngineFamily;
+
+        for (String id : hiddenMenuItemIds) {
+            setItemVisible(id, true);
+        }
+        hiddenMenuItemIds.clear();
+
+        Set<String> engineDependentIds = ALLOWED_MENU_ITEMS_BY_ENGINE_FAMILY.keySet();
+        for (String id : engineDependentIds) {
+            if (!isAllowedForEngineFamily(id, newEngineFamily)) {
+                hideMenuItemByEngine(id);
+            }
+        }
+
+        Collection<Pair<MenuItem, ListItem>> menuEntries = registrations.values();
+        for (Pair<MenuItem, ListItem> entry : menuEntries) {
+            List<String> childIds = childIdsOf(entry.getKey());
+            if (childIds.isEmpty()) {
+                continue;
+            }
+            boolean allChildrenHidden = childIds.stream().noneMatch(this::isItemVisible);
+            if (allChildrenHidden) {
+                hideMenuItemByEngine(entry.getKey().getId());
+            }
+        }
+    }
 
     /**
      * Adds a menu item to the menu before the existing menu item with the specified id.
@@ -105,6 +159,41 @@ public class ControlListMenu extends JmixListMenu {
         }
 
         return existingMenuItem;
+    }
+
+    protected boolean isAllowedForEngineFamily(String id, @Nullable EngineFamily engineFamily) {
+        Set<EngineFamily> allowed = ALLOWED_MENU_ITEMS_BY_ENGINE_FAMILY.get(id);
+        return allowed == null || engineFamily != null && allowed.contains(engineFamily);
+    }
+
+    protected List<String> childIdsOf(MenuItem item) {
+        if (item instanceof GroupLabelMenuItem group) {
+            return ListUtils.emptyIfNull(group.getChildrenItems());
+        }
+        if (item instanceof MenuBarItem barItem) {
+            return barItem.getChildItems().stream().map(MenuItem::getId).toList();
+        }
+        return List.of();
+    }
+
+    protected void hideMenuItemByEngine(String id) {
+        if (isItemVisible(id)) {
+            setItemVisible(id, false);
+            hiddenMenuItemIds.add(id);
+        }
+    }
+
+    protected boolean isItemVisible(String menuItemId) {
+        Pair<MenuItem, ListItem> entry = registrations.get(menuItemId);
+        return entry != null && entry.getValue().isVisible();
+    }
+
+    protected void setItemVisible(String menuItemId, boolean visible) {
+        Pair<MenuItem, ListItem> entry = registrations.get(menuItemId);
+        if (entry != null) {
+            entry.getValue().setVisible(visible);
+            entry.getKey().setVisible(visible);
+        }
     }
 
     @Getter

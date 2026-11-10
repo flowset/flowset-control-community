@@ -32,7 +32,7 @@
                                         themeNames="tertiary-inline"/>
                             </suffix>
                         </textField>
-                        <dateTimePicker property="evaluationTime" readOnly="true" width="auto" step="1ms"/>
+                        <dateTimePicker id="evaluationTimeField" property="evaluationTime" readOnly="true" width="auto" step="1ms"/>
                         <textField id="decisionDefinitionField" label="msg://decisionDefinition" readOnly="true"
                                    width="auto" property="decisionDefinitionId">
                             <suffix>

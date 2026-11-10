@@ -10,6 +10,8 @@ import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.processinstance.LazyTabContent;
 import io.flowset.control.view.processinstance.event.*;
 import io.flowset.control.view.util.ComponentHelper;
@@ -34,6 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @FragmentDescriptor("history-tab-fragment.xml")
 public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     public static final String USER_TASKS_TAB_ID = "historyTasksTab";
@@ -42,10 +47,6 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     public static final String DECISIONS_TAB_ID = "historyDecisionsTab";
 
     public static final int ACTIVITIES_TAB_IDX = 0;
-    public static final int USER_TASKS_TAB_IDX = 1;
-    public static final int VARIABLES_TAB_IDX = 2;
-    public static final int INCIDENTS_TAB_IDX = 3;
-    public static final int DECISIONS_TAB_IDX = 4;
 
     @Autowired
     protected Metadata metadata;
@@ -68,6 +69,9 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     @Autowired
     protected ComponentHelper componentHelper;
 
+    @Autowired
+    protected EngineService engineService;
+
     @ViewComponent
     protected InstanceContainer<ProcessInstanceData> processInstanceDataDc;
 
@@ -78,13 +82,15 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     protected ActivitiesTabFragment activitiesFragment;
 
     protected boolean initialized = false;
+    protected List<HistoryTabType> historyTabTypes = new ArrayList<>();
 
     @Subscribe
     public void onReady(ReadyEvent event) {
-        initUserTasksTab();
-        initVariablesTab();
-        initIncidentsTab();
-        initDecisionsTab();
+        EngineType engineType = engineService.getSelectedEngineType();
+        historyTabTypes = resolveTabTypes(engineType);
+        for (int i = 0; i < historyTabTypes.size(); i++) {
+            initTab(historyTabTypes.get(i), i);
+        }
     }
 
     public void refresh() {
@@ -145,105 +151,154 @@ public class HistoryTabFragment extends Fragment<JmixTabSheet> {
     }
 
     protected void loadAndUpdateActivitiesCount() {
-        ActivityFilter activityFilter = metadata.create(ActivityFilter.class);
-        activityFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (historyTabTypes.contains(HistoryTabType.ACTIVITIES)) {
+            ActivityFilter activityFilter = metadata.create(ActivityFilter.class);
+            activityFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long activitiesCount = activityService.getHistoryActivitiesCount(activityFilter);
+            long activitiesCount = activityService.getHistoryActivitiesCount(activityFilter);
 
-        updateActivityTabCaption(activitiesCount);
+            updateActivityTabCaption(activitiesCount);
+        }
     }
 
     protected void loadAndUpdateVariablesCount() {
-        VariableFilter variableFilter = metadata.create(VariableFilter.class);
-        variableFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (historyTabTypes.contains(HistoryTabType.VARIABLES)) {
+            VariableFilter variableFilter = metadata.create(VariableFilter.class);
+            variableFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long variablesCount = variableService.getHistoricVariablesCount(variableFilter);
+            long variablesCount = variableService.getHistoricVariablesCount(variableFilter);
 
-        updateVariablesTabCaption(variablesCount);
+            updateVariablesTabCaption(variablesCount);
+        }
     }
 
     protected void loadAndUpdateIncidentsCount() {
-        IncidentFilter incidentFilter = metadata.create(IncidentFilter.class);
-        incidentFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (historyTabTypes.contains(HistoryTabType.INCIDENTS)) {
+            IncidentFilter incidentFilter = metadata.create(IncidentFilter.class);
+            incidentFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long incidentCount = incidentService.getHistoricIncidentCount(incidentFilter);
+            long incidentCount = incidentService.getHistoricIncidentCount(incidentFilter);
 
-        updateIncidentTabCaption(incidentCount);
+            updateIncidentTabCaption(incidentCount);
+        }
     }
 
     protected void loadAndUpdateUserTasksCount() {
-        UserTaskFilter userTaskFilter = metadata.create(UserTaskFilter.class);
-        userTaskFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (historyTabTypes.contains(HistoryTabType.USER_TASKS)) {
+            UserTaskFilter userTaskFilter = metadata.create(UserTaskFilter.class);
+            userTaskFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long historyTasksCount = userTaskService.getHistoryTasksCount(userTaskFilter);
+            long historyTasksCount = userTaskService.getHistoryTasksCount(userTaskFilter);
 
-        updateUserTasksTabCaption(historyTasksCount);
+            updateUserTasksTabCaption(historyTasksCount);
+        }
     }
 
     protected void loadAndUpdateDecisionsCount() {
-        DecisionInstanceFilter decisionInstanceFilter = metadata.create(DecisionInstanceFilter.class);
-        decisionInstanceFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
+        if (historyTabTypes.contains(HistoryTabType.DECISIONS)) {
+            DecisionInstanceFilter decisionInstanceFilter = metadata.create(DecisionInstanceFilter.class);
+            decisionInstanceFilter.setProcessInstanceId(processInstanceDataDc.getItem().getId());
 
-        long decisionsCount = decisionInstanceService.getHistoryDecisionInstancesCount(decisionInstanceFilter);
-        updateDecisionsTabCaption(decisionsCount);
+            long decisionsCount = decisionInstanceService.getHistoryDecisionInstancesCount(decisionInstanceFilter);
+            updateDecisionsTabCaption(decisionsCount);
+        }
     }
 
+    /**
+     * Returns the history tabs shown for the engine type, in the order of the tab sheet.
+     *
+     * @param engineType the type of the selected engine, or {@code null} if no engine is selected
+     * @return the tab types
+     */
+    protected List<HistoryTabType> resolveTabTypes(@Nullable EngineType engineType) {
+        List<HistoryTabType> types = new ArrayList<>(List.of(HistoryTabType.ACTIVITIES, HistoryTabType.USER_TASKS,
+                HistoryTabType.VARIABLES));
+        if (engineType == null || engineType.isCamunda7Compatible()) {
+            types.add(HistoryTabType.INCIDENTS);
+        }
+        types.add(HistoryTabType.DECISIONS);
+        return types;
+    }
+
+    protected void initTab(HistoryTabType type, int idx) {
+        switch (type) {
+            case ACTIVITIES -> {
+                // Declared in the descriptor.
+            }
+            case USER_TASKS -> initUserTasksTab(idx);
+            case VARIABLES -> initVariablesTab(idx);
+            case INCIDENTS -> initIncidentsTab(idx);
+            case DECISIONS -> initDecisionsTab(idx);
+        }
+    }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
-    protected void initUserTasksTab() {
+    protected void initUserTasksTab(int tabIndex) {
         Tab userTasksTab = createTab(USER_TASKS_TAB_ID, "ProcessInstanceEditHistoryFragment.tasksTabCaption",
                 VaadinIcon.USER_CARD);
         historyTabsheet.add(userTasksTab, componentHelper.createLazyTabContent(() ->
-                fragments.create(getParentController(), HistoryUserTasksTabFragment.class)), USER_TASKS_TAB_IDX);
+                fragments.create(getParentController(), HistoryUserTasksTabFragment.class)), tabIndex);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
-    protected void initVariablesTab() {
+    protected void initVariablesTab(int tabIndex) {
         Tab variablesTab = createTab(VARIABLES_TAB_ID, "ProcessInstanceEditHistoryFragment.historicVariableInstancesTabCaption",
                 VaadinIcon.COGS);
         historyTabsheet.add(variablesTab, componentHelper.createLazyTabContent(() ->
-                fragments.create(getParentController(), HistoryVariablesTabFragment.class)), VARIABLES_TAB_IDX);
+                fragments.create(getParentController(), HistoryVariablesTabFragment.class)), tabIndex);
     }
 
     @SuppressWarnings("JmixIncorrectCreateGuiComponent")
-    protected void initIncidentsTab() {
+    protected void initIncidentsTab(int tabIndex) {
         Tab incidentsTab = createTab(INCIDENTS_TAB_ID, "ProcessInstanceEditHistoryFragment.incidentsTabCaption",
                 VaadinIcon.WARNING);
         historyTabsheet.add(incidentsTab, componentHelper.createLazyTabContent(() ->
-                fragments.create(getParentController(), HistoryIncidentsTabFragment.class)), INCIDENTS_TAB_IDX);
+                fragments.create(getParentController(), HistoryIncidentsTabFragment.class)), tabIndex);
     }
 
-    protected void initDecisionsTab() {
+    protected void initDecisionsTab(int tabIndex) {
         Tab decisionsTab = createTab(DECISIONS_TAB_ID, "ProcessInstanceEditHistoryFragment.decisionsTabCaption",
                 VaadinIcon.TABLE);
         historyTabsheet.add(decisionsTab, componentHelper.createLazyTabContent(() ->
-                fragments.create(getParentController(), HistoryDecisionsFragment.class)), DECISIONS_TAB_IDX);
+                fragments.create(getParentController(), HistoryDecisionsFragment.class)), tabIndex);
     }
 
     protected void updateUserTasksTabCaption(long userTasksCount) {
-        updateTabCaption(USER_TASKS_TAB_IDX,
-                "ProcessInstanceEditHistoryFragment.tasksTabCaption",
-                userTasksCount, VaadinIcon.USER_CARD.create());
+        int tabIndex = historyTabTypes.indexOf(HistoryTabType.USER_TASKS);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex,
+                    "ProcessInstanceEditHistoryFragment.tasksTabCaption",
+                    userTasksCount, VaadinIcon.USER_CARD.create());
+        }
     }
 
     protected void updateVariablesTabCaption(long variablesCount) {
-        updateTabCaption(VARIABLES_TAB_IDX,
-                "ProcessInstanceEditHistoryFragment.historicVariableInstancesTabCaption",
-                variablesCount, VaadinIcon.CURLY_BRACKETS.create());
+        int tabIndex = historyTabTypes.indexOf(HistoryTabType.VARIABLES);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex,
+                    "ProcessInstanceEditHistoryFragment.historicVariableInstancesTabCaption",
+                    variablesCount, VaadinIcon.CURLY_BRACKETS.create());
+        }
     }
 
     protected void updateIncidentTabCaption(long incidentCount) {
-        updateTabCaption(INCIDENTS_TAB_IDX,
-                "ProcessInstanceEditHistoryFragment.incidentsTabCaption",
-                incidentCount, VaadinIcon.WARNING.create());
+        int tabIndex = historyTabTypes.indexOf(HistoryTabType.INCIDENTS);
+        if (tabIndex != -1) {
+            updateTabCaption(tabIndex,
+                    "ProcessInstanceEditHistoryFragment.incidentsTabCaption",
+                    incidentCount, VaadinIcon.WARNING.create());
+        }
     }
 
     protected void updateDecisionsTabCaption(long decisionsCount) {
-        SvgIcon svgIcon = new SvgIcon("icons/table_view.svg");
-        svgIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
-        updateTabCaption(DECISIONS_TAB_IDX,
-                "ProcessInstanceEditHistoryFragment.decisionsTabCaption",
-                decisionsCount, svgIcon);
+        int tabIndex = historyTabTypes.indexOf(HistoryTabType.DECISIONS);
+        if (tabIndex != -1) {
+            SvgIcon svgIcon = new SvgIcon("icons/table_view.svg");
+            svgIcon.addClassNames(LumoUtility.IconSize.MEDIUM, LumoUtility.Padding.XSMALL);
+            updateTabCaption(tabIndex,
+                    "ProcessInstanceEditHistoryFragment.decisionsTabCaption",
+                    decisionsCount, svgIcon);
+        }
     }
 
     protected void updateActivityTabCaption(long activitiesCount) {

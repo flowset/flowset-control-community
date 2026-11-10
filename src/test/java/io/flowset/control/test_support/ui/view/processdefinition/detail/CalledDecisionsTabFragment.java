@@ -27,6 +27,7 @@ public class CalledDecisionsTabFragment extends Composite<CalledDecisionsTabFrag
     public static final int DECISION_REF_COLUMN_INDEX = 0;
     public static final int BINDING_COLUMN_INDEX = 1;
     public static final int VERSION_COLUMN_INDEX = 2;
+    public static final int VERSION_TAG_COLUMN_INDEX = 3;
     public static final int ELEMENT_ID_COLUMN_INDEX = 4;
 
     @TestComponent(path = "decisionsFragmentDecisionsGrid")

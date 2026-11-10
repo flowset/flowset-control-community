@@ -5,13 +5,13 @@
 
 package io.flowset.control.entity.variable;
 
+import io.flowset.control.annotation.EngineProperty;
 import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import io.jmix.core.metamodel.annotation.PropertyDatatype;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 
 import java.time.OffsetDateTime;
 
@@ -32,7 +32,6 @@ public class HistoricVariableInstanceData {
     protected String taskId;
 
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
-    @Temporal(TemporalType.TIMESTAMP)
     @JmixProperty
     protected OffsetDateTime createTime;
 
@@ -45,6 +44,7 @@ public class HistoricVariableInstanceData {
     @JmixProperty
     protected String name;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String processDefinitionKey;
 
@@ -54,34 +54,43 @@ public class HistoricVariableInstanceData {
     @JmixProperty
     protected String executionId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String activityInstanceId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String caseDefinitionKey;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String caseDefinitionId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String caseInstanceId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String caseExecutionId;
 
     @JmixProperty
     protected String tenantId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String errorMessage;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String state;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     @JmixProperty
     protected OffsetDateTime removalTime;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     @JmixProperty
     protected String rootProcessInstanceId;
 

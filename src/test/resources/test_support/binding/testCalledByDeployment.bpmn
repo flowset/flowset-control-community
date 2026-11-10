@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - Copyright (c) Haulmont 2026. All Rights Reserved.
+  - Use is subject to license terms.
+  -->
+
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  id="Definitions_testCalledByDeployment"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+    <bpmn:process id="testCalledByDeployment" name="testCalledByDeployment" isExecutable="true" camunda:historyTimeToLive="180">
+        <bpmn:startEvent id="startEvent">
+            <bpmn:outgoing>Flow_start_to_end</bpmn:outgoing>
+        </bpmn:startEvent>
+        <bpmn:endEvent id="endEvent">
+            <bpmn:incoming>Flow_start_to_end</bpmn:incoming>
+        </bpmn:endEvent>
+        <bpmn:sequenceFlow id="Flow_start_to_end" sourceRef="startEvent" targetRef="endEvent"/>
+    </bpmn:process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+        <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="testCalledByDeployment">
+            <bpmndi:BPMNShape id="startEvent_di" bpmnElement="startEvent">
+                <dc:Bounds x="152" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape id="endEvent_di" bpmnElement="endEvent">
+                <dc:Bounds x="252" y="102" width="36" height="36"/>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge id="Flow_start_to_end_di" bpmnElement="Flow_start_to_end">
+                <di:waypoint x="188" y="120"/>
+                <di:waypoint x="252" y="120"/>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
+</bpmn:definitions>

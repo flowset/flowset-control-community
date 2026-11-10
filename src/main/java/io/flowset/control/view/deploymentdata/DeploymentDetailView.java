@@ -38,10 +38,12 @@ import io.jmix.flowui.view.*;
 import io.flowset.control.entity.deployment.DeploymentData;
 import io.flowset.control.entity.deployment.DeploymentProcessInstancesInfo;
 import io.flowset.control.entity.deployment.DeploymentResource;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.filter.ProcessDefinitionFilter;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.exception.EngineResourceNotAvailableException;
 import io.flowset.control.service.deployment.DeploymentService;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.processdefinition.ProcessDefinitionLoadContext;
 import io.flowset.control.service.processdefinition.ProcessDefinitionService;
 import io.flowset.control.service.processinstance.ProcessInstanceService;
@@ -51,6 +53,7 @@ import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
 import io.flowset.uikit.fragment.formviewer.FormViewerFragment;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 
@@ -95,6 +98,8 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
     private Fragments fragments;
     @Autowired
     private ViewNavigators viewNavigators;
+    @Autowired
+    private EngineService engineService;
 
     @ViewComponent
     private InstanceContainer<DeploymentData> deploymentDataDc;
@@ -130,8 +135,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
     public void onDownloadResourceButtonClick(final ClickEvent<JmixButton> event) {
         DeploymentResource selectedResource = resourcesDataGrid.getSingleSelectedItem();
         if (selectedResource != null) {
-            Resource deploymentResourceData = deploymentService.getDeploymentResourceData(
-                    selectedResource.getDeploymentId(), selectedResource.getResourceId());
+            Resource deploymentResourceData = getDeploymentResourceData(selectedResource);
             byte[] byteArrayContent = getByteArrayContent(deploymentResourceData);
             String downloadName = FilenameUtils.getName(selectedResource.getName());
             if (StringUtils.isEmpty(downloadName)) {
@@ -139,6 +143,11 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
             }
             downloader.download(() -> new ByteArrayInputStream(byteArrayContent), downloadName);
         }
+    }
+
+    protected Resource getDeploymentResourceData(DeploymentResource selectedResource) {
+        return deploymentService.getDeploymentResourceData(
+                selectedResource.getDeploymentId(), selectedResource.getResourceId());
     }
 
     @Subscribe("resourcesDataGrid")
@@ -149,8 +158,7 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
             return;
         }
         String resourceName = selectedResourceName.getName();
-        Resource deploymentResourceData = deploymentService.getDeploymentResourceData(
-                selectedResourceName.getDeploymentId(), selectedResourceName.getResourceId());
+        Resource deploymentResourceData = getDeploymentResourceData(selectedResourceName);
 
         resourceTabSheet.setVisible(true);
         downloadResourceButton.setVisible(true);
@@ -175,11 +183,15 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
     protected void onDeploymentDataDcItemChange(InstanceContainer.ItemChangeEvent<DeploymentData> event) {
         DeploymentData deploymentData = event.getItem();
         if (deploymentData != null) {
-            List<DeploymentResource> deploymentResourceNames = deploymentService.getDeploymentResources(
-                    deploymentData.getDeploymentId());
+            List<DeploymentResource> deploymentResourceNames = getDeploymentResources(deploymentData);
             resourcesDataGrid.setItems(new ArrayList<>(
                     deploymentResourceNames != null ? deploymentResourceNames : List.of()));
         }
+    }
+
+    protected List<DeploymentResource> getDeploymentResources(DeploymentData deploymentData) {
+        return deploymentService.getDeploymentResources(
+                deploymentData.getDeploymentId());
     }
 
     @Install(to = "deploymentDataDl", target = Target.DATA_LOADER)
@@ -188,10 +200,15 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
         String id = item == null ? Objects.requireNonNull(loadContext.getId()).toString() : item.getId();
 
         try {
-            return deploymentService.findById(id);
+            return loadDeploymentById(id);
         } catch (EngineConnectionFailedException e) {
             throw new ViewEngineConnectionFailedException(e, this);
         }
+    }
+
+    @Nullable
+    protected DeploymentData loadDeploymentById(String id) {
+        return deploymentService.findById(id);
     }
 
     private void initResourcesDataGrid() {
@@ -364,6 +381,8 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
     private Component createBpmnViewer(String xmlData) {
         BpmnViewerFragment bpmnViewerFragment = fragments.create(this, BpmnViewerFragment.class);
         bpmnViewerFragment.setId("viewerFragment");
+        EngineType engineType = engineService.getSelectedEngineType();
+        bpmnViewerFragment.setEngineType(engineType != null ? engineType.name() : null);
         bpmnViewerFragment.initViewer(xmlData);
 
         return bpmnViewerFragment;

@@ -39,10 +39,14 @@ public class ViewDeploymentAction extends ViewEntityDetailAction<ViewDeploymentA
             return;
         }
         viewNavigators.detailView(getCurrentView(), entityClass)
-                .withViewClass(DeploymentDetailView.class)
+                .withViewClass(getDeploymentDetailViewClass())
                 .withRouteParameters(new RouteParameters("id", getEntityId()))
                 .withBackwardNavigation(true)
                 .navigate();
+    }
+
+    protected Class<? extends DeploymentDetailView> getDeploymentDetailViewClass() {
+        return DeploymentDetailView.class;
     }
 
     @Override

@@ -11,6 +11,7 @@ import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.engine.external.ExternalEngine;
 import io.flowset.control.test_support.engine.external.RunningExternalEngine;
 import io.flowset.control.test_support.engine.external.WithRunningExternalEngine;
+import io.flowset.control.test_support.ui.component.BpmnViewerFragment;
 import io.flowset.control.test_support.ui.view.MainView;
 import io.flowset.control.test_support.ui.view.deployment.DeploymentDetailView;
 import io.flowset.control.test_support.ui.view.deployment.DeploymentListView;
@@ -21,10 +22,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.value;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.webdriver;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
+import static io.flowset.control.test_support.ui.condition.ControlCondition.allBodyRowsHaveCellText;
+import static io.flowset.control.test_support.ui.condition.ControlCondition.visibleBodyRowCount;
+import static io.flowset.control.test_support.ui.view.deployment.DeploymentDetailView.RESOURCE_NAME_COLUMN_INDEX;
 import static io.flowset.control.test_support.ui.view.deployment.DeploymentListView.DEPLOYMENT_ID_COLUMN_INDEX;
 import static io.flowset.control.test_support.ui.view.deployment.DeploymentListView.ID_BUTTON_BY;
 import static io.jmix.masquerade.JConditions.*;
@@ -69,6 +76,102 @@ public class DeploymentDetailViewActionsUiTest extends AbstractCamunda7UiTest {
 
         // then
         detailView.shouldNotBe(EXIST);
+    }
+
+    @Test
+    @DisplayName("Resources grid lists deployment resources")
+    void givenExistingDeployment_whenOpenDeploymentDetailView_thenResourcesShown() {
+        // given
+        String deploymentId = camundaRestTestHelper.createDeployment(engine, "test_support/vacationApproval.bpmn")
+                .getId();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        DeploymentListView listView = mainView.openDeploymentListView();
+        listView.waitUntilDataLoading()
+                .getRowByDeploymentId(deploymentId)
+                .getCellByIndex(DEPLOYMENT_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ID_BUTTON_BY).click();
+
+        // then
+        DeploymentDetailView detailView = $j(DeploymentDetailView.class)
+                .exists()
+                .displayed();
+
+        detailView.getResourcesDataGrid()
+                .shouldHave(visibleBodyRowCount(1))
+                .shouldHave(allBodyRowsHaveCellText(RESOURCE_NAME_COLUMN_INDEX, "vacationApproval.bpmn"));
+        detailView.getEmptyResourceMessageContainer().shouldBe(VISIBLE);
+    }
+
+    @Test
+    @DisplayName("Selecting BPMN resource shows its diagram")
+    void givenExistingDeployment_whenSelectBpmnResource_thenDiagramShown() {
+        // given
+        String deploymentId = camundaRestTestHelper.createDeployment(engine, "test_support/vacationApproval.bpmn")
+                .getId();
+
+        MainView mainView = loginAsAdmin();
+        List<String> elementIds = List.of("startEvent", "approveVacationTask", "checkStateGateway", "saveDetailsTask",
+                "approvedEndEvent", "notApprovedEndEvent");
+
+        // when
+        DeploymentListView listView = mainView.openDeploymentListView();
+        listView.waitUntilDataLoading()
+                .getRowByDeploymentId(deploymentId)
+                .getCellByIndex(DEPLOYMENT_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ID_BUTTON_BY).click();
+
+        DeploymentDetailView detailView = $j(DeploymentDetailView.class)
+                .exists()
+                .displayed();
+
+        detailView.selectResourceRow("vacationApproval.bpmn");
+
+        // then
+        detailView.getResourceTabSheet()
+                .getTabById("viewTab")
+                .shouldBe(SELECTED);
+
+        BpmnViewerFragment viewerFragment = detailView.getBpmnViewerFragment();
+        elementIds.forEach(elementId -> viewerFragment.getProcessDiagramElementById(elementId)
+                .shouldBe(visible));
+    }
+
+    @Test
+    @DisplayName("Selecting DMN resource shows its diagram")
+    void givenExistingDecisionDeployment_whenSelectDmnResource_thenDiagramShown() {
+        // given
+        String deploymentId = camundaRestTestHelper.createDeployment(engine, "test_support/dmn/testDmn.dmn")
+                .getId();
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        DeploymentListView listView = mainView.openDeploymentListView();
+        listView.waitUntilDataLoading()
+                .getRowByDeploymentId(deploymentId)
+                .getCellByIndex(DEPLOYMENT_ID_COLUMN_INDEX)
+                .getCellContent()
+                .find(ID_BUTTON_BY).click();
+
+        DeploymentDetailView detailView = $j(DeploymentDetailView.class)
+                .exists()
+                .displayed();
+
+        detailView.selectResourceRow("testDmn.dmn");
+
+        // then
+        detailView.getResourceTabSheet()
+                .getTabById("viewTab")
+                .shouldBe(SELECTED);
+
+        detailView.getDmnViewerFragment()
+                .getDiagramElementById("decision_testDmn")
+                .shouldBe(visible);
     }
 
     @Test

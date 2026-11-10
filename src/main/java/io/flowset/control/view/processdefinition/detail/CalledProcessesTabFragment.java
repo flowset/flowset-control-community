@@ -8,8 +8,10 @@ package io.flowset.control.view.processdefinition.detail;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.processdefinition.CalledProcessReferenceData;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.uicomponent.viewer.handler.CallActivityOverlayClickHandler;
 import io.jmix.flowui.component.UiComponentUtils;
 import io.jmix.flowui.component.grid.DataGrid;
@@ -35,6 +37,16 @@ public class CalledProcessesTabFragment extends Fragment<VerticalLayout> {
     protected DataGrid<CalledProcessReferenceData> calledProcessesGrid;
     @ViewComponent
     protected InstanceContainer<ProcessDefinitionData> processDefinitionDataDc;
+    @Autowired
+    protected EngineService engineService;
+
+    @Subscribe
+    public void onReady(final ReadyEvent event) {
+        if (!isVersionBindingAvailableByEngineType()) {
+            calledProcessesGrid.removeColumnByKey("version");
+            calledProcessesGrid.removeColumnByKey("versionTag");
+        }
+    }
 
     @Supply(to = "calledProcessesGrid.binding", subject = "renderer")
     protected Renderer<CalledProcessReferenceData> calledProcessesGridBindingRenderer() {
@@ -55,5 +67,10 @@ public class CalledProcessesTabFragment extends Fragment<VerticalLayout> {
                 processDefinitionDataDc.getItem(),
                 selectedItem,
                 UiComponentUtils.isComponentAttachedToDialog(this));
+    }
+
+    protected boolean isVersionBindingAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

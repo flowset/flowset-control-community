@@ -191,6 +191,14 @@ public class MainView extends StandardMainView {
         menu.addMenuItem(new ControlListMenu.GroupLabelMenuItem("supportLabel")
                         .withChildrenItems("about")
                         .withTitle(messageBundle.getMessage("menu.supportGroup.label")));
+
+        updateMenuByEngine();
+        selectedEngineDc.addItemChangeListener(itemChangeEvent -> updateMenuByEngine());
+    }
+
+    protected void updateMenuByEngine() {
+        BpmEngine selectedEngine = selectedEngineDc.getItemOrNull();
+        menu.applyEngineVisibility(selectedEngine != null ? selectedEngine.getType() : null);
     }
 
     protected void initInitialLayout() {

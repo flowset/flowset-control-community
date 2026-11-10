@@ -14,7 +14,7 @@
       <output id="output_1937d" label="Check Result" name="result" typeRef="string"/>
       <rule id="DecisionRule_1dt1dqx">
         <inputEntry id="UnaryTests_1pkhr1y">
-          <text>value &gt; 0</text>
+          <text>&gt; 0</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_1ngqo6m">
           <text>"ok"</text>
@@ -22,7 +22,7 @@
       </rule>
       <rule id="DecisionRule_184tk79">
         <inputEntry id="UnaryTests_12py7iw">
-          <text>value &lt;= 0</text>
+          <text>&lt;= 0</text>
         </inputEntry>
         <outputEntry id="LiteralExpression_0gdcpxp">
           <text>"not ok"</text>

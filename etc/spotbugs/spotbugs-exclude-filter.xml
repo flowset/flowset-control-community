@@ -60,6 +60,11 @@
     </Match>
 
     <Match>
+        <Bug pattern="EQ_DOESNT_OVERRIDE_EQUALS"/>
+        <Class name="io.flowset.control.test_support.camunda7.CibSevenContainer"/>
+    </Match>
+
+    <Match>
         <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
         <Class name="io.flowset.control.view.processinstance.runtime.RuntimeTabFragment" />
         <Method name="onRuntimeActivityInstancesDcItemChange" />

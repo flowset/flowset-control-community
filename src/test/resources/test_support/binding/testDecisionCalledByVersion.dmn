@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - Copyright (c) Haulmont 2026. All Rights Reserved.
+  - Use is subject to license terms.
+  -->
+
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="definitions_decision_calledByVersion" name="DRD"
+             namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="decision_calledByVersion" name="decision_calledByVersion" camunda:historyTimeToLive="180">
+    <decisionTable id="decisionTable_decision_calledByVersion">
+      <input id="input1" label="Amount">
+        <inputExpression id="inputExpression1" typeRef="number">
+          <text>1</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="Result" name="result" typeRef="string"/>
+      <rule id="rule1">
+        <inputEntry id="inputEntry1">
+          <text>&gt; 0</text>
+        </inputEntry>
+        <outputEntry id="outputEntry1">
+          <text>"ok"</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+  <dmndi:DMNDI>
+    <dmndi:DMNDiagram id="DMNDiagram_decision_calledByVersion">
+      <dmndi:DMNShape id="DMNShape_decision_calledByVersion" dmnElementRef="decision_calledByVersion">
+        <dc:Bounds height="80" width="180" x="150" y="150"/>
+      </dmndi:DMNShape>
+    </dmndi:DMNDiagram>
+  </dmndi:DMNDI>
+</definitions>
