@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_er" targetNamespace="http://flowset.io/test">
+  <bpmn:process id="ut-engine-reject" name="UT Engine Reject" isExecutable="true" camunda:historyTimeToLive="30">
+    <bpmn:startEvent id="Start_1"><bpmn:outgoing>F1</bpmn:outgoing></bpmn:startEvent>
+    <bpmn:serviceTask id="Task_NoImpl" name="Service task without implementation"><bpmn:incoming>F1</bpmn:incoming><bpmn:outgoing>F2</bpmn:outgoing></bpmn:serviceTask>
+    <bpmn:endEvent id="End_1"><bpmn:incoming>F2</bpmn:incoming></bpmn:endEvent>
+    <bpmn:sequenceFlow id="F1" sourceRef="Start_1" targetRef="Task_NoImpl" />
+    <bpmn:sequenceFlow id="F2" sourceRef="Task_NoImpl" targetRef="End_1" />
+  </bpmn:process>
+</bpmn:definitions>

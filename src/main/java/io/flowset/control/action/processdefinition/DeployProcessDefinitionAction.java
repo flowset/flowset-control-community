@@ -7,7 +7,7 @@ package io.flowset.control.action.processdefinition;
 
 import com.vaadin.flow.component.Component;
 import io.flowset.control.security.accesscontext.processdefinition.ProcessDefinitionDeployAccessContext;
-import io.flowset.control.view.newprocessdeployment.NewProcessDeploymentView;
+import io.flowset.control.view.deploymentupload.DeploymentUploadView;
 import io.jmix.core.AccessManager;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.action.ActionType;
@@ -49,7 +49,7 @@ public class DeployProcessDefinitionAction extends SecuredBaseAction<DeployProce
 
     @Override
     public void execute() {
-        viewNavigators.view(getCurrentView(), NewProcessDeploymentView.class)
+        viewNavigators.view(getCurrentView(), DeploymentUploadView.class)
                 .withBackwardNavigation(true)
                 .navigate();
     }

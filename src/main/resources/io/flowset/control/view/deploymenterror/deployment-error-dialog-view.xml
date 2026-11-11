@@ -17,7 +17,7 @@
         <action id="close" type="view_close" text="msg:///actions.Close"/>
     </actions>
     <layout>
-        <hbox width="100%" alignItems="AUTO" justifyContent="START" themeNames="spacing-s"
+        <hbox id="notDeployedBox" width="100%" alignItems="AUTO" justifyContent="START" themeNames="spacing-s"
               classNames="border rounded-l border-error-50 bg-error-10 text-error-contrast p-m">
             <icon id="warningIcon" icon="WARNING" size="1.25em" classNames="text-error"/>
             <vbox padding="false" themeNames="spacing-xs">

@@ -6,11 +6,17 @@
 package io.flowset.control.view.deploymentupload;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -40,7 +46,6 @@ import io.flowset.control.service.deployment.validation.ReferenceLocation;
 import io.flowset.control.service.deployment.validation.ResolvedReference;
 import io.flowset.control.service.deployment.validation.ResourceReference;
 import io.flowset.control.service.engine.EngineTenantProvider;
-import io.flowset.control.view.AbstractResourceDeploymentView;
 import io.flowset.control.view.deploymentdata.DeploymentDetailView;
 import io.flowset.control.view.deploymenterror.DeploymentErrorDialogView;
 import io.flowset.control.view.deploymenterror.ResourceDeploymentReportFactory;
@@ -50,6 +55,7 @@ import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.flowui.DialogWindows;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.ViewNavigators;
+import io.jmix.flowui.UiComponents;
 import io.jmix.flowui.component.grid.DataGrid;
 import io.jmix.flowui.component.upload.FileUploadField;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
@@ -67,11 +73,9 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -82,6 +86,12 @@ import java.util.stream.Collectors;
 public class DeploymentUploadView extends StandardView {
 
     protected static final long BYTES_IN_MB = 1024L * 1024L;
+
+    /**
+     * Theme of the buttons that look like links, see styles/components/vaadin-button.css
+     */
+    protected static final String LINK_THEME_NAME = "link";
+    protected static final String STATUS_ICON_SIZE = "1em";
 
     @Autowired
     protected DeploymentService deploymentService;
@@ -103,6 +113,8 @@ public class DeploymentUploadView extends StandardView {
     protected DialogWindows dialogWindows;
     @Autowired
     protected ViewNavigators viewNavigators;
+    @Autowired
+    protected UiComponents uiComponents;
     @Autowired
     protected ResourceDeploymentReportFactory resourceDeploymentReportFactory;
     @ViewComponent
@@ -134,8 +146,6 @@ public class DeploymentUploadView extends StandardView {
     protected DataGrid<KeyValueEntity> referencesDataGrid;
     @ViewComponent
     protected JmixButton okBtn;
-    @ViewComponent
-    protected JmixButton errorsBtn;
     @ViewComponent
     protected DeploymentResourcePreviewFragment resourcePreviewFragment;
 
@@ -169,6 +179,11 @@ public class DeploymentUploadView extends StandardView {
     protected boolean refreshingFiles = false;
 
     /**
+     * {@code true} after a deploy attempt rejected by the engine: only then the OK status is known for sure.
+     */
+    protected boolean deployAttempted = false;
+
+    /**
      * Whether the reference check (including the engine lookup) is performed for the current file list,
      * so the deployment can rely on its result.
      */
@@ -188,9 +203,8 @@ public class DeploymentUploadView extends StandardView {
     public void onInit(final InitEvent event) {
         canDeployProcesses = securitySupport.isActionPermitted(new ProcessDefinitionDeployAccessContext());
         canDeployDecisions = securitySupport.isActionPermitted(new DecisionDefinitionDeployAccessContext());
-        okBtn.setVisible(canDeployProcesses || canDeployDecisions);
+        okBtn.setVisible(canDeploy());
         initFilesUpload();
-        initErrorsBtn();
         initDeploymentNameField();
         initTenantInfo();
         initFilesPanel();
@@ -201,6 +215,7 @@ public class DeploymentUploadView extends StandardView {
         // both grids share the free space; the panel scrolls if their minimum heights do not fit
         filesPanel.setFlexGrow(1, filesDataGrid, referencesDataGrid);
         filesPanel.getStyle().set("overflow", "auto");
+        filesDataGrid.setPartNameGenerator(item -> item.getId().equals(previewedFileId) ? "previewed-row" : null);
     }
 
     protected void initDeploymentNameField() {
@@ -252,21 +267,26 @@ public class DeploymentUploadView extends StandardView {
                 .filter(type -> switch (type) {
                     case BPMN -> canDeployProcesses;
                     case DMN -> canDeployDecisions;
-                    default -> canDeployProcesses || canDeployDecisions;
+                    default -> canDeploy();
                 })
                 .toList();
     }
 
-    protected void initErrorsBtn() {
-        errorsBtn.addClickListener(event -> openEngineReportDialog());
+    @Subscribe("filesUpload")
+    public void onFilesUploadSucceeded(final FileUploadSucceededEvent<FileUploadField, ?> event) {
+        String fileName = Objects.toString(event.getFileName(), "");
+        byte[] content = filesUpload.getValue();
+        filesUpload.clear();
+        if (content != null) {
+            addFile(fileName, content);
+        }
     }
 
-    @Subscribe("filesUpload")
-    public void onFilesUploadSucceeded(final FileUploadSucceededEvent<FileUploadField, MemoryBuffer> event) {
-        String fileName = Objects.toString(event.getFileName(), "");
-        byte[] content = filesUpload.getValue() != null ? filesUpload.getValue() : readContent(event.getReceiver());
-        filesUpload.clear();
-
+    /**
+     * Adds an uploaded file to the deployment and revalidates the files. The file is rejected with a notification
+     * if the file limit is reached.
+     */
+    protected void addFile(String fileName, byte[] content) {
         if (uploadedFiles.size() >= getMaxFiles()) {
             notifications.create(messageBundle.formatMessage("tooManyFiles", getMaxFiles()))
                     .withType(Notifications.Type.WARNING)
@@ -275,19 +295,7 @@ public class DeploymentUploadView extends StandardView {
         }
         uploadedFiles.add(new UploadedFile(fileName, content, deploymentResourceValidator.validate(fileName, content)));
         onFilesChanged();
-        validateFiles();
-        checkReferences();
-    }
-
-    protected byte[] readContent(@Nullable MemoryBuffer buffer) {
-        if (buffer == null) {
-            return new byte[0];
-        }
-        try (InputStream inputStream = buffer.getInputStream()) {
-            return inputStream.readAllBytes();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        revalidate();
     }
 
     @Subscribe("filesUpload")
@@ -305,8 +313,7 @@ public class DeploymentUploadView extends StandardView {
         if (uploadedFiles.removeIf(file -> selectedIds.contains(file.getId()))) {
             onFilesChanged();
         }
-        validateFiles();
-        checkReferences();
+        revalidate();
     }
 
     @Subscribe("filesDataGrid")
@@ -320,24 +327,57 @@ public class DeploymentUploadView extends StandardView {
                 : event.getFirstSelectedItem().orElse(null);
         activeFileId = active != null ? (UUID) active.getId() : null;
         updatePreview();
-        updateErrorsBtn();
+    }
+
+    @Subscribe("filesDataGrid")
+    public void onFilesDataGridItemClick(final ItemClickEvent<KeyValueEntity> event) {
+        activeFileId = (UUID) event.getItem().getId();
+        updatePreview();
     }
 
     @Supply(to = "filesDataGrid.status", subject = "renderer")
     protected Renderer<KeyValueEntity> filesDataGridStatusRenderer() {
         return new ComponentRenderer<>(item -> {
-            DeploymentResourceStatus status = DeploymentResourceStatus.fromId(item.getValue("status"));
-            if (status == null) {
+            UploadedFile file = findFile((UUID) item.getId());
+            if (file == null) {
                 return new Span();
             }
-            Span badge = new Span(messages.getMessage(status));
-            badge.getElement().getThemeList().add(switch (status) {
-                case OK -> "badge success";
-                case WARNING -> "badge warning";
-                case ERROR -> "badge error";
-            });
-            return badge;
+            return switch (file.getStatus()) {
+                case ERROR -> createProblemsLink(file, VaadinIcon.CLOSE_CIRCLE, LumoUtility.TextColor.ERROR,
+                        messageBundle.formatMessage("statusErrors", file.getErrors().size()));
+                case WARNING -> createProblemsLink(file, VaadinIcon.WARNING, LumoUtility.TextColor.WARNING,
+                        messageBundle.formatMessage("statusWarnings", file.getWarnings().size()));
+                case OK -> deployAttempted ? createOkStatus() : new Span();
+            };
         });
+    }
+
+    protected Component createProblemsLink(UploadedFile file, VaadinIcon icon, String colorClassName, String text) {
+        JmixButton link = uiComponents.create(JmixButton.class);
+        link.setText(text);
+        link.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        link.addThemeName(LINK_THEME_NAME);
+        link.addClassName(colorClassName);
+        link.addClickListener(event -> openProblemsDialog(file));
+        return createStatus(icon, colorClassName, link);
+    }
+
+    protected Component createOkStatus() {
+        return createStatus(VaadinIcon.CHECK_CIRCLE, LumoUtility.TextColor.SUCCESS,
+                new Span(messages.getMessage(DeploymentResourceStatus.OK)));
+    }
+
+    /**
+     * The icon is placed next to the text, not into the button, so that all the statuses have the same icon size.
+     */
+    protected Component createStatus(VaadinIcon vaadinIcon, String colorClassName, Component text) {
+        Icon icon = vaadinIcon.create();
+        icon.addClassName(colorClassName);
+        icon.setSize(STATUS_ICON_SIZE);
+        HorizontalLayout layout = new HorizontalLayout(icon, text);
+        layout.setSpacing(false);
+        layout.addClassNames(LumoUtility.Gap.XSMALL, LumoUtility.AlignItems.CENTER);
+        return layout;
     }
 
     @Supply(to = "referencesDataGrid.location", subject = "renderer")
@@ -360,9 +400,10 @@ public class DeploymentUploadView extends StandardView {
 
     @Subscribe(id = "okBtn", subject = "clickListener")
     public void onOkBtnClick(final ClickEvent<JmixButton> event) {
-        validateFiles();
-        if (!referenceCheckCompleted) {
-            // the deployment relies on the result of the reference check performed for the current files
+        applyViewChecks();
+        if (referenceCheckCompleted) {
+            refreshFiles();
+        } else {
             checkReferences();
         }
         if (uploadedFiles.isEmpty() || hasErrors()) {
@@ -383,11 +424,12 @@ public class DeploymentUploadView extends StandardView {
         DeploymentContext context = new DeploymentContext()
                 .withDeploymentName(deploymentNameField.getValue())
                 .withSkipUnchangedResources(Boolean.TRUE.equals(skipUnchangedField.getValue()));
-        uploadedFiles.forEach(file -> context.addResource(file.getName(), new ByteArrayInputStream(file.getContent())));
+        uploadedFiles.forEach(file -> context.withResource(file.getName(), new ByteArrayInputStream(file.getContent())));
 
+        Instant deployStart = Instant.now();
         try {
             DeploymentWithDefinitions result = deploymentService.createDeployment(context);
-            onDeploymentCreated(result);
+            onDeploymentCreated(result, deployStart);
         } catch (Exception ex) {
             log.error("Error on deployment upload", ex);
             RemoteEngineParseException parseException =
@@ -412,7 +454,17 @@ public class DeploymentUploadView extends StandardView {
      * counted by the resources of the created deployment loaded from the engine: with the "Skip unchanged resources"
      * option, unchanged resources are not deployed. If the resources cannot be loaded, the uploaded files are counted.
      */
-    protected void onDeploymentCreated(@Nullable DeploymentWithDefinitions result) {
+    protected void onDeploymentCreated(@Nullable DeploymentWithDefinitions result, Instant deployStart) {
+        String deploymentId = result != null ? result.getId() : null;
+        if (isExistingDeployment(result, deployStart)) {
+            notifications.create(messageBundle.getMessage("deploymentUnchanged"),
+                            messageBundle.getMessage("deploymentUnchanged.description"))
+                    .withType(Notifications.Type.WARNING)
+                    .show();
+            closeAndNavigate(deploymentId);
+            return;
+        }
+
         int processes = CollectionUtils.size(result != null ? result.getDeployedProcessDefinitions() : null);
         int decisions = CollectionUtils.size(result != null ? result.getDeployedDecisionDefinitions() : null);
 
@@ -432,11 +484,24 @@ public class DeploymentUploadView extends StandardView {
         notifications.create(messageBundle.getMessage("deploymentCreated"), summary)
                 .withType(Notifications.Type.SUCCESS)
                 .show();
+        closeAndNavigate(deploymentId);
+    }
 
-        String deploymentId = result != null ? result.getId() : null;
+    /**
+     * With the "Skip unchanged resources" option, the engine returns the existing deployment instead of creating
+     * a new one when none of the resources differs from the deployed ones.
+     */
+    protected boolean isExistingDeployment(@Nullable DeploymentWithDefinitions result, Instant deployStart) {
+        return result != null && result.getDeploymentTime() != null
+                && result.getDeploymentTime().toInstant().isBefore(deployStart);
+    }
+
+    /**
+     * Closes the view with the SAVE outcome (see ViewAnalyticsListener); instead of the backward navigation,
+     * the details of the deployment are opened.
+     */
+    protected void closeAndNavigate(@Nullable String deploymentId) {
         if (StringUtils.isNotBlank(deploymentId)) {
-            // the view is closed with the SAVE outcome (see ViewAnalyticsListener), but instead of the backward
-            // navigation to the previous view the details of the created deployment are opened
             ViewControllerUtils.setViewCloseDelegate(this, view -> navigateToDeployment(deploymentId));
         }
         close(StandardOutcome.SAVE);
@@ -490,6 +555,7 @@ public class DeploymentUploadView extends StandardView {
      * {@link DeploymentResourceStatus#ERROR} status. Nothing is deployed, so the view stays open.
      */
     protected void handleEngineRejection(RemoteEngineParseException exception) {
+        deployAttempted = true;
         Map<String, ResourceReport> details = exception.getDetails() != null ? exception.getDetails() : Map.of();
         int rejectedFiles = 0;
         UploadedFile firstRejectedFile = null;
@@ -516,11 +582,11 @@ public class DeploymentUploadView extends StandardView {
                     .ifPresent(filesDataGrid::select);
             activeFileId = rejectedFileId;
             updatePreview();
-            updateErrorsBtn();
         }
 
         if (rejectedFiles > 0) {
-            notifications.create(messageBundle.formatMessage("deploymentRejected", rejectedFiles))
+            notifications.create(messageBundle.getMessage("deploymentRejected"),
+                            messageBundle.formatMessage("deploymentRejected.description", rejectedFiles))
                     .withType(Notifications.Type.ERROR)
                     .show();
         } else {
@@ -543,33 +609,18 @@ public class DeploymentUploadView extends StandardView {
     }
 
     /**
-     * Opens the engine report of the file selected in the grid.
+     * Opens the report of the problems of the file: the ones found by Control and, if the engine rejected the file,
+     * the ones reported by the engine.
      */
-    protected void openEngineReportDialog() {
-        UploadedFile selectedFile = getSelectedFile();
-        if (selectedFile == null || selectedFile.getEngineReport() == null) {
-            return;
-        }
-        ResourceDeploymentReport report = resourceDeploymentReportFactory.createReport(
-                selectedFile.getEngineReport(), selectedFile.getName());
+    protected void openProblemsDialog(UploadedFile file) {
+        ResourceDeploymentReport report = resourceDeploymentReportFactory.createReport(file.getName(),
+                file.getLocalErrors(), file.getLocalWarnings(), file.getEngineReport());
         dialogWindows.view(this, DeploymentErrorDialogView.class)
-                .withViewConfigurer(view -> view.setResourceReport(report))
+                .withViewConfigurer(view -> {
+                    view.setResourceReport(report);
+                    view.setEngineRejected(file.getEngineReport() != null);
+                })
                 .open();
-    }
-
-    /**
-     * Shows the engine report button if the file selected in the grid has been rejected by the engine.
-     */
-    protected void updateErrorsBtn() {
-        UploadedFile selectedFile = getSelectedFile();
-        ResourceReport report = selectedFile != null ? selectedFile.getEngineReport() : null;
-        errorsBtn.setVisible(report != null);
-        if (report != null) {
-            int size = CollectionUtils.size(report.getErrors()) + CollectionUtils.size(report.getWarnings());
-            String sizeText = size > 99 ? "99+" : String.valueOf(size);
-            errorsBtn.setText(messages.formatMessage(AbstractResourceDeploymentView.class,
-                    "deploymentErrorsBtn.text", sizeText));
-        }
     }
 
     @Subscribe(id = "cancelBtn", subject = "clickListener")
@@ -578,11 +629,19 @@ public class DeploymentUploadView extends StandardView {
     }
 
     /**
-     * Performs the view-level checks of the uploaded files (size limit, duplicate names) and refreshes the grids.
-     * The content checks are performed by {@link DeploymentResourceValidator} once, when a file is uploaded.
-     * The reference check is performed separately, see {@link #checkReferences()}.
+     * Performs the view-level checks of the uploaded files (size limit, duplicate names, permissions) and the
+     * reference check, then refreshes the grids.
      */
-    protected void validateFiles() {
+    protected void revalidate() {
+        applyViewChecks();
+        checkReferences();
+    }
+
+    /**
+     * Applies the view-level checks (size limit, duplicate names, permissions) to the uploaded files. The content
+     * checks are performed by {@link DeploymentResourceValidator} once, when a file is uploaded.
+     */
+    protected void applyViewChecks() {
         Map<String, Long> nameCounts = uploadedFiles.stream()
                 .collect(Collectors.groupingBy(file -> normalizeName(file.getName()), Collectors.counting()));
         long maxFileSize = getMaxFileSizeBytes();
@@ -603,8 +662,6 @@ public class DeploymentUploadView extends StandardView {
             }
             file.setViewErrors(errors);
         }
-
-        refreshFiles();
     }
 
     /**
@@ -613,8 +670,8 @@ public class DeploymentUploadView extends StandardView {
      * is performed for the new list.
      */
     protected void onFilesChanged() {
-        // the engine report relates to the rejected file list
         uploadedFiles.forEach(UploadedFile::clearEngineReport);
+        deployAttempted = false;
         referenceCheckCompleted = false;
     }
 
@@ -704,7 +761,6 @@ public class DeploymentUploadView extends StandardView {
             refreshingFiles = false;
         }
         updatePreview();
-        updateErrorsBtn();
         refreshReferences();
 
         updateOkBtnState();
@@ -723,10 +779,6 @@ public class DeploymentUploadView extends StandardView {
         item.setValue("type", file.getType() != null ? messages.getMessage(file.getType()) : "-");
         item.setValue("keys", String.join(", ", file.getValidationResult().getKeys()));
         item.setValue("status", file.getStatus().getId());
-
-        List<String> details = new ArrayList<>(file.getErrors());
-        details.addAll(file.getWarnings());
-        item.setValue("details", String.join("; ", details));
         return item;
     }
 
@@ -735,16 +787,18 @@ public class DeploymentUploadView extends StandardView {
      */
     protected void updatePreview() {
         UploadedFile selectedFile = getSelectedFile();
+        UUID previousFileId = previewedFileId;
         if (selectedFile == null) {
             if (previewedFileId != null) {
                 resourcePreviewFragment.clear();
                 previewedFileId = null;
             }
-            return;
-        }
-        if (!selectedFile.getId().equals(previewedFileId)) {
+        } else if (!selectedFile.getId().equals(previewedFileId)) {
             resourcePreviewFragment.showResource(selectedFile.getName(), selectedFile.getContent());
             previewedFileId = selectedFile.getId();
+        }
+        if (!Objects.equals(previousFileId, previewedFileId)) {
+            filesDataGrid.getDataProvider().refreshAll();
         }
     }
 
@@ -753,8 +807,13 @@ public class DeploymentUploadView extends StandardView {
      */
     @Nullable
     protected UploadedFile getSelectedFile() {
-        return activeFileId == null ? null : uploadedFiles.stream()
-                .filter(file -> file.getId().equals(activeFileId))
+        return findFile(activeFileId);
+    }
+
+    @Nullable
+    protected UploadedFile findFile(@Nullable UUID fileId) {
+        return fileId == null ? null : uploadedFiles.stream()
+                .filter(file -> file.getId().equals(fileId))
                 .findFirst()
                 .orElse(null);
     }
@@ -909,24 +968,38 @@ public class DeploymentUploadView extends StandardView {
         }
 
         /**
-         * @return errors of the view-level checks followed by the errors of the content validation, the errors
-         * of the reference check and the errors reported by the engine
+         * @return errors found by Control: the view-level checks, the content validation and the reference check
          */
-        public List<String> getErrors() {
+        public List<String> getLocalErrors() {
             List<String> errors = new ArrayList<>(viewErrors);
             errors.addAll(validationResult.getErrors());
             errors.addAll(referenceErrors);
+            return errors;
+        }
+
+        /**
+         * @return warnings found by Control: the content validation and the reference check
+         */
+        public List<String> getLocalWarnings() {
+            List<String> warnings = new ArrayList<>(validationResult.getWarnings());
+            warnings.addAll(referenceWarnings);
+            return warnings;
+        }
+
+        /**
+         * @return errors found by Control followed by the errors reported by the engine
+         */
+        public List<String> getErrors() {
+            List<String> errors = getLocalErrors();
             errors.addAll(engineErrors);
             return errors;
         }
 
         /**
-         * @return warnings of the content validation followed by the warnings of the reference check and the
-         * warnings reported by the engine
+         * @return warnings found by Control followed by the warnings reported by the engine
          */
         public List<String> getWarnings() {
-            List<String> warnings = new ArrayList<>(validationResult.getWarnings());
-            warnings.addAll(referenceWarnings);
+            List<String> warnings = getLocalWarnings();
             warnings.addAll(engineWarnings);
             return warnings;
         }

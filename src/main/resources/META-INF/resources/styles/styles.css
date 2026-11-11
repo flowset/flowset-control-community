@@ -17,9 +17,11 @@
 @import 'view/all-tasks-view.css';
 @import 'view/process-definition-detail-view.css';
 @import 'view/process-instance-detail-view.css';
+@import 'view/deployment-upload-view.css';
 @import 'uicomponent/toggle-button-group.css';
 @import 'uicomponent/bordered-button.css';
 @import 'uicomponent/process-tooltip.css';
 @import 'uicomponent/engine-env-badge.css';
+@import 'uicomponent/alert-box.css';
 @import 'components/jmix-code-editor.css';
 @import 'components/vaadin-button.css';

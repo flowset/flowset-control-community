@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_mr" targetNamespace="http://flowset.io/test">
+  <bpmn:process id="ut-missing-refs" name="UT Missing Refs" isExecutable="true" camunda:historyTimeToLive="30">
+    <bpmn:startEvent id="Start_1"><bpmn:outgoing>F1</bpmn:outgoing></bpmn:startEvent>
+    <bpmn:callActivity id="Call_1" name="Call missing process" calledElement="ut-no-such-process" camunda:calledElementBinding="deployment"><bpmn:incoming>F1</bpmn:incoming><bpmn:outgoing>F2</bpmn:outgoing></bpmn:callActivity>
+    <bpmn:businessRuleTask id="Rule_1" name="Missing decision (latest)" camunda:decisionRef="ut-no-such-decision" camunda:decisionRefBinding="latest"><bpmn:incoming>F2</bpmn:incoming><bpmn:outgoing>F3</bpmn:outgoing></bpmn:businessRuleTask>
+    <bpmn:endEvent id="End_1"><bpmn:incoming>F3</bpmn:incoming></bpmn:endEvent>
+    <bpmn:sequenceFlow id="F1" sourceRef="Start_1" targetRef="Call_1" />
+    <bpmn:sequenceFlow id="F2" sourceRef="Call_1" targetRef="Rule_1" />
+    <bpmn:sequenceFlow id="F3" sourceRef="Rule_1" targetRef="End_1" />
+  </bpmn:process>
+</bpmn:definitions>

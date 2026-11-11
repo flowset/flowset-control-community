@@ -14,7 +14,6 @@
                 <property name="type" datatype="string"/>
                 <property name="keys" datatype="string"/>
                 <property name="status" datatype="string"/>
-                <property name="details" datatype="string"/>
             </properties>
         </keyValueCollection>
         <keyValueCollection id="referencesDc">
@@ -37,13 +36,22 @@
                splitterPosition="45"
                themeNames="splitter-spacing">
             <vbox id="filesPanel" padding="false" height="100%">
+                <hbox id="filesUploadInfo"
+                      width="100%"
+                      classNames="alert-box">
+                    <icon icon="INFO_CIRCLE" classNames="icon-m"/>
+                    <span id="filesUploadHelperText"/>
+                </hbox>
                 <textField id="deploymentNameField"
                            width="100%"
                            label="msg://deploymentNameField.label"
                            clearButtonVisible="true"/>
-                <checkbox id="skipUnchangedField"
-                          label="msg://skipUnchangedField.label"
-                          helperText="msg://skipUnchangedField.helperText"/>
+                <hbox id="skipUnchangedBox" alignItems="CENTER" themeNames="spacing-xs">
+                    <checkbox id="skipUnchangedField" label="msg://skipUnchangedField.label"/>
+                    <icon icon="QUESTION_CIRCLE" size="0.9em">
+                        <tooltip text="msg://skipUnchangedField.helperText" position="BOTTOM_START"/>
+                    </icon>
+                </hbox>
                 <span id="tenantInfo"
                       classNames="text-secondary text-s"
                       visible="false"/>
@@ -55,15 +63,7 @@
                                      fileNameVisible="false"
                                      clearButtonVisible="false"/>
                     <button id="removeFileBtn" action="filesDataGrid.remove"/>
-                    <button id="errorsBtn" visible="false"
-                            themeNames="badge error pill tertiary-inline has-icon">
-                        <prefix>
-                            <icon id="deploymentErrorsIcon" icon="WARNING"/>
-                        </prefix>
-                    </button>
                 </hbox>
-                <span id="filesUploadHelperText"
-                      classNames="text-secondary text-s"/>
                 <span id="noDeployPermissionInfo"
                       classNames="text-secondary text-s"
                       text="msg://noDeployPermission"
@@ -71,6 +71,7 @@
                 <dataGrid id="filesDataGrid"
                           width="100%"
                           minHeight="10em"
+                          classNames="deployment-files-grid"
                           selectionMode="MULTI"
                           dataContainer="filesDc">
                     <actions>
@@ -82,7 +83,6 @@
                         <column property="type" header="msg://type" autoWidth="true"/>
                         <column property="keys" header="msg://keys" autoWidth="true"/>
                         <column property="status" header="msg://status" autoWidth="true" sortable="false"/>
-                        <column property="details" header="msg://details" flexGrow="1"/>
                     </columns>
                 </dataGrid>
                 <span id="referencesHeader"

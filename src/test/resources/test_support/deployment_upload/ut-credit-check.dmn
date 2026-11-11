@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd" xmlns:camunda="http://camunda.org/schema/1.0/dmn" id="Definitions_credit" name="UT Credit" namespace="http://flowset.io/test">
+  <decision id="ut-credit-check" name="UT Credit Check" camunda:historyTimeToLive="30">
+    <decisionTable id="DecisionTable_1" hitPolicy="FIRST">
+      <input id="Input_1" label="Amount">
+        <inputExpression id="InputExpression_1" typeRef="double">
+          <text>amount</text>
+        </inputExpression>
+      </input>
+      <output id="Output_1" label="Result" name="result" typeRef="string" />
+      <rule id="Rule_1">
+        <inputEntry id="UnaryTests_1"><text>&lt;= 10000</text></inputEntry>
+        <outputEntry id="LiteralExpression_1"><text>"approve"</text></outputEntry>
+      </rule>
+      <rule id="Rule_2">
+        <inputEntry id="UnaryTests_2"><text>&gt; 10000</text></inputEntry>
+        <outputEntry id="LiteralExpression_2"><text>"manual"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

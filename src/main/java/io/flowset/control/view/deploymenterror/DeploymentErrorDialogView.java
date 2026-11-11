@@ -6,6 +6,7 @@
 package io.flowset.control.view.deploymenterror;
 
 
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.model.CollectionLoader;
 import io.jmix.flowui.model.InstanceContainer;
@@ -39,8 +40,19 @@ public class DeploymentErrorDialogView extends StandardView {
     @ViewComponent
     protected CollectionLoader<ResourceValidationError> validationErrorsDl;
 
+    @ViewComponent
+    protected HorizontalLayout notDeployedBox;
+
     public void setResourceReport(ResourceDeploymentReport report) {
         deploymentReportDc.setItem(report);
+    }
+
+    /**
+     * Shows or hides the "Resource not deployed" message: it makes sense only when the engine rejected the resource,
+     * not for the problems found before the deployment.
+     */
+    public void setEngineRejected(boolean engineRejected) {
+        notDeployedBox.setVisible(engineRejected);
     }
 
     @Subscribe

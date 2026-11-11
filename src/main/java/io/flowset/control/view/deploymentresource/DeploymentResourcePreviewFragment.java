@@ -9,10 +9,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.IFrame;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.deployment.DeploymentResourceType;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
@@ -142,9 +144,19 @@ public class DeploymentResourcePreviewFragment extends Fragment<VerticalLayout> 
 
     protected void showBpmn(byte[] content) {
         String textContent = toText(content);
-        addTab("viewTab", VaadinIcon.SITEMAP.create(), getViewTabLabel(), createBpmnViewer(textContent));
+        Component view = textContent.contains("BPMNDiagram")
+                ? createBpmnViewer(textContent)
+                : createMessage(messageBundle.getMessage("noDiagramMessage"));
+        addTab("viewTab", VaadinIcon.SITEMAP.create(), getViewTabLabel(), view);
         addTab("contentTab", VaadinIcon.FILE_CODE.create(), getSourceTabLabel(),
                 createCodeEditor(textContent, CodeEditorMode.XML));
+    }
+
+    protected Component createMessage(String text) {
+        Span message = uiComponents.create(Span.class);
+        message.setText(text);
+        message.addClassNames(LumoUtility.TextColor.SECONDARY, LumoUtility.Padding.MEDIUM);
+        return message;
     }
 
     protected void clearTabSheet() {

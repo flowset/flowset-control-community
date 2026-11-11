@@ -1,0 +1,9 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+/* the row whose file is shown in the preview */
+vaadin-grid.deployment-files-grid::part(previewed-row) {
+    background-color: var(--lumo-primary-color-10pct);
+}

@@ -80,12 +80,7 @@ public class DeploymentServiceImpl implements DeploymentService {
                 // sends both enable-duplicate-filtering=true and deploy-changed-only=true
                 builder.enableDuplicateFiltering(true);
             }
-            if (context.getResourceName() != null && context.getResourceContent() != null) {
-                builder.addInputStream(context.getResourceName(), context.getResourceContent());
-            }
-            if (context.getResources() != null) {
-                context.getResources().forEach(builder::addInputStream);
-            }
+            context.getResources().forEach(builder::addInputStream);
 
             return builder.deployWithResult();
         } catch (Exception e) {
@@ -237,13 +232,9 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
 
     protected String getDeploymentLogName(DeploymentContext context) {
-        if (StringUtils.isNotBlank(context.getDeploymentName())) {
-            return context.getDeploymentName();
-        }
-        if (context.getResourceName() != null) {
-            return context.getResourceName();
-        }
-        return context.getResources() != null ? String.join(", ", context.getResources().keySet()) : "";
+        return StringUtils.isNotBlank(context.getDeploymentName())
+                ? context.getDeploymentName()
+                : String.join(", ", context.getResources().keySet());
     }
 
     protected DeploymentQuery createDeploymentQuery(@Nullable DeploymentFilter filter, @Nullable Sort sort) {

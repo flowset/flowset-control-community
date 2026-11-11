@@ -1,0 +1,23 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+html {
+    --alert-info-border-color: #69b1ff;
+    --alert-info-bg-color: #e6f4ff;
+    --alert-info-icon-color: #4096ff;
+}
+
+.alert-box {
+    border: 1px solid var(--alert-info-border-color);
+    background-color: var(--alert-info-bg-color);
+    padding: var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-m);
+    gap: var(--lumo-space-s);
+}
+
+.alert-box > vaadin-icon {
+    color: var(--alert-info-icon-color);
+    padding: var(--lumo-space-xs);
+}

@@ -32,7 +32,6 @@ import io.flowset.control.view.deploymentdata.DeploymentListView;
 import io.flowset.control.view.deploymentupload.DeploymentUploadView;
 import io.flowset.control.view.engineconnectionsettings.EngineConnectionSettingsView;
 import io.flowset.control.view.incidentdata.*;
-import io.flowset.control.view.newprocessdeployment.NewProcessDeploymentView;
 import io.flowset.control.view.processdefinition.*;
 import io.flowset.control.view.processinstance.*;
 import io.flowset.control.view.processinstancemigration.ProcessInstanceMigrationView;
@@ -287,8 +286,6 @@ public class ViewAnalyticsListener {
 
         this.viewAnalyticstDataMap.put(StartProcessWithVariableView.class, new ViewEventData()
                 .setSaveCloseEventType(CONTROL_START_PROCESS));
-        this.viewAnalyticstDataMap.put(NewProcessDeploymentView.class, new ViewEventData()
-                .setSaveCloseEventType(CONTROL_DEPLOY_PROCESS));
 
         this.viewAnalyticstDataMap.put(SuspendProcessDefinitionView.class, new ViewEventData()
                 .setSaveCloseEventType(CONTROL_SUSPEND_PROCESS));

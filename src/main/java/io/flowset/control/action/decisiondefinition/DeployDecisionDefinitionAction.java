@@ -7,7 +7,7 @@ package io.flowset.control.action.decisiondefinition;
 
 import com.vaadin.flow.component.Component;
 import io.flowset.control.security.accesscontext.decisiondefinition.DecisionDefinitionDeployAccessContext;
-import io.flowset.control.view.decisiondeployment.DecisionDeploymentView;
+import io.flowset.control.view.deploymentupload.DeploymentUploadView;
 import io.jmix.core.AccessManager;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.action.ActionType;
@@ -55,7 +55,7 @@ public class DeployDecisionDefinitionAction extends SecuredBaseAction<DeployDeci
 
     @Override
     public void execute() {
-        viewNavigators.view(getCurrentView(), DecisionDeploymentView.class)
+        viewNavigators.view(getCurrentView(), DeploymentUploadView.class)
                 .withBackwardNavigation(true)
                 .navigate();
     }

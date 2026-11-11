@@ -12,7 +12,7 @@ import io.flowset.control.test_support.engine.external.ExternalEngine;
 import io.flowset.control.test_support.engine.external.RunningExternalEngine;
 import io.flowset.control.test_support.engine.external.WithRunningExternalEngine;
 import io.flowset.control.test_support.ui.view.MainView;
-import io.flowset.control.test_support.ui.view.processdefinition.NewProcessDeploymentView;
+import io.flowset.control.test_support.ui.view.deploymentupload.DeploymentUploadView;
 import io.flowset.control.test_support.ui.view.processdefinition.ProcessDefinitionDiagramDialog;
 import io.flowset.control.test_support.ui.view.processdefinition.ProcessDefinitionListView;
 import io.flowset.control.test_support.ui.view.processdefinition.StartProcessWithVariableDialog;
@@ -116,8 +116,8 @@ public class ProcessDefinitionListViewActionsUiTest extends AbstractCamunda7UiTe
     }
 
     @Test
-    @DisplayName("Deploy action opens New process deployment view")
-    void givenLoggedInUser_whenOpenProcessListAndClickDeploy_thenNewProcessDeploymentViewOpened() {
+    @DisplayName("Deploy action opens Upload deployment view")
+    void givenLoggedInUser_whenOpenProcessListAndClickDeploy_thenDeploymentUploadViewOpened() {
         // given
         MainView mainView = loginAsAdmin();
 
@@ -126,7 +126,7 @@ public class ProcessDefinitionListViewActionsUiTest extends AbstractCamunda7UiTe
         listView.getDeployBtn().click();
 
         // then
-        $j(NewProcessDeploymentView.class).exists()
+        $j(DeploymentUploadView.class).exists()
                 .displayed();
     }
 

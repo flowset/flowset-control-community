@@ -1,0 +1,11 @@
+{
+  "id": "ut-invoice-form",
+  "type": "default",
+  "schemaVersion": 16,
+  "executionPlatform": "Camunda Platform",
+  "executionPlatformVersion": "7.21.0",
+  "components": [
+    { "key": "invoiceNumber", "label": "Invoice number", "type": "textfield" },
+    { "key": "amount", "label": "Amount", "type": "number" }
+  ]
+}

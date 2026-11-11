@@ -148,21 +148,15 @@ The following actions are also available:
 ![process-list-view.png](img/process-list-view.png)
 
 #### Deploying a Process <a name="deploying-a-process"></a>
-You can deploy a new process or a new version of an existing process using the **Deploy** action available in the **Processes** view.
-Clicking the **Deploy** button opens the **New process deployment** view.
-
-![new-process-deployment-view.png](img/new-process-deployment-view.png)
-
-To upload a BPMN 2.0 file, click the **Upload** button and select the process to be deployed.
-After uploading, you can preview the diagram of the uploaded process and click the **OK** button to deploy to the BPM engine.
+You can deploy a new process or a new version of an existing process using the **Deploy** action available in the **Processes** view (and the **Decisions** view for decisions). The action opens the **Upload deployment** view described below.
 
 #### Uploading a Deployment <a name="uploading-a-deployment"></a>
-A deployment with several resources (processes, decisions, forms, scripts, images) can be created at once using the **Upload** button in the **Deployments** view.
+A deployment with several resources (processes, decisions, forms, scripts, images) can be created at once using the **Upload** button in the **Deployments** view, or the **Deploy** button in the **Processes** and **Decisions** views.
 Clicking the button opens the **Upload deployment** view.
 
 ![deployment-upload-view.png](img/deployment-upload-view.png)
 
-**Files.** Drop the files to the upload area or click **Upload files**. The following file types are supported:
+**Files.** Click **Upload** and select a file; repeat for every file of the deployment. The following file types are supported:
 
 | Type | Extensions |
 |------|------------|
@@ -185,10 +179,10 @@ The number and the size of the files, as well as the structure of the uploaded X
 The deployment name is set to the name of the first BPMN file by default and can be changed. If **Skip unchanged resources** is selected, a resource is deployed only if it differs from the latest deployed version with the same name.
 Select a file in the grid to preview its content (diagram, decision table, form, image or source).
 
-**Validation.** Each file is validated when it is uploaded, and gets one of the statuses:
-- **OK**: no problems found.
-- **Warning**: the file can be deployed, but something may not work as expected, e.g. a referenced resource cannot be checked.
-- **Error**: the file cannot be deployed, e.g. it is not a valid BPMN 2.0 model, contains no executable process, has a duplicate name or key, is too large, or you are not permitted to deploy it. Fix or remove such files to deploy.
+**Validation.** Each file is validated when it is uploaded. The status column shows:
+- **Warning (N)**: the file can be deployed, but something may not work as expected, e.g. it contains no executable process or a referenced resource cannot be checked.
+- **Error (N)**: the file cannot be deployed, e.g. it is not a valid BPMN 2.0 model, has a duplicate name or key, is too large, or you are not permitted to deploy it. Fix or remove such files to deploy.
+- **OK**: shown only after a deploy attempt, for the files the engine accepted.
 
 **References.** The references of the BPMN files (called processes, decisions, Camunda Forms, HTML forms and external scripts) are listed in the **References** grid with the location of the referenced resource:
 - **This deployment**: the resource is one of the uploaded files.
@@ -198,9 +192,7 @@ Select a file in the grid to preview its content (diagram, decision table, form,
 
 A missing resource referenced with the `deployment` binding is an error, as it must be a part of the same deployment. Missing resources with other bindings are warnings.
 
-**Confirmation.** Clicking **Deploy** opens a confirmation dialog that shows the deployment name, the **Skip unchanged resources** option, a summary and the resources to be deployed grouped by type: processes, decisions, forms and other resources. Each process and decision is marked as a **New definition** or a **New version** of a definition that already exists in the engine. Camunda Forms cannot be looked up in the engine, so they are marked as **Deployed** only. If the engine cannot be checked, the dialog shows a corresponding note.
-
-**Result.** The engine creates a deployment only if it accepts all its files. If the engine rejects any file, nothing is deployed: the rejected files get the **Error** status, the problems reported by the engine are shown in the **Details** column, and the **Errors** button opens the full report for the selected file.
+**Result.** Clicking **Deploy** sends the files to the engine, which creates a deployment only if it accepts all of them. If the engine rejects any file, nothing is deployed: the rejected files get the **Error** status with the number of problems, the problems are shown in the tooltip of the status, and clicking the status opens the full engine report for the file.
 After a successful deployment, the details of the created deployment are opened and a notification shows the number of the deployed processes, decisions and forms.
 
 **Permissions.** The **Upload** button is available to users permitted to deploy processes or decisions. BPMN files require the permission to deploy processes, DMN files require the permission to deploy decisions; other resources can be deployed with either of them.
