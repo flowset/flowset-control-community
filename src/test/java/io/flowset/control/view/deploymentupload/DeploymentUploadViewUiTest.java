@@ -6,9 +6,7 @@
 package io.flowset.control.view.deploymentupload;
 
 import io.flowset.control.FlowsetControlApplication;
-import io.flowset.control.service.deployment.validation.DeploymentResourceStatus;
-import io.flowset.control.service.deployment.validation.ReferenceLocation;
-import io.flowset.control.service.deployment.validation.ResolvedReference;
+import io.flowset.control.entity.deployment.DeploymentResourceStatus;
 import io.flowset.control.test_support.FlowsetControlTestConfiguration;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.testassist.FlowuiTestAssistConfiguration;
@@ -24,14 +22,14 @@ import org.springframework.test.context.DynamicPropertySource;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static io.jmix.flowui.component.UiComponentUtils.getCurrentView;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * UI integration test of the {@link DeploymentUploadView} file checks that do not need a BPM engine: no engine is
- * selected, so the references to the engine cannot be checked.
+ * UI integration test of the {@link DeploymentUploadView} checks that do not need a BPM engine.
  */
 @UiTest
 @SpringBootTest(classes = {FlowsetControlApplication.class, FlowuiTestAssistConfiguration.class,
@@ -64,8 +62,8 @@ class DeploymentUploadViewUiTest {
     }
 
     @Test
-    @DisplayName("Process with its decision and form: references resolved in this deployment, deploy enabled")
-    void givenProcessDecisionAndForm_thenAllResolvedAndDeployEnabled() {
+    @DisplayName("Supported files: types resolved, default deployment name, deploy enabled")
+    void givenSupportedFiles_thenDeployEnabled() {
         DeploymentUploadView view = openView();
 
         upload(view, "invoice-approval.bpmn");
@@ -73,50 +71,29 @@ class DeploymentUploadViewUiTest {
         upload(view, "ut-invoice-form.form");
 
         assertThat(view.uploadedFiles).hasSize(3)
-                .allSatisfy(file -> assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.OK));
-        assertThat(view.resolvedReferences)
-                .extracting(ResolvedReference::location)
-                .containsOnly(ReferenceLocation.THIS_DEPLOYMENT);
-        assertThat(view.referencesDataGrid.isVisible()).isTrue();
+                .allSatisfy(file -> {
+                    assertThat(file.getType()).isNotNull();
+                    assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.OK);
+                });
         assertThat(view.deploymentNameField.getValue()).isEqualTo("invoice-approval");
         assertThat(view.okBtn.isEnabled()).isTrue();
         assertThat(view.deployAttempted).isFalse();
     }
 
     @Test
-    @DisplayName("Process alone: references to the missing decision and form are errors")
-    void givenProcessWithoutReferencedResources_thenDeploymentBindingReferencesAreErrors() {
+    @DisplayName("Unsupported type and empty file: errors block the deployment until removed")
+    void givenUnsupportedAndEmptyFiles_thenErrorsBlockDeployUntilRemoved() {
         DeploymentUploadView view = openView();
 
-        upload(view, "invoice-approval.bpmn");
-
-        assertThat(view.uploadedFiles).singleElement()
-                .satisfies(file -> assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.ERROR));
-        assertThat(view.resolvedReferences)
-                .extracting(ResolvedReference::location)
-                .containsOnly(ReferenceLocation.MISSING);
-        assertThat(view.okBtn.isEnabled()).isFalse();
-
-        upload(view, "ut-credit-check.dmn");
-        upload(view, "ut-invoice-form.form");
-
-        assertThat(view.uploadedFiles)
-                .allSatisfy(file -> assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.OK));
-        assertThat(view.okBtn.isEnabled()).isTrue();
-    }
-
-    @Test
-    @DisplayName("Not executable process is a warning, invalid XML is an error that blocks the deployment until removed")
-    void givenInvalidFiles_thenErrorsBlockDeployUntilRemoved() {
-        DeploymentUploadView view = openView();
-
-        upload(view, "ut-not-executable.bpmn");
-        upload(view, "ut-garbage.bpmn");
+        view.addFile("notes.txt", "just a note".getBytes(StandardCharsets.UTF_8));
+        view.addFile("empty.bpmn", new byte[0]);
 
         assertThat(view.uploadedFiles).hasSize(2);
-        assertThat(view.uploadedFiles.get(0).getStatus()).isEqualTo(DeploymentResourceStatus.WARNING);
-        assertThat(view.uploadedFiles.get(1).getStatus()).isEqualTo(DeploymentResourceStatus.ERROR);
-        assertThat(view.uploadedFiles.get(1).getErrors()).isNotEmpty();
+        assertThat(view.uploadedFiles.get(0).getType()).isNull();
+        assertThat(view.uploadedFiles).allSatisfy(file -> {
+            assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.ERROR);
+            assertThat(file.getViewErrors()).hasSize(1);
+        });
         assertThat(view.okBtn.isEnabled()).isFalse();
 
         view.okBtn.click();
@@ -144,22 +121,6 @@ class DeploymentUploadViewUiTest {
     }
 
     @Test
-    @DisplayName("Missing references: deployment binding is an error, latest binding without engine is a warning")
-    void givenMissingReferences_thenErrorAndNotCheckedWarning() {
-        DeploymentUploadView view = openView();
-
-        upload(view, "ut-missing-refs.bpmn");
-
-        DeploymentUploadView.UploadedFile file = view.uploadedFiles.getFirst();
-        assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.ERROR);
-        assertThat(file.getErrors()).hasSize(1);
-        assertThat(file.getWarnings()).hasSize(1);
-        assertThat(view.resolvedReferences)
-                .extracting(ResolvedReference::location)
-                .containsExactlyInAnyOrder(ReferenceLocation.MISSING, ReferenceLocation.NOT_CHECKED);
-    }
-
-    @Test
     @DisplayName("File limit: the upload is disabled and extra files are rejected")
     void givenFileLimitReached_thenUploadDisabledAndExtraFileRejected() {
         DeploymentUploadView view = openView();
@@ -170,7 +131,7 @@ class DeploymentUploadViewUiTest {
 
         assertThat(view.filesUpload.isEnabled()).isFalse();
 
-        upload(view, "ut-missing-refs.bpmn");
+        upload(view, "ut-engine-reject.bpmn");
 
         assertThat(view.uploadedFiles).hasSize(3);
     }

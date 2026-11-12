@@ -37,27 +37,30 @@ public class ResourceDeploymentReportFactory {
      * @return created deployment report
      */
     public ResourceDeploymentReport createReport(ResourceReport report, String fileName) {
-        return createReport(fileName, List.of(), List.of(), report);
+        return createReport(fileName, List.of(), report);
     }
 
     /**
      * Creates a deployment report of a single resource: the problems found by Control (messages only) followed by
-     * the problems reported by the engine, errors before warnings in both groups.
+     * the problems reported by the engine, errors before warnings.
      *
      * @param fileName     resource name
      * @param errors       error messages found by Control
-     * @param warnings     warning messages found by Control
      * @param engineReport resource report returned by the engine, {@code null} if the engine has not checked the file
      * @return created deployment report
      */
-    public ResourceDeploymentReport createReport(String fileName, List<String> errors, List<String> warnings,
+    public ResourceDeploymentReport createReport(String fileName, List<String> errors,
                                                  @Nullable ResourceReport engineReport) {
         ResourceDeploymentReport deploymentReport = dataManager.create(ResourceDeploymentReport.class);
         deploymentReport.setFilename(fileName);
 
         List<ResourceValidationError> result = new ArrayList<>();
-        errors.forEach(message -> result.add(createValidationError(ValidationErrorType.ERROR, message)));
-        warnings.forEach(message -> result.add(createValidationError(ValidationErrorType.WARNING, message)));
+        for (String message : errors) {
+            ResourceValidationError error = dataManager.create(ResourceValidationError.class);
+            error.setType(ValidationErrorType.ERROR);
+            error.setMessage(message);
+            result.add(error);
+        }
         if (engineReport != null) {
             addValidationErrors(engineReport.getErrors(), ValidationErrorType.ERROR, result);
             addValidationErrors(engineReport.getWarnings(), ValidationErrorType.WARNING, result);
@@ -67,12 +70,6 @@ public class ResourceDeploymentReportFactory {
         return deploymentReport;
     }
 
-    protected ResourceValidationError createValidationError(ValidationErrorType type, String message) {
-        ResourceValidationError error = dataManager.create(ResourceValidationError.class);
-        error.setType(type);
-        error.setMessage(message);
-        return error;
-    }
 
     /**
      * Converts the engine problems to validation errors of the given type and adds them to the result.

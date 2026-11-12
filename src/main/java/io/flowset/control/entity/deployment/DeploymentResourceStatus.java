@@ -3,7 +3,7 @@
  * Use is subject to license terms.
  */
 
-package io.flowset.control.service.deployment.validation;
+package io.flowset.control.entity.deployment;
 
 import io.jmix.core.metamodel.datatype.EnumClass;
 import org.jspecify.annotations.Nullable;

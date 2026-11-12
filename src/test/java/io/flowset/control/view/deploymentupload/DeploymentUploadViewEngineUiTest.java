@@ -6,7 +6,7 @@
 package io.flowset.control.view.deploymentupload;
 
 import io.flowset.control.FlowsetControlApplication;
-import io.flowset.control.service.deployment.validation.DeploymentResourceStatus;
+import io.flowset.control.entity.deployment.DeploymentResourceStatus;
 import io.flowset.control.test_support.AbstractIntegrationTest;
 import io.flowset.control.test_support.FlowsetControlTestConfiguration;
 import io.flowset.control.test_support.WithRunningEngine;
@@ -74,7 +74,7 @@ class DeploymentUploadViewEngineUiTest extends AbstractIntegrationTest {
         DeploymentUploadView.UploadedFile rejected = view.uploadedFiles.get(3);
         assertThat(rejected.getStatus()).isEqualTo(DeploymentResourceStatus.ERROR);
         assertThat(rejected.getEngineReport()).isNotNull();
-        assertThat(rejected.getEngineErrors()).isNotEmpty();
+        assertThat(rejected.hasEngineErrors()).isTrue();
         assertThat(view.uploadedFiles.subList(0, 3))
                 .allSatisfy(file -> {
                     assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.OK);

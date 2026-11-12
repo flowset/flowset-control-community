@@ -36,15 +36,7 @@ import io.flowset.control.security.accesscontext.decisiondefinition.DecisionDefi
 import io.flowset.control.security.accesscontext.processdefinition.ProcessDefinitionDeployAccessContext;
 import io.flowset.control.service.deployment.DeploymentContext;
 import io.flowset.control.service.deployment.DeploymentService;
-import io.flowset.control.service.deployment.validation.DeploymentReferenceCheckResult;
-import io.flowset.control.service.deployment.validation.DeploymentReferenceChecker;
-import io.flowset.control.service.deployment.validation.DeploymentResourceDescriptor;
-import io.flowset.control.service.deployment.validation.DeploymentResourceStatus;
-import io.flowset.control.service.deployment.validation.DeploymentResourceValidationResult;
-import io.flowset.control.service.deployment.validation.DeploymentResourceValidator;
-import io.flowset.control.service.deployment.validation.ReferenceLocation;
-import io.flowset.control.service.deployment.validation.ResolvedReference;
-import io.flowset.control.service.deployment.validation.ResourceReference;
+import io.flowset.control.entity.deployment.DeploymentResourceStatus;
 import io.flowset.control.service.engine.EngineTenantProvider;
 import io.flowset.control.view.deploymentdata.DeploymentDetailView;
 import io.flowset.control.view.deploymenterror.DeploymentErrorDialogView;
@@ -106,10 +98,6 @@ public class DeploymentUploadView extends StandardView {
     @Autowired
     protected EngineTenantProvider engineTenantProvider;
     @Autowired
-    protected DeploymentResourceValidator deploymentResourceValidator;
-    @Autowired
-    protected DeploymentReferenceChecker deploymentReferenceChecker;
-    @Autowired
     protected DialogWindows dialogWindows;
     @Autowired
     protected ViewNavigators viewNavigators;
@@ -139,22 +127,12 @@ public class DeploymentUploadView extends StandardView {
     @ViewComponent
     protected VerticalLayout filesPanel;
     @ViewComponent
-    protected Span referencesHeader;
-    @ViewComponent
-    protected KeyValueCollectionContainer referencesDc;
-    @ViewComponent
-    protected DataGrid<KeyValueEntity> referencesDataGrid;
-    @ViewComponent
     protected JmixButton okBtn;
     @ViewComponent
     protected DeploymentResourcePreviewFragment resourcePreviewFragment;
 
     protected final List<UploadedFile> uploadedFiles = new ArrayList<>();
 
-    /**
-     * References of the uploaded BPMN files resolved by the last applied reference check result.
-     */
-    protected List<ResolvedReference> resolvedReferences = List.of();
 
     /**
      * Whether the user has entered a custom deployment name, so the default name must not overwrite it.
@@ -179,15 +157,11 @@ public class DeploymentUploadView extends StandardView {
     protected boolean refreshingFiles = false;
 
     /**
-     * {@code true} after a deploy attempt rejected by the engine: only then the OK status is known for sure.
+     * {@code true} after a deploy attempt rejected by the engine: the files without an engine report are shown
+     * as not checked, since the engine stops at the first rejected file.
      */
     protected boolean deployAttempted = false;
 
-    /**
-     * Whether the reference check (including the engine lookup) is performed for the current file list,
-     * so the deployment can rely on its result.
-     */
-    protected boolean referenceCheckCompleted = true;
 
     /**
      * Whether the current user is permitted to deploy processes (BPMN files).
@@ -213,7 +187,7 @@ public class DeploymentUploadView extends StandardView {
 
     protected void initFilesPanel() {
         // both grids share the free space; the panel scrolls if their minimum heights do not fit
-        filesPanel.setFlexGrow(1, filesDataGrid, referencesDataGrid);
+        filesPanel.setFlexGrow(1, filesDataGrid);
         filesPanel.getStyle().set("overflow", "auto");
         filesDataGrid.setPartNameGenerator(item -> item.getId().equals(previewedFileId) ? "previewed-row" : null);
     }
@@ -293,7 +267,7 @@ public class DeploymentUploadView extends StandardView {
                     .show();
             return;
         }
-        uploadedFiles.add(new UploadedFile(fileName, content, deploymentResourceValidator.validate(fileName, content)));
+        uploadedFiles.add(new UploadedFile(fileName, content));
         onFilesChanged();
         revalidate();
     }
@@ -344,10 +318,10 @@ public class DeploymentUploadView extends StandardView {
             }
             return switch (file.getStatus()) {
                 case ERROR -> createProblemsLink(file, VaadinIcon.CLOSE_CIRCLE, LumoUtility.TextColor.ERROR,
-                        messageBundle.formatMessage("statusErrors", file.getErrors().size()));
+                        messageBundle.formatMessage("statusErrors", file.getErrorCount()));
                 case WARNING -> createProblemsLink(file, VaadinIcon.WARNING, LumoUtility.TextColor.WARNING,
-                        messageBundle.formatMessage("statusWarnings", file.getWarnings().size()));
-                case OK -> deployAttempted ? createOkStatus() : new Span();
+                        messageBundle.formatMessage("statusWarnings", file.getWarningCount()));
+                case OK -> deployAttempted ? createNotCheckedStatus() : new Span();
             };
         });
     }
@@ -362,9 +336,15 @@ public class DeploymentUploadView extends StandardView {
         return createStatus(icon, colorClassName, link);
     }
 
-    protected Component createOkStatus() {
-        return createStatus(VaadinIcon.CHECK_CIRCLE, LumoUtility.TextColor.SUCCESS,
-                new Span(messages.getMessage(DeploymentResourceStatus.OK)));
+    /**
+     * The engine stops at the first rejected file, so a file without an engine report has not been checked by
+     * the engine: it is neither OK nor rejected.
+     */
+    protected Component createNotCheckedStatus() {
+        Span text = new Span(messageBundle.getMessage("statusNotChecked"));
+        Component status = createStatus(VaadinIcon.MINUS_CIRCLE_O, LumoUtility.TextColor.SECONDARY, text);
+        status.getElement().setProperty("title", messageBundle.getMessage("statusNotChecked.tooltip"));
+        return status;
     }
 
     /**
@@ -380,32 +360,9 @@ public class DeploymentUploadView extends StandardView {
         return layout;
     }
 
-    @Supply(to = "referencesDataGrid.location", subject = "renderer")
-    protected Renderer<KeyValueEntity> referencesDataGridLocationRenderer() {
-        return new ComponentRenderer<>(item -> {
-            ReferenceLocation location = ReferenceLocation.fromId(item.getValue("location"));
-            if (location == null) {
-                return new Span();
-            }
-            Span badge = new Span(messages.getMessage(location));
-            badge.getElement().getThemeList().add(switch (location) {
-                case THIS_DEPLOYMENT -> "badge success";
-                case ENGINE -> "badge";
-                case MISSING -> "badge error";
-                case NOT_CHECKED, CHECKING -> "badge contrast";
-            });
-            return badge;
-        });
-    }
-
     @Subscribe(id = "okBtn", subject = "clickListener")
     public void onOkBtnClick(final ClickEvent<JmixButton> event) {
-        applyViewChecks();
-        if (referenceCheckCompleted) {
-            refreshFiles();
-        } else {
-            checkReferences();
-        }
+        revalidate();
         if (uploadedFiles.isEmpty() || hasErrors()) {
             notifications.create(messageBundle.getMessage("validation.deployBlocked"))
                     .withType(Notifications.Type.ERROR)
@@ -561,10 +518,8 @@ public class DeploymentUploadView extends StandardView {
         UploadedFile firstRejectedFile = null;
         for (UploadedFile file : uploadedFiles) {
             ResourceReport report = details.get(file.getName());
-            file.setEngineReport(report,
-                    report != null ? formatEngineProblems(report.getErrors()) : List.of(),
-                    report != null ? formatEngineProblems(report.getWarnings()) : List.of());
-            if (!file.getEngineErrors().isEmpty()) {
+            file.setEngineReport(report);
+            if (file.hasEngineErrors()) {
                 rejectedFiles++;
                 if (firstRejectedFile == null) {
                     firstRejectedFile = file;
@@ -596,25 +551,13 @@ public class DeploymentUploadView extends StandardView {
         }
     }
 
-    protected List<String> formatEngineProblems(@Nullable List<ResourceReport.ProblemDetails> problems) {
-        if (problems == null) {
-            return List.of();
-        }
-        return problems.stream()
-                .map(problem -> StringUtils.isNotBlank(problem.getMainElementId())
-                        ? messageBundle.formatMessage("engineProblemWithElement",
-                        Objects.toString(problem.getMessage(), ""), problem.getMainElementId())
-                        : Objects.toString(problem.getMessage(), ""))
-                .toList();
-    }
-
     /**
-     * Opens the report of the problems of the file: the ones found by Control and, if the engine rejected the file,
-     * the ones reported by the engine.
+     * Opens the report of the problems of the file: the view-level checks and, if the engine rejected the file,
+     * the problems reported by the engine.
      */
     protected void openProblemsDialog(UploadedFile file) {
         ResourceDeploymentReport report = resourceDeploymentReportFactory.createReport(file.getName(),
-                file.getLocalErrors(), file.getLocalWarnings(), file.getEngineReport());
+                file.getViewErrors(), file.getEngineReport());
         dialogWindows.view(this, DeploymentErrorDialogView.class)
                 .withViewConfigurer(view -> {
                     view.setResourceReport(report);
@@ -629,25 +572,22 @@ public class DeploymentUploadView extends StandardView {
     }
 
     /**
-     * Performs the view-level checks of the uploaded files (size limit, duplicate names, permissions) and the
-     * reference check, then refreshes the grids.
+     * Applies the view-level checks (file type, size limit, duplicate names, permissions) to the uploaded files
+     * and refreshes the grid. The content of the files is checked by the engine on deployment.
      */
     protected void revalidate() {
-        applyViewChecks();
-        checkReferences();
-    }
-
-    /**
-     * Applies the view-level checks (size limit, duplicate names, permissions) to the uploaded files. The content
-     * checks are performed by {@link DeploymentResourceValidator} once, when a file is uploaded.
-     */
-    protected void applyViewChecks() {
         Map<String, Long> nameCounts = uploadedFiles.stream()
                 .collect(Collectors.groupingBy(file -> normalizeName(file.getName()), Collectors.counting()));
         long maxFileSize = getMaxFileSizeBytes();
 
         for (UploadedFile file : uploadedFiles) {
             List<String> errors = new ArrayList<>();
+            if (file.getType() == null) {
+                errors.add(messageBundle.getMessage("validation.unsupportedType"));
+            }
+            if (file.getContent().length == 0) {
+                errors.add(messageBundle.getMessage("validation.emptyFile"));
+            }
             if (file.getContent().length > maxFileSize) {
                 errors.add(messageBundle.formatMessage("validation.fileTooLarge", formatSizeInMb(maxFileSize)));
             }
@@ -662,77 +602,16 @@ public class DeploymentUploadView extends StandardView {
             }
             file.setViewErrors(errors);
         }
+        refreshFiles();
     }
 
     /**
-     * Invalidates the last reference check result and the engine reports of the last rejected deployment: must be
-     * called on every change of the uploaded file list. The deployment is not possible until the reference check
-     * is performed for the new list.
+     * Invalidates the engine reports of the last rejected deployment: must be called on every change of the
+     * uploaded file list.
      */
     protected void onFilesChanged() {
         uploadedFiles.forEach(UploadedFile::clearEngineReport);
         deployAttempted = false;
-        referenceCheckCompleted = false;
-    }
-
-    /**
-     * Performs the reference check ({@link DeploymentReferenceChecker}: references between the files and to the
-     * engine, duplicate keys) of the current files. The engine lookup is performed synchronously in the UI thread:
-     * the engine failures are handled by the checker, the references that cannot be checked are reported as such.
-     */
-    protected void checkReferences() {
-        List<DeploymentResourceDescriptor> descriptors = uploadedFiles.stream()
-                .map(file -> DeploymentResourceDescriptor.of(file.getName(), file.getValidationResult()))
-                .toList();
-        if (descriptors.isEmpty()) {
-            applyReferenceCheckResult(new DeploymentReferenceCheckResult());
-            return;
-        }
-
-        DeploymentReferenceCheckResult result;
-        try {
-            result = deploymentReferenceChecker.check(descriptors);
-        } catch (RuntimeException e) {
-            log.warn("Unable to check the references of the deployment resources", e);
-            result = deploymentReferenceChecker.checkEngineUnavailable(descriptors);
-        }
-        applyReferenceCheckResult(result);
-    }
-
-    /**
-     * Applies the reference check result to the files and the references grid.
-     */
-    protected void applyReferenceCheckResult(DeploymentReferenceCheckResult result) {
-        for (UploadedFile file : uploadedFiles) {
-            file.setReferenceErrors(result.getErrors(file.getName()));
-            file.setReferenceWarnings(result.getWarnings(file.getName()));
-        }
-        resolvedReferences = List.copyOf(result.getReferences());
-        referenceCheckCompleted = true;
-        refreshFiles();
-    }
-
-    protected void refreshReferences() {
-        referencesDc.setItems(resolvedReferences.stream()
-                .map(this::createReferenceItem)
-                .toList());
-        boolean visible = !resolvedReferences.isEmpty();
-        referencesHeader.setVisible(visible);
-        referencesDataGrid.setVisible(visible);
-    }
-
-    protected KeyValueEntity createReferenceItem(ResolvedReference resolvedReference) {
-        ResourceReference reference = resolvedReference.reference();
-        KeyValueEntity item = referencesDc.createEntity();
-        item.setId(UUID.randomUUID());
-        item.setValue("fileName", resolvedReference.fileName());
-        item.setValue("element", Objects.toString(reference.getSourceElementId(), ""));
-        item.setValue("kind", messages.getMessage(reference.getKind()));
-        item.setValue("key", reference.getKey());
-        item.setValue("binding", reference.getBinding());
-        item.setValue("location", resolvedReference.location().getId());
-        item.setValue("message", resolvedReference.message());
-        return item;
     }
 
     protected void refreshFiles() {
@@ -761,7 +640,6 @@ public class DeploymentUploadView extends StandardView {
             refreshingFiles = false;
         }
         updatePreview();
-        refreshReferences();
 
         updateOkBtnState();
         updateUploadState();
@@ -777,7 +655,6 @@ public class DeploymentUploadView extends StandardView {
         item.setId(file.getId());
         item.setValue("fileName", file.getName());
         item.setValue("type", file.getType() != null ? messages.getMessage(file.getType()) : "-");
-        item.setValue("keys", String.join(", ", file.getValidationResult().getKeys()));
         item.setValue("status", file.getStatus().getId());
         return item;
     }
@@ -887,31 +764,23 @@ public class DeploymentUploadView extends StandardView {
         protected final UUID id = UUID.randomUUID();
         protected final String name;
         protected final byte[] content;
-        protected final DeploymentResourceValidationResult validationResult;
+        @Nullable
+        protected final DeploymentResourceType type;
         /**
-         * Errors of the view-level checks that depend on the other files and the settings
-         * (duplicate names, size limit).
+         * Errors of the view-level checks: file type, size limit, duplicate names, permissions.
          */
         protected List<String> viewErrors = List.of();
         /**
-         * Errors and warnings of the reference check that depends on the other files and the engine
-         * (missing referenced resources, duplicate keys).
-         */
-        protected List<String> referenceErrors = List.of();
-        protected List<String> referenceWarnings = List.of();
-        /**
          * Report of the engine that rejected the last deployment attempt, {@code null} if the engine reported
-         * no problems for this file. The engine errors and warnings are the formatted problems of the report.
+         * no problems for this file.
          */
         @Nullable
         protected ResourceReport engineReport;
-        protected List<String> engineErrors = List.of();
-        protected List<String> engineWarnings = List.of();
 
-        public UploadedFile(String name, byte[] content, DeploymentResourceValidationResult validationResult) {
+        public UploadedFile(String name, byte[] content) {
             this.name = name;
             this.content = content;
-            this.validationResult = validationResult;
+            this.type = DeploymentResourceType.fromFileName(name);
         }
 
         public UUID getId() {
@@ -928,23 +797,15 @@ public class DeploymentUploadView extends StandardView {
 
         @Nullable
         public DeploymentResourceType getType() {
-            return validationResult.getType();
+            return type;
         }
 
-        public DeploymentResourceValidationResult getValidationResult() {
-            return validationResult;
+        public List<String> getViewErrors() {
+            return viewErrors;
         }
 
         public void setViewErrors(List<String> viewErrors) {
             this.viewErrors = List.copyOf(viewErrors);
-        }
-
-        public void setReferenceErrors(List<String> referenceErrors) {
-            this.referenceErrors = List.copyOf(referenceErrors);
-        }
-
-        public void setReferenceWarnings(List<String> referenceWarnings) {
-            this.referenceWarnings = List.copyOf(referenceWarnings);
         }
 
         @Nullable
@@ -952,63 +813,31 @@ public class DeploymentUploadView extends StandardView {
             return engineReport;
         }
 
-        public List<String> getEngineErrors() {
-            return engineErrors;
-        }
-
-        public void setEngineReport(@Nullable ResourceReport engineReport, List<String> engineErrors,
-                                    List<String> engineWarnings) {
+        public void setEngineReport(@Nullable ResourceReport engineReport) {
             this.engineReport = engineReport;
-            this.engineErrors = List.copyOf(engineErrors);
-            this.engineWarnings = List.copyOf(engineWarnings);
         }
 
         public void clearEngineReport() {
-            setEngineReport(null, List.of(), List.of());
+            this.engineReport = null;
         }
 
-        /**
-         * @return errors found by Control: the view-level checks, the content validation and the reference check
-         */
-        public List<String> getLocalErrors() {
-            List<String> errors = new ArrayList<>(viewErrors);
-            errors.addAll(validationResult.getErrors());
-            errors.addAll(referenceErrors);
-            return errors;
+        public boolean hasEngineErrors() {
+            return engineReport != null && CollectionUtils.isNotEmpty(engineReport.getErrors());
         }
 
-        /**
-         * @return warnings found by Control: the content validation and the reference check
-         */
-        public List<String> getLocalWarnings() {
-            List<String> warnings = new ArrayList<>(validationResult.getWarnings());
-            warnings.addAll(referenceWarnings);
-            return warnings;
+        public int getErrorCount() {
+            return viewErrors.size() + (engineReport != null ? CollectionUtils.size(engineReport.getErrors()) : 0);
         }
 
-        /**
-         * @return errors found by Control followed by the errors reported by the engine
-         */
-        public List<String> getErrors() {
-            List<String> errors = getLocalErrors();
-            errors.addAll(engineErrors);
-            return errors;
-        }
-
-        /**
-         * @return warnings found by Control followed by the warnings reported by the engine
-         */
-        public List<String> getWarnings() {
-            List<String> warnings = getLocalWarnings();
-            warnings.addAll(engineWarnings);
-            return warnings;
+        public int getWarningCount() {
+            return engineReport != null ? CollectionUtils.size(engineReport.getWarnings()) : 0;
         }
 
         public DeploymentResourceStatus getStatus() {
-            if (!getErrors().isEmpty()) {
+            if (getErrorCount() > 0) {
                 return DeploymentResourceStatus.ERROR;
             }
-            return getWarnings().isEmpty() ? DeploymentResourceStatus.OK : DeploymentResourceStatus.WARNING;
+            return getWarningCount() > 0 ? DeploymentResourceStatus.WARNING : DeploymentResourceStatus.OK;
         }
     }
 }

@@ -12,20 +12,7 @@
                 <property name="id" datatype="uuid"/>
                 <property name="fileName" datatype="string"/>
                 <property name="type" datatype="string"/>
-                <property name="keys" datatype="string"/>
                 <property name="status" datatype="string"/>
-            </properties>
-        </keyValueCollection>
-        <keyValueCollection id="referencesDc">
-            <properties idProperty="id">
-                <property name="id" datatype="uuid"/>
-                <property name="fileName" datatype="string"/>
-                <property name="element" datatype="string"/>
-                <property name="kind" datatype="string"/>
-                <property name="key" datatype="string"/>
-                <property name="binding" datatype="string"/>
-                <property name="location" datatype="string"/>
-                <property name="message" datatype="string"/>
             </properties>
         </keyValueCollection>
     </data>
@@ -81,29 +68,7 @@
                     <columns resizable="true">
                         <column property="fileName" header="msg://fileName" flexGrow="1"/>
                         <column property="type" header="msg://type" autoWidth="true"/>
-                        <column property="keys" header="msg://keys" autoWidth="true"/>
                         <column property="status" header="msg://status" autoWidth="true" sortable="false"/>
-                    </columns>
-                </dataGrid>
-                <span id="referencesHeader"
-                      classNames="font-semibold"
-                      text="msg://references"
-                      visible="false"/>
-                <dataGrid id="referencesDataGrid"
-                          width="100%"
-                          minHeight="8em"
-                          selectionMode="NONE"
-                          visible="false"
-                          dataContainer="referencesDc">
-                    <columns resizable="true">
-                        <column property="fileName" header="msg://fileName" autoWidth="true"/>
-                        <column property="element" header="msg://referenceElement" autoWidth="true"/>
-                        <column property="kind" header="msg://referenceKind" autoWidth="true"/>
-                        <column property="key" header="msg://referenceKey" autoWidth="true"/>
-                        <column property="binding" header="msg://referenceBinding" autoWidth="true"/>
-                        <column property="location" header="msg://referenceLocation" autoWidth="true"
-                                sortable="false"/>
-                        <column property="message" header="msg://referenceMessage" flexGrow="1"/>
                     </columns>
                 </dataGrid>
             </vbox>

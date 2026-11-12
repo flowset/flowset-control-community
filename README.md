@@ -167,32 +167,19 @@ Clicking the button opens the **Upload deployment** view.
 | Script | `.js`, `.groovy`, `.py`, `.rb` |
 | Image | `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg` |
 
-The number and the size of the files, as well as the structure of the uploaded XML files, are limited by the following application properties:
+The number and the size of the files are limited by the following application properties:
 
 | Property | Default | Description |
 |----------|---------|-------------|
 | `flowset.control.ui.deployment-upload-max-files` | `50` | Maximum number of files in a single deployment |
 | `flowset.control.ui.deployment-upload-max-file-size-bytes` | `10485760` | Maximum size of a single file, in bytes |
-| `flowset.control.resource-validation.xml-max-depth` | `64` | Maximum nesting depth of the elements of the BPMN, DMN and SVG files |
-| `flowset.control.resource-validation.xml-max-elements` | `100000` | Maximum number of elements of the BPMN, DMN and SVG files |
 
 The deployment name is set to the name of the first BPMN file by default and can be changed. If **Skip unchanged resources** is selected, a resource is deployed only if it differs from the latest deployed version with the same name.
 Select a file in the grid to preview its content (diagram, decision table, form, image or source).
 
-**Validation.** Each file is validated when it is uploaded. The status column shows:
-- **Warning (N)**: the file can be deployed, but something may not work as expected, e.g. it contains no executable process or a referenced resource cannot be checked.
-- **Error (N)**: the file cannot be deployed, e.g. it is not a valid BPMN 2.0 model, has a duplicate name or key, is too large, or you are not permitted to deploy it. Fix or remove such files to deploy.
-- **OK**: shown only after a deploy attempt, for the files the engine accepted.
+**Checks.** The file type is defined by the extension; a file of an unsupported type, an empty file, a file that is too large, a duplicate file name, or a file you are not permitted to deploy gets the **Error (N)** status. Clicking the status opens the list of the problems. The content of the files is checked by the engine on deployment.
 
-**References.** The references of the BPMN files (called processes, decisions, Camunda Forms, HTML forms and external scripts) are listed in the **References** grid with the location of the referenced resource:
-- **This deployment**: the resource is one of the uploaded files.
-- **Engine**: the resource is not uploaded, but is already deployed to the selected engine.
-- **Missing**: the resource is found neither in the uploaded files nor in the engine.
-- **Not checked**: the reference cannot be checked, e.g. it is defined by an expression, or the engine is unavailable or does not respond within the timeout.
-
-A missing resource referenced with the `deployment` binding is an error, as it must be a part of the same deployment. Missing resources with other bindings are warnings.
-
-**Result.** Clicking **Deploy** sends the files to the engine, which creates a deployment only if it accepts all of them. If the engine rejects any file, nothing is deployed: the rejected files get the **Error** status with the number of problems, the problems are shown in the tooltip of the status, and clicking the status opens the full engine report for the file.
+**Result.** Clicking **Deploy** sends the files to the engine, which creates a deployment only if it accepts all of them. If the engine rejects a file, nothing is deployed: the file gets the **Error** status with the number of problems, clicking the status opens the full report, and the other files are marked as **Not checked**, because the engine stops at the first rejected file.
 After a successful deployment, the details of the created deployment are opened and a notification shows the number of the deployed processes, decisions and forms.
 
 **Permissions.** The **Upload** button is available to users permitted to deploy processes or decisions. BPMN files require the permission to deploy processes, DMN files require the permission to deploy decisions; other resources can be deployed with either of them.
