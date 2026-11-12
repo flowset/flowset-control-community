@@ -111,7 +111,7 @@ public class CallActivityOverlayClickHandler {
         if (CollectionUtils.size(calledProcessInstanceIds) == 1) {
             viewNavigators.detailView(getCurrentView(), ProcessInstanceData.class)
                     .withViewClass(ProcessInstanceDetailView.class)
-                    .withRouteParameters(new RouteParameters("id", calledProcessInstanceIds.get(0)))
+                    .withRouteParameters(new RouteParameters("id", calledProcessInstanceIds.getFirst()))
                     .withBackwardNavigation(true)
                     .navigate();
         } else {
@@ -123,6 +123,22 @@ public class CallActivityOverlayClickHandler {
 
     @Nullable
     protected ProcessDefinitionData findCalledProcess(CallActivityData callActivityData, ProcessDefinitionData parentProcess) {
+        String calledElement = callActivityData.getCalledElement();
+        String binding = callActivityData.getBinding();
+
+        if ("id".equals(binding)) {
+            ProcessDefinitionData calledProcess = processDefinitionService.getById(calledElement);
+            if (calledProcess == null) {
+                notifications.create(messages.formatMessage("", "calledProcessNotFound.title", calledElement),
+                                String.join("\n",
+                                        messages.formatMessage("", "calledProcessNotFound.description.binding", binding),
+                                        messages.formatMessage("", "calledProcessNotFound.description.id", calledElement)))
+                        .withType(Notifications.Type.WARNING)
+                        .show();
+            }
+            return calledProcess;
+        }
+
         ProcessDefinitionFilter filter = createFilter(callActivityData, parentProcess);
         if (filter == null) {
             return null;
@@ -132,13 +148,13 @@ public class CallActivityOverlayClickHandler {
                 .setFilter(filter));
 
         if (CollectionUtils.isEmpty(calledProcesses)) {
-            notifications.create(messages.formatMessage("", "calledProcessNotFound.title", callActivityData.getCalledElement()),
-                            getAdditionalFilterMessage(callActivityData.getBinding(), filter))
+            notifications.create(messages.formatMessage("", "calledProcessNotFound.title", calledElement),
+                            getAdditionalFilterMessage(binding, filter))
                     .withType(Notifications.Type.WARNING)
                     .show();
             return null;
         } else {
-            return calledProcesses.get(0);
+            return calledProcesses.getFirst();
         }
     }
 

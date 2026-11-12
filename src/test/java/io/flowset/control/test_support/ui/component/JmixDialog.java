@@ -21,6 +21,7 @@ import static org.openqa.selenium.By.cssSelector;
 public class JmixDialog extends Composite<JmixDialog> {
 
     public static final By OVERLAY = cssSelector("vaadin-dialog[opened][role='dialog']");
+    public static final By EXCEPTION_OVERLAY = cssSelector("vaadin-dialog[opened] .jmix-exception-dialog-window-content");
 
     @TestComponent(path = "yes")
     private Button yesBtn;

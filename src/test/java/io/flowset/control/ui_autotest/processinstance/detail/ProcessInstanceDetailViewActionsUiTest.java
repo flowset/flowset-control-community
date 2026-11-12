@@ -17,11 +17,14 @@ import io.flowset.control.test_support.ui.view.processinstance.action.ActivatePr
 import io.flowset.control.test_support.ui.view.processinstance.action.ProcessInstanceTerminateDialog;
 import io.flowset.control.test_support.ui.view.processinstance.action.SuspendProcessInstanceDialog;
 import io.flowset.control.test_support.ui.view.processinstance.detail.ProcessInstanceDetailView;
+import io.flowset.control.test_support.ui.view.processinstance.detail.tab.RuntimeTabFragment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import static com.codeborne.selenide.Condition.text;
+import static io.flowset.control.test_support.ui.view.processinstance.detail.tab.JobsTabFragment.STATE_COLUMN_INDEX;
 import static io.jmix.masquerade.JConditions.*;
 import static io.jmix.masquerade.Masquerade.$j;
 
@@ -370,6 +373,46 @@ public class ProcessInstanceDetailViewActionsUiTest extends AbstractCamunda7UiTe
         reopenedDetailView.getGeneralPanel()
                 .getSuspendBtn()
                 .shouldNotBe(VISIBLE);
+    }
+
+    @Test
+    @DisplayName("Refresh action with Jobs tab selected reloads jobs grid")
+    void givenExistingActiveJob_whenOpenJobsTabAndClickRefresh_thenJobsDataUpdated() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testFailedJobIncident.bpmn")
+                .startByKey("testFailedJobIncident")
+                .waitJobsExecution();
+        String instanceId = dataManager.getStartedInstances("testFailedJobIncident").get(0);
+        String jobId = dataManager.getJobsByKey("testFailedJobIncident").get(0);
+
+        MainView mainView = loginAsAdmin();
+
+        // when
+        ProcessInstanceDetailView detailView = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId);
+        detailView.openRuntimeJobsTab()
+                .getRowByJobId(jobId)
+                .getCellByIndex(STATE_COLUMN_INDEX)
+                .getCellContent()
+                .shouldHave(text("Active"));
+
+        camundaRestTestHelper.suspendJobById(camunda7, jobId);
+        detailView.getGeneralPanel().clickRefreshBtn();
+
+        // then
+        $j(RuntimeTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
+                .getTabsheet()
+                .getTabById("runtimeVariablesTab")
+                .shouldBe(SELECTED);
+
+        $j(ProcessInstanceDetailView.class)
+                .exists()
+                .openRuntimeJobsTab()
+                .getRowByJobId(jobId)
+                .getCellByIndex(STATE_COLUMN_INDEX)
+                .getCellContent()
+                .shouldHave(text("Suspended"));
     }
 
     @Test

@@ -23,7 +23,6 @@ import io.flowset.control.entity.processinstance.ProcessInstanceData;
 import io.flowset.control.service.deployment.DeploymentService;
 import io.flowset.control.view.processdefinition.event.ReloadSelectedProcess;
 import io.jmix.flowui.UiEventPublisher;
-import io.jmix.flowui.component.datetimepicker.TypedDateTimePicker;
 import io.jmix.flowui.component.textfield.TypedTextField;
 import io.jmix.flowui.fragment.Fragment;
 import io.jmix.flowui.fragment.FragmentDescriptor;
@@ -62,12 +61,6 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     @Autowired
     protected DeploymentService deploymentService;
     @ViewComponent
-    protected TypedTextField<Object> deploymentIdField;
-    @ViewComponent
-    protected TypedTextField<Object> deploymentSourceField;
-    @ViewComponent
-    protected TypedDateTimePicker<Comparable> deploymentTimeField;
-    @ViewComponent
     protected CollectionContainer<ProcessInstanceData> processInstanceDataDc;
     @ViewComponent
     protected CopyComponentValueToClipboardAction copyIdAction;
@@ -88,6 +81,8 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected DeleteProcessDefinitionAction deleteAction;
     @ViewComponent
     protected ViewDeploymentAction viewDeploymentAction;
+    @ViewComponent
+    protected InstanceContainer<DeploymentData> deploymentDc;
 
     @Subscribe(target = Target.HOST_CONTROLLER)
     public void onHostBeforeShow(View.BeforeShowEvent event) {
@@ -163,9 +158,7 @@ public class GeneralPanelFragment extends Fragment<FlexLayout> {
     protected void initDeploymentData() {
         DeploymentData deployment = deploymentService.findById(processDefinitionDataDc.getItem().getDeploymentId());
         if (deployment != null) {
-            deploymentIdField.setTypedValue(deployment.getDeploymentId());
-            deploymentSourceField.setTypedValue(deployment.getSource());
-            deploymentTimeField.setTypedValue(deployment.getDeploymentTime());
+            deploymentDc.setItem(deployment);
         }
     }
 

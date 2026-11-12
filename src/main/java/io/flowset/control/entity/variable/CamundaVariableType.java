@@ -5,11 +5,10 @@
 
 package io.flowset.control.entity.variable;
 
-import io.jmix.core.metamodel.datatype.EnumClass;
 import org.jspecify.annotations.Nullable;
 
 
-public enum CamundaVariableType implements EnumClass<String> {
+public enum CamundaVariableType implements ProcessVariableType {
 
     STRING("String", true),
     NULL("Null", true),

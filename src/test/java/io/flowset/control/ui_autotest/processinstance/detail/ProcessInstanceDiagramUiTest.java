@@ -5,7 +5,6 @@
 
 package io.flowset.control.ui_autotest.processinstance.detail;
 
-import com.codeborne.selenide.SelenideElement;
 import io.flowset.control.test_support.camunda7.AbstractCamunda7UiTest;
 import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.engine.external.ExternalEngine;
@@ -19,8 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+
 import static com.codeborne.selenide.Condition.*;
-import static io.flowset.control.test_support.ui.component.BpmnViewerFragment.INCIDENT_COUNT_OVERLAY;
 
 @WithRunningExternalEngine
 @DisplayName("BPMN diagram in Process instance detail view")
@@ -31,6 +31,29 @@ public class ProcessInstanceDiagramUiTest extends AbstractCamunda7UiTest {
 
     @Autowired
     ApplicationContext applicationContext;
+
+    @Test
+    @DisplayName("Diagram of the instance's process is shown")
+    void givenActiveProcessInstance_whenOpenDetailView_thenDiagramShown() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/vacationApproval.bpmn")
+                .startByKey("vacation_approval");
+        String instanceId = dataManager.getStartedInstances("vacation_approval").get(0);
+
+        MainView mainView = loginAsAdmin();
+        List<String> elementIds = List.of("startEvent", "approveVacationTask", "checkStateGateway", "saveDetailsTask",
+                "approvedEndEvent", "notApprovedEndEvent");
+
+        // when
+        BpmnViewerFragment viewerFragment = mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(instanceId)
+                .getBpmnViewerFragment();
+
+        // then
+        elementIds.forEach(elementId -> viewerFragment.getProcessDiagramElementById(elementId)
+                .shouldBe(visible));
+    }
 
     @Test
     @DisplayName("Incident count overlay is visible if incidents exist")
@@ -50,11 +73,8 @@ public class ProcessInstanceDiagramUiTest extends AbstractCamunda7UiTest {
                 .getBpmnViewerFragment();
 
         // then
-        SelenideElement incidentOverlay = viewerFragment.getIncidentCountOverlay("throwsExceptionTask")
-                .shouldBe(exist)
-                .shouldBe(visible);
-
-        incidentOverlay.find(INCIDENT_COUNT_OVERLAY)
+        viewerFragment.getIncidentCountOverlay("throwsExceptionTask")
+                .shouldBe(visible)
                 .shouldHave(text("1"))
                 .shouldHave(attribute("title", "Incidents: 1"));
     }

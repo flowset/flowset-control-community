@@ -11,19 +11,30 @@ import org.jspecify.annotations.Nullable;
 
 public enum EngineType implements EnumClass<String> {
 
-    CAMUNDA_7("Camunda 7"),
-    OPERATON("OPERATON"),
-    FLUXNOVA("FLUXNOVA"),
-    CIB_SEVEN("CIB_SEVEN");
+    CAMUNDA_7("Camunda 7", EngineFamily.CAMUNDA_7),
+    OPERATON("OPERATON", EngineFamily.CAMUNDA_7),
+    FLUXNOVA("FLUXNOVA", EngineFamily.CAMUNDA_7),
+    CIB_SEVEN("CIB_SEVEN", EngineFamily.CAMUNDA_7);
 
     private final String id;
+    private final EngineFamily family;
 
-    EngineType(String id) {
+    EngineType(String id, @Nullable EngineFamily family) {
         this.id = id;
+        this.family = family;
     }
 
     public String getId() {
         return id;
+    }
+
+    @Nullable
+    public EngineFamily getFamily() {
+        return family;
+    }
+
+    public boolean isCamunda7Compatible() {
+        return family == EngineFamily.CAMUNDA_7;
     }
 
     @Nullable

@@ -8,7 +8,7 @@
       title="msg://bulkDeleteProcessInstanceView.title">
     <layout>
         <span text="msg://bulkDeleteProcessInstanceMsg" width="100%"/>
-        <formLayout width="100%" classNames="pt-m">
+        <formLayout id="skipOptionsForm" width="100%" classNames="pt-m">
             <responsiveSteps>
                 <responsiveStep minWidth="0" columns="2"/>
             </responsiveSteps>

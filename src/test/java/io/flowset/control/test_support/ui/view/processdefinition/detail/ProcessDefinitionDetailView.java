@@ -11,6 +11,7 @@ import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.CodeEditor;
 import io.jmix.masquerade.component.ComboBox;
 import io.jmix.masquerade.component.TabSheet;
+import io.jmix.masquerade.component.TextField;
 import io.jmix.masquerade.component.Unknown;
 import io.jmix.masquerade.sys.View;
 import lombok.Getter;
@@ -44,6 +45,9 @@ public class ProcessDefinitionDetailView extends View<ProcessDefinitionDetailVie
 
     @TestComponent(path = "versionComboBox")
     private ComboBox versionComboBox;
+
+    @TestComponent(path = "versionTagField")
+    private TextField versionTagField;
 
     @TestComponent(path = "bpmnXmlEditor")
     private CodeEditor bpmnXmlEditor;

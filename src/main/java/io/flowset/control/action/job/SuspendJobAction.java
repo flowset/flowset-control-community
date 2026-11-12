@@ -6,9 +6,11 @@
 package io.flowset.control.action.job;
 
 import com.vaadin.flow.component.Component;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.job.JobData;
 import io.flowset.control.entity.job.JobState;
 import io.flowset.control.security.accesscontext.job.JobSuspendAccessContext;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.job.SuspendJobView;
 import io.jmix.core.AccessManager;
 import io.jmix.core.Messages;
@@ -27,6 +29,7 @@ public class SuspendJobAction extends SecuredBaseAction<SuspendJobAction> implem
     public static final String ID = "control_suspendJob";
 
     protected DialogWindows dialogWindows;
+    protected EngineService engineService;
 
     protected JobData jobData;
     protected Runnable afterSaveHandler;
@@ -52,6 +55,11 @@ public class SuspendJobAction extends SecuredBaseAction<SuspendJobAction> implem
     @Autowired
     public void setDialogWindows(DialogWindows dialogWindows) {
         this.dialogWindows = dialogWindows;
+    }
+
+    @Autowired
+    public void setEngineService(EngineService engineService) {
+        this.engineService = engineService;
     }
 
     @Autowired
@@ -89,11 +97,17 @@ public class SuspendJobAction extends SecuredBaseAction<SuspendJobAction> implem
     public void refreshState() {
         super.refreshState();
 
-        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isVisibleByState());
+        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isVisibleByState()
+                && isAvailableByEngineType());
     }
 
     protected boolean isVisibleByState() {
         return jobData != null
                 && jobData.getState() == JobState.ACTIVE;
+    }
+
+    protected boolean isAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

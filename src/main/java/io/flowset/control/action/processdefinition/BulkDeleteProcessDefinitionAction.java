@@ -5,8 +5,10 @@
 
 package io.flowset.control.action.processdefinition;
 
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionData;
 import io.flowset.control.security.SecuritySupport;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.view.processdefinition.BulkDeleteProcessDefinitionView;
 import io.jmix.core.Messages;
 import io.jmix.flowui.DialogWindows;
@@ -25,6 +27,7 @@ public class BulkDeleteProcessDefinitionAction
     public static final String ID = "control_bulkDeleteProcessDefinition";
 
     protected DialogWindows dialogWindows;
+    protected EngineService engineService;
 
     protected Runnable afterSaveHandler;
 
@@ -46,6 +49,11 @@ public class BulkDeleteProcessDefinitionAction
     @Autowired
     public void setDialogWindows(DialogWindows dialogWindows) {
         this.dialogWindows = dialogWindows;
+    }
+
+    @Autowired
+    public void setEngineService(EngineService engineService) {
+        this.engineService = engineService;
     }
 
     @Autowired
@@ -80,11 +88,16 @@ public class BulkDeleteProcessDefinitionAction
     public void refreshState() {
         super.refreshState();
 
-        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission);
+        setVisibleInternal(visibleExplicitly && visibleByActionUiPermission && isAvailableByEngineType());
     }
 
     @Override
     protected boolean isApplicable() {
         return super.isApplicable() && ! target.getSelectedItems().isEmpty();
+    }
+
+    protected boolean isAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

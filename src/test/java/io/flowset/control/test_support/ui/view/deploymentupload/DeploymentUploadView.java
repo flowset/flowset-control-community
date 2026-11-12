@@ -9,7 +9,9 @@ import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.Button;
 import io.jmix.masquerade.component.Checkbox;
+import io.flowset.control.test_support.ui.component.BpmnViewerFragment;
 import io.jmix.masquerade.component.DataGrid;
+import io.jmix.masquerade.component.FileUploadField;
 import io.jmix.masquerade.component.TextField;
 import io.jmix.masquerade.sys.View;
 import lombok.Getter;
@@ -37,8 +39,14 @@ public class DeploymentUploadView extends View<DeploymentUploadView> {
     @TestComponent(path = "removeFileBtn")
     private Button removeFileBtn;
 
+    @TestComponent(path = "filesUpload")
+    private FileUploadField filesUpload;
+
     @TestComponent(path = "filesDataGrid")
     private DataGrid filesDataGrid;
+
+    @TestComponent(path = "viewerFragmentViewerVBox")
+    private BpmnViewerFragment bpmnViewerFragment;
 
     @TestComponent(path = "okBtn")
     private Button okBtn;

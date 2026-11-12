@@ -1,10 +1,13 @@
 package io.flowset.control.view.processinstanceterminate;
 
 
+import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.control.service.processinstance.ProcessInstanceBulkTerminateContext;
 import io.jmix.core.Messages;
 import io.jmix.flowui.Notifications;
 import io.jmix.flowui.component.checkbox.JmixCheckbox;
+import io.jmix.flowui.component.formlayout.JmixFormLayout;
 import io.jmix.flowui.component.textarea.JmixTextArea;
 import io.jmix.flowui.kit.action.ActionPerformedEvent;
 import io.jmix.flowui.view.*;
@@ -29,11 +32,15 @@ public class ProcessInstanceTerminateView extends StandardView {
     protected JmixCheckbox skipCustomListenersField;
     @ViewComponent
     protected JmixCheckbox skipSubprocessesField;
+    @ViewComponent
+    protected JmixFormLayout skipOptionsForm;
     @Autowired
     protected Notifications notifications;
 
     @Autowired
     protected Messages messages;
+    @Autowired
+    protected EngineService engineService;
 
     protected ProcessInstanceData processInstanceData;
 
@@ -45,6 +52,7 @@ public class ProcessInstanceTerminateView extends StandardView {
     public void onBeforeShow(final BeforeShowEvent event) {
         skipIoMappingsField.setValue(true);
         skipCustomListenersField.setValue(true);
+        skipOptionsForm.setVisible(isSkipOptionsAvailableByEngineType());
     }
 
     @Subscribe("terminateAction")
@@ -68,5 +76,10 @@ public class ProcessInstanceTerminateView extends StandardView {
     @Subscribe("cancelAction")
     public void onCancelAction(final ActionPerformedEvent event) {
         close(StandardOutcome.DISCARD);
+    }
+
+    protected boolean isSkipOptionsAvailableByEngineType() {
+        EngineType selectedEngineType = engineService.getSelectedEngineType();
+        return selectedEngineType == null || selectedEngineType.isCamunda7Compatible();
     }
 }

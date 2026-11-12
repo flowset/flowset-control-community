@@ -5,13 +5,13 @@
 
 package io.flowset.control.entity.job;
 
+import io.flowset.control.annotation.EngineProperty;
 import io.flowset.control.datatype.EngineOffsetDateTimeDatatype;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import io.jmix.core.metamodel.annotation.PropertyDatatype;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.time.OffsetDateTime;
@@ -25,6 +25,7 @@ public class JobData {
 
     protected String jobId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String jobDefinitionId;
 
     protected Integer retries;
@@ -35,21 +36,23 @@ public class JobData {
 
     protected String processDefinitionId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String processDefinitionKey;
 
     protected String executionId;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String failedActivityId;
 
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
     protected OffsetDateTime dueDate;
 
     @PropertyDatatype(value = EngineOffsetDateTimeDatatype.DATATYPE_NAME)
-    @Temporal(TemporalType.TIMESTAMP)
     protected OffsetDateTime createTime;
 
     protected Boolean suspended;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected Long priority;
 
     protected String tenantId;

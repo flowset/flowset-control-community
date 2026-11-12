@@ -27,6 +27,8 @@ public class CalledProcessesTabFragment extends Composite<CalledProcessesTabFrag
     public static final By PREVIEW_BUTTON_BY = byPath("root", "previewBtn");
     public static final int CALLED_ELEMENT_COLUMN_INDEX = 0;
     public static final int BINDING_COLUMN_INDEX = 1;
+    public static final int VERSION_COLUMN_INDEX = 2;
+    public static final int VERSION_TAG_COLUMN_INDEX = 3;
 
     @TestComponent(path = "calledProcessesFragmentCalledProcessesGrid")
     private DataGrid calledProcessesGrid;

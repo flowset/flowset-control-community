@@ -77,7 +77,13 @@ public class ProcessInstanceDetailView extends View<ProcessInstanceDetailView> {
      * @return content of the opened Variables tab
      */
     public RuntimeVariablesTabFragment openRuntimeVariablesTab() {
-        openRuntimeTab();
+        RuntimeTabFragment runtimeTabFragment = openRuntimeTab();
+
+        runtimeTabFragment.getTabsheet()
+                .getTabById("runtimeVariablesTab")
+                .select()
+                .shouldBe(VISIBLE)
+                .shouldBe(SELECTED);
 
         return $j(RuntimeVariablesTabFragment.class, "runtimeTabFragmentRuntimeTabRoot")
                 .exists()

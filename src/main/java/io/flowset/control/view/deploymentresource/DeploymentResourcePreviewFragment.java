@@ -16,6 +16,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.entity.deployment.DeploymentResourceType;
+import io.flowset.control.entity.engine.EngineType;
+import io.flowset.control.service.engine.EngineService;
 import io.flowset.uikit.fragment.bpmnviewer.BpmnViewerFragment;
 import io.flowset.uikit.fragment.dmnviewer.DmnViewerFragment;
 import io.flowset.uikit.fragment.formviewer.FormViewerFragment;
@@ -46,6 +48,8 @@ public class DeploymentResourcePreviewFragment extends Fragment<VerticalLayout> 
 
     @Autowired
     protected Fragments fragments;
+    @Autowired
+    protected EngineService engineService;
 
     @ViewComponent
     protected MessageBundle messageBundle;
@@ -195,6 +199,8 @@ public class DeploymentResourcePreviewFragment extends Fragment<VerticalLayout> 
     protected Component createBpmnViewer(String xmlData) {
         final BpmnViewerFragment bpmnViewerFragment = fragments.create(this, BpmnViewerFragment.class);
         bpmnViewerFragment.setId("viewerFragment");
+        EngineType engineType = engineService.getSelectedEngineType();
+        bpmnViewerFragment.setEngineType(engineType != null ? engineType.name() : null);
         bpmnViewerFragment.initViewer(xmlData);
         return bpmnViewerFragment;
     }

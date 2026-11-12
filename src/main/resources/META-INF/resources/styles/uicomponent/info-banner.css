@@ -1,0 +1,22 @@
+/*
+ * Copyright (c) Haulmont 2026. All Rights Reserved.
+ * Use is subject to license terms.
+ */
+
+.info-banner {
+    box-sizing: border-box;
+    gap: var(--lumo-space-s);
+    padding: var(--lumo-space-s) var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-m);
+    background-color: hsl(210, 90%, 95%);
+    color: hsl(210, 60%, 28%);
+    font-size: var(--lumo-font-size-s);
+    line-height: var(--lumo-line-height-s);
+}
+
+.info-banner > vaadin-icon {
+    flex: none;
+    width: var(--lumo-icon-size-s);
+    height: var(--lumo-icon-size-s);
+    color: hsl(210, 80%, 45%);
+}

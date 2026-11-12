@@ -15,6 +15,7 @@ import io.flowset.control.test_support.camunda7.Camunda7Container;
 import io.flowset.control.test_support.camunda7.CamundaRestTestHelper;
 import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.camunda7.dto.response.RuntimeUserTaskDto;
+import io.jmix.core.Sort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -130,6 +132,30 @@ public class Camunda7UserTaskFindAllTest extends AbstractCamunda7IntegrationTest
                         UserTaskData::getProcessDefinitionKey, UserTaskData::getAssignee)
                 .contains(tuple("taskWithAssignee", "Task with assignee", null, "admin"),
                         tuple("taskWithoutAssignee", "Task without assignee", null, null));
+    }
+
+    @Test
+    @DisplayName("Runtime user tasks are sorted by process instance id")
+    void givenLoadContextWithProcessInstanceIdSort_whenFindRuntimeTasks_thenTasksSortedByProcessInstanceId() {
+        //given
+        List<String> instanceIdsDesc = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/testUserTaskWithoutAssignee.bpmn")
+                .startByKey("userTaskWithoutAssignee", 3)
+                .getStartedInstances("userTaskWithoutAssignee")
+                .stream()
+                .sorted(Comparator.reverseOrder())
+                .toList();
+
+        UserTaskLoadContext userTaskLoadContext = new UserTaskLoadContext()
+                .setSort(Sort.by(Sort.Direction.DESC, "processInstanceId"));
+
+        //when
+        List<UserTaskData> foundUserTasks = userTaskService.findRuntimeTasks(userTaskLoadContext);
+
+        //then
+        assertThat(foundUserTasks)
+                .extracting(UserTaskData::getProcessInstanceId)
+                .containsExactlyElementsOf(instanceIdsDesc);
     }
 
     @ParameterizedTest

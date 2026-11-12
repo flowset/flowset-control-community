@@ -97,8 +97,7 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
-        String stacktrace = jobService.getErrorDetails(getEditedEntity().getJobId());
-        stackTraceField.setValue(stacktrace);
+        stackTraceField.setValue(getErrorDetails());
 
         JobDefinitionData jobDefinition = jobService.findJobDefinition(getEditedEntity().getJobDefinitionId());
         if (jobDefinition != null) {
@@ -108,6 +107,10 @@ public class JobDataDetailView extends StandardDetailView<JobData> {
 
         configureActions();
         initProcessFields();
+    }
+
+    protected String getErrorDetails() {
+        return jobService.getErrorDetails(getEditedEntity().getJobId());
     }
 
     @Install(to = "jobDataDl", target = Target.DATA_LOADER)

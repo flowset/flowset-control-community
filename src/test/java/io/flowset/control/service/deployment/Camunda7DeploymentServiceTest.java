@@ -34,6 +34,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 @SpringBootTest
 @ExtendWith(AuthenticatedAsAdmin.class)
@@ -244,6 +245,46 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
 
         //then
         assertThat(count).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Get count of deployments filtered by source")
+    void givenDeployedResourcesAndFilterBySource_whenGetCount_thenDeploymentsWithSourceCountReturned() {
+        //given
+        camundaRestTestHelper.createDeploymentWithSource(camunda7, "test_support/supportRequest.bpmn", "test-source");
+        camundaRestTestHelper.createDeploymentWithSource(camunda7, "test_support/contractApproval.bpmn", "other-source");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/vacationApproval.bpmn");
+
+        DeploymentFilter filter = dataManager.create(DeploymentFilter.class);
+        filter.setSource("test-source");
+
+        //when
+        long count = deploymentService.getCount(filter);
+
+        //then
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Find deployments filtered by source")
+    void givenDeployedResourcesAndFilterBySource_whenFindAll_thenDeploymentsWithSourceReturned() {
+        //given
+        String deploymentId = camundaRestTestHelper.createDeploymentWithSource(camunda7,
+                        "test_support/supportRequest.bpmn", "test-source")
+                .getId();
+        camundaRestTestHelper.createDeploymentWithSource(camunda7, "test_support/contractApproval.bpmn", "other-source");
+        camundaRestTestHelper.createDeployment(camunda7, "test_support/vacationApproval.bpmn");
+
+        DeploymentFilter filter = dataManager.create(DeploymentFilter.class);
+        filter.setSource("test-source");
+
+        //when
+        List<DeploymentData> deployments = deploymentService.findAll(new DeploymentLoadContext().setFilter(filter));
+
+        //then
+        assertThat(deployments)
+                .extracting(DeploymentData::getDeploymentId, DeploymentData::getSource)
+                .containsExactly(tuple(deploymentId, "test-source"));
     }
 
     @Test

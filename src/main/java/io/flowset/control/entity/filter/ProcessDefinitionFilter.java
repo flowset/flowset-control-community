@@ -5,6 +5,8 @@
 
 package io.flowset.control.entity.filter;
 
+import io.flowset.control.annotation.EngineProperty;
+import io.flowset.control.entity.engine.EngineFamily;
 import io.flowset.control.entity.processdefinition.ProcessDefinitionState;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.JmixId;
@@ -24,6 +26,7 @@ public class ProcessDefinitionFilter {
     @JmixId
     protected UUID id;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected List<String> keyIn;
 
     protected String state;
@@ -32,6 +35,7 @@ public class ProcessDefinitionFilter {
 
     protected String key;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected List<String> idIn;
 
     protected String deploymentId;
@@ -41,6 +45,7 @@ public class ProcessDefinitionFilter {
 
     protected Boolean latestVersionOnly = true;
 
+    @EngineProperty(supportedFamilies = EngineFamily.CAMUNDA_7)
     protected String versionTag;
 
     protected Integer version;

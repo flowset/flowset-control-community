@@ -5,6 +5,7 @@
 
 package io.flowset.control.test_support.ui.view.decisiondefinition;
 
+import io.flowset.control.test_support.ui.component.DmnViewerFragment;
 import io.jmix.masquerade.TestComponent;
 import io.jmix.masquerade.TestView;
 import io.jmix.masquerade.component.TextField;
@@ -24,4 +25,7 @@ public class DecisionDefinitionDiagramDialog extends DialogWindow<DecisionDefini
 
     @TestComponent(path = "versionField")
     private TextField versionField;
+
+    @TestComponent(path = "viewerFragmentViewerVBox")
+    private DmnViewerFragment dmnViewerFragment;
 }

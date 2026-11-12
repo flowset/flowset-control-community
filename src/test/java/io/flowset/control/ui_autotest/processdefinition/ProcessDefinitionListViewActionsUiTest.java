@@ -11,6 +11,7 @@ import io.flowset.control.test_support.camunda7.CamundaSampleDataManager;
 import io.flowset.control.test_support.engine.external.ExternalEngine;
 import io.flowset.control.test_support.engine.external.RunningExternalEngine;
 import io.flowset.control.test_support.engine.external.WithRunningExternalEngine;
+import io.flowset.control.test_support.ui.component.BpmnViewerFragment;
 import io.flowset.control.test_support.ui.view.MainView;
 import io.flowset.control.test_support.ui.view.deploymentupload.DeploymentUploadView;
 import io.flowset.control.test_support.ui.view.processdefinition.ProcessDefinitionDiagramDialog;
@@ -23,10 +24,13 @@ import org.openqa.selenium.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.CollectionCondition.texts;
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.value;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.webdriver;
 import static com.codeborne.selenide.WebDriverConditions.urlContaining;
@@ -226,6 +230,32 @@ public class ProcessDefinitionListViewActionsUiTest extends AbstractCamunda7UiTe
         dialog.getVersionField().shouldHave(value("1"));
     }
 
+    @Test
+    @DisplayName("Preview action for process shows its diagram in dialog")
+    void givenExistingProcessDefinition_whenClickPreviewInRow_thenDiagramShown() {
+        // given
+        applicationContext.getBean(CamundaSampleDataManager.class, engine)
+                .deploy("test_support/vacationApproval.bpmn");
+
+        MainView mainView = loginAsAdmin();
+        List<String> elementIds = List.of("startEvent", "approveVacationTask", "checkStateGateway", "saveDetailsTask",
+                "approvedEndEvent", "notApprovedEndEvent");
+
+        // when
+        mainView.openProcessListView()
+                .getRowByProcessKey("vacation_approval")
+                .getCellByIndex(KEY_COLUMN_INDEX)
+                .getCellContent()
+                .find(PREVIEW_BUTTON_BY).click();
+
+        // then
+        BpmnViewerFragment viewerFragment = $j(ProcessDefinitionDiagramDialog.class)
+                .exists()
+                .displayed()
+                .getBpmnViewerFragment();
+        elementIds.forEach(elementId -> viewerFragment.getProcessDiagramElementById(elementId)
+                .shouldBe(visible));
+    }
 
     @Test
     @DisplayName("Start action for process opens Start process dialog")

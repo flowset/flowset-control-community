@@ -30,7 +30,7 @@ public class BpmnViewerFragment extends Composite<BpmnViewerFragment> {
     public static final String CALLED_PROCESS_INSTANCE_OVERLAY_CLASS = "djs-overlay-called-process-instance";
     public static final String DECISION_OVERLAY_CLASS = "djs-overlay-decision";
     public static final String DECISION_INSTANCE_OVERLAY_CLASS = "djs-overlay-decision-instance";
-    public static final String INCIDENT_COUNT_OVERLAY_CLASS = "djs-overlay-incident-count";
+    public static final String ACTIVITY_INSTANCE_STATISTICS_OVERLAY_CLASS = "djs-overlay-activity-instance-statistics";
 
     public static final WebElementCondition ACTIVE_ELEMENT = cssClass("activity-hover");
     public static final WebElementCondition SELECTED_ELEMENT = cssClass("primary-color-activity");
@@ -149,7 +149,7 @@ public class BpmnViewerFragment extends Composite<BpmnViewerFragment> {
      * @return the incident count overlay
      */
     public SelenideElement getIncidentCountOverlay(String elementId) {
-        return getOverlayByElementId(elementId, INCIDENT_COUNT_OVERLAY_CLASS);
+        return getOverlayByElementId(elementId, ACTIVITY_INSTANCE_STATISTICS_OVERLAY_CLASS).$(INCIDENT_COUNT_OVERLAY);
     }
 
     /**

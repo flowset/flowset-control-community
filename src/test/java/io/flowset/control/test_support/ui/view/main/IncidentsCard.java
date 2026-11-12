@@ -11,13 +11,13 @@ import io.jmix.masquerade.sys.Composite;
 import lombok.Getter;
 
 /**
- * Wrapper for the Running Instances card on Dashboard.
+ * Wrapper for the Incidents card on Dashboard.
  * Source: part of {@link io.flowset.control.view.dashboard.RunningInstancesAndIncidentsFragment}
  */
 @Getter
 public class IncidentsCard extends Composite<IncidentsCard> {
 
     @TestComponent(path = "viewIncidentsStatBtn")
-    private Button viewRunningInstancesStatBtn;
+    private Button viewIncidentsStatBtn;
 
 }

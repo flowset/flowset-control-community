@@ -19,6 +19,7 @@ import io.jmix.masquerade.sys.View;
 import lombok.Getter;
 import org.openqa.selenium.By;
 
+import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Selenide.$;
 import static io.flowset.control.test_support.ui.UiTestSupport.getRowByCellContent;
 import static io.flowset.control.test_support.ui.UiTestSupport.getVisibleDropdownItems;
@@ -26,6 +27,7 @@ import static io.flowset.control.test_support.ui.UiTestSupport.openGridContextMe
 import static io.jmix.masquerade.JConditions.VISIBLE;
 import static io.jmix.masquerade.JSelectors.byPath;
 import static io.jmix.masquerade.Masquerade.$j;
+import static org.openqa.selenium.By.cssSelector;
 
 /**
  * Wrapper for the Process instance list view.
@@ -38,6 +40,8 @@ public class ProcessInstanceListView extends View<ProcessInstanceListView> {
     public static final By ID_BUTTON_BY = byPath("root", "idBtn");
     public static final By PROCESS_BUTTON_BY = byPath("root", "idBtn");
     public static final By VIEW_TERMINATE_REASON_BUTTON_BY = byPath("root", "viewTerminateReasonBtn");
+    public static final By HEADER_FILTER_BY = cssSelector(".jmix-grid-header-filter");
+    public static final By HEADER_FILTER_BUTTON_BY = cssSelector("[jmix-role='column-filter-button']");
 
     public static final int ID_COLUMN_INDEX = 1;
     public static final int PROCESS_COLUMN_INDEX = 2;
@@ -127,6 +131,23 @@ public class ProcessInstanceListView extends View<ProcessInstanceListView> {
         waitUntilDataLoading();
 
         return this;
+    }
+
+    /**
+     * Opens the filter dialog of the State column.
+     *
+     * @return opened state filter dialog
+     */
+    public ProcessInstanceStateFilterDialog openStateFilter() {
+        processInstancesGrid.getDelegate()
+                .$$(HEADER_FILTER_BY)
+                .findBy(exactText("State"))
+                .$(HEADER_FILTER_BUTTON_BY)
+                .click();
+
+        return $j(ProcessInstanceStateFilterDialog.class, ProcessInstanceStateFilterDialog.OVERLAY)
+                .exists()
+                .displayed();
     }
 
     /**

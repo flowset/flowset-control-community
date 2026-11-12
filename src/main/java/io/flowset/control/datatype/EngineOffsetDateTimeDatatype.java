@@ -9,9 +9,9 @@ import io.jmix.core.metamodel.datatype.FormatStrings;
 import io.jmix.core.metamodel.datatype.TimeZoneAwareDatatype;
 import io.jmix.core.metamodel.datatype.impl.AbstractTemporalDatatype;
 import io.jmix.core.security.CurrentAuthentication;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -66,13 +66,13 @@ public class EngineOffsetDateTimeDatatype extends AbstractTemporalDatatype<Offse
         }
 
         final EngineService engineService = engineServiceProvider.getIfAvailable();
-        final BpmEngine selectedEngine = engineService.getSelectedEngine();
+        final BpmEngine selectedEngine = engineService != null ? engineService.getSelectedEngine() : null;
         if (selectedEngine == null) {
             return formatOffsetDateTime(date, locale, timeZone);
         }
 
         final EngineTimeService engineTimeService = engineTimeServiceProvider.getIfAvailable();
-        final Long engineOffset = engineTimeService.getEngineOffsetInMillis(selectedEngine.getId());
+        final Long engineOffset = engineTimeService != null ? engineTimeService.getEngineOffsetInMillis(selectedEngine.getId()) : null;
         if (engineOffset == null) {
             return formatOffsetDateTime(date, locale, timeZone);
         }

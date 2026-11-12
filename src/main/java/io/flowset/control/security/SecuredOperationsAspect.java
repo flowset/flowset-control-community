@@ -46,7 +46,8 @@ public class SecuredOperationsAspect {
      * @see SecuredEntityLoad
      * @see SecuredEntityOperation
      */
-    @Around("execution(* io.flowset.control.service..*.*(..))")
+    @Around("execution(* io.flowset.control.service..*.*(..))"
+            + " && !@within(io.flowset.control.service.engine.EngineServiceDelegate)")
     public Object aroundSecuredOperation(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature sig = (MethodSignature) joinPoint.getSignature();
         Method method = sig.getMethod();

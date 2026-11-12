@@ -19,6 +19,9 @@ import lombok.Getter;
 @TestView(id = "BulkTaskCompleteView")
 public class BulkTaskCompleteDialog extends DialogWindow<BulkTaskCompleteDialog> {
 
+    @TestComponent(path = "createVariableBtn")
+    private Button createVariableBtn;
+
     @TestComponent(path = "completeTaskBtn")
     private Button completeBtn;
 

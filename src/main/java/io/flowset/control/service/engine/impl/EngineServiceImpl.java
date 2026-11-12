@@ -13,16 +13,21 @@ import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.core.session.SessionData;
 import io.jmix.flowui.UiEventPublisher;
 import io.flowset.control.entity.engine.BpmEngine;
+import io.flowset.control.entity.engine.EngineType;
 import io.flowset.control.service.engine.EngineService;
+import io.jmix.core.event.EntityChangedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.flowset.control.entity.engine.BpmEngine.SELECTED_ENGINE_ATTRIBUTE;
 
@@ -36,6 +41,11 @@ public class EngineServiceImpl implements EngineService {
     protected final CurrentAuthentication currentAuthentication;
     protected final EngineAuthStateService engineAuthStateService;
     protected final EntityStates entityStates;
+
+    /**
+     * Types of the selected engine by the selected engine session attribute.
+     */
+    protected final Map<String, EngineType> engineTypeById = new ConcurrentHashMap<>();
 
     public EngineServiceImpl(Metadata metadata,
                              ObjectProvider<SessionData> sessionDataProvider,
@@ -65,6 +75,27 @@ public class EngineServiceImpl implements EngineService {
     }
 
     @Override
+    public EngineType getSelectedEngineType() {
+        String selectedEngineAttribute = getSelectedEngineAttribute();
+        if (selectedEngineAttribute == null) {
+            BpmEngine engine = findDefaultEngine();
+            return engine != null ? engine.getType() : null;
+        }
+
+        EngineType engineType = engineTypeById.get(selectedEngineAttribute);
+        if (engineType != null) {
+            return engineType;
+        }
+
+        BpmEngine engine = getSelectedEngine();
+        if (engine == null || engine.getType() == null) {
+            return null;
+        }
+        engineTypeById.put(selectedEngineAttribute, engine.getType());
+        return engine.getType();
+    }
+
+    @Override
     public BpmEngine findDefaultEngine() {
         Optional<BpmEngine> defaultEngine = dataManager.load(BpmEngine.class)
                 .condition(PropertyCondition.equal("isDefault", true))
@@ -86,6 +117,23 @@ public class EngineServiceImpl implements EngineService {
                 .optional();
 
         return bpmEngine.orElse(null);
+    }
+
+    @Override
+    public BpmEngine findEngineByBaseUrl(String baseUrl) {
+        String url = baseUrl.trim();
+        if (url.isEmpty()) {
+            return null;
+        }
+        String alternativeUrl = url.endsWith("/") ? url.substring(0, url.length() - 1) : url + "/";
+
+        return dataManager.load(BpmEngine.class)
+                .condition(PropertyCondition.equal("baseUrl", url))
+                .optional()
+                .or(() -> dataManager.load(BpmEngine.class)
+                        .condition(PropertyCondition.equal("baseUrl", alternativeUrl))
+                        .optional())
+                .orElse(null);
     }
 
     @Override
@@ -123,6 +171,11 @@ public class EngineServiceImpl implements EngineService {
     public void markAsDefault(BpmEngine engine) {
         engine.setIsDefault(true);
         saveEngine(engine);
+    }
+
+    @TransactionalEventListener
+    public void onBpmEngineChangedAfterCommit(final EntityChangedEvent<BpmEngine> event) {
+        engineTypeById.clear();
     }
 
     protected String getSelectedEngineAttribute() {
