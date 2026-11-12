@@ -3,13 +3,13 @@
  * Use is subject to license terms.
  */
 
-package io.flowset.control.ui_autotest.processdefinition;
+package io.flowset.control.ui_autotest.deployment.upload;
 
 import io.flowset.control.test_support.camunda7.AbstractCamunda7UiTest;
 import io.flowset.control.test_support.engine.external.WithRunningExternalEngine;
 import io.flowset.control.test_support.ui.component.BpmnViewerFragment;
 import io.flowset.control.test_support.ui.view.MainView;
-import io.flowset.control.test_support.ui.view.processdefinition.NewProcessDeploymentView;
+import io.flowset.control.test_support.ui.view.deploymentupload.DeploymentUploadView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
@@ -20,11 +20,12 @@ import java.util.List;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
+import static io.flowset.control.test_support.ui.UiTestSupport.getBodyRows;
 import static io.jmix.masquerade.Masquerade.$j;
 
 @WithRunningExternalEngine
-@DisplayName("BPMN diagram preview in Process deployment view")
-public class NewProcessDeploymentViewUiTest extends AbstractCamunda7UiTest {
+@DisplayName("BPMN diagram preview in Upload deployment view")
+public class DeploymentUploadViewPreviewUiTest extends AbstractCamunda7UiTest {
 
     @Test
     @DisplayName("Uploaded BPMN file is shown in diagram preview")
@@ -33,23 +34,24 @@ public class NewProcessDeploymentViewUiTest extends AbstractCamunda7UiTest {
         File bpmnFile = ResourceUtils.getFile("classpath:test_support/vacationApproval.bpmn");
         List<String> elementIds = List.of("startEvent", "approveVacationTask", "checkStateGateway", "saveDetailsTask",
                 "approvedEndEvent", "notApprovedEndEvent");
-
         MainView mainView = loginAsAdmin();
         mainView.openProcessListView()
                 .getDeployBtn()
                 .click();
-
-        NewProcessDeploymentView deploymentView = $j(NewProcessDeploymentView.class)
+        DeploymentUploadView uploadView = $j(DeploymentUploadView.class)
                 .exists()
                 .displayed();
 
         // when
-        deploymentView.getBpmnXmlUploadField().setValue(bpmnFile);
+        uploadView.getFilesUpload().setValue(bpmnFile);
+        getBodyRows(uploadView.getFilesDataGrid()).getFirst()
+                .getCellByIndex(DeploymentUploadView.FILE_NAME_COLUMN_INDEX)
+                .getCellContent()
+                .shouldHave(text("vacationApproval.bpmn"))
+                .click();
 
         // then
-        deploymentView.getProcessIdLabel().shouldHave(text("vacation_approval"));
-
-        BpmnViewerFragment viewerFragment = deploymentView.getBpmnViewerFragment();
+        BpmnViewerFragment viewerFragment = uploadView.getBpmnViewerFragment();
         elementIds.forEach(elementId -> viewerFragment.getProcessDiagramElementById(elementId)
                 .shouldBe(visible));
     }

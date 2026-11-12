@@ -3,14 +3,15 @@
  * Use is subject to license terms.
  */
 
-package io.flowset.control.ui_autotest.decisiondefinition;
+package io.flowset.control.ui_autotest.deployment.upload;
 
 import io.flowset.control.security.UiMinimalRole;
 import io.flowset.control.test_support.AbstractUiTest;
 import io.flowset.control.test_support.ControlTestDataCreator;
-import io.flowset.control.test_support.security.TestUiPermissionFullAccessReadRole;
 import io.flowset.control.test_support.security.role.decisiondefinition.TestDecisionDefinitionDeployPermissionRole;
-import io.flowset.control.test_support.ui.view.decisiondeployment.DecisionDeploymentView;
+import io.flowset.control.test_support.security.role.processdefinition.TestProcessDefinitionDeployPermissionRole;
+import io.flowset.control.test_support.security.role.processdefinition.TestProcessDefinitionDetailAccessRole;
+import io.flowset.control.test_support.ui.view.deploymentupload.DeploymentUploadView;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Named;
@@ -30,9 +31,9 @@ import static io.jmix.masquerade.JConditions.EXIST;
 import static io.jmix.masquerade.JConditions.VISIBLE;
 import static io.jmix.masquerade.Masquerade.$j;
 
-@DisplayName("Secured actions availability on Decision deployment view")
+@DisplayName("Secured actions availability on Upload deployment view")
 @Tag("security")
-public class DecisionDeploymentViewActionSecurityUiTest extends AbstractUiTest {
+public class DeploymentUploadViewActionSecurityUiTest extends AbstractUiTest {
 
     @Autowired
     ControlTestDataCreator controlTestDataCreator;
@@ -44,65 +45,69 @@ public class DecisionDeploymentViewActionSecurityUiTest extends AbstractUiTest {
     void tearDownUsers() {
         jdbcTemplate.update("delete from SEC_ROLE_ASSIGNMENT where USERNAME like 'test-user%'");
         jdbcTemplate.update(
-                "delete from SEC_RESOURCE_POLICY where ROLE_ID in " +
-                        "(select ID from SEC_RESOURCE_ROLE where CODE like 'test-%')"
+                "delete from SEC_RESOURCE_POLICY where ROLE_ID in (select ID from SEC_RESOURCE_ROLE " +
+                        "where CODE like 'test-%')"
         );
         jdbcTemplate.update("delete from SEC_RESOURCE_ROLE where CODE like 'test-%'");
         jdbcTemplate.update("delete from USER_ where USERNAME like 'test-user%'");
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("okButtonVisibilitySource")
-    @DisplayName("OK button visibility")
-    void givenLoggedInUser_whenOpenDecisionDeploymentView_thenOkButtonVisibilityMatchesPermissions(
+    @MethodSource("deployButtonVisibilitySource")
+    @DisplayName("Deploy button visibility on Upload deployment view")
+    void givenLoggedInUser_whenOpenDeploymentUploadView_thenDeployButtonVisibilityMatchesPermissions(
             Class<?> roleClass, boolean expectedVisible
     ) {
         // given
-        controlTestDataCreator.createUser("test-user-decision-deployment-ok", "password", roleClass);
+        controlTestDataCreator.createUser("test-user-deployment-upload", "password", roleClass);
 
-        loginAs("test-user-decision-deployment-ok", "password");
+        loginAs("test-user-deployment-upload", "password");
 
         // when
-        open("/bpm/decision-deployment");
-        DecisionDeploymentView deploymentView = $j(DecisionDeploymentView.class)
+        open("/bpm/deployments/upload");
+        DeploymentUploadView uploadView = $j(DeploymentUploadView.class)
                 .exists()
                 .displayed();
 
         // then
         if (expectedVisible) {
-            deploymentView.getOkBtn().shouldBe(VISIBLE);
+            uploadView.getOkBtn().shouldBe(VISIBLE);
         } else {
-            deploymentView.getOkBtn().shouldNotBe(VISIBLE);
+            uploadView.getOkBtn().shouldNotBe(VISIBLE);
         }
     }
 
     @Test
-    @DisplayName("Direct URL navigation is denied without Decision deployment view policy")
-    void givenUserWithoutDecisionDeploymentViewPolicy_whenOpenViewByUrl_thenNavigationDenied() {
+    @DisplayName("Direct URL navigation is denied without Upload deployment view policy")
+    void givenUserWithoutDeploymentUploadViewPolicy_whenOpenViewByUrl_thenNavigationDenied() {
         // given
         controlTestDataCreator.createUser(
-                "test-user-no-decision-deployment-view-policy",
+                "test-user-no-deployment-upload-view-policy",
                 "password",
                 UiMinimalRole.class
         );
-        loginAs("test-user-no-decision-deployment-view-policy", "password");
+        loginAs("test-user-no-deployment-upload-view-policy", "password");
 
         // when
-        open("/bpm/decision-deployment");
+        open("/bpm/deployments/upload");
 
         // then
-        $j(DecisionDeploymentView.class).shouldNotBe(EXIST);
-        $("body").shouldHave(text("Could not navigate to 'bpm/decision-deployment'"));
+        $j(DeploymentUploadView.class).shouldNotBe(EXIST);
+        $("body").shouldHave(text("Could not navigate to 'bpm/deployments/upload'"));
     }
 
-    private static Stream<Arguments> okButtonVisibilitySource() {
+    private static Stream<Arguments> deployButtonVisibilitySource() {
         return Stream.of(
                 Arguments.of(
-                        Named.of("without deploy permission", TestUiPermissionFullAccessReadRole.class),
+                        Named.of("without deploy permissions", TestProcessDefinitionDetailAccessRole.class),
                         Named.of("hidden", false)
                 ),
                 Arguments.of(
-                        Named.of("with deploy permission", TestDecisionDefinitionDeployPermissionRole.class),
+                        Named.of("with process deploy permission", TestProcessDefinitionDeployPermissionRole.class),
+                        Named.of("visible", true)
+                ),
+                Arguments.of(
+                        Named.of("with decision deploy permission", TestDecisionDefinitionDeployPermissionRole.class),
                         Named.of("visible", true)
                 )
         );

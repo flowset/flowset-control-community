@@ -39,6 +39,7 @@ Flowset Control Community is built using the open-source [Jmix](https://www.jmix
    - [Connecting to BPM Engines](#connecting-to-bpm-engines)
    - [Working with Processes](#working-with-processes)
      - [Deploying a Process](#deploying-a-process)
+     - [Uploading a Deployment](#uploading-a-deployment)
      - [Starting a Process](#starting-a-process)
    - [Managing Process Instances](#managing-process-instances)
    - [User Tasks](#user-tasks)
@@ -147,13 +148,43 @@ The following actions are also available:
 ![process-list-view.png](img/process-list-view.png)
 
 #### Deploying a Process <a name="deploying-a-process"></a>
-You can deploy a new process or a new version of an existing process using the **Deploy** action available in the **Processes** view.
-Clicking the **Deploy** button opens the **New process deployment** view.
+You can deploy a new process or a new version of an existing process using the **Deploy** action available in the **Processes** view (and the **Decisions** view for decisions). The action opens the **Upload deployment** view described below.
 
-![new-process-deployment-view.png](img/new-process-deployment-view.png)
+#### Uploading a Deployment <a name="uploading-a-deployment"></a>
+A deployment with several resources (processes, decisions, forms, scripts, images) can be created at once using the **Upload** button in the **Deployments** view, or the **Deploy** button in the **Processes** and **Decisions** views.
+Clicking the button opens the **Upload deployment** view.
 
-To upload a BPMN 2.0 file, click the **Upload** button and select the process to be deployed.
-After uploading, you can preview the diagram of the uploaded process and click the **OK** button to deploy to the BPM engine.
+![deployment-upload-view.png](img/deployment-upload-view.png)
+
+**Files.** Click **Upload** and select a file; repeat for every file of the deployment. The file type is defined by the extension:
+
+| Type | Extensions |
+|------|------------|
+| BPMN | `.bpmn`, `.bpmn20.xml` |
+| DMN | `.dmn`, `.dmn11.xml` |
+| CMMN | `.cmmn`, `.cmmn10.xml`, `.cmmn11.xml` |
+| Camunda Form | `.form` |
+| HTML form | `.html`, `.htm` |
+| Script | `.js`, `.groovy`, `.py`, `.rb`, `.kts`, `.scala`, `.jexl` |
+| Image | `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.bmp` |
+| Other | any other extension: the file is deployed as is, e.g. a template or a data file referenced by a process |
+
+The number and the size of the files are limited by the following application properties:
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `flowset.control.ui.deployment-upload-max-files` | `50` | Maximum number of files in a single deployment |
+| `flowset.control.ui.deployment-upload-max-file-size-bytes` | `10485760` | Maximum size of a single file, in bytes |
+
+The deployment name is set to the name of the first BPMN file by default and can be changed. If **Skip unchanged resources** is selected, a resource is deployed only if it differs from the latest deployed version with the same name.
+Select a file in the grid to preview its content (diagram, decision table, form, image or source).
+
+**Checks.** The file type is defined by the extension; an empty file, a file that is too large, a duplicate file name, or a file you are not permitted to deploy gets the **Error (N)** status. Clicking the status opens the list of the problems. The content of the files is checked by the engine on deployment.
+
+**Result.** Clicking **Deploy** sends the files to the engine, which creates a deployment only if it accepts all of them. If the engine rejects a file, nothing is deployed: the file gets the **Error** status with the number of problems, clicking the status opens the full report, and the other files are marked as **Not checked**, because the engine stops at the first rejected file.
+After a successful deployment, the details of the created deployment are opened and a notification shows the number of the deployed processes, decisions and forms.
+
+**Permissions.** The **Upload** button is available to users permitted to deploy processes or decisions. BPMN files require the permission to deploy processes, DMN files require the permission to deploy decisions; other resources can be deployed with either of them.
 
 #### Starting a Process <a name="starting-a-process"></a>
 

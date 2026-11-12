@@ -239,9 +239,9 @@ public class QueryUtils {
             for (Sort.Order order : sort.getOrders()) {
                 boolean unknownValueUsed = false;
                 switch (order.getProperty()) {
-                    case "id" -> deploymentQuery.orderByDeploymentId();
+                    case "id", "deploymentId" -> deploymentQuery.orderByDeploymentId();
                     case "name" -> deploymentQuery.orderByDeploymentName();
-                    case "time" -> deploymentQuery.orderByDeploymentTime();
+                    case "time", "deploymentTime" -> deploymentQuery.orderByDeploymentTime();
                     case "tenantId" -> deploymentQuery.orderByTenantId();
                     default -> unknownValueUsed = true;
                 }

@@ -13,7 +13,7 @@ import io.flowset.control.test_support.engine.external.WithRunningExternalEngine
 import io.flowset.control.test_support.ui.view.MainView;
 import io.flowset.control.test_support.ui.view.decisiondefinition.DecisionDefinitionListView;
 import io.flowset.control.test_support.ui.view.decisiondefinition.detail.DecisionDefinitionDetailView;
-import io.flowset.control.test_support.ui.view.decisiondeployment.DecisionDeploymentView;
+import io.flowset.control.test_support.ui.view.deploymentupload.DeploymentUploadView;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,8 +111,8 @@ public class DecisionListViewActionsUiTest extends AbstractCamunda7UiTest {
     }
 
     @Test
-    @DisplayName("Deploy action opens Decision deployment view")
-    void givenLoggedInUser_whenOpenDecisionDefinitionListAndClickDeploy_thenDecisionDeploymentViewOpened() {
+    @DisplayName("Deploy action opens Upload deployment view")
+    void givenLoggedInUser_whenOpenDecisionDefinitionListAndClickDeploy_thenDeploymentUploadViewOpened() {
         // given
         MainView mainView = loginAsAdmin();
 
@@ -121,7 +121,7 @@ public class DecisionListViewActionsUiTest extends AbstractCamunda7UiTest {
         listView.getDeployBtn().click();
 
         // then
-        $j(DecisionDeploymentView.class)
+        $j(DeploymentUploadView.class)
                 .exists()
                 .displayed();
     }

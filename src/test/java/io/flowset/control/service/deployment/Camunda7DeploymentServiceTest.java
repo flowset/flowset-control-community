@@ -63,7 +63,8 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
         //given
         String resourceName = "contractApproval.bpmn";
         String bpmnXml = getResource("test_support/contractApproval.bpmn");
-        DeploymentContext deploymentContext = new DeploymentContext(resourceName, new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
+        DeploymentContext deploymentContext = new DeploymentContext()
+                .withResource(resourceName, new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
 
         //when
         DeploymentWithDefinitions deployment = deploymentService.createDeployment(deploymentContext);
@@ -99,7 +100,8 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
         //given
         String resourceName = "testDeployInvalidBpmnXml.bpmn";
         String bpmnXml = getResource("test_support/testDeployInvalidBpmnXml.bpmn");
-        DeploymentContext deploymentContext = new DeploymentContext(resourceName, new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
+        DeploymentContext deploymentContext = new DeploymentContext()
+                .withResource(resourceName, new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
 
         //when and then
         assertThatThrownBy(() -> deploymentService.createDeployment(deploymentContext))
@@ -123,7 +125,8 @@ public class Camunda7DeploymentServiceTest extends AbstractCamunda7IntegrationTe
         //given
         String resourceName = "contractApproval.bpmn";
         String bpmnXml = getResource("test_support/contractApproval.bpmn");
-        DeploymentContext deploymentContext = new DeploymentContext(resourceName, new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
+        DeploymentContext deploymentContext = new DeploymentContext()
+                .withResource(resourceName, new ByteArrayInputStream(bpmnXml.getBytes(StandardCharsets.UTF_8)));
 
         camunda7.stop();
 

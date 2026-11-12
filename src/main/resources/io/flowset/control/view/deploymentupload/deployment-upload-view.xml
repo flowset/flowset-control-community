@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ Copyright (c) Haulmont 2026. All Rights Reserved.
+  ~ Use is subject to license terms.
+  -->
+
+<view xmlns="http://jmix.io/schema/flowui/view"
+      title="msg://deploymentUploadView.title">
+    <data>
+        <keyValueCollection id="filesDc">
+            <properties idProperty="id">
+                <property name="id" datatype="uuid"/>
+                <property name="fileName" datatype="string"/>
+                <property name="type" datatype="string"/>
+                <property name="status" datatype="string"/>
+            </properties>
+        </keyValueCollection>
+    </data>
+    <layout expand="filesSplit">
+        <split id="filesSplit"
+               orientation="HORIZONTAL"
+               width="100%"
+               splitterPosition="45"
+               themeNames="splitter-spacing">
+            <vbox id="filesPanel" padding="false" height="100%">
+                <hbox id="filesUploadInfo"
+                      width="100%"
+                      classNames="alert-box">
+                    <icon icon="INFO_CIRCLE" classNames="icon-m"/>
+                    <span id="filesUploadHelperText"/>
+                </hbox>
+                <textField id="deploymentNameField"
+                           width="100%"
+                           label="msg://deploymentNameField.label"
+                           clearButtonVisible="true"/>
+                <hbox id="skipUnchangedBox" alignItems="CENTER" themeNames="spacing-xs">
+                    <checkbox id="skipUnchangedField" label="msg://skipUnchangedField.label"/>
+                    <icon icon="QUESTION_CIRCLE" size="0.9em">
+                        <tooltip text="msg://skipUnchangedField.helperText" position="BOTTOM_START"/>
+                    </icon>
+                </hbox>
+                <span id="tenantInfo"
+                      classNames="text-secondary text-s"
+                      visible="false"/>
+
+                <hbox id="filesButtonsPanel" classNames="buttons-panel" alignItems="CENTER">
+                    <fileUploadField id="filesUpload"
+                                     uploadText="msg://filesUpload.uploadText"
+                                     uploadIcon="UPLOAD"
+                                     fileNameVisible="false"
+                                     clearButtonVisible="false"/>
+                    <button id="removeFileBtn" action="filesDataGrid.remove"/>
+                </hbox>
+                <span id="noDeployPermissionInfo"
+                      classNames="text-secondary text-s"
+                      text="msg://noDeployPermission"
+                      visible="false"/>
+                <dataGrid id="filesDataGrid"
+                          width="100%"
+                          minHeight="10em"
+                          classNames="deployment-files-grid"
+                          selectionMode="MULTI"
+                          dataContainer="filesDc">
+                    <actions>
+                        <action id="remove" type="list_itemTracking" text="msg://removeFile" icon="TRASH"
+                                actionVariant="DANGER"/>
+                    </actions>
+                    <columns resizable="true">
+                        <column property="fileName" header="msg://fileName" flexGrow="1"/>
+                        <column property="type" header="msg://type" autoWidth="true"/>
+                        <column property="status" header="msg://status" autoWidth="true" sortable="false"/>
+                    </columns>
+                </dataGrid>
+            </vbox>
+            <vbox id="previewPanel" padding="false" height="100%">
+                <fragment id="resourcePreviewFragment"
+                          class="io.flowset.control.view.deploymentresource.DeploymentResourcePreviewFragment"/>
+            </vbox>
+        </split>
+
+        <hbox>
+            <button id="okBtn" text="msg://deploy" icon="ROCKET"
+                    themeNames="primary" enabled="false"/>
+            <button id="cancelBtn" text="msg:///actions.Cancel" icon="BAN"/>
+        </hbox>
+    </layout>
+</view>
