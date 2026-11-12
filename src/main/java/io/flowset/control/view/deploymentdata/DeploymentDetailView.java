@@ -109,7 +109,6 @@ public class DeploymentDetailView extends StandardDetailView<DeploymentData> {
         downloadResourceButton.setVisible(false);
         downloadResourceButton.addClickListener(this::onDownloadResourceButtonClick);
 
-        // the suffix of the preview tab sheet, as it was declared in the view descriptor before
         resourcePreviewFragment.getResourceTabSheet().setSuffixComponent(downloadResourceButton);
     }
 

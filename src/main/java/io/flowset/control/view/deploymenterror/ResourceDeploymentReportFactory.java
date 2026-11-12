@@ -70,7 +70,6 @@ public class ResourceDeploymentReportFactory {
         return deploymentReport;
     }
 
-
     /**
      * Converts the engine problems to validation errors of the given type and adds them to the result.
      *

@@ -7,6 +7,7 @@ package io.flowset.control.view.deploymentupload;
 
 import io.flowset.control.FlowsetControlApplication;
 import io.flowset.control.entity.deployment.DeploymentResourceStatus;
+import io.flowset.control.entity.deployment.DeploymentResourceType;
 import io.flowset.control.test_support.FlowsetControlTestConfiguration;
 import io.jmix.flowui.ViewNavigators;
 import io.jmix.flowui.testassist.FlowuiTestAssistConfiguration;
@@ -81,19 +82,18 @@ class DeploymentUploadViewUiTest {
     }
 
     @Test
-    @DisplayName("Unsupported type and empty file: errors block the deployment until removed")
-    void givenUnsupportedAndEmptyFiles_thenErrorsBlockDeployUntilRemoved() {
+    @DisplayName("Unknown extension is another resource; an empty file is an error that blocks the deployment until removed")
+    void givenOtherAndEmptyFiles_thenEmptyFileBlocksDeployUntilRemoved() {
         DeploymentUploadView view = openView();
 
-        view.addFile("notes.txt", "just a note".getBytes(StandardCharsets.UTF_8));
+        view.addFile("template.ftl", "Dear ${name}".getBytes(StandardCharsets.UTF_8));
         view.addFile("empty.bpmn", new byte[0]);
 
         assertThat(view.uploadedFiles).hasSize(2);
-        assertThat(view.uploadedFiles.get(0).getType()).isNull();
-        assertThat(view.uploadedFiles).allSatisfy(file -> {
-            assertThat(file.getStatus()).isEqualTo(DeploymentResourceStatus.ERROR);
-            assertThat(file.getViewErrors()).hasSize(1);
-        });
+        assertThat(view.uploadedFiles.get(0).getType()).isEqualTo(DeploymentResourceType.OTHER);
+        assertThat(view.uploadedFiles.get(0).getStatus()).isEqualTo(DeploymentResourceStatus.OK);
+        assertThat(view.uploadedFiles.get(1).getStatus()).isEqualTo(DeploymentResourceStatus.ERROR);
+        assertThat(view.uploadedFiles.get(1).getViewErrors()).hasSize(1);
         assertThat(view.okBtn.isEnabled()).isFalse();
 
         view.okBtn.click();

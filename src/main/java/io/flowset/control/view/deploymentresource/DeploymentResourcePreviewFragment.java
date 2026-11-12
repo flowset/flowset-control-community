@@ -42,6 +42,8 @@ import java.util.List;
 @FragmentDescriptor("deployment-resource-preview-fragment.xml")
 public class DeploymentResourcePreviewFragment extends Fragment<VerticalLayout> {
 
+    protected static final int BINARY_CHECK_LENGTH = 8192;
+
     @Autowired
     protected Fragments fragments;
 
@@ -64,18 +66,14 @@ public class DeploymentResourcePreviewFragment extends Fragment<VerticalLayout> 
         resourceTabSheet.setVisible(true);
         emptyResourceMessageContainer.setVisible(false);
 
-        DeploymentResourceType type = DeploymentResourceType.fromFileName(fileName);
-        if (type == null) {
-            showUnsupportedResource(content);
-            return;
-        }
-        switch (type) {
+        switch (DeploymentResourceType.fromFileName(fileName)) {
             case BPMN -> showBpmn(content);
             case DMN -> showDmn(content);
+            case CMMN -> showSource(content, CodeEditorMode.XML);
             case CAMUNDA_FORM -> showForm(content);
             case HTML_FORM -> showHtml(content);
             case IMAGE -> showImage(fileName, content);
-            case SCRIPT -> showUnsupportedResource(content);
+            case SCRIPT, OTHER -> showSource(content, CodeEditorMode.TEXT);
         }
     }
 
@@ -113,9 +111,21 @@ public class DeploymentResourcePreviewFragment extends Fragment<VerticalLayout> 
         resourceTabSheet.add(tab, content);
     }
 
-    protected void showUnsupportedResource(byte[] content) {
-        addTab("viewTab", VaadinIcon.EYE.create(), getSourceTabLabel(),
-                createCodeEditor(toText(content), CodeEditorMode.TEXT));
+    protected void showSource(byte[] content, CodeEditorMode mode) {
+        Component view = isBinary(content)
+                ? createMessage(messageBundle.formatMessage("binaryResourceMessage", content.length))
+                : createCodeEditor(toText(content), mode);
+        addTab("viewTab", VaadinIcon.EYE.create(), getSourceTabLabel(), view);
+    }
+
+    protected boolean isBinary(byte[] content) {
+        int checked = Math.min(content.length, BINARY_CHECK_LENGTH);
+        for (int i = 0; i < checked; i++) {
+            if (content[i] == 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected void showHtml(byte[] content) {

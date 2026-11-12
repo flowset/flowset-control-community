@@ -77,7 +77,6 @@ public class DeploymentServiceImpl implements DeploymentService {
                 builder.name(context.getDeploymentName());
             }
             if (context.isSkipUnchangedResources()) {
-                // sends both enable-duplicate-filtering=true and deploy-changed-only=true
                 builder.enableDuplicateFiltering(true);
             }
             context.getResources().forEach(builder::addInputStream);

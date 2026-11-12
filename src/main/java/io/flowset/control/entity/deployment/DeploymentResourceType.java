@@ -8,8 +8,6 @@ package io.flowset.control.entity.deployment;
 import io.jmix.core.metamodel.datatype.EnumClass;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -20,10 +18,15 @@ public enum DeploymentResourceType implements EnumClass<String> {
 
     BPMN("bpmn", List.of(".bpmn", ".bpmn20.xml")),
     DMN("dmn", List.of(".dmn", ".dmn11.xml")),
+    CMMN("cmmn", List.of(".cmmn", ".cmmn10.xml", ".cmmn11.xml")),
     CAMUNDA_FORM("camundaForm", List.of(".form")),
     HTML_FORM("htmlForm", List.of(".html", ".htm")),
-    SCRIPT("script", List.of(".js", ".groovy", ".py", ".rb")),
-    IMAGE("image", List.of(".png", ".jpg", ".jpeg", ".gif", ".svg"));
+    SCRIPT("script", List.of(".js", ".groovy", ".py", ".rb", ".kts", ".scala", ".jexl")),
+    IMAGE("image", List.of(".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp", ".bmp")),
+    /**
+     * Any other file: the engine stores it in the deployment as is.
+     */
+    OTHER("other", List.of());
 
     private final String id;
     private final List<String> extensions;
@@ -57,18 +60,18 @@ public enum DeploymentResourceType implements EnumClass<String> {
 
     /**
      * Determines a resource type by the file name extension (case-insensitive).
-     * The longest matching extension wins, e.g. {@code process.bpmn20.xml} is resolved as {@link #BPMN}.
+     * The longest matching extension wins, e.g. {@code process.bpmn20.xml} is resolved as {@link #BPMN};
+     * a file with an unknown extension is {@link #OTHER}.
      *
      * @param fileName file name
-     * @return resource type or {@code null} if the file type is not supported
+     * @return resource type
      */
-    @Nullable
     public static DeploymentResourceType fromFileName(@Nullable String fileName) {
         if (fileName == null) {
-            return null;
+            return OTHER;
         }
         String lowerCaseName = fileName.toLowerCase(Locale.ROOT);
-        DeploymentResourceType result = null;
+        DeploymentResourceType result = OTHER;
         int matchedLength = 0;
         for (DeploymentResourceType type : values()) {
             for (String extension : type.extensions) {
@@ -83,20 +86,4 @@ public enum DeploymentResourceType implements EnumClass<String> {
         return result;
     }
 
-    /**
-     * @return all supported file extensions, longest first
-     */
-    public static List<String> getAllExtensions() {
-        return Arrays.stream(values())
-                .flatMap(type -> type.extensions.stream())
-                .sorted(Comparator.comparingInt(String::length).reversed())
-                .toList();
-    }
-
-    /**
-     * @return all supported file extensions as an array suitable for the {@code acceptedFileTypes} upload property
-     */
-    public static String[] getAcceptedFileTypes() {
-        return getAllExtensions().toArray(String[]::new);
-    }
 }

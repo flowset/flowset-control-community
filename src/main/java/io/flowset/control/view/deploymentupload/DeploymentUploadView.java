@@ -79,9 +79,6 @@ public class DeploymentUploadView extends StandardView {
 
     protected static final long BYTES_IN_MB = 1024L * 1024L;
 
-    /**
-     * Theme of the buttons that look like links, see styles/components/vaadin-button.css
-     */
     protected static final String LINK_THEME_NAME = "link";
     protected static final String STATUS_ICON_SIZE = "1em";
 
@@ -133,44 +130,20 @@ public class DeploymentUploadView extends StandardView {
 
     protected final List<UploadedFile> uploadedFiles = new ArrayList<>();
 
-
-    /**
-     * Whether the user has entered a custom deployment name, so the default name must not overwrite it.
-     */
     protected boolean customDeploymentName = false;
 
-    /**
-     * Id of the file shown in the preview, {@code null} if no file is shown.
-     */
     @Nullable
     protected UUID previewedFileId;
 
-    /**
-     * Id of the last selected file: with the multi-selection grid, it is the file shown in the preview.
-     */
     @Nullable
     protected UUID activeFileId;
 
-    /**
-     * Whether the files grid items are being refreshed, so the grid selection events must be ignored.
-     */
     protected boolean refreshingFiles = false;
 
-    /**
-     * {@code true} after a deploy attempt rejected by the engine: the files without an engine report are shown
-     * as not checked, since the engine stops at the first rejected file.
-     */
     protected boolean deployAttempted = false;
 
-
-    /**
-     * Whether the current user is permitted to deploy processes (BPMN files).
-     */
     protected boolean canDeployProcesses;
 
-    /**
-     * Whether the current user is permitted to deploy decisions (DMN files).
-     */
     protected boolean canDeployDecisions;
 
     @Subscribe
@@ -186,7 +159,6 @@ public class DeploymentUploadView extends StandardView {
     }
 
     protected void initFilesPanel() {
-        // both grids share the free space; the panel scrolls if their minimum heights do not fit
         filesPanel.setFlexGrow(1, filesDataGrid);
         filesPanel.getStyle().set("overflow", "auto");
         filesDataGrid.setPartNameGenerator(item -> item.getId().equals(previewedFileId) ? "previewed-row" : null);
@@ -195,7 +167,6 @@ public class DeploymentUploadView extends StandardView {
     protected void initDeploymentNameField() {
         deploymentNameField.addValueChangeListener(event -> {
             if (event.isFromClient()) {
-                // a blank value means the user cleared the field: the default name applies again on the next file change
                 customDeploymentName = StringUtils.isNotBlank(event.getValue());
             }
         });
@@ -211,14 +182,10 @@ public class DeploymentUploadView extends StandardView {
     }
 
     protected void initFilesUpload() {
-        List<DeploymentResourceType> allowedTypes = getAllowedResourceTypes();
-        filesUpload.setAcceptedFileTypes(allowedTypes.stream()
-                .flatMap(type -> type.getExtensions().stream())
-                .sorted(Comparator.comparingInt(String::length).reversed())
-                .toArray(String[]::new));
         filesUpload.setMaxFileSize((int) Math.min(Integer.MAX_VALUE, getMaxFileSizeBytes()));
 
-        String formats = allowedTypes.stream()
+        String formats = getAllowedResourceTypes().stream()
+                .filter(type -> type != DeploymentResourceType.OTHER)
                 .map(type -> messages.getMessage(type))
                 .collect(Collectors.joining(", "));
         filesUploadHelperText.setText(messageBundle.formatMessage("filesUpload.helperText",
@@ -232,10 +199,6 @@ public class DeploymentUploadView extends StandardView {
         return canDeployProcesses || canDeployDecisions;
     }
 
-    /**
-     * @return resource types the current user is permitted to deploy: BPMN files require the process deploy
-     * permission, DMN files require the decision deploy permission, other resources require either of them
-     */
     protected List<DeploymentResourceType> getAllowedResourceTypes() {
         return Arrays.stream(DeploymentResourceType.values())
                 .filter(type -> switch (type) {
@@ -256,10 +219,6 @@ public class DeploymentUploadView extends StandardView {
         }
     }
 
-    /**
-     * Adds an uploaded file to the deployment and revalidates the files. The file is rejected with a notification
-     * if the file limit is reached.
-     */
     protected void addFile(String fileName, byte[] content) {
         if (uploadedFiles.size() >= getMaxFiles()) {
             notifications.create(messageBundle.formatMessage("tooManyFiles", getMaxFiles()))
@@ -336,10 +295,6 @@ public class DeploymentUploadView extends StandardView {
         return createStatus(icon, colorClassName, link);
     }
 
-    /**
-     * The engine stops at the first rejected file, so a file without an engine report has not been checked by
-     * the engine: it is neither OK nor rejected.
-     */
     protected Component createNotCheckedStatus() {
         Span text = new Span(messageBundle.getMessage("statusNotChecked"));
         Component status = createStatus(VaadinIcon.MINUS_CIRCLE_O, LumoUtility.TextColor.SECONDARY, text);
@@ -347,9 +302,6 @@ public class DeploymentUploadView extends StandardView {
         return status;
     }
 
-    /**
-     * The icon is placed next to the text, not into the button, so that all the statuses have the same icon size.
-     */
     protected Component createStatus(VaadinIcon vaadinIcon, String colorClassName, Component text) {
         Icon icon = vaadinIcon.create();
         icon.addClassName(colorClassName);
@@ -373,10 +325,6 @@ public class DeploymentUploadView extends StandardView {
         deploy();
     }
 
-    /**
-     * Deploys the uploaded files as a single deployment. The engine deploys either all files or none of them:
-     * if it rejects any file, the problems reported by the engine are shown for each rejected file.
-     */
     protected void deploy() {
         DeploymentContext context = new DeploymentContext()
                 .withDeploymentName(deploymentNameField.getValue())
@@ -403,14 +351,6 @@ public class DeploymentUploadView extends StandardView {
         }
     }
 
-    /**
-     * Shows the summary of the created deployment and navigates to its details.
-     * <p>
-     * The processes and decisions are taken from the deployment result. The deployment result of the REST client
-     * does not contain the deployed Camunda Forms and other resources (HTML forms, scripts, images), so they are
-     * counted by the resources of the created deployment loaded from the engine: with the "Skip unchanged resources"
-     * option, unchanged resources are not deployed. If the resources cannot be loaded, the uploaded files are counted.
-     */
     protected void onDeploymentCreated(@Nullable DeploymentWithDefinitions result, Instant deployStart) {
         String deploymentId = result != null ? result.getId() : null;
         if (isExistingDeployment(result, deployStart)) {
@@ -424,17 +364,20 @@ public class DeploymentUploadView extends StandardView {
 
         int processes = CollectionUtils.size(result != null ? result.getDeployedProcessDefinitions() : null);
         int decisions = CollectionUtils.size(result != null ? result.getDeployedDecisionDefinitions() : null);
+        int cases = CollectionUtils.size(result != null ? result.getDeployedCaseDefinitions() : null);
 
         List<String> resourceNames = loadDeployedResourceNames(result != null ? result.getId() : null);
         if (resourceNames == null) {
-            // fallback: the uploaded files are counted, which may include unchanged (not deployed) resources
             resourceNames = uploadedFiles.stream().map(UploadedFile::getName).toList();
         }
         long forms = countResources(resourceNames, EnumSet.of(DeploymentResourceType.CAMUNDA_FORM));
         long others = countResources(resourceNames, EnumSet.of(DeploymentResourceType.HTML_FORM,
-                DeploymentResourceType.SCRIPT, DeploymentResourceType.IMAGE));
+                DeploymentResourceType.SCRIPT, DeploymentResourceType.IMAGE, DeploymentResourceType.OTHER));
 
         String summary = messageBundle.formatMessage("deploymentCreated.summary", processes, decisions, forms);
+        if (cases > 0) {
+            summary += messageBundle.formatMessage("deploymentCreated.summaryCases", cases);
+        }
         if (others > 0) {
             summary += messageBundle.formatMessage("deploymentCreated.summaryOther", others);
         }
@@ -444,19 +387,11 @@ public class DeploymentUploadView extends StandardView {
         closeAndNavigate(deploymentId);
     }
 
-    /**
-     * With the "Skip unchanged resources" option, the engine returns the existing deployment instead of creating
-     * a new one when none of the resources differs from the deployed ones.
-     */
     protected boolean isExistingDeployment(@Nullable DeploymentWithDefinitions result, Instant deployStart) {
         return result != null && result.getDeploymentTime() != null
                 && result.getDeploymentTime().toInstant().isBefore(deployStart);
     }
 
-    /**
-     * Closes the view with the SAVE outcome (see ViewAnalyticsListener); instead of the backward navigation,
-     * the details of the deployment are opened.
-     */
     protected void closeAndNavigate(@Nullable String deploymentId) {
         if (StringUtils.isNotBlank(deploymentId)) {
             ViewControllerUtils.setViewCloseDelegate(this, view -> navigateToDeployment(deploymentId));
@@ -464,12 +399,6 @@ public class DeploymentUploadView extends StandardView {
         close(StandardOutcome.SAVE);
     }
 
-    /**
-     * Loads the names of the resources of the created deployment from the engine.
-     *
-     * @param deploymentId id of the created deployment
-     * @return resource names or {@code null} if the deployment id is blank or the resources cannot be loaded
-     */
     @Nullable
     protected List<String> loadDeployedResourceNames(@Nullable String deploymentId) {
         if (StringUtils.isBlank(deploymentId)) {
@@ -495,10 +424,6 @@ public class DeploymentUploadView extends StandardView {
                 .count();
     }
 
-    /**
-     * Opens the details of the deployment. The backward navigation is disabled, so the upload view is not
-     * opened again when the details view is closed.
-     */
     protected void navigateToDeployment(String deploymentId) {
         viewNavigators.detailView(this, DeploymentData.class)
                 .withViewClass(DeploymentDetailView.class)
@@ -507,10 +432,6 @@ public class DeploymentUploadView extends StandardView {
                 .navigate();
     }
 
-    /**
-     * Applies the problems reported by the engine to the uploaded files: the files with engine errors get the
-     * {@link DeploymentResourceStatus#ERROR} status. Nothing is deployed, so the view stays open.
-     */
     protected void handleEngineRejection(RemoteEngineParseException exception) {
         deployAttempted = true;
         Map<String, ResourceReport> details = exception.getDetails() != null ? exception.getDetails() : Map.of();
@@ -551,10 +472,6 @@ public class DeploymentUploadView extends StandardView {
         }
     }
 
-    /**
-     * Opens the report of the problems of the file: the view-level checks and, if the engine rejected the file,
-     * the problems reported by the engine.
-     */
     protected void openProblemsDialog(UploadedFile file) {
         ResourceDeploymentReport report = resourceDeploymentReportFactory.createReport(file.getName(),
                 file.getViewErrors(), file.getEngineReport());
@@ -571,10 +488,6 @@ public class DeploymentUploadView extends StandardView {
         close(StandardOutcome.CLOSE);
     }
 
-    /**
-     * Applies the view-level checks (file type, size limit, duplicate names, permissions) to the uploaded files
-     * and refreshes the grid. The content of the files is checked by the engine on deployment.
-     */
     protected void revalidate() {
         Map<String, Long> nameCounts = uploadedFiles.stream()
                 .collect(Collectors.groupingBy(file -> normalizeName(file.getName()), Collectors.counting()));
@@ -582,9 +495,6 @@ public class DeploymentUploadView extends StandardView {
 
         for (UploadedFile file : uploadedFiles) {
             List<String> errors = new ArrayList<>();
-            if (file.getType() == null) {
-                errors.add(messageBundle.getMessage("validation.unsupportedType"));
-            }
             if (file.getContent().length == 0) {
                 errors.add(messageBundle.getMessage("validation.emptyFile"));
             }
@@ -605,10 +515,6 @@ public class DeploymentUploadView extends StandardView {
         refreshFiles();
     }
 
-    /**
-     * Invalidates the engine reports of the last rejected deployment: must be called on every change of the
-     * uploaded file list.
-     */
     protected void onFilesChanged() {
         uploadedFiles.forEach(UploadedFile::clearEngineReport);
         deployAttempted = false;
@@ -654,14 +560,11 @@ public class DeploymentUploadView extends StandardView {
         KeyValueEntity item = filesDc.createEntity();
         item.setId(file.getId());
         item.setValue("fileName", file.getName());
-        item.setValue("type", file.getType() != null ? messages.getMessage(file.getType()) : "-");
+        item.setValue("type", messages.getMessage(file.getType()));
         item.setValue("status", file.getStatus().getId());
         return item;
     }
 
-    /**
-     * Shows the file selected in the grid in the preview, or clears the preview if no file is selected.
-     */
     protected void updatePreview() {
         UploadedFile selectedFile = getSelectedFile();
         UUID previousFileId = previewedFileId;
@@ -679,9 +582,6 @@ public class DeploymentUploadView extends StandardView {
         }
     }
 
-    /**
-     * @return the last selected file, {@code null} if no file is selected
-     */
     @Nullable
     protected UploadedFile getSelectedFile() {
         return findFile(activeFileId);
@@ -695,10 +595,6 @@ public class DeploymentUploadView extends StandardView {
                 .orElse(null);
     }
 
-    /**
-     * Sets the deployment name to the default one (the name of the first uploaded BPMN file without the extension)
-     * if the user has not entered a custom name.
-     */
     protected void updateDefaultDeploymentName() {
         if (customDeploymentName) {
             return;
@@ -730,10 +626,6 @@ public class DeploymentUploadView extends StandardView {
         filesUpload.setEnabled(canDeploy() && uploadedFiles.size() < getMaxFiles());
     }
 
-    /**
-     * @return whether any file has the {@link DeploymentResourceStatus#ERROR} status: such files block the deployment,
-     * warnings do not
-     */
     protected boolean hasErrors() {
         return uploadedFiles.stream().anyMatch(file -> file.getStatus() == DeploymentResourceStatus.ERROR);
     }
@@ -764,16 +656,8 @@ public class DeploymentUploadView extends StandardView {
         protected final UUID id = UUID.randomUUID();
         protected final String name;
         protected final byte[] content;
-        @Nullable
         protected final DeploymentResourceType type;
-        /**
-         * Errors of the view-level checks: file type, size limit, duplicate names, permissions.
-         */
         protected List<String> viewErrors = List.of();
-        /**
-         * Report of the engine that rejected the last deployment attempt, {@code null} if the engine reported
-         * no problems for this file.
-         */
         @Nullable
         protected ResourceReport engineReport;
 
@@ -795,7 +679,6 @@ public class DeploymentUploadView extends StandardView {
             return content;
         }
 
-        @Nullable
         public DeploymentResourceType getType() {
             return type;
         }

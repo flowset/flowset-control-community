@@ -156,16 +156,18 @@ Clicking the button opens the **Upload deployment** view.
 
 ![deployment-upload-view.png](img/deployment-upload-view.png)
 
-**Files.** Click **Upload** and select a file; repeat for every file of the deployment. The following file types are supported:
+**Files.** Click **Upload** and select a file; repeat for every file of the deployment. The file type is defined by the extension:
 
 | Type | Extensions |
 |------|------------|
 | BPMN | `.bpmn`, `.bpmn20.xml` |
 | DMN | `.dmn`, `.dmn11.xml` |
+| CMMN | `.cmmn`, `.cmmn10.xml`, `.cmmn11.xml` |
 | Camunda Form | `.form` |
 | HTML form | `.html`, `.htm` |
-| Script | `.js`, `.groovy`, `.py`, `.rb` |
-| Image | `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg` |
+| Script | `.js`, `.groovy`, `.py`, `.rb`, `.kts`, `.scala`, `.jexl` |
+| Image | `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.bmp` |
+| Other | any other extension: the file is deployed as is, e.g. a template or a data file referenced by a process |
 
 The number and the size of the files are limited by the following application properties:
 
@@ -177,7 +179,7 @@ The number and the size of the files are limited by the following application pr
 The deployment name is set to the name of the first BPMN file by default and can be changed. If **Skip unchanged resources** is selected, a resource is deployed only if it differs from the latest deployed version with the same name.
 Select a file in the grid to preview its content (diagram, decision table, form, image or source).
 
-**Checks.** The file type is defined by the extension; a file of an unsupported type, an empty file, a file that is too large, a duplicate file name, or a file you are not permitted to deploy gets the **Error (N)** status. Clicking the status opens the list of the problems. The content of the files is checked by the engine on deployment.
+**Checks.** The file type is defined by the extension; an empty file, a file that is too large, a duplicate file name, or a file you are not permitted to deploy gets the **Error (N)** status. Clicking the status opens the list of the problems. The content of the files is checked by the engine on deployment.
 
 **Result.** Clicking **Deploy** sends the files to the engine, which creates a deployment only if it accepts all of them. If the engine rejects a file, nothing is deployed: the file gets the **Error** status with the number of problems, clicking the status opens the full report, and the other files are marked as **Not checked**, because the engine stops at the first rejected file.
 After a successful deployment, the details of the created deployment are opened and a notification shows the number of the deployed processes, decisions and forms.

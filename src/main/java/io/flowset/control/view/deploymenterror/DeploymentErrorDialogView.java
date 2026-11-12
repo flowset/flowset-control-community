@@ -5,7 +5,6 @@
 
 package io.flowset.control.view.deploymenterror;
 
-
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import io.jmix.core.LoadContext;
 import io.jmix.flowui.model.CollectionLoader;
