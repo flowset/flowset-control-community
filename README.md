@@ -151,7 +151,7 @@ The following actions are also available:
 You can deploy a new process or a new version of an existing process using the **Deploy** action available in the **Processes** view (and the **Decisions** view for decisions). The action opens the **Upload deployment** view described below.
 
 #### Uploading a Deployment <a name="uploading-a-deployment"></a>
-A deployment with several resources (processes, decisions, forms, scripts, images) can be created at once using the **Upload** button in the **Deployments** view, or the **Deploy** button in the **Processes** and **Decisions** views.
+A deployment with several resources (processes, decisions, forms, scripts, images) can be created at once using the **Create** button in the **Deployments** view, or the **Deploy** button in the **Processes** and **Decisions** views.
 Clicking the button opens the **Upload deployment** view.
 
 ![deployment-upload-view.png](img/deployment-upload-view.png)
@@ -163,7 +163,7 @@ Clicking the button opens the **Upload deployment** view.
 | BPMN | `.bpmn`, `.bpmn20.xml` |
 | DMN | `.dmn`, `.dmn11.xml` |
 | CMMN | `.cmmn`, `.cmmn10.xml`, `.cmmn11.xml` |
-| Camunda Form | `.form` |
+| JSON form | `.form` |
 | HTML form | `.html`, `.htm` |
 | Script | `.js`, `.groovy`, `.py`, `.rb`, `.kts`, `.scala`, `.jexl` |
 | Image | `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.bmp` |
@@ -184,7 +184,7 @@ Select a file in the grid to preview its content (diagram, decision table, form,
 **Result.** Clicking **Deploy** sends the files to the engine, which creates a deployment only if it accepts all of them. If the engine rejects a file, nothing is deployed: the file gets the **Error** status with the number of problems, clicking the status opens the full report, and the other files are marked as **Not checked**, because the engine stops at the first rejected file.
 After a successful deployment, the details of the created deployment are opened and a notification shows the number of the deployed processes, decisions and forms.
 
-**Permissions.** The **Upload** button is available to users permitted to deploy processes or decisions. BPMN files require the permission to deploy processes, DMN files require the permission to deploy decisions; other resources can be deployed with either of them.
+**Permissions.** The **Create** button is available to users permitted to deploy processes or decisions. BPMN files require the permission to deploy processes, DMN files require the permission to deploy decisions; other resources can be deployed with either of them.
 
 #### Starting a Process <a name="starting-a-process"></a>
 
