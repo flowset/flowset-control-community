@@ -3,7 +3,10 @@ package io.flowset.control.view.deploymentdata;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.data.event.SortEvent;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import io.flowset.control.action.deployment.BulkDeleteDeploymentAction;
@@ -63,11 +66,17 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
         addClassNames(LumoUtility.Padding.Top.SMALL);
         initFilterFormStyles();
         initFilter();
+        setDefaultSort();
 
         registerQueryParamBinders();
 
         addFilterValueChangeListeners(filterFormLayout);
         bulkRemove.setAfterSaveHandler(this::startLoadData);
+    }
+
+    protected void setDefaultSort() {
+        deploymentsDataGrid.sort(List.of(
+                new GridSortOrder<>(deploymentsDataGrid.getColumnByKey("deploymentTime"), SortDirection.DESCENDING)));
     }
 
     @Subscribe("applyFilter")
@@ -117,6 +126,13 @@ public class DeploymentListView extends AbstractListViewWithDelayedLoad<Deployme
     @Override
     protected void loadData() {
         deploymentDatasDl.load();
+    }
+
+    @Subscribe("deploymentsDataGrid")
+    public void onDeploymentsDataGridSort(final SortEvent<DataGrid<DeploymentData>, GridSortOrder<DataGrid<DeploymentData>>> event) {
+        if (event.isFromClient()) {
+            startLoadData();
+        }
     }
 
     @Subscribe("deploymentsDataGrid.refresh")
