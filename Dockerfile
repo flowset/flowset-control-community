@@ -3,7 +3,7 @@
 # Use is subject to license terms.
 #
 
-FROM amazoncorretto:21.0.3 AS layers
+FROM amazoncorretto:21.0.13 AS layers
 
 COPY build/libs/*.jar app.jar
 
