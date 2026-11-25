@@ -23,17 +23,22 @@ import io.flowset.control.test_support.ui.view.processinstance.detail.tab.Histor
 import io.flowset.control.test_support.ui.view.processinstance.detail.tab.HistoryVariablesTabFragment;
 import io.flowset.control.test_support.ui.view.processinstance.detail.tab.RuntimeTabFragment;
 import io.flowset.control.test_support.ui.view.processinstance.detail.tab.RuntimeVariablesTabFragment;
+import org.camunda.community.rest.client.model.ProcessInstanceDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.codeborne.selenide.CollectionCondition.size;
 import static com.codeborne.selenide.CollectionCondition.texts;
 import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.refresh;
+import static com.codeborne.selenide.Selenide.webdriver;
+import static com.codeborne.selenide.WebDriverConditions.urlContaining;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.bodyRowWithCellTexts;
 import static io.flowset.control.test_support.ui.condition.ControlCondition.visibleBodyRowCount;
 import static io.flowset.control.test_support.ui.view.processinstance.detail.tab.HistoryActivitiesTabFragment.ACTIVITY_NAME_COLUMN_INDEX;
@@ -74,6 +79,46 @@ public class ProcessInstanceDetailViewTabsUiTest extends AbstractCamunda7UiTest 
 
         // then
         runtimeTab.getTabs()
+                .shouldHave(size(5))
+                .shouldHave(texts("Variables", "User tasks", "Jobs", "External tasks", "Incidents"));
+    }
+
+    @Test
+    @DisplayName("Runtime tab shows nested tabs once after closing called process instance detail view")
+    void givenProcessInstanceWithCalledInstance_whenCalledProcessInstanceDetailViewClosed_thenRuntimeTabsShownInOrder() {
+        // given
+        CamundaSampleDataManager dataManager = applicationContext.getBean(CamundaSampleDataManager.class, camunda7)
+                .deploy("test_support/terminateinstance/testSkipSubprocess.bpmn")
+                .deploy("test_support/terminateinstance/testSkipSubprocessMain.bpmn")
+                .startByKey("testSkipSubprocessMain");
+        String parentInstanceId = dataManager.getStartedInstances("testSkipSubprocessMain").getFirst();
+        List<ProcessInstanceDto> subprocessInstances = camundaRestTestHelper.findRuntimeSubprocessInstances(camunda7, parentInstanceId);
+        String subprocessInstanceId = subprocessInstances.getFirst().getId();
+
+        MainView mainView = loginAsAdmin();
+
+        mainView.openProcessInstanceListView()
+                .openDetailViewByInstanceId(parentInstanceId)
+                .getBpmnViewerFragment()
+                .getCalledProcessInstanceOverlay("subprocessTask")
+                .shouldBe(visible)
+                .click();
+        webdriver().shouldHave(urlContaining("/bpm/process-instances/" + subprocessInstanceId));
+
+        // when
+        $j(ProcessInstanceDetailView.class)
+                .exists()
+                .displayed()
+                .getCloseButton()
+                .click();
+        webdriver().shouldHave(urlContaining("/bpm/process-instances/" + parentInstanceId));
+
+        // then
+        $j(ProcessInstanceDetailView.class)
+                .exists()
+                .displayed()
+                .openRuntimeTab()
+                .getTabs()
                 .shouldHave(size(5))
                 .shouldHave(texts("Variables", "User tasks", "Jobs", "External tasks", "Incidents"));
     }

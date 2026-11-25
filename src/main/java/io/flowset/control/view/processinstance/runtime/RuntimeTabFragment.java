@@ -147,6 +147,7 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
 
             setVariablesDefaultSort();
 
+            removeCreatedTabs();
             tabTypes = resolveTabTypes(engineService.getSelectedEngineType());
             for (int i = 0; i < tabTypes.size(); i++) {
                 initTab(tabTypes.get(i), i);
@@ -178,6 +179,13 @@ public class RuntimeTabFragment extends Fragment<HorizontalLayout> {
             types.add(RuntimeTabType.INCIDENTS);
         }
         return types;
+    }
+
+    protected void removeCreatedTabs() {
+        runtimeTabsheet.setSelectedIndex(VARIABLES_TAB_IDX);
+        for (int i = tabTypes.size() - 1; i > VARIABLES_TAB_IDX; i--) {
+            runtimeTabsheet.remove(i);
+        }
     }
 
     protected void initTab(RuntimeTabType type, int idx) {
